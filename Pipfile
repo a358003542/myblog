@@ -5,6 +5,17 @@ name = "pypi"
 
 [packages]
 flask = "*"
+flask-bootstrap = "*"
+flask-moment = "*"
+flask-wtf = "*"
+six = "*"
+pytz = "*"
+python-dateutil = "*"
+unidecode = "*"
+docutils = "*"
+blinker = "*"
+markdown = "*"
+loguru = "*"
 
 [dev-packages]
 
