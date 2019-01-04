@@ -1,9 +1,8 @@
 # myblog2
+flask make a blog.
 
 ## 介绍
-flask + pelican
-
-flask和pelican的组合，相当于之前myblog，简单的pelican博客的升级版。
+相当于之前简单的pelican博客的升级版。
 
 
 1. 利用 simple_pelican 将 content 里面的内容刷进数据库里面
