@@ -16,6 +16,8 @@ docutils = "*"
 blinker = "*"
 markdown = "*"
 loguru = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
 
 [dev-packages]
 
