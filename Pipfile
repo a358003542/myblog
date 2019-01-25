@@ -19,6 +19,9 @@ loguru = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-mail = "*"
+pytest = "*"
+flask-login = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

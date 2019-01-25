@@ -2,7 +2,7 @@
 # -*-coding:utf-8-*-
 
 
-from hello import Role, User, db
+from myblog import Role, User, db
 
 admin_role = Role(name='Admin')
 
