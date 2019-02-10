@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="baidu-site-verification" content="D4VqC4HppC" /> 
+	<meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625" />
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-5644206261254049",
+        enable_page_level_ads: true
+      });
+    </script>
+    
+    
+    <meta name="author" content="cdwanze"/>
+    <meta name="copyright" content="cdwanze"/>
+
+    <meta property="og:type" content="article"/>
+    <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="recommender, 机器学习, " />
+
+<meta property="og:title" content="推荐系统第一谈 "/>
+<meta property="og:url" content="/articles/recommender-talk-one.html" />
+<meta property="og:description" content="前言 推荐系统本质上是隶属于机器学习系统的，所以在简单了解下推荐系统相关算法之后，具体实现推荐系统的架构，是应该基于机器学习系统架构，然后在这之上引入新的处理流即可。 推荐系统的定义 我们首先看到维基上对于推荐系统的定义： 推荐系统是一种信息过滤系统，用来预测用户对物品的“评分”或“偏好”。 这句话暗含了很多信息，很值得我们去玩味。第一推荐系统是一个信息过滤系统，我们可以假设用户进行了某种搜索行为，然后出来了很多搜索结果，这个时候推荐系统对这些搜索结果进行了过滤，筛选出最好的那几条呈现给用户，这大概就是推荐系统做的事情。 我们都已经熟悉推荐系统了，上面澄清了推荐系统和搜索系统的区别，一般推荐系统是没有输入搜索词这个动作的，不过不同的推荐主题我们可以假设对应不同的搜索词。然后平时我们看到的热门榜单页面，排行榜页面一般都不是推荐系统干的事，因为这些页面结果的生成是和用户无关的，这就提到了推荐系统的第二个特性：推荐系统是个性化的，千人千面的。 然后我们再来看推荐系统是用来预测用户对物品的“评分”或“偏好”这句话。这句话除了上面谈及的推荐系统是个性化的之外，还几乎把推荐系统最核心的数据结构和要做的事情给描述出来了。 物品1 物品2 物品3 物品4 用户1 2 ? 3 ? 用户2 1 2 5 ? 用户3 …" />
+<meta property="og:site_name" content="cdwanze的博文" />
+<meta property="og:article:author" content="cdwanze" />
+<meta property="og:article:published_time" content="2018-11-27T00:00:00+08:00" />
+<meta property="" content="2018-12-26T00:00:00+08:00" />
+<meta name="twitter:title" content="推荐系统第一谈 ">
+<meta name="twitter:description" content="前言 推荐系统本质上是隶属于机器学习系统的，所以在简单了解下推荐系统相关算法之后，具体实现推荐系统的架构，是应该基于机器学习系统架构，然后在这之上引入新的处理流即可。 推荐系统的定义 我们首先看到维基上对于推荐系统的定义： 推荐系统是一种信息过滤系统，用来预测用户对物品的“评分”或“偏好”。 这句话暗含了很多信息，很值得我们去玩味。第一推荐系统是一个信息过滤系统，我们可以假设用户进行了某种搜索行为，然后出来了很多搜索结果，这个时候推荐系统对这些搜索结果进行了过滤，筛选出最好的那几条呈现给用户，这大概就是推荐系统做的事情。 我们都已经熟悉推荐系统了，上面澄清了推荐系统和搜索系统的区别，一般推荐系统是没有输入搜索词这个动作的，不过不同的推荐主题我们可以假设对应不同的搜索词。然后平时我们看到的热门榜单页面，排行榜页面一般都不是推荐系统干的事，因为这些页面结果的生成是和用户无关的，这就提到了推荐系统的第二个特性：推荐系统是个性化的，千人千面的。 然后我们再来看推荐系统是用来预测用户对物品的“评分”或“偏好”这句话。这句话除了上面谈及的推荐系统是个性化的之外，还几乎把推荐系统最核心的数据结构和要做的事情给描述出来了。 物品1 物品2 物品3 物品4 用户1 2 ? 3 ? 用户2 1 2 5 ? 用户3 …">
+
+    <title>推荐系统第一谈  · cdwanze的博文
+</title>
+
+
+    <link href="/theme/css/font-awesome.css" rel="stylesheet" media="screen">
+    <link href="/theme/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <link rel="stylesheet" type="text/css" href="/theme/css/pygments.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/theme/css/elegant.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+
+
+
+
+
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false">
+                <span class="sr-only">Navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        
+            <a class="navbar-brand" href="/"><span class=site-name>网站首页</span></a>
+        </div>
+
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav nav-pills pull-right">
+                <li >
+                    <a href="">博文首页</a></li>
+
+                <form action="/search.html" onsubmit="return validateForm(this.elements['q'].value);" class="navbar-form navbar-right">
+                <input type="text" name="q"  id="tipue_search_input" class="form-control" placeholder="Search...">
+                <input class="btn btn-default" type="submit" value="搜索" >
+                </form>
+                
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">查找文章<span class="caret"></span></a>
+                 <ul class="dropdown-menu">
+                  <li><a class="slowscroll" href="/categories.html">按分类</a></li>
+                 <li><a class="slowscroll" href="/tags.html">按标签</a></li>
+                </ul>
+                </li>
+
+                  
+                <li >
+                    <a href="/guan-yu-ben-wang-zhan.html">关于本网站</a></li>
+                <li >
+                    <a href="/gong-gao.html">公告</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container-fluid">
+    <div class="col-md-1 col-md-1-left"></div>
+    <div class="col-md-10">
+<article>
+<div class="row">
+    <header class="page-header col-md-10 col-md-offset-2">
+    <h1><a href="/articles/recommender-talk-one.html"> 推荐系统第一谈  </a></h1>
+    </header>
+</div>
+
+<div class="row">
+    <div class="col-md-2 table-of-content">
+        <nav>
+        <h4>目录</h4>
+        <div class="toc">
+<ul>
+<li><a href="#_1">前言</a><ul>
+<li><a href="#_2">推荐系统的定义</a></li>
+<li><a href="#_3">推荐系统的类型</a></li>
+<li><a href="#python">推荐系统的python模块支持</a></li>
+</ul>
+</li>
+<li><a href="#_4">推荐系统的可解释性</a></li>
+<li><a href="#_5">推荐系统的可定制性</a></li>
+<li><a href="#_6">推荐系统的数据埋点需求</a></li>
+<li><a href="#_7">推荐系统的后期</a></li>
+<li><a href="#_8">推荐系统的实时性和相似扎堆问题</a></li>
+<li><a href="#_9">推荐系统的早期搭建</a></li>
+<li><a href="#_10">参考资料</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="col-md-8 article-content">
+
+            
+            
+<h2 id="_1">前言</h2>
+<p>推荐系统本质上是隶属于机器学习系统的，所以在简单了解下推荐系统相关算法之后，具体实现推荐系统的架构，是应该基于机器学习系统架构，然后在这之上引入新的处理流即可。</p>
+<h3 id="_2">推荐系统的定义</h3>
+<p>我们首先看到维基上对于推荐系统的定义：</p>
+<blockquote>
+<p>推荐系统是一种信息过滤系统，用来预测用户对物品的“评分”或“偏好”。</p>
+</blockquote>
+<p>这句话暗含了很多信息，很值得我们去玩味。第一推荐系统是一个信息过滤系统，我们可以假设用户进行了某种搜索行为，然后出来了很多搜索结果，这个时候推荐系统对这些搜索结果进行了过滤，筛选出最好的那几条呈现给用户，这大概就是推荐系统做的事情。</p>
+<p>我们都已经熟悉推荐系统了，上面澄清了推荐系统和搜索系统的区别，一般推荐系统是没有输入搜索词这个动作的，不过不同的推荐主题我们可以假设对应不同的搜索词。然后平时我们看到的热门榜单页面，排行榜页面一般都不是推荐系统干的事，因为这些页面结果的生成是和用户无关的，这就提到了推荐系统的第二个特性：推荐系统是个性化的，千人千面的。</p>
+<p>然后我们再来看推荐系统是用来预测用户对物品的“评分”或“偏好”这句话。这句话除了上面谈及的推荐系统是个性化的之外，还几乎把推荐系统最核心的数据结构和要做的事情给描述出来了。</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">物品1</th>
+<th align="center">物品2</th>
+<th align="center">物品3</th>
+<th align="center">物品4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">用户1</td>
+<td align="center">2</td>
+<td align="center">?</td>
+<td align="center">3</td>
+<td align="center">?</td>
+</tr>
+<tr>
+<td align="center">用户2</td>
+<td align="center">1</td>
+<td align="center">2</td>
+<td align="center">5</td>
+<td align="center">?</td>
+</tr>
+<tr>
+<td align="center">用户3</td>
+<td align="center">?</td>
+<td align="center">?</td>
+<td align="center">?</td>
+<td align="center">?</td>
+</tr>
+</tbody>
+</table>
+<p>推荐系统就是要维护这样的用户和物品评分矩阵，这是推荐系统内部最核心的数据。</p>
+<p>然后推荐系统是负责进行预测工作的，所以一般推荐的物品是用户没有用过的物品（这里主要指推荐系统内部最核心的工作）。</p>
+<p>上面这个数据结构也可以表示成为这样一条条记录：</p>
+<div class="highlight"><pre><span></span>user item rating timestamp
+</pre></div>
+<p>一般一条条记录还会加上timestamp时间戳，因为记录的时间戳可以调控记录权重，让最近的记录更重要。</p>
+<p>上面谈及的评分矩阵有完备的数据当然好，那么就剩下新物品和新用户到来的时候，那么接下来的评分数据如何填充，这是我们在搭建推荐系统的时候需要思考解决的问题；而实践中可能这个评分矩阵有大量的数据缺失，也就是数据稀疏性问题，这也是推荐系统的一个难点问题；此外甚至可能推荐系统在刚开始搭建的时候，完善没有这样的评分数据，这就是推荐系统中的冷启动问题。</p>
+<p>那么我们为什么要维护这样一个评分矩阵，这里的评分的含义其实是非常明显的，就算没有用户直接给物品的评分数据，你也应该暗地里计算一个这样的分数，来标明用户对物品的喜好程度，然后根据这些喜好得分，选择TopN，推荐给用户。所以这样的评分数据就算没有用户直接给出，我们也要自己这边定义算法得到的。</p>
+<h3 id="_3">推荐系统的类型</h3>
+<p>目前主流的推荐系统就两个类型：基于用户的协同过滤推荐和基于物品相似度的推荐。</p>
+<h3 id="python">推荐系统的python模块支持</h3>
+<p>推荐系统在python生态圈里面似乎有个已经较为成熟的模块了： </p>
+<p><a href="https://github.com/NicolasHug/Surprise">https://github.com/NicolasHug/Surprise</a></p>
+<p>简单看了一下，其提供了一个基本的推荐系统内部基本数据规范接口和基本算法接口，可以对接好进行使用。</p>
+<p>但我们也要看到推荐系统是一个和业务贴得非常近的，然后我们也要看到，推荐系统的从搭建到调试到优化，到后期业务需求跟进等等都不是一朝一夕的功夫，是一个从算法上来讲算不上很难，更偏工程实践的领域。</p>
+<p>如果后面有需求那么就会开始利用python的相关科学计算模块了，numpy，sklearn等等。</p>
+<h2 id="_4">推荐系统的可解释性</h2>
+<p>从个人使用推荐系统情况来，推荐系统的输出页面最好解释性强一点，尽量少一些潜在的模糊的推荐，比如说我跟踪你点了哪里点了哪里所以我推荐给你这个内容，这种话谁都说不出口，连推荐理由都说不出来的推荐系统我们最好不要做，这样给用户的感觉不是很好。</p>
+<p>所以我的一个建议是不要收集类似用户的点击或者其他意图不明确的记录，下面这些记录是能被用户认可的，而且意图非常的明显可以作为推荐系统推荐理由。</p>
+<ul>
+<li>你购买过这个物品，这个物品的标签有什么，根据你喜爱的这个标签，我们给你推荐什么。实际上用户在网站上购买多个物品之后，将会有多个物品的多个标签，多个标签有个计数，每个标签都将输出一个推荐页面。</li>
+<li>推荐系统页面的输出过滤：推荐系统可以暗含比如距离优先权重，文章时间优先权重等，热度优选权重等，而在实际输出的推荐页面，应该再给用户这些排序选项，这实际上也再暗地里告诉用户我们的推荐是考虑了这些因素的。</li>
+<li>你购买的物品基因和那些用户相同，他们也喜欢这些物品。这里明确告诉用户你购买过这些物品，我们是根据你的购买记录来做出这些判断的。非常不喜欢推荐系统使用这些信息来进行推荐，你的年龄是多少，你的学历是多少等等，这些推荐第一推荐效果实际上我看了非常的不好，很多网站都用他来解决推荐系统冷启动问题，但我觉得完全没有必要，强制推送用户一堆不喜欢的东西，就好像推销一样是推荐系统的大忌；其次你的这些推荐就是明摆着告诉用户我要收集你的这些个人信息，给人的感觉更加不好。</li>
+</ul>
+<h2 id="_5">推荐系统的可定制性</h2>
+<p>前面提到了推荐系统输出页面可以增加一些过滤选项，同样页面还可以加入推荐系统的高级定制选项。这里讨论的可定制性包括时间遗忘权重，喜好标签和自定义标签的标记等等。这些高级定制界面一般用户可能用不到，后面有时间精力可以去开发。</p>
+<p>推荐系统的效果最终评判方实际上就在每个用户身上，没有任何人，没有任何算法可以做这个工作；其次推荐系统的很多信息收集也可以放在这个定制页面，实际上某些用户对于上传这些信息也会很热心的，而这将很快的提高推荐系统的质量；最后这个可定制页面对于早期人工输入收集和后期推荐系统某些数据维护也很有帮助。</p>
+<p>还是那句话，推荐系统更多的不是某种高难度的算法，而是一个不断完善的工程上的事。</p>
+<h2 id="_6">推荐系统的数据埋点需求</h2>
+<p>正如前面提及的目前大概需要这些信息：</p>
+<ul>
+<li>用户对某个物品的消费记录</li>
+<li>物品的标签</li>
+</ul>
+<p>后期网站页面和推荐系统操作页面需要进行合并融合工作。</p>
+<p>按照上面的讨论，推荐系统需要的最核心的数据就是用户对于某个物品的购买记录，不需要其他花里胡哨的瞎猜逻辑。</p>
+<p>如果用户没有购买记录，我觉得更好的做法是将某个问题页面，也就是前面提到的推荐系统的可定制性相关页面，在用户查看到推荐栏的时候放出，用户选择之后，立马放出推荐结果。</p>
+<h2 id="_7">推荐系统的后期</h2>
+<p>这个是后面的事情了，这里简单提一下，除了上面说到的推荐系统的可定制性外，我觉得推荐系统后期可能面对的最大问题是大数据量下的快速反应问题。</p>
+<p>至于人们提及的更高大上的比如更加智能的猜测用户的心意【这里指的是搭建用户的记录知识库】，和用户更优化的对话交互推荐，我觉得这都不算推荐系统的事情，而是智能系统的事情了。</p>
+<h2 id="_8">推荐系统的实时性和相似扎堆问题</h2>
+<p>目前我看到的推荐系统在实时性上已经提到了很高的一个程度，基本上做到了用户点击什么立马反应改变推荐结果。总的说来推荐系统实时改变这是很好的，但感觉现在的推荐系统太实时了，也就是那个时间戳权重可能提的太高了，以至于我感觉现在的推荐系统已经没有记忆性了，只是一个实时反映的系统，而没有很好地去维护用户的个性特征特性。这就造成了现在的推荐系统经常出现相似的内容一股脑的扎堆进来，实时性是要的，但过分的提高实时性，实际上就完全放弃了推荐系统的下一步的可改进性。</p>
+<p>而推荐系统的下一步可改进性就是除了高大上的猜测用户心意上下功夫，搭建用户模型，更好地为用户画像。</p>
+<p>此外还有一个改进路线就是进一步提高推荐系统的推荐结果可解释性和相关可解释路线的多样性。这就好比给用户多增加几个谋士，可能有几个谋士不合乎用户心意，但多增加几个之后，用户的使用体验和满意度肯定会上升的。</p>
+<p>具体多种推荐路线那可能就要联系到用户的画像，抓住用户的某个特征然后得出结论，比如说射手座的喜欢购买这些；星期天大家喜欢买这些等。这些谋士的建议可能很不靠谱，但这些推荐建议多几个是不会引起用户的讨厌的，毕竟是用户自己主动去下拉翻动的。</p>
+<h2 id="_9">推荐系统的早期搭建</h2>
+<p>基于物品的推荐非常适合早期运行，数据也适合进行线下预处理，即使后期物品数据非常庞大也能做到实时计算和推荐。</p>
+<p>所以我们工作推荐系统搭建早期重点精力应该在基于物品的相似度上的推荐。下面是最基础版本的构想：</p>
+<ol>
+<li>物品的标签</li>
+<li>根据用户的购买记录，找到对应物品的各个标签</li>
+<li>根据物品相似度判断得到推荐结果</li>
+</ol>
+<p>刚开始的版本就是最粗糙的那个版本，正如前面提及的，推荐系统是个不断优化完善上的工程上的事，随着物品变多，物品标签变多，用户购买记录变多等会出现越来越多要考虑的问题。</p>
+<p>先对接线上数据库数据做出一个基本的雏形再说。</p>
+<h2 id="_10">参考资料</h2>
+<ol>
+<li>推荐系统 Dietmar Jannach Markus Zanker 著 蒋凡译</li>
+</ol>
+            
+            
+            <hr/>
+
+        </div>
+        <section>
+        <div class="col-md-2" style="float:right;font-size:0.9em;">
+            <h4>首发于：</h4>
+            <time pubdate="pubdate" datetime="2018-11-27T00:00:00+08:00">2018年 11月 27日 </time>
+
+<h4>最近更新于：</h4>
+<time datetime="2018-12-26T00:00:00+08:00">2018年 12月 26日 </time>
+
+            <h4>分类：</h4>
+            <a class="category-link" href="/categories.html#ji-qi-xue-xi-ref">机器学习</a>
+            <h4>标签：</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#recommender-ref">recommender
+                    <span>1</span>
+</a></li>
+            </ul>
+        </div>
+        </section>
+</div>
+</article>
+    </div>
+    <div class="col-md-1"></div>
+
+</div>
+
+
+<div id="push"></div>
+
+
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a> and updated by <a href="http://www.cdwanze.work" title="cdwanze Home Page">cdwanze</a></li>
+    </ul>
+</div>
+</footer>
+
+    <script src="/theme/js/jquery.min.js"></script>
+<script src="/theme/js/bootstrap.min.js"></script>
+<script>
+    function validateForm(query) {
+        return (query.length > 0);
+    }
+</script>
+
+
+    
+
+
+
+</body>
+</html>

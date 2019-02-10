@@ -14,7 +14,7 @@ TIMEZONE = 'Asia/Shanghai'
 
 
 if sys.platform == 'win32':
-    DEFAULT_LANG = 'zh-cn'
+    DEFAULT_LANG = 'zh'
 else:
     DEFAULT_LANG = 'zh_CN'
     LOCALE='zh_CN'
@@ -76,3 +76,30 @@ READERS = {'html': None}
 MARKUP = ('md', 'ipynb')
 IGNORE_FILES = ['.ipynb_checkpoints']
 
+# changing theme
+THEME = 'mytheme'
+
+
+# the plugin
+PLUGIN_PATHS = ['myplugins']
+
+PLUGINS = ['pelican_javascript', 'extract_toc',
+           'render_math', 'pelican_ipynb', 'tipue_search']
+
+MATH_JAX = {'tex_extensions': ['mhchem.js']}
+
+DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
+
+DEFAULT_PAGINATION = 20
+
+# auto toc support
+MARKDOWN = {
+    'extension_configs': {
+        'markdown.extensions.codehilite': {'css_class': 'highlight'},
+        'markdown.extensions.toc': {},
+        'markdown.extensions.fenced_code': {},
+        'markdown.extensions.extra': {},
+        'markdown.extensions.meta': {},
+    },
+    'output_format': 'html5',
+}

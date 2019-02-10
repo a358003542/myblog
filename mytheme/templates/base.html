@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="baidu-site-verification" content="D4VqC4HppC" /> 
+	<meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625" />
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-5644206261254049",
+        enable_page_level_ads: true
+      });
+    </script>
+    
+    
+    {% if article and article.author %}
+    <meta name="author" content="{{ article.author }}"/>
+    <meta name="copyright" content="{{ article.author }}"/>
+    {% elif page and page.author %}
+    <meta name="author" content="{{ page.author }}"/>
+    <meta name="copyright" content="{{ page.author }}"/>
+    {% else %}
+    <meta name="author" content="{{ AUTHOR }}"/>
+    <meta name="copyright" content="{{ AUTHOR }}"/>
+    {% endif %}
+
+    {% from '_includes/_defaults.html' import SITE_DESCRIPTION with context %}
+    {% if SITE_DESCRIPTION %}
+    <meta name="description"
+          content="{% block head_description %}{{ SITE_DESCRIPTION|e }}{% endblock head_description %}"/>
+    {% endif %}
+    {% block meta_tags_in_head %}
+    {% from '_includes/_defaults.html' import GOOGLE_PLUS_PROFILE_URL with context %}
+    {% if GOOGLE_PLUS_PROFILE_URL %}
+    <link rel="author" href={{GOOGLE_PLUS_PROFILE_URL}}/>
+    {% endif %}
+    {% from '_includes/_defaults.html' import TWITTER_USERNAME with context %}
+    {%if TWITTER_USERNAME %}
+    <meta name="twitter:creator" content="@{{TWITTER_USERNAME}}">
+    {% endif %}
+    <meta property="og:type" content="article"/>
+    <meta name="twitter:card" content="summary">
+    {% endblock meta_tags_in_head %}
+    <title>{% block title %}{{ SITENAME|striptags|e }}{% endblock title %}</title>
+
+    {% block head_links %}
+
+    <link href="{{ SITEURL }}/theme/css/font-awesome.css" rel="stylesheet" media="screen">
+    <link href="{{ SITEURL }}/theme/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    {% if 'assets' in PLUGINS %}
+    {% include '_includes/minify_css.html' with context %}
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="{{ SITEURL }}/theme/css/pygments.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ SITEURL }}/theme/css/elegant.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ SITEURL }}/theme/css/custom.css" media="screen">
+    {% endif %}
+
+    {% endblock head_links %}
+
+
+    {% include '_includes/favicon_links.html' %}
+    {% block feed_links %}
+    {% include '_includes/feeds.html' %}
+    {% endblock feed_links %}
+    {% include '_includes/analytics.html' %}
+
+
+    {% if article %}
+    {% if article.stylesheets %}
+    {% for stylesheet in article.stylesheets %}
+    {{ stylesheet }}
+    {% endfor %}
+    {% endif %}
+    {% endif %}
+
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false">
+                <span class="sr-only">Navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        
+            <a class="navbar-brand" href="/"><span class=site-name>网站首页</span></a>
+        </div>
+
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav nav-pills pull-right">
+                <li {% if page_name=='index' %} class="active"{% endif %}>
+                    <a href="{{ SITEURL }}">博文首页</a></li>
+
+                <form action="{{ SITEURL }}/search.html" onsubmit="return validateForm(this.elements['q'].value);" class="navbar-form navbar-right">
+                <input type="text" name="q"  id="tipue_search_input" class="form-control" placeholder="Search...">
+                <input class="btn btn-default" type="submit" value="搜索" >
+                </form>
+                
+                {% block more_navbar %}
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">查找文章<span class="caret"></span></a>
+                 <ul class="dropdown-menu">
+                  <li><a class="slowscroll" href="/categories.html">按分类</a></li>
+                 <li><a class="slowscroll" href="/tags.html">按标签</a></li>
+                </ul>
+                </li>
+                {% endblock %}
+
+                  
+                {% if DISPLAY_PAGES_ON_MENU %}
+                {% for p in pages %}
+                <li {% if p== page %} class="active" {% endif %}>
+                    <a href="{{ SITEURL }}/{{ p.url }}">{{ p.title
+                    }}</a></li>
+                {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container-fluid">
+    <div class="col-md-1 col-md-1-left"></div>
+    <div class="col-md-10">
+        {% block content %}
+        {% endblock content %}
+    </div>
+    <div class="col-md-1"></div>
+
+</div>
+
+
+<div id="push"></div>
+
+
+{% include '_includes/footer.html' %}
+
+
+{% block script %}
+<script src="{{ SITEURL }}/theme/js/jquery.min.js"></script>
+<script src="{{ SITEURL }}/theme/js/bootstrap.min.js"></script>
+<script>
+    function validateForm(query) {
+        return (query.length > 0);
+    }
+</script>
+
+{% endblock script %}
+{% include '_includes/stat_counter.html' %}
+
+
+{% if article %}
+{% if article.javascripts %}
+{% for javascript in article.javascripts %}
+{{ javascript }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% if article and article.author %}
+    <meta name="author" content="{{ article.author }}"/>
+    <meta name="copyright" content="{{ article.author }}"/>
+    {% elif page and page.author %}
+    <meta name="author" content="{{ page.author }}"/>
+    <meta name="copyright" content="{{ page.author }}"/>
+    {% else %}
+    <meta name="author" content="{{ AUTHOR }}"/>
+    <meta name="copyright" content="{{ AUTHOR }}"/>
+    {% endif %}
+
+    {% block meta_tags_in_head %}
+    {% if page.tags or page.category or page.keywords %}
+    <meta name="keywords" content="{{ [page.tags|join(', '), page.category, page.keywords]|join(', ') }}" />
+    {% endif %}
+    {% endblock meta_tags_in_head %}
+
+    <title>{{ page.title|striptags|e }} {%if page.subtitle %} - {{ page.subtitle|striptags|e }} {% endif %}</title>
+
+
+    {% block head_links %}
+    <link href="{{ SITEURL }}/theme/css/font-awesome.css" rel="stylesheet" media="screen">
+    <link href="{{ SITEURL }}/theme/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="{{ SITEURL }}/theme/js/jquery.min.js"></script>
+    {% endblock head_links %}
+
+
+</head>
+<body>
+
+
+
+{{ page.content }}
+
+
+<script src="{{ SITEURL }}/theme/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>
+
+
+
+
+

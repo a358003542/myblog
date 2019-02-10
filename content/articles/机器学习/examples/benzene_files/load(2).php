@@ -1,0 +1,1 @@
+li#ca-0,li#ca-1,li#ca-2,li#ca-varlang-0,li#ca-varlang-1,li#ca-varlang-2{display:none}.skin-vector .mw-body-content{font-size:0.938em}.skin-monobook .mw-body-content{font-size:110%}

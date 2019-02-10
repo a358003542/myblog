@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="baidu-site-verification" content="D4VqC4HppC" /> 
+	<meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625" />
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-5644206261254049",
+        enable_page_level_ads: true
+      });
+    </script>
+    
+    
+    <meta name="author" content="cdwanze"/>
+    <meta name="copyright" content="cdwanze"/>
+
+     <meta property="og:type" content="article"/>
+    <meta name="twitter:card" content="summary">
+
+ <meta property="og:title" content="cdwanze的博文" />
+<meta name="twitter:title" content="cdwanze的博文"> <meta property="og:url" content="" />  <meta property="og:site_name" content="cdwanze的博文" />
+<meta property="og:article:author" content="cdwanze" />       <title> cdwanze的博文 </title>
+
+
+    <link href="/theme/css/font-awesome.css" rel="stylesheet" media="screen">
+    <link href="/theme/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <link rel="stylesheet" type="text/css" href="/theme/css/pygments.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/theme/css/elegant.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+
+
+
+
+
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false">
+                <span class="sr-only">Navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        
+            <a class="navbar-brand" href="/"><span class=site-name>网站首页</span></a>
+        </div>
+
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav nav-pills pull-right">
+                <li >
+                    <a href="">博文首页</a></li>
+
+                <form action="/search.html" onsubmit="return validateForm(this.elements['q'].value);" class="navbar-form navbar-right">
+                <input type="text" name="q"  id="tipue_search_input" class="form-control" placeholder="Search...">
+                <input class="btn btn-default" type="submit" value="搜索" >
+                </form>
+                
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">查找文章<span class="caret"></span></a>
+                 <ul class="dropdown-menu">
+                  <li><a class="slowscroll" href="/categories.html">按分类</a></li>
+                 <li><a class="slowscroll" href="/tags.html">按标签</a></li>
+                </ul>
+                </li>
+
+                  
+                <li >
+                    <a href="/guan-yu-ben-wang-zhan.html">关于本网站</a></li>
+                <li >
+                    <a href="/gong-gao.html">公告</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container-fluid">
+    <div class="col-md-1 col-md-1-left"></div>
+    <div class="col-md-10">
+  
+<style>
+    article {
+        border: 1px solid #aaa;
+    }
+
+    section {
+        padding: 1em;
+    }
+
+    article > p {
+        padding-left: 0.5em;
+        padding-right: 0.5em;
+    }
+
+    #gotop{
+        position:fixed;
+        right: 12% ;
+        float:right ;
+        top: 50%;
+    }
+    @media screen and (max-width: 600px) {
+        #gotop{
+            display:none;
+        }
+    }
+</style>
+
+<button id="gotop" type="button" class="btn btn-default">
+    <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+  </button>
+
+
+
+<div class="row">
+
+    <div class="row">
+     </div>
+
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <header>
+                <h1 id="recent-posts">最近博文
+                    <a id="allposts" href="/archives.html">所有博文</a>
+                </h1>
+            </header>
+
+
+            <div class="recent-posts">
+
+                <article>
+
+                    <h1 class="page-header"><a href="/articles/bihu-query.html">bihu_query项目  </a></h1>
+
+                    <section>
+                        posted in
+                        <a href="/categories.html#xiang-mu-ref">项目
+                        </a>
+                        <div class="recent-posts-time">
+                            <time pubdate="pubdate" datetime="2018-08-08T00:00:00+08:00">2018年 8月 8日
+                            </time>
+                        </div>
+                    </section>
+                    
+<h2 id="_1">简介</h2>
+<p>实现了一个通用的根据输入的url，然后用户自己编写对应的url 正则匹配规则，然后编写相应的页面爬取规则，从而实现一个实时爬虫接口功能。</p>
+<p>项目地址在 <a href="https://github.com/a358003542/bihu_query">https://github.com/a358003542/bihu_query</a> 。</p>
+<h2 id="_2">功能简介</h2>
+<h3 id="query">query 接口</h3>
+<div class="highlight"><pre><span></span>/query/?url=
+</pre></div>
+<p>输入url参数，实时爬取目标页面，返回数据。</p>
+<h3 id="_3">快速创建爬虫的图形操作界面</h3>
+<p>实现了一个快速创建爬虫的图形操作界面</p>
+<h2 id="_4">更新说明</h2>
+<h2 id="_5">项目配置管理</h2>
+<p>本项目开发遵循12因素应用配置管理原则：</p>
+<ol>
+<li>.env 不进入版本库，控制整个项目的配置选择，目前选用了三个阶段： development testing production，分别对应于 本机早期开发， 实际上机测试  和 生产环境</li>
+<li>.secrets.toml 里面放着一些私密的配置信息，不进入版本库</li>
+<li>settings.toml 里面放着其他一些配置</li>
+</ol>
+<p>使用请参看 dynaconf 模块。</p>
+<h2 id="_6">版权申明</h2>
+<p>本模块版权归cdwanze所有，不可用于商业目的 …</p>
+                </article>
+
+
+                <article>
+
+                    <h1 class="page-header"><a href="/articles/bihu-module.html">bihu模块  </a></h1>
+
+                    <section>
+                        posted in
+                        <a href="/categories.html#xiang-mu-ref">项目
+                        </a>
+                        <div class="recent-posts-time">
+                            <time pubdate="pubdate" datetime="2018-07-27T00:00:00+08:00">2018年 7月 27日
+                            </time>
+                        </div>
+                    </section>
+                    
+<h2 id="_1">简介</h2>
+<p>一个通用目的的python模块，安装如下：</p>
+<div class="highlight"><pre><span></span>pip install bihu
+</pre></div>
+<p>项目源码在 <a href="https://github.com/a358003542/bihu">https://github.com/a358003542/bihu</a></p>
+<h2 id="_2">功能简介</h2>
+<ol>
+<li>web 里面有获取随机user-agent函数等其他辅助函数。</li>
+<li>workflow里面写了一个状态控制类，在airflow调度的时候，最小的任务执行仍然有状态记录。</li>
+<li>database 里面放着很多便捷的对接数据库的通用操作模式。具体请读者用心体会。</li>
+<li>utils里面有很多便捷的函数支持。</li>
+</ol>
+<h2 id="_3">更新说明</h2>
+<h2 id="_4">项目配置管理</h2>
+<p>本项目开发遵循12因素应用配置管理原则：</p>
+<ol>
+<li>.env 不进入版本库，控制整个项目的配置选择，目前选用了三个阶段： development testing production，分别对应于 本机早期开发， 实际上机测试  和 生产环境</li>
+<li>.secrets.toml 里面放着一些私密的配置信息，不进入版本库</li>
+<li>settings.toml 里面放着其他一些配置</li>
+</ol>
+<p>使用请参看 dynaconf 模块。</p>
+<h2 id="_5">版权申明</h2>
+<p>本模块版权归cdwanze所有，不可用于商业目的 …</p>
+                </article>
+
+
+                <article>
+
+                    <h1 class="page-header"><a href="/articles/bihu-spiderctl.html">bihu_spiderctl项目  </a></h1>
+
+                    <section>
+                        posted in
+                        <a href="/categories.html#xiang-mu-ref">项目
+                        </a>
+                        <div class="recent-posts-time">
+                            <time pubdate="pubdate" datetime="2018-07-27T00:00:00+08:00">2018年 7月 27日
+                            </time>
+                        </div>
+                    </section>
+                    
+<h2 id="_1">简介</h2>
+<p>本项目源于 https://github.com/DormyMo/SpiderKeeper 项目[MIT LICENSE]，进行了django化，这样方便数据库和以后的其他django项目数据库合并在一起，然后对界面进行了部分调整和简化。</p>
+<p>项目地址在 <a href="https://github.com/a358003542/bihu_spiderctl">https://github.com/a358003542/bihu_spiderctl</a> 。</p>
+<h2 id="_2">使用帮助</h2>
+<p>运行命令，进行project初始化：</p>
+<div class="highlight"><pre><span></span>python manage.py init_data
+</pre></div>
+<p>用于初始化项目默认项目 default ，本项目简化去除了deploy和project等等概念，实际上一般使用并不需要考虑这些概念，分布式爬虫也不一定要用deploy那个命令行工具，实际上完全可以和运维工具git仓库控制结合起来，实现多台机器自动化代码更新。分布式也不是那么神秘，各个机器scrapyd服务开起来就可以了，具体命令让那里分发完全可以更高层的调度系统来控制。</p>
+<p>这种处理和目前流行的 应用 单进程 ，然后 多进程由专门的工具如nginx 来实现有异曲同工的意图，那就是具体某个小的功能应用，不用太考虑系统架构上的事情，越小巧，越专注于本职工作就好。这样将大大降低单应用开发人员的思维复杂度，Again，让我们再重温一下Unix编程艺术里面的金句：</p>
+<blockquote>
+<p>KEEP …</p></blockquote>
+                </article>
+
+             </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+    </div>
+    <div class="col-md-1"></div>
+
+</div>
+
+
+<div id="push"></div>
+
+
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a> and updated by <a href="http://www.cdwanze.work" title="cdwanze Home Page">cdwanze</a></li>
+    </ul>
+</div>
+</footer>
+
+ <script src="/theme/js/jquery.min.js"></script>
+<script src="/theme/js/bootstrap.min.js"></script>
+<script>
+    function validateForm(query) {
+        return (query.length > 0);
+    }
+</script>
+
+
+
+<script>
+    (function ($) {
+        // custom css expression for a case-insensitive contains()
+        jQuery.expr[':'].Contains = function (a, i, m) {
+            return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
+        };
+
+        function listFilter() {
+
+            $('#findtag')
+                .change(function () {
+                    var filter = $(this).val();
+                    if (filter) {
+                        // this finds all links in a list that contain the input,
+                        // and hide the ones not containing the input while showing the ones that do
+                        $('.list-of-tags').find("a:not(:Contains(" + filter + "))").parent().hide();
+                        $('.list-of-tags').find("a:Contains(" + filter + ")").parent().show();
+                    } else {
+                        $('.list-of-tags').find("li").show();
+                    }
+                    return false;
+                })
+                .keyup(function () {
+                    // fire the above change event after every letter
+                    $(this).change();
+                });
+        }
+
+        //ondomready
+        $(function () {
+            listFilter($());
+        });
+    }(jQuery));
+
+</script> 
+
+<script>
+    $(function(){
+        //点击回到顶部的元素
+        $("#gotop").click(function(e) {
+                //以1秒的间隔返回顶部
+                $('body,html').animate({scrollTop:0},1000);
+        });
+    });
+</script>
+
+<script>
+  $('.page-header').hover(function(){
+    $(this).css("color",'#3875d7')
+  }, function(){
+    $(this).css('color','#8B0000')
+  })
+</script>
+
+
+<script>
+  $(document).ready(function(){
+    $('a.slowscroll').click(function(event){
+      var $anchor = $(this);
+      $('html, body').animate({scrollTop: $($anchor.attr('href')).offset().top},1500);
+      event.preventDefault();
+      // $('a.slowscroll').parent().removeClass('active');
+      // $('.navbar-header').hide();
+      // $anchor.parent().addClass('active');
+    })
+  })
+  console.log('document init...')
+</script>
+
+
+
+
+</body>
+</html>
