@@ -1,5 +1,5 @@
 [[source]]
-url = "https://pypi.douban.com/simple"
+url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
@@ -9,11 +9,6 @@ flask-bootstrap = "*"
 flask-moment = "*"
 flask-wtf = "*"
 six = "*"
-pytz = "*"
-python-dateutil = "*"
-unidecode = "*"
-docutils = "*"
-blinker = "*"
 markdown = "*"
 loguru = "*"
 flask-sqlalchemy = "*"
@@ -22,6 +17,21 @@ flask-mail = "*"
 pytest = "*"
 flask-login = "*"
 python-dotenv = "*"
+
+"beautifulsoup4" = "*"
+blinker = "*"
+docutils = "*"
+feedgenerator = "*"
+"jinja2" = "*"
+markupsafe = "*"
+pelican = "*"
+pygments = "*"
+python-dateutil = "*"
+pytz = "*"
+unidecode = "*"
+click = "*"
+nbconvert = "*"
+ipython = "*"
 
 [dev-packages]
 
