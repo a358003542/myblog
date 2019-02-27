@@ -1,6 +1,6 @@
 Title: pandas模块
 Date: 2018-07-01
-Modified: 2018-09-16
+Modified: 2019-02-27
 Tags: 科学计算
 
 [TOC]
@@ -12,6 +12,10 @@ Tags: 科学计算
 pandas最核心的两个数据结构就是 Series 类和 DataFrame 类。其中DataFrame可能会用的偏多一点，Series相当于一维情况下较简单的DataFrame，有的时候会用到。本文重点讨论DataFrame类。
 
 DataFrame之所以很常用是因为这种数据结构太常见了，在excel中，在csv中，在sql中，等等来源的数据都可以汇总成为DataFrame数据结构，然后进行一些后面必要的数据处理，包括送入机器学习或者深度学习的模型中去。
+
+
+
+## 读写文件支持
 
 pandas的io子模块写得很便捷，实际上我经常看到有些python程序员并不是在做数据处理，有时都会调用下pandas的io来做一些读写操作。
 
@@ -42,27 +46,7 @@ read_csv 有很多选项，应付初步加载csv数据进入df内是绝对没问
 
 ### 读excel文件
 
-利用pd.read_excel来读excel文件里面的数据，这个功能需要按照xlrdpython第三方模块支持。
-
-
-
-### 直接加载python对象
-
-这里支持的python对象有字典，或者已经是DataFrame了。
-
-```python
-data = {'state': ['Ohio', 'Ohio', 'Ohio', 'Nevada', 'Nevada', 'Nevada'], 
-        'year': [2000, 2001, 2002, 2001, 2002, 2003], 
-        'pop': [1.5, 1.7, 3.6, 2.4, 2.9, 3.2]}
-
-frame = pd.DataFrame(data)
-
-frame
-```
-
-
-
-实际上有些情况，可能利用python的其他模块进行数据源加载，然后整合为python字典之类，再存入DataFrame中会更方便一些，这个要根据具体情况来了。
+利用pd.read_excel来读excel文件里面的数据，这个功能需要安装 **xlrd** 模块。
 
 
 
@@ -75,48 +59,31 @@ import sqlalchemy
 data_source = sqlalchemy.create_engine('sqlite:///mydata.sqlite')
 ```
 
-上面的讨论我们可以汇总成为一个DataHandler对象，某些算法可以直接继承自这个类，直接加载数据，算法内部自动进行一些输出预处理，分类，测试，打标签，相应的算法计算等等。
+
+
+## 创建DataFrame对象
+
+除了直接从文件读写创建DataFrame对象外，你还可以通过DataFrame类来直接生成DataFrame对象，如下所示：
+
+### 直接加载python对象
+
+这里支持的python对象有字典，或者已经是DataFrame了。
 
 ```python
-import os
+data = {'state': ['Ohio', 'Ohio', 'Ohio', 'Nevada', 'Nevada', 'Nevada'], 
+        'year': [2000, 2001, 2002, 2001, 2002, 2003], 
+        'pop': [1.5, 1.7, 3.6, 2.4, 2.9, 3.2]}
 
-import pandas as pd
-
-class MissingSQLStatementError(Exception):
-    pass
-
-class DataHandler(object):
-    """
-    read data source from
-    - file
-    - python  DataFrame dict ...
-    - sql
-    """
-    def __init__(self, data_source=None, data_source_type='file', sql_query=None, read_data_kwargs=None):
-        self.data_source = data_source
-        self.read_data_kwargs = read_data_kwargs if read_data_kwargs is not None else {}
-
-        self.df = None
-
-        if data_source_type == 'file':
-            _, ext = os.path.splitext(self.data_source)
-            ext = ext.lower()[1:]
-
-            if ext in ['csv', 'txt']:
-                self.df = pd.read_csv(self.data_source, **self.read_data_kwargs)
-            elif ext in ['xlsx']: # sheet_name
-                self.df = pd.read_excel(self.data_source, **self.read_data_kwargs)
-        elif data_source_type == 'python':
-            self.df = pd.DataFrame(self.data_source)
-        elif data_source_type == 'sql':
-            if sql_query is None:
-                raise MissingSQLStatementError
-            else:
-                self.df = pd.read_sql(sql_query, self.data_source, **self.read_data_kwargs)
-
+frame = pd.DataFrame(data)
 ```
 
+当然我们操作DataFrame通常的思路更偏向于一行一行的来，你也可以直接把类似于numpy的ndarray的结构的数据转成DataFrame对象：
 
+```
+pd.DataFrame([[1,2],[2,3]])
+```
+
+再比如：
 
 ### 新建一个随机数填充的DataFrame
 
@@ -126,39 +93,23 @@ class DataHandler(object):
 df = pd.DataFrame(np.random.randn(6,4), columns=['a','b','c','d'])
 ```
 
-在实践中行row的名字也是可以定制的，但我们先重点看一下列名这个概念。上面 `columns` 参数是设置列名的，而上面提到的通用数据源加载类中，并没有提到columns这个概念，是因为，你的DataFrame创建之后，列名是可以随时修改定制的：
-
-```python
-
-    def set_columns(self, columns):
-        self.df.columns = columns
-
-    def rename_column(self, origin_column_name, column_name):
-        """
-        默认的column 可用 0 1 2 来引用
-        :param origin_column_name:
-        :param column_name:
-        :return:
-        """
-        d = {}
-        d[origin_column_name] = column_name
-        self.df.rename(columns=d, inplace=True)
-
-    def rename_columns(self, columns):
-        self.df.rename(columns = columns, inplace=True)
-
-
-```
-
-首先我们看到第一个方法 `set_columns` ，其直接设置列名。
-
-然后我们看到 `rename_column` 方法，如果你一开始不管列名这个问题，那么你新建的df默认的column就是 0,1,2... （是数值型不是字符串型），然后如上你可以定制那个列名，然后重命名之。
+上面的例子还演示了列名不用默认的0 1 ，而是你直接去指定。
 
 
 
-## DataFrame转numpy数据类型
+### 选择合适的时机转入DataFrame
 
-如上pandas有很好的io接口，获取数据之后，然后我们就有了相应的dataframe对象了，但有的时候我们进行计算是希望以ndarray（numpy）的形式来进行的（我们引入DataFrame是因为其有label等等让各个列数据有含义的功能，而到了实际底层算法，可能就是特征1234了，我们不再关心具体特征的名字，这个时候将某部分数据退化为numpy的ndarray数据类型就很必要了，一方面底层算法层不在意这些，第二就是numpy的ndarray对象可以和以前我们常见的那些算法包括新出来的tensorflow很容易对接起来。）
+你需要选择一个合适的时机将你的python数据转入DataFrame中，通常这并不是越早越好。DataFrame更快更适合的是那些矩阵操作，或者所有元素都要进行的操作。而对于你的python数据的某个，或者某些的更改操作，并不是某一行，或者某一列的操作，这个时候用DataFrame你会发现很不方便。
+
+
+
+## DataFrame基础
+
+
+
+### DataFrame转ndarray
+
+有的时候我们进行计算是希望以ndarray（numpy）的形式来进行的（我们引入DataFrame是因为其有label等等让各个列数据有含义的功能，而到了实际底层算法，可能就是特征1234了，我们不再关心具体特征的名字，这个时候将某部分数据退化为numpy的ndarray数据类型就很必要了，一方面底层算法层不在意这些，第二就是numpy的ndarray对象可以和以前我们常见的那些算法包括新出来的tensorflow很容易对接起来。）
 
 实际转变如下，非常简单：
 
@@ -167,6 +118,51 @@ nd = df.values
 ```
 
 参考了 [这个网页](https://stackoverflow.com/questions/13187778/convert-pandas-dataframe-to-numpy-array-preserving-index) 。
+
+
+
+### DataFrame列重命名
+
+在创建DataFrame对象时 `columns` 参数是设置列名的，DataFrame对象创建之后，你还可以如下所示修改列名。
+
+```python
+def set_columns(df, columns):
+    """
+    重新设置列名
+    """
+    df.columns = columns
+
+def rename_column(df, origin_column_name, column_name):
+    """
+    将某个列名更改为某个名字
+    默认的column 可用 0 1 2 来引用 数值型
+    """
+    d = {}
+    d[origin_column_name] = column_name
+    df.rename(columns=d, inplace=True)
+
+def rename_columns(df, columns):
+    """
+    重新设置列名
+    """
+    df.rename(columns = columns, inplace=True)
+    
+def rename_column_by_index(df, index, column_name):
+    """
+    不知道列名是多少，只知道是第几列，将其修改为某个名字
+    """
+    df.rename(columns={df.columns[index]: column_name})
+```
+
+
+
+### DataFrame的append操作
+
+
+
+
+
+
 
 
 
@@ -221,8 +217,6 @@ df.iloc[:, [0,2]]
 
 
 
-## DataFrame
-
 ### 对某一特征列进行某个运算
 
 利用pandas的DataFrame的apply方法将某个函数应用到某个特征列，然后赋值给新的一列。
@@ -246,7 +240,7 @@ df[(df['col1']==0) & (df['col2']==0)]
 ### 按照行排序
 
 ```
-df.sort_index(axis=1, ascending=False
+df.sort_index(axis=1, ascending=False)
 ```
 
 ### 按照列排序
