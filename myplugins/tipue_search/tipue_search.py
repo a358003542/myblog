@@ -15,7 +15,7 @@ import os.path
 import json
 from bs4 import BeautifulSoup
 from codecs import open
-import pkuseg
+import jieba
 
 try:
     from urlparse import urljoin
@@ -55,8 +55,7 @@ class Tipue_Search_JSON_Generator(object):
         page_url = page.url if page.url else '.'
 
         # 分词加空格
-        seg = pkuseg.pkuseg()
-        words = seg.cut(page_text)
+        words = jieba.lcut(page_text)
         page_text = ' '.join(words)
 
         node = {'title': page_title,

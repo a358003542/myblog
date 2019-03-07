@@ -36,8 +36,6 @@ def devserve():
     """
     click.echo("start devbuild your pelican project...")
 
-    click.echo('right now you are in folder: {0}'.format(BASEDIR))
-
     def devbuild():
         cmd = "pipenv run python -m pelican.tools.pelican --debug -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}".format(
             INPUTDIR=INPUTDIR,
