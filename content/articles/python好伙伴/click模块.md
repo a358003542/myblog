@@ -31,7 +31,7 @@ if __name__ == '__main__':
 我们看到一切都是很直观明了的， `@click.command()` 用来装饰一个函数，然后用 `@click.option` 来具体添加命令行选项。其中第一个就是命令行选项的名字，然后 `help` ， `default` 的意义我们是清楚的（类似的还有 `type` 来控制数据类型）。然后我们注意到某个选项比如上面的name是可以请求输入来获得值的。然后我们可以用 `click.echo` 来进行打印操作（不是print函数是为了获得更好的python2和3的兼容性，这个是随意的，直接用print函数也是可以的）。
 
 具体脚本运行情况如下所示:
-
+```
     wanze@wanze-ubuntu:~/桌面$ python3 test2.py --help
     Usage: test2.py [OPTIONS]
     
@@ -41,16 +41,16 @@ if __name__ == '__main__':
       --count INTEGER  Number of greetings.
       --name TEXT      The person to greet.
       --help           Show this message and exit.
-
+```
 我们看到该函数的 `__doc__` 说明文档就直接成了该命令行的描述性文档了。
 
 更棒的是其 `prompt` 机制和具体命令行输入参数是兼容的:
-
+```
     wanze@wanze-ubuntu:~/桌面$ python3 test2.py --count=3 --name=wanze
     Hello wanze!
     Hello wanze!
     Hello wanze!
-
+```
 # 必填参数，文件操作和如何测试
 
 必填参数用 `@click.argument()` 来装饰添加之，如下所示:
@@ -82,14 +82,14 @@ def touch(f):
 ```
 
 在上面的例子中我们看到脚本最后那里写上:
-
+```
     if __name__ == '__main__':
         inout()
-
+```
 脚本就可以正常测试了:
-
+```
     bash>>> python3 test5.py test.py output.txt
-
+```
 但是更好的做法是用测试式开发风格:
 
 ```python
@@ -134,12 +134,12 @@ if __name__ == '__main__':
 ## 标准输入和标准输出
 
 值得一提的是标准输入和标准输出可以用 '-' 简单表示。比如上面的例子:
-
+```
     bash>>> python3 test4.py - output.txt
     test test
     
     bash>>> python3 test4.py test.py -
-
+```
 标准输入的那个例子你需要按下 `Ctrl-D` 来结束文件流。
 
 # 分组和多个子命令
@@ -199,7 +199,7 @@ click模块必填参数通过 `argument()` 引入，然后可选参数通过 `op
 如果默认 `default=True` 这样设置了，那么默认就是存储的布尔值了，其实际上暗含加上了 `is_flag=True` 。所以如果没有设置default，则可以通过 `is_flag` 来控制具体存储的是布尔值。
 
 ## 短名选项和长名选项和布尔值
-
+```
     import sys
 
     @click.command()
@@ -216,7 +216,7 @@ click模块必填参数通过 `argument()` 引入，然后可选参数通过 `op
     LINUX!!!!111
     bash>>> python3 test.py -S
     linux
-
+```
 也就是通过上面的这种 `/` 分割语句来创建这种多个flag的布尔值控制，其中 `/` 左边是True，右边是False，然后短名选项跟着写入就是了。 **注意** 上面例子短名情况前面的空格是不可少的。
 
 ## 多个choice选项的用法
@@ -275,14 +275,14 @@ def hello(username):
 ```
 
 此外click模块还提供了如下的prompt快捷请求输入命令。
-
+```
     value = click.prompt('Please enter a valid integer', type=int)
-
+```
 还有如下的 `confirm` 函数也很有用:
-
+```
     if click.confirm('Do you want to continue?'):
         click.echo('Well done!')
-
+```
 # 全局环境变量控制
 
 # 命令行选项控制其他动作
@@ -308,33 +308,33 @@ def hello():
 # 带颜色的终端回显
 
 click借助python模块 `colorama` 的力量有在终端显示带颜色的字体的功能，首先确认按照了 `colorama` :
-
+```
     pip install colorama
-
+```
 简单的使用就是:
-
+```
     import click
 
     click.secho('Hello World!', fg='green')
     click.secho('Some more text', bg='white', fg='black')
     click.secho('ATTENTION', blink=True, bold=True)
-
+```
 其中fg是前景颜色，也可以说字体颜色吧，颜色选项有:
-
+```
     Fore: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE.
-
+```
 然后bg是背景颜色:
-
+```
     Back: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE.
-
+```
 然后还有其他一些style:
-
+```
     dim=True
     bold=True
     blink=True
     underline=True
     reverse=True
-
+```
 其中dim是淡化，bold是加粗，blink意思应该是闪烁，但是没看到效果。underline是下划线，reverse是前景色和背景色翻转。
 
 
