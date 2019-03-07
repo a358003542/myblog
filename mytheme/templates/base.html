@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="baidu-site-verification" content="D4VqC4HppC" /> 
-	<meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625" />    
-    
+	<meta name="baidu-site-verification" content="D4VqC4HppC" />
+	<meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625" />
+
     {% if article and article.author %}
     <meta name="author" content="{{ article.author }}"/>
     <meta name="copyright" content="{{ article.author }}"/>
@@ -80,21 +80,16 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-        
+
             <a class="navbar-brand" href="/"><span class=site-name>网站首页</span></a>
         </div>
 
 
         <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav nav-pills pull-right">
+            <ul class="nav navbar-nav nav-pills navbar-right">
                 <li {% if page_name=='index' %} class="active"{% endif %}>
                     <a href="{{ SITEURL }}">博文首页</a></li>
 
-                <form action="{{ SITEURL }}/search.html" onsubmit="return validateForm(this.elements['q'].value);" class="navbar-form navbar-right">
-                <input type="text" name="q"  id="tipue_search_input" class="form-control" placeholder="Search...">
-                <input class="btn btn-default" type="submit" value="搜索" >
-                </form>
-                
                 {% block more_navbar %}
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">查找文章<span class="caret"></span></a>
@@ -105,7 +100,7 @@
                 </li>
                 {% endblock %}
 
-                  
+
                 {% if DISPLAY_PAGES_ON_MENU %}
                 {% for p in pages %}
                 <li {% if p== page %} class="active" {% endif %}>
@@ -114,6 +109,13 @@
                 {% endfor %}
                 {% endif %}
             </ul>
+
+            <form action="{{ SITEURL }}/search.html" onsubmit="return validateForm(this.elements['q'].value);" class="navbar-form navbar-left">
+                <div class="form-group">
+                <input type="text" name="q"  id="tipue_search_input" class="form-control" placeholder="Search..." style="width:350px">
+                </div>
+                <button class="btn btn-default" type="submit">搜索</button>
+            </form>
         </div>
     </div>
 </nav>
