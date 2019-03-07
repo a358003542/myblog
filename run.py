@@ -83,6 +83,9 @@ def build():
 
     click.echo('right now you are in folder: {0}'.format(BASEDIR))
 
+    if not os.path.exists(PUBLISHDIR):
+        os.mkdir(PUBLISHDIR)
+
     cmd = "pipenv run python -m pelican.tools.pelican --debug {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
         INPUTDIR=INPUTDIR,
         PUBLISHCONF=PUBLISHCONF,
