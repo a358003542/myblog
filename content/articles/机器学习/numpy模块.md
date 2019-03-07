@@ -67,7 +67,7 @@ ndarray有一个头header来控制所有接下来存储的数据类型(dtype)，
 
 具体使用声明如下:
 
-```python
+```
 >>> t = np.array([1,2,3],dtype='int32')
 >>> type(t)
 <class 'numpy.ndarray'>
@@ -78,7 +78,7 @@ dtype('int32')
 
 在实际使用的时候，dtype若指定为int，则实际就是对应的 `np.int_`
 
-```python
+```
 >>> t = np.array([1,2,3],dtype='int')
 >>> t.dtype
 dtype('int64')
@@ -88,23 +88,15 @@ dtype('int64')
 
 #### ndarray的dtype变换
 
-在改变某个ndarray对象的dtype的时候，原ndarray对象实际上被删除了，等于重新创建了一个ndarray对象。可以通过上面的类型声明来直接进行转换，如:
-
-    >>> t = np.array([1,2,3],dtype='int8')
-    >>> t.dtype
-    dtype('int8')
-    >>> new_t = np.int32(t)
-    >>> new_t.dtype
-    dtype('int32')
 
 还可以通过调用ndarray的 `astype` 方法来实现。注意这个方法是 **非破坏型** 方法，具体使用如下面例子所示：
-
+```
     >>> t = np.array([1,2,3],dtype='int8')
     >>> t.astype('int32')
     array([1, 2, 3], dtype=int32)
     >>> t
     array([1, 2, 3], dtype=int8)
-
+```
 #### dtype对象的从属关系
 
 用 `np.issubdtype` 函数来判断某个ndarray的dtype对象是不是整型的子集。

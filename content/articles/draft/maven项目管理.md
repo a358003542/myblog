@@ -10,8 +10,14 @@ Status: draft
 
 如果读者是使用的 IntelliJ IDEA 的话，maven的安装和使用是不需要费什么心思的，具体常用命令在右边插件哪里点一下就可以了。读者想要了解得更相信，请参阅参考资料1里面的讲解了解下。
 
+在改变某个ndarray对象的dtype的时候，原ndarray对象实际上被删除了，等于重新创建了一个ndarray对象。可以通过上面的类型声明来直接进行转换，如:
 
-
+    >>> t = np.array([1,2,3],dtype='int8')
+    >>> t.dtype
+    dtype('int8')
+    >>> new_t = np.int32(t)
+    >>> new_t.dtype
+    dtype('int32')
 ## src文件夹下
 
 src文件夹下放着你的java源码，一般结构如下：

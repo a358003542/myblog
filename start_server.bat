@@ -1,4 +1,4 @@
-start /b pipenv run pelican --debug --autoreload -r content -o output -s .\pelicanconf.py 
+start /b pipenv run python -m pelican.tools.pelican --debug --autoreload -r content -o output -s .\pelicanconf.py
 
 
 cd output 

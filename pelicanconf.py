@@ -83,8 +83,7 @@ THEME = 'mytheme'
 # the plugin
 PLUGIN_PATHS = ['myplugins']
 
-PLUGINS = ['pelican_javascript', 'extract_toc',
-           'render_math', 'pelican_ipynb', 'tipue_search']
+PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search']
 
 MATH_JAX = {'tex_extensions': ['mhchem.js']}
 
