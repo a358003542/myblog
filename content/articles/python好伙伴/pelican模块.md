@@ -1,7 +1,7 @@
 Title: pelican模块
 Slug: pelican-module
-Date: 2016-09-25 21:51
-Modified: 2016-10-03 18:50 
+Date: 2016-09-25 
+Modified: 2019-03-07  
 Tags: pelican, 静态网站生成, python
 [TOC]
 
@@ -78,10 +78,10 @@ STATIC_PATHS = ['images',
 比如在markdown里面引入图片如下所示：
 
 ```md
-![img]({filename}/images/chemistry/Naphthalene.png)
+![img]({static}/images/chemistry/Naphthalene.png)
 ```
 
-这里 `{filename}` 是pelican特有的写法，表示引用某个文件。然后后面就是具体要引用的文件路径。其他引用类似，这里就不多说了。下面对extra这个文件夹多做一些说明，其是为了让网页加入favicon.ico静态文件的，你还需要如下设置：
+这里 `{static}` 后面就是具体要引用的文件路径。具体就是content文件夹下面的images文件夹，这个文件夹默认是要copy到输出文件夹根目录哪里去的。下面对extra这个文件夹多做一些说明，其是为了让网页加入favicon.ico静态文件的，你还需要如下设置：
 
 ```
 EXTRA_PATH_METADATA = {
