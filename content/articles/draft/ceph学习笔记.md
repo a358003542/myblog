@@ -24,7 +24,7 @@ ceph是一个分布式存储系统，提供了优良的性能，可靠性和可�
 ## ceph存储系统结构
 ceph存储系统如下图所示分为四个层次：
 
-![ceph_system_structure.png]({filename}/images/ceph_system_structure.png)
+![ceph_system_structure.png]({static}/images/ceph_system_structure.png)
 
 1. 首先是最底层的RADOS基础存储系统，所有存储在ceph系统的用户数据最终都是由这一层来存储的。理解RADOS是理解ceph系统的关键。
 
@@ -38,7 +38,7 @@ ceph存储系统如下图所示分为四个层次：
 ## RADOS存储系统结构
 RADOS基础存储系统结构如下图所示：
 
-![rados_system_structure]({filename}/images/rados_system_structure.png)
+![rados_system_structure]({static}/images/rados_system_structure.png)
 
 RADOS系统由很多OSDs组成，其称之为OSD deamon进程，ceph osd daemon 功能是存储数据，处理数据的复制、恢复、回填、再均衡并通过检查其他osd daemon的心跳来向ceph monitor提供一些监控信息。ceph monitor 维护着展示集群状态的各个图表。
 

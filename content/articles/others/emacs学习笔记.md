@@ -324,7 +324,7 @@ python模式推荐还是使用 **python-mode** 宏包而不是内置的 `python.
 
 这样具体效果如下图所示:
 
-![img]({filename}/images/emacs/平行分出一个窗口.png)
+![img]({static}/images/emacs/平行分出一个窗口.png)
 
 # 快速删除一行
 
@@ -417,7 +417,7 @@ window-numbering这个宏包不错，其github项目地址在 [这里](https://g
 
 实际开启编号模式，具体效果如下图所示:
 
-![img]({filename}/images/emacs/窗口编号方便快速切换.png)
+![img]({static}/images/emacs/窗口编号方便快速切换.png)
 
 更多窗口操作知识请参看 [这个网页](http://blog.binchen.org/posts/emacs-zhong-de-wan-mei-duo-chuang-kou-cao-zuo.html) ，介绍的挺好的。
 
@@ -454,9 +454,9 @@ emacs-livedown这个宏包其是利用nodejs里面的livedown模块的功能，�
 
 你就可以用emacs双击一个md文件，然后在网页端就显示渲染好的网页了，而且livedown本身就支持实时根据md文件实时更新。上图片吧:
 
-![img]({filename}/images/emacs/emacs的markdown模式.png "emacs的markdown模式")
+![img]({static}/images/emacs/emacs的markdown模式.png "emacs的markdown模式")
 
-![img]({filename}/images/emacs/md文件对应的网页显示.png "md文件对应的网页显示")
+![img]({static}/images/emacs/md文件对应的网页显示.png "md文件对应的网页显示")
 
 然后在emacsclient下另外开启一个frame还需要执行一下命令 `livedown:preview` 网页才会切换到这个md的预览。
 

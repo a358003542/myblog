@@ -9,7 +9,7 @@ Tags: blog,
 
 简单来说就是写一个 `CNAME` 文件，实际上github的 settings那里还提供了功能，具体实际做的工作也就是创建了一个 `CNAME` 文件。
 
-![github_pages_cname]({filename}/images/others/github_pages_cname.png)
+![github_pages_cname]({static}/images/others/github_pages_cname.png)
 
 
 
@@ -52,4 +52,4 @@ Tags: blog,
 
 
 
-![github_pages_set_https]({filename}/images/others/github_pages_set_https.png)
+![github_pages_set_https]({static}/images/others/github_pages_set_https.png)

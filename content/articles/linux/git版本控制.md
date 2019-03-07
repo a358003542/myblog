@@ -189,7 +189,7 @@ git reset HEAD file_or_folder
 ## 分支功能
 git的分支功能特别强大，推荐多使用来做到灵活开发。git保存的不是文件差异或者变化量而是一系列的文件快照。git在commit之后，除了相关的提交信息之外，还有一个指向这棵树的指针。而git中的分支本质上仅仅是个指向commit对象的可变指针。当使用 `git branch testing` 来新建一个分支之后，就是在目前这个commit对象上又新建了一个分支指针。然后git还保存了一个名叫 `HEAD` 的特别指针，其指向你正在工作的本地分支。因此运行git branch仅仅是新建了一个分支，系统并不会自动切换到那个分支，要切换到那个分支需要使用 `git checkout testing` 命令。如果master分支和testing分支各自向前commit推一次，然后一个分支样貌就如下图所示出来了:
 
- ![git分支]({filename}/images/linux/git-branch.png)
+ ![git分支]({static}/images/linux/git-branch.png)
 
 
 上图HEAD说明当前正在工作的分支点在那里，master是默认的主分支，然后上图还有一个testing分支。上图是在f30ab那里开了一个testing分支，然后testing分支又commit了一次，然后master分支那边也推了一次，然后本地文件夹当前工作分支是在master那里。

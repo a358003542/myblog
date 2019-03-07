@@ -189,7 +189,7 @@ Bind(event, handler, source=None, id=wx.ID_ANY, id2=wx.ID_ANY)
 
 
 
-![img]({filename}/images/wxpython/wxpython事件处理过程.png)
+![img]({static}/images/wxpython/wxpython事件处理过程.png)
 
 
 

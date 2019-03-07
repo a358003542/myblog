@@ -249,20 +249,20 @@ $$
 
 具体裁剪效果如下所示:
 
-![img]({filename}/images/python/test_trim.jpg)
+![img]({static}/images/python/test_trim.jpg)
 
 然后去边裁剪之后的效果为:
 
-![img]({filename}/images/python/test_trim_out.jpg)
+![img]({static}/images/python/test_trim_out.jpg)
 
 ## 附录
 
 ### 有名的lena图
 
-![img]({filename}/images/python/lena.jpg)
+![img]({static}/images/python/lena.jpg)
 
 还有福利图。。
 
-![img]({filename}/images/python/lena_fuli.jpg)
+![img]({static}/images/python/lena_fuli.jpg)
 
 

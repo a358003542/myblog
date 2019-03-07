@@ -10,7 +10,7 @@ html的显示布局和 \(TeX\) 的显示布局一样也是采用的浮动盒子�
 
 下面这个图片来自 [这个网页](http://www.hicksdesign.co.uk/boxmodel/) 。
 
-![img]({filename}/images/前端开发/html_box_model.png "html_box_model")
+![img]({static}/images/前端开发/html_box_model.png "html_box_model")
 
 
 [这篇文章](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Model/Introduction_to_the_CSS_box_model) 讲解得很好，下面简要介绍之，下面放在短代码环境的都是可以用作css属性的。盒子最中心的是content区域，如果该盒子的 `box-sizing` 是默认值的话，那么 `width` 控制的就是content区域的宽度。如果将 `box-sizing` 设置为 `border-box` ，那么 `width` 对应的就是整个盒子的宽度。这个只是一点简单的数学加减法把戏罢了，没什么大不了的。

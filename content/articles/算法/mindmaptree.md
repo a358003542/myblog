@@ -6,7 +6,7 @@ Modified: 2017-11-24 18:03
 
 如下思维导图，我们如何设计一种数据格式来便捷的进行后续csv或者json操作？
 
-![img]({filename}/images/arithmetic/mindmaptree.png)
+![img]({static}/images/arithmetic/mindmaptree.png)
 
 然后其对应的csv格式如下：
 

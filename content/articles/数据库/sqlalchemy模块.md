@@ -30,7 +30,7 @@ sqlalchemy的安装简单用pip3命令安装之即可:
 
 通过sqlalchemy连接具体的某个数据库，前面有一些准备工作要做，参考 [sqlalchemy architecture](http://www.aosabook.org/en/sqlalchemy.html) 一文的描述:
 
-![img]({filename}/images/python/layers.png "SQLAlchemy layer diagram")
+![img]({static}/images/python/layers.png "SQLAlchemy layer diagram")
 
 和数据库直接相连的是我们熟悉的那些DBAPI接口模块，比如: sqlite3, pymysql, psycopg2等，然后中间的核心层有Engine，连接池，方言，SQL表达语言和类型系统。core层很重要，实际上有些模块是完全建构在core层之上的，不一定要用ORM方法。
 
@@ -1180,9 +1180,9 @@ session.commit()
 然后用sqliteman观察数据库情况如下:
 
 
-![img]({filename}/images/python/users_table.png "users_table")
+![img]({static}/images/python/users_table.png "users_table")
 
-![img]({filename}/images/python/emails_table.png "emails_talbe")
+![img]({static}/images/python/emails_table.png "emails_talbe")
 
 `session.query(User,Email)` 返回的是笛卡尔积的形式:
 
@@ -1346,7 +1346,7 @@ many-to-one模型实际上和one-to-many模型就是一回事，而且如果我�
 
 many-to-many模型有点复杂和难于理解，这是因为其还要求有一个额外的Table来管理原两个表格之间的元素的映射关系，幸好sqlalchemy官方文档专门有一小节对这个做出了一些说明。其描述的一个应用场景就是一篇博文有多个标签，然后一个标签有多篇博文（我们可以简单构建出这样一个功能，单击一个标签按钮，然后弹出所有有这些标签的文章出来）。一个博文有多个标签这很简单，一个one-to-many模型就解决了，大概就是 `blog.tags` ，就弹出一个list，里面装着一些标签对象。所以关键性的问题是如何实现出 `tag.blogs` ，就弹出一个list，里面装着一些博文对象。而在 [这篇文章](http://code.tutsplus.com/articles/sql-for-beginners-part-3-database-relationships--net-8561) 的这幅图片中:
 
-![img]({filename}/images/python/many_to_many.png ""many-to-many模型")
+![img]({static}/images/python/many_to_many.png ""many-to-many模型")
 
 于是现在的情况变成这样的了，blog one-to-many，但to many的是一个中间表格，而tag one-to-many，这个many也是一个中间表格。我们知道所谓的many一方存储着外键约束值，所以这个中间表格就两列，左列外键引用blog，右列外键引用tag，具体每一个映射关系都要写一条记录上去。不管怎么说，看下面这个例子吧:
 
@@ -1425,11 +1425,11 @@ session.commit()
 
 然后生成的表格如下所示:
 
-![img]({filename}/images/python/tags_table.png "tags\_table")
+![img]({static}/images/python/tags_table.png "tags\_table")
 
-![img]({filename}/images/python/blogs_table.png "blogs\_table")
+![img]({static}/images/python/blogs_table.png "blogs\_table")
 
-![img]({filename}/images/python/blog_tags_table.png "blog\_tags\_table")
+![img]({static}/images/python/blog_tags_table.png "blog\_tags\_table")
 
 然后执行结果如下:
 

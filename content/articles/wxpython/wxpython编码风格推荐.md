@@ -103,7 +103,7 @@ GUI层自身还有一些事件处理。
 
 我试着进行如下约定，然后再试着重构整理下代码试试看。
 
-![img]({filename}/images/wxpython/MVC.png)
+![img]({static}/images/wxpython/MVC.png)
 
 ### 常量，模型层变量，全局变量分离
 

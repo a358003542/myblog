@@ -77,7 +77,7 @@ shell就好像一个包装层，在shell的里面就是Linux操作系统的核�
 
 Shell是提供操作系统核心（称为kernel）与用户之间交互的特殊程序，参见下图。这个kernel在启动时被装入内存,并管理系统直到关机为止。它负责建立和控制进程，管理内存、文件系统、通信等等。其他的实用程序，包括Shell在内都存储在硬盘上。kernel把程序从硬盘中装入内存，运行它们，并在程序运行结束后回收被程序占用的系统资源。Shell 是从你登录就开始运行的实用程序，它允许用户通过 Shell 脚本或者命令行的方式输入命令，并通过翻译这些命令完成用户与kernel的交互。
 
-![kernel and shell]({filename}/images/linux/kernel_and_shell.png)
+![kernel and shell]({static}/images/linux/kernel_and_shell.png)
 
 目前系统一般用的是Bourne Shell（bash shell）。本文提到shell即指bash shell，还有其他的shell这里就不讨论了
 
@@ -708,7 +708,7 @@ IP只有两种IP， 一种是 公网IP ，另一个是 私网IP 。
 
 理论上只有位于同一网域内的计算机才可能直接进行文件交互，而不同网域之间的计算机的信息都是通过路由的IP分发来达到信息互通目的的。这一块刚开始会很生疏，建议跟着鸟哥的私房菜的下面这幅图好好把基本的route流程过一下：
 
-![简单的路由示意图]({filename}/images/linux/route_1.jpg)
+![简单的路由示意图]({static}/images/linux/route_1.jpg)
 
 
 首先是每个机器上都有一个所谓的路由表，现在假设PC1要传资料给PC11，首先其会分析自己的路由表，如果发现目标IP和自己的IP在一个网域，那么就直接通过区域网功能传输数据了。
