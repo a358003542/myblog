@@ -18,6 +18,6 @@ DELETE_OUTPUT_DIRECTORY = False
 # Following items are often useful when publishing
 
 ## add disqus comment
-DISQUS_SITENAME = 'cdwanzes-blog'
+#DISQUS_SITENAME = 'cdwanzes-blog'
 
-GOOGLE_ANALYTICS = "UA-80598120-2"
+#GOOGLE_ANALYTICS = "UA-80598120-2"
