@@ -81,11 +81,6 @@ def build():
     """
     click.echo("start build your pelican project...")
 
-    click.echo('right now you are in folder: {0}'.format(BASEDIR))
-
-    if not os.path.exists(PUBLISHDIR):
-        os.mkdir(PUBLISHDIR)
-
     cmd = "pipenv run python -m pelican.tools.pelican --debug {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
         INPUTDIR=INPUTDIR,
         PUBLISHCONF=PUBLISHCONF,
@@ -93,7 +88,7 @@ def build():
     )
 
     click.echo('start run cmd: {0}'.format(cmd))
-    ret = subprocess.call(cmd)
+    ret = subprocess.call(cmd, shell=True)
 
     click.echo('running result is:{0}'.format(ret))
 
