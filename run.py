@@ -18,7 +18,7 @@ PROJECT = 'myblog'
 BASEDIR = os.getcwd()
 INPUTDIR = os.path.join(BASEDIR, 'content')
 OUTPUTDIR = os.path.join(BASEDIR, 'output')
-PUBLISHDIR = os.path.join(BASEDIR, '..', 'html')
+PUBLISHDIR = os.path.abspath(os.path.join(BASEDIR, '..', 'html'))
 CONFFILE = os.path.join(BASEDIR, 'pelicanconf.py')
 PUBLISHCONF = os.path.join(BASEDIR, 'publishconf.py')
 PORT = 9000
@@ -39,7 +39,11 @@ def devserve():
     click.echo('right now you are in folder: {0}'.format(BASEDIR))
 
     def devbuild():
-        cmd = f"pipenv run python -m pelican.tools.pelican --debug -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}"
+        cmd = "pipenv run python -m pelican.tools.pelican --debug -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}".format(
+            INPUTDIR=INPUTDIR,
+            OUTPUTDIR=OUTPUTDIR,
+            CONFFILE=CONFFILE
+        )
         click.echo('start run cmd: {0}'.format(cmd))
         subprocess.call(cmd, shell=True)
 
@@ -49,7 +53,7 @@ def devserve():
             time.sleep(1)
 
         os.chdir(OUTPUTDIR)
-        serve_cmd = f'pipenv run python -m http.server {PORT}'
+        serve_cmd = 'pipenv run python -m http.server {PORT}'.format(PORT=PORT)
         click.echo('start run cmd: {0}'.format(serve_cmd))
         subprocess.call(serve_cmd, shell=True)
 
@@ -79,7 +83,11 @@ def build():
 
     click.echo('right now you are in folder: {0}'.format(BASEDIR))
 
-    cmd = f"pipenv run python -m pelican.tools.pelican --debug {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}"
+    cmd = "pipenv run python -m pelican.tools.pelican --debug {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
+        INPUTDIR=INPUTDIR,
+        PUBLISHCONF=PUBLISHCONF,
+        PUBLISHDIR=PUBLISHDIR
+    )
 
     click.echo('start run cmd: {0}'.format(cmd))
     ret = subprocess.call(cmd)
