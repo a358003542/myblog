@@ -7,6 +7,10 @@ A Pelican plugin to serialize generated HTML to JSON
 that can be used by jQuery plugin - Tipue Search.
 
 Copyright (c) Talha Mansoor
+
+
+updated by cdwanze 2019-03-08 for chinese
+
 """
 
 from __future__ import unicode_literals
@@ -15,7 +19,7 @@ import os.path
 import json
 from bs4 import BeautifulSoup
 from codecs import open
-import jieba
+import pkuseg
 
 try:
     from urlparse import urljoin
@@ -42,12 +46,13 @@ class Tipue_Search_JSON_Generator(object):
             return
 
         soup_title = BeautifulSoup(page.title.replace('&nbsp;', ' '), 'html.parser')
-        page_title = soup_title.get_text(' ', strip=True).replace('“', '"').replace('”', '"').replace('’', "'").replace(
-            '^', '&#94;')
+        page_title = soup_title.get_text(' ', strip=True).replace('“', '"'). \
+            replace('”', '"').replace('’', "'").replace('^', '&#94;')
 
         soup_text = BeautifulSoup(page.content, 'html.parser')
-        page_text = soup_text.get_text(' ', strip=True).replace('“', '"').replace('”', '"').replace('’', "'").replace(
-            '¶', ' ').replace('^', '&#94;')
+        page_text = soup_text.get_text(' ', strip=True).replace('“', '"'). \
+            replace('”', '"').replace('’', "'").replace('¶', ' ').replace('^', '&#94;')
+
         page_text = ' '.join(page_text.split())
 
         page_category = page.category.name if getattr(page, 'category', 'None') != 'None' else ''
@@ -55,7 +60,12 @@ class Tipue_Search_JSON_Generator(object):
         page_url = page.url if page.url else '.'
 
         # 分词加空格
-        words = jieba.lcut(page_text)
+        seg = pkuseg.pkuseg()
+        words = seg.cut(page_text)
+        # 停用词去除
+        from .chinese_stop_words import STOP_WORDS
+        words = [word for word in words if word not in STOP_WORDS]
+
         page_text = ' '.join(words)
 
         node = {'title': page_title,
@@ -94,8 +104,13 @@ class Tipue_Search_JSON_Generator(object):
         for srclink in self.tpages:
             self.create_tpage_node(srclink)
 
+        all_pages = len(pages)
+        count = 0
         for page in pages:
             self.create_json_node(page)
+            count += 1
+            print('tipue search processed {percent} %'.format(percent = (count / all_pages) * 100))
+
         root_node = {'pages': self.json_nodes}
 
         with open(path, 'w', encoding='utf-8') as fd:
