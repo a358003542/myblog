@@ -1,7 +1,7 @@
 Title: pandas模块
 Date: 2018-07-01
-Modified: 2019-02-27
-Tags: 科学计算
+Modified: 2019-03-12
+Tags: 科学计算, 
 
 [TOC]
 
@@ -158,7 +158,24 @@ def rename_column_by_index(df, index, column_name):
 
 ### DataFrame的append操作
 
+有的时候你需要在现有的Datafrme后面额外添加一行或者几行数据，这个操作很普遍。
 
+```
+import pandas as pd
+df = pd.DataFrame(columns=['a','b','c'])
+df.append({'a':1}, ignore_index=True)
+Out[7]: 
+     a   b   c
+0  1.0 NaN NaN
+
+df.append([{'a':1},{'b':2}], ignore_index=True)
+Out[8]: 
+     a    b   c
+0  1.0  NaN NaN
+1  NaN  2.0 NaN
+```
+
+如果是上面字典的形式，那么是比如带上 `ignore_index=True` 参数的。此外还可以append pandas的 Series对象，如果Series对象有name属性，那么这个name将作为插入新的一行的index名字，否则也要带上 `ignore_index=True` 参数。
 
 
 

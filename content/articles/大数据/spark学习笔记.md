@@ -64,6 +64,28 @@ sc = SparkContext(conf = conf)
 
 `SparkContext` 接受 `SparkConf` 指定的一些配置信息，然后与Spark集群进行连接，通过 `SparkContext` 可以进行创建RDD ，集群中广播变量等工作。
 
+### centos7上安装spark
+
+参考了参考资料3，感觉类似windows下的绿色安装方式，关键是findspark指向正确的位置，或者设置好 `SPARK_HOME` 环境变量。唯一值得一提的就是需要安装好java
+
+```
+sudo yum install java
+```
+
+
+
+## 什么时候用pyspark那边的东西
+
+在初步接触之后正如前面讨论的，pyspark那边情况复杂而相关运算python支持模块少，不是动不动就把数据处理的任务转成pyspark那边的东西然后再从头开始写代码，这有时只是在浪费精力。
+
+我对这块也在摸索讨论阶段，但也看到，对于某些问题【我是说代码中的某部分任务】，纯python单机版完全可以应付的来，可以做的又快又好，那么我们应该马上将pyspark的比如说DataFrame对象转成pandas的DataFrame对象，然后调用你之前写好的python代码完成工作即可。
+
+只有那些不可避免要用到pyspark那边的东西，或者使用pyspark那边的东西能更好地完成工作时，才考虑用pyspark那边的东西。
+
+我对这块还需要进一步学习研究，这里只是简单提下，比如说一个问题，pyspark那边读取的日志流，进入处理环节，数据最后精简整合为一个数据矩阵的，而这个数据矩阵相比较原来很庞大的日志流数据来说，是已经和很精简版本的了，而且在单机上是能够很好地应付了，那么就应该将这个数据矩阵转成pandas的Dataframe对象，然后完成任务即可。
+
+
+
 ## RDD是什么
 
 似乎Spark的主打牌就是RDD，弹性分布式数据集（Resilient Distributed Dataset）。Spark关注的工作就是创建RDD，转化RDD，计算RDD。
@@ -118,19 +140,13 @@ y2.collect()
 
 
 
-## 数据预处理
 
-这个要看实际情况了，具体来说就是你要处理的数据矩阵大小，有些数据矩阵大小实际上并不是很大，这个时候python单机版大概能应付过来，那么简单起见，是没必要上spark的，到时候将处理好的数据送给spark就是了。
 
-实际上我们经常遇到很大型的矩阵，就是因为算法本身要求 横向 竖向 全特征 或者全物品等等 才造成矩阵很大，所以才不得不上大数据。
-
-因为python那边数据预处理很方便，如果不行的话，那只好将原始数据用spark慢慢读进来，再进行预处理，这个时候，你在python那边的原数据预处理代码都要移植过来，会有点麻烦的。
-
-有种情况，数据必须立刻就上spark，进行预处理和后面的算法部分，那就是 日志流 的情况。因为日志流这种你根本无法预判将要面临的数据大小，最保守的情况都是要立刻上spark。
-
-## RDD的cache方法
+### RDD的cache方法
 
 将目标RDD对象缓存到内存里面，
+
+
 
 
 
@@ -140,5 +156,28 @@ y2.collect()
 x = sc.broadcase([1,2,3])
 ```
 
-广播变量可以被工作节点访问，访问就是调用目标变量的 `value` 方法。
+广播变量可以被工作节点访问，访问就是调用目标变量的 `value` 方法。暂时对这个广播变量还不是很懂，TODO
 
+
+
+## 自定义UDF函数对象
+
+
+
+
+
+## DataFrame对象
+
+pyspark的DataFrame对象
+
+
+
+
+
+
+
+## 参考资料
+
+1. [using pyspark first](https://www.analyticsvidhya.com/blog/2016/10/using-pyspark-to-perform-transformations-and-actions-on-rdd/)
+2. [pyspark dataframe operations](https://www.analyticsvidhya.com/blog/2016/10/spark-dataframe-and-operations/)
+3. [install spark centos7](https://idroot.us/linux/install-apache-spark-centos-7/)
