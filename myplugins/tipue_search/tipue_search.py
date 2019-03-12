@@ -19,7 +19,8 @@ import os.path
 import json
 from bs4 import BeautifulSoup
 from codecs import open
-import pkuseg
+
+import jieba
 
 try:
     from urlparse import urljoin
@@ -60,8 +61,9 @@ class Tipue_Search_JSON_Generator(object):
         page_url = page.url if page.url else '.'
 
         # 分词加空格
-        seg = pkuseg.pkuseg()
-        words = seg.cut(page_text)
+        jieba.load_userdict('blog_dict.txt')
+        words = jieba.lcut(page_text)
+
         # 停用词去除
         from .chinese_stop_words import STOP_WORDS
         words = [word for word in words if word not in STOP_WORDS]
@@ -109,12 +111,14 @@ class Tipue_Search_JSON_Generator(object):
         for page in pages:
             self.create_json_node(page)
             count += 1
-            print('tipue search processed {percent} %'.format(percent = (count / all_pages) * 100))
+
+            if count % 10 == 0:
+                print('tipue search processed {percent} %'.format(percent=(count / all_pages) * 100))
 
         root_node = {'pages': self.json_nodes}
 
         with open(path, 'w', encoding='utf-8') as fd:
-            json.dump(root_node, fd, separators=(',', ':'), ensure_ascii=False)
+            json.dump(root_node, fd, separators=(',', ':'), ensure_ascii=False, indent=4)
 
 
 def get_generators(generators):
