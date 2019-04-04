@@ -1,7 +1,6 @@
 # myblog2
-flask make a blog.
+在之前pelican写作静态博客的内容的基础上升级为flask版本，同时又保留原来的markdown本地写作体验。
 
-## 设计
-flask做一个博客，因markdown本地有良好的写作体验，所以希望支持markdown的离线编辑和上传。这是最核心的，其他后面后时间再说。
+## TODO
+1. 深入理解原pelican V4.0.1 作业原理，在其原作业基础上，将content中的文章整理成为最终要送入jinja2模板前的信息。
 
-后面搜索将进一步优化
