@@ -20,7 +20,7 @@ Title: 关于本网站
 
 
 
-![img]({static}/images/reward_wechat.png)
+![img]({static}/images/reward_wechat.png){:height="50%" width="50%"}
 
 
 
