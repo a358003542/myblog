@@ -1,8 +1,0 @@
-# Tests
-mock
-
-# Optional Packages
-Markdown < 3.0
-BeautifulSoup4
-lxml
-typogrify

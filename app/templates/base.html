@@ -9,7 +9,7 @@
     <meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625"/>
 {%- endblock metas %}
 
-{% block title %}MyBlog{% endblock %}
+{% block title %}我的网站{% endblock %}
 
 {% block head %}
     {{ super() }}
@@ -19,22 +19,22 @@
 
 
 {% block navbar %}
-    <div class="navbar navbar-inverse" role="navigation">
-        <div class="container">
+    <nav class="navbar">
+    <div class="navbar navbar-default" role="navigation">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Navigation</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('main.index') }}">MyBlog</a>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">网站首页</a>
             </div>
+
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
+                <ul class="nav navbar-nav nav-pills navbar-right">
+                    <li><a href="https://docs.cdwanze.work">博文首页</a></li>
+
                     {% if current_user.is_authenticated %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">账号 <b class="caret"></b></a>
@@ -50,18 +50,20 @@
                 </ul>
             </div>
         </div>
-    </div>
+    </nav>
 {% endblock %}
 
 {% block content %}
+    <div class="container-fluid">
     {% for message in get_flashed_messages() %}
         <div class="alert alert-warning">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
             {{ message }}
         </div>
     {% endfor %}
-    <div class="container">
+
         {% block page_content %}
+
         {% endblock %}
     </div>
 {% endblock %}

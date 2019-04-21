@@ -37,7 +37,7 @@ def devserve():
     click.echo("start devbuild your pelican project...")
 
     def devbuild():
-        cmd = "pipenv run python -m pelican.tools.pelican --debug -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}".format(
+        cmd = "pelican --debug -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}".format(
             INPUTDIR=INPUTDIR,
             OUTPUTDIR=OUTPUTDIR,
             CONFFILE=CONFFILE
@@ -51,7 +51,7 @@ def devserve():
             time.sleep(1)
 
         os.chdir(OUTPUTDIR)
-        serve_cmd = 'pipenv run python -m http.server {PORT}'.format(PORT=PORT)
+        serve_cmd = 'python -m http.server {PORT}'.format(PORT=PORT)
         click.echo('start run cmd: {0}'.format(serve_cmd))
         subprocess.call(serve_cmd, shell=True)
 
@@ -79,7 +79,7 @@ def build():
     """
     click.echo("start build your pelican project...")
 
-    cmd = "pipenv run python -m pelican.tools.pelican --debug {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
+    cmd = "pelican --debug {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
         INPUTDIR=INPUTDIR,
         PUBLISHCONF=PUBLISHCONF,
         PUBLISHDIR=PUBLISHDIR
