@@ -4,3 +4,4 @@ beautifulsoup4
 jieba
 nbconvert
 pelican
+markdown
