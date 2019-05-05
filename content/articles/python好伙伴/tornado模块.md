@@ -1,22 +1,18 @@
 Title: Tornado模块
 Slug: tornado-module
-Date: 2016-10-07 07:08 
-Modified: 2018-01-17 07:09 
+Date: 2016-10-07 
+Modified: 2019-05-05 
 Tags: tornado,
-Status: draft
+
 [TOC]
 
 
 
 ## 简介
 
-流行的异步python web服务框架。
+tornado是python的异步的网络框架模块，tornado在应对高并发请求上性能很好。
 
 ### 安装
-
-```sh
-pip3 install tornado
-```
 
 ### 第一个例子
 
@@ -52,19 +48,7 @@ tornado.ioloop.IOLoop.current().start()
 asyncio.get_event_loop().run_forever()
 ```
 
-所以后面我们会谈论到将tornado的事件驱动挂载到asyncio的主事件驱动循环上，这样tornado webapp的事件处理部分就变成了:
-
-```python
-from tornado.platform.asyncio import AsyncIOMainLoop
-if __name__ == '__main__':
-    AsyncIOMainLoop().install()
-    app = make_app()
-    app.listen(9999)
-
-    asyncio.get_event_loop().run_forever()
-```
-
-这里的 `AsyncioIOMainLoop().install()` 的用途就是上面提及的将tornado的事件循环挂载到asyncio的主事件驱动循环上。
+从tornado5.0开始，tornado已经自动和asyncio集成起来了，这里所谓的集成指的是：tornado的事件驱动自动挂载到asyncio的主事件驱动循环之上了。
 
 ### make a app
 
@@ -83,49 +67,40 @@ def make_app():
 ```python
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-    self.write("Hello, world")
+         self.write("Hello, world")
 ```
 视图处理类里面很多细节后面再详细讨论之。
 
 ### 一个简单的异步例子
 
 ```python
-import asyncio
-from tornado.platform.asyncio import AsyncIOMainLoop
+import tornado.ioloop
 import tornado.web
-import aiohttp
-from expython.web.coroutine import aiowget_images
-
 
 class MainHandler(tornado.web.RequestHandler):
-    @asyncio.coroutine
-    def get(self):
-        res = yield from aiowget_images('http://tu.duowan.com/m/meinv')
-        for img in res:
-            self.write("&lt;img src={} /&gt;".format(img))
+    async def get(self):
+        self.write("Hello, world")
 
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
-    ],debug=True)
+    ])
 
-
-
-if __name__ == '__main__':
-    AsyncIOMainLoop().install()
+if __name__ == "__main__":
     app = make_app()
-    app.listen(9999)
-
-    asyncio.get_event_loop().run_forever()
+    app.listen(8888)
+    tornado.ioloop.IOLoop.current().start()
 ```
 
-这个例子将tornado的事件循环和asyncio的事件循环合并了，然后我们看到程序结构大体和同步风格没有太大差异，除了视图处理类里面的某些函数变成了协程函数，从而其可以不阻塞的接受多个网络对应的方法的请求了。
+实际上就是将你需要异步的函数写成asyncio的协程形式即可，因为以前接触过tornado的老版本，不得不承认现在tornado进步很大啊，和asyncio集成之后代码更加的简洁了。
 
 ### tornado.gen.coroutine vs asyncio.coroutine
 
 请参看官方文档的 [这里](http://www.tornadoweb.org/en/stable/guide/coroutines.html) ，实际上我试了一下，将 `@gen.coroutine` 替换为 `@asyncio.coroutine` webapp也是可以正常运行的。
 
 正如官方文档所说，这里主要是兼容性的考虑，Tornado的coroutine runner更通用，可以适应其他框架，而asyncio的coroutine runner并不接受其他框架的corotine。一般还是推荐使用tornado提供的装饰器 `@gen.coroutine` 吧。
+
+
 
 ## Application对象
 
