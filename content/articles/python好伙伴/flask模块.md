@@ -300,9 +300,9 @@ cmd里面要配置好环境变量 `export FLASK_APP=hello.py`
 
 
 
-## 数据库版本管理
+## flask-migrate
 
-`flask-migrate` 其基于sqlalchemy 的  alembic ，然后做了一些额外的工作。 
+`flask-migrate` 其基于sqlalchemy 的  alembic ，然后做了一些额外的工作。 主要提供了一些便捷的命令行接口，具体使用还是要熟悉sqlalchemy和alembic。
 
 ```python
 from flask_migrate import Migrate
