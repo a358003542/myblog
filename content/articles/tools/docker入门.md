@@ -112,7 +112,14 @@ docker run 命令有自动试着从docker hub那边下载镜像的功能，这�
 docker container ls
 ```
 
+8. 将你的项目提交到docker hub那边
 
+```
+docker login 
+docker push a358003542/first
+```
+
+注意这里docker push 后面名字的格式一定是 `你在docker hub上的用户名/你的仓库名字` 。
 
 
 
