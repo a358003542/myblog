@@ -1,4 +1,4 @@
-Title: docker入门
+Title: docker
 Slug: docker
 Date: 2018-06-14
 Modified: 2019-05-13
@@ -121,15 +121,109 @@ docker push a358003542/first
 
 注意这里docker push 后面名字的格式一定是 `你在docker hub上的用户名/你的仓库名字` 。
 
+## 删除虚悬镜像
 
-
-## 进入docker shell
+docker build 或者docker pull 同名镜像，旧镜像的仓库名和tag会变成none，这类镜像叫做虚悬镜像。可用以下命令删除组合这些虚悬镜像：
 
 ```
-docker exec -it "id of running container" bash
+docker image prune
+```
+
+## `.dockerignore`
+
+`.dockerignore` 类似于 `.gitignore` 文件，用于我们在docker build镜像的时候忽略掉那些不需要的文件或文件夹，因为docker在build镜像过程时，会自动将指定的上下文目录打包传递给docker引擎。
+
+## Dockerfile
+
+### FROM
+
+指定基础镜像
+
+### COPY
+
+将某个文件或文件夹复制到容器的某个位置，COPY的本地内容路径应该是相对路径。
+
+### RUN
+
+相当于在容器内执行了某个shell命令，首先各个RUN之间环境是不共用的，其次一个RUN命令就对应容器的一层，所以推荐是RUN命令都合并在一起。
+
+### CMD
+
+CMD提供了运行容器的默认行为，比如 ubuntu 的镜像 CMD 是 `/bin/bash` ，那么输入：
+
+```
+docker run -it ubuntu
+```
+
+就会直接进入bash。
+
+你在Dockerfile里面定义的ENV环境变量会先进入CMD的shell层的。
+
+### ENV
+
+设置环境变量
+
+在Dockerfile后面， 你可以如下引用之前设置的环境变量： `$APP_PATH`
+
+### VOLUME
+
+定义匿名卷
+
+比如：
+
+```
+VOLUME /home/data
+```
+
+就定义了容器的数据存储匿名卷，一般Dockerfile的最后会申明匿名卷，就算后面容器运行时用户忘记指定存储卷了，容器运行时也不会像容器的存储卷写入大量数据。而后面我们通过 `-v mydata:/home/data` 来制定存储卷，会覆盖之前Dockerfile声明的默认配置。
+
+
+
+### EXPOSE
+
+声明容器提供服务的端口，你还是需要使用 `-p 9001:9001` 来映射端口，不过如果你提供了关于某个端口的声明，那么后面启动容器时只提供 `-p` 参数，docker会自动根据EXPOSE的声明来暴露端口的。
+
+
+
+### WORKDIR
+
+指定docker环境下的当前工作目录（当你运行docker run的时候也是在docker环境下）
+
+
+
+## 保存某个镜像到文件
+
+```
+docker save <image>
 ```
 
 
+
+
+
+## 启动某个容器
+
+下面是启动某个容器并进入bash与之交互
+
+```
+docker run -it "id of running container" bash
+```
+
+如果某个容器已经在后台运行了，你希望登入该容器，则推荐使用 exec ：
+
+```
+docker exec -it <container> bash
+```
+
+因为使用exec登入容器，输入 exit 也不会导致容器停止。
+
+## 查看某个容器的输出日志
+
+如果以后台的形式启动某个容器，那么可以如下查看该容器的日志：
+
+```
+docker logs <container>
+```
 
 
 
