@@ -143,6 +143,12 @@ docker image prune
 
 将某个文件或文件夹复制到容器的某个位置，COPY的本地内容路径应该是相对路径。
 
+### ADD
+
+ADD和COPY功能基本一致，除了ADD还增加了额外的功能，比如面向网络的下载等。
+
+
+
 ### RUN
 
 相当于在容器内执行了某个shell命令，首先各个RUN之间环境是不共用的，其次一个RUN命令就对应容器的一层，所以推荐是RUN命令都合并在一起。
@@ -181,7 +187,7 @@ VOLUME /home/data
 
 ### EXPOSE
 
-声明容器提供服务的端口，你还是需要使用 `-p 9001:9001` 来映射端口，不过如果你提供了关于某个端口的声明，那么后面启动容器时只提供 `-p` 参数，docker会自动根据EXPOSE的声明来暴露端口的。
+声明容器提供服务的端口，你还是需要使用 `-p 9001:9001` 来映射端口。
 
 
 
@@ -217,6 +223,20 @@ docker exec -it <container> bash
 
 因为使用exec登入容器，输入 exit 也不会导致容器停止。
 
+
+
+### 容器运行时设定重启策略
+
+- `--restart=no` 默认 容器退出不做什么
+
+- `--restart=on-failure` 容器非0状态退出 docker会尝试启动该容器
+
+- `--restart=always` 这个主要用于docker服务重启然后自动启动该容器
+
+  
+
+
+
 ## 查看某个容器的输出日志
 
 如果以后台的形式启动某个容器，那么可以如下查看该容器的日志：
@@ -224,6 +244,12 @@ docker exec -it <container> bash
 ```
 docker logs <container>
 ```
+
+
+
+## docker compose
+
+多容器组合
 
 
 

@@ -61,7 +61,7 @@ class Tipue_Search_JSON_Generator(object):
         page_url = page.url if page.url else '.'
 
         # 分词加空格
-        dict_path = os.path.join(os.path.abspath('.'), 'blog_dict.txt')
+        dict_path = os.path.join(os.path.dirname(__file__), 'blog_dict.txt')
 
         jieba.load_userdict(dict_path)
         words = jieba.lcut(page_text)
