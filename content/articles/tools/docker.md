@@ -29,6 +29,10 @@ docker包括三个核心概念： 镜像image，容器container，仓库
 
 ## 安装
 
+下面的内容可能 **过时** 了，请参考官方文档来进行安装之。
+
+### windows下的安装
+
 windows下安装如果你的操作系统不是专业版或者企业版，那么只能用 [docker tool box](https://docs.docker.com/toolbox/toolbox_install_windows/) 来安装。然后记得把 window10 的开发者模式打开。
 
 如果你的windows10是企业版或者专业版，我没试过，我想按照官网哪个，直接就能安装成功吧。
@@ -44,6 +48,30 @@ yum install -y lvm2
 yum-config-manager  --add-repo  https://download.docker.com/linux/centos/docker-ce.repo
 yum install docker-ce
 ```
+
+### linux系统下安装之后
+
+linux系统下安装docker之后如果出现运行：
+
+```
+sudo docker run hello-world
+```
+
+可以，但是运行：
+
+```
+docker run hello-world
+```
+
+不可以，那么应该把你的当前登录用户加入到docker群组中去：
+
+```
+sudo usermod -aG docker $USER
+```
+
+
+
+
 
 ## 第一个项目
 
@@ -249,7 +277,74 @@ docker logs <container>
 
 ## docker compose
 
-多容器组合
+虽然docker-compose说是对docker多容器的编排工具，但实际上就是对单个容器的一些启动配置定制也是很方便的。
+
+一个简单的例子如下所示：
+
+```yml
+version: "3"
+
+services:
+  web:
+    build: .
+    env_file:
+      - ./pycode/python.env
+    volumes:
+      - ./data:/home/data
+      - ./pycode:/home/pycode
+    ports:
+      - 9001:9001
+```
+
+这些选项很多在 `docker run` 命令时的可选参数，具体功能大体也都是类似的。
+
+运行docker-compose up即启动容器组，或者重启或者查看日志等等。
+
+```
+docker-compose up
+```
+
+
+
+## 多阶段构建
+
+多阶段构建最常用的模式是将你的容器的dev环境和runtime环境分开，具体要有效的实施多阶段构建，你需要深刻理解你当前的项目那些包是运行时环境需要的，那些包是编译环境需要的。
+
+1. 首先你新开一个编译环境的容器，里面装好编译你的项目代码需要的依赖等，然后将你的项目代码编译好。
+2. 其次你新建一个运行时环境容器，其中最核心的代码是：
+
+```
+COPY --from=builder $ROOT/build $ROOT/build
+```
+
+也就是将builder容器的里面编译好的build内容复制到运行时容器里面
+
+这样做有两个好处：
+
+1. 编译依赖可能很多，但你实际的运行时容器镜像可以做到很小巧
+2. 编译容器没有发生变动的情况下，重新build整个镜像，编译时容器会全部利用cache，不会再进行费时的编译工作
+
+
+
+
+
+## Dokcerfile最佳实践
+
+1. 使用 `.dockerignore`
+2. 相同的命令尽量合并，因为dockerfile每一个命令就新建了一个docker层。docker早期这点很关键，现在docker重点要关注这三个命令，尽量合并起来： `RUN`  `COPY` `ADD` 
+
+3. 使用多阶段构建，能够大大降低你的镜像的大小，从而不用再苦苦挣扎着去想如何减少中间层和文件。
+4. 别安装不需要的软件
+5. apt安装软件先update并尽量如下合并为一句话，如下是一个最佳实践，最后还将apt安装过程的缓存删掉了。
+
+```dockerfile
+RUN apt-get update && apt-get install -y \
+    aufs-tools \
+    automake \
+    build-essential \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
+```
 
 
 

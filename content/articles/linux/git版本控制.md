@@ -3,6 +3,7 @@ Slug: git
 Date: 2017-12-24 16:10
 Modified: 2017-12-24 16:10
 Tags: git
+
 [TOC]
 
 ## git基础
@@ -313,19 +314,41 @@ git push --force
 
 ## 子模块功能
 
-### 添加子模块
+### 为某个git项目添加子模块
 
 一个git仓库里面可能有一些文件夹是另外一个git仓库，我们称该git仓库为子模块，对于这些内容我们应该如下添加子模块来管理：
 
 ```
-git submodule add the_folder
+git submodule add submodule_url
 ```
 
-这样你的子模块里面的内容都是通过其自身的git来管理的，但如果子模块内容更新了，而主模块是需要记录这些更新的，否则你的主模块记录的子模块还是以前的版本。
+这样将会多出了一个 `.gitmodules` 文件，里面存放着当前项目的子模块的信息。
 
-### 子模块更新
+现在子模块里面还没有内容，你还需要运行：
 
-具体子模块更新实际上就是常规的 `git add submodule_folder` 然后commit操作。
+```
+git submodule update
+```
+
+来获取子模块的内容。
+
+### clone包括子git模块
+
+如果某个项目里面有子git模块，然后简单使用git clone命令里面的内容是不会下载下来的。参考了 [这个网页](http://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) 。
+
+如下加上 `--recursive` 选项就会下载项目里面的子git模块。
+
+```
+git clone --recursive what.git
+```
+
+​    
+
+### 日常子模块操作
+
+其实子模块就是另外一个git项目，你可以进入子模块文件夹，然后进行其他一些常规的git操作。只是因为主项目指向的是某个版本号的子模块，这些操作在主模块上我们不能认为已经生效了。
+
+要主项目指向子模块的最新版本可以如下操作：
 
 ```
 git add --all  submodule_folder
@@ -333,15 +356,7 @@ git add --all  submodule_folder
 git commit -m "update submodule"
 ```
 
-### clone包括子git模块
 
-如果某个项目里面有子git模块，然后简单使用git clone命令里面的内容是不会下载下来的。参考了 [这个网页](http://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) 。
-
-如下加上 `--recursive` 选项就会下载项目里面的子git模块。
-```
-git clone --recursive what.git
-```
-​    
 
 ## 中文乱码问题
 

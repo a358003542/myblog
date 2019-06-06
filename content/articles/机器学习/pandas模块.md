@@ -268,6 +268,24 @@ df.sort_values(by='B')
 
 
 
+## 高效Pandas
+
+这里主要参考了 [这篇文章](<https://tomaugspurger.github.io/modern-4-performance>) ，这里有一系列关于如何更好的使用pandas的文章，价值很大。这里主要关注使用上speed up的问题。
+
+### 多个相似结构的df合并推荐使用concat而不是append
+
+通常有很多类似数据源，比如多个csv文件等，需要将这些相似结构的df进行合并操作。这里推荐如下使用concat来做，而不是append：
+
+```python
+topk_all = pd.concat([topk_df, local_topk], ignore_index=True)
+```
+
+### 使用pandas的nlargest而不是排序之后取前几个
+
+你如果需要找最大的几个值，那么推荐使用Dataframe的nlargest方法，这个方法经过优化了的，简单来说就是使用了快速排序的前半部分，这样会更高效。
+
+
+
 
 
 ## 绘图相关

@@ -102,6 +102,65 @@ if __name__ == "__main__":
 
 
 
+
+
+## tornado的全局变量
+
+tornado的某些代码只希望运行一次，可让目标对象成为全局变量，如果是Handler级别的全局变量，那么可以直接将全局变量申请放在Handler类里面。
+
+而如果你想某个全部变量多个Handler之间共用，也就是该全局变量是Application级别的，那么可以 [这个网页](<https://stackoverflow.com/questions/25067916/python-tornado-updating-shared-data-between-requests>) 提供的解决方案。
+
+大致就是各个Hanlder接收字典参数，然后在 `initialize` 方法初始化时将变量赋值过来：
+
+```python
+class PageTwoHandler(tornado.web.RequestHandler):
+    def initialize(self, configs):
+        self.configs = configs
+
+    def get(self):
+        self.write(str(self.configs) + "\n")
+
+
+class Application(tornado.web.Application):
+    def __init__(self):
+        handlers = [('/pageone', PageOneHandler, {'configs' : configs}),
+                ('/pagetwo', PageTwoHandler, {'configs': configs})]
+        settings = dict(template_path='/templates',
+                    static_path='/static', debug=False)
+        tornado.web.Application.__init__(self, handlers, **settings)
+
+```
+
+
+
+## 如何正确的关闭tornado进程
+
+因为有的时候需要定制tornado关闭动作，然后和supervisor配合有时会出现端口无法正常释放，加上希望tornado能够温和的关闭重启而不杀死正在进行的动作保证数据的完整和安全，这个问题在网上已经看到很多人提及了，经过一番搜索之后，感觉github仓库下的 [这个issue](<https://github.com/tornadoweb/tornado/issues/1791>)【20190606还open着的】可能下面的描述更值得我们细看一下。
+
+这里面我获得的一个背景知识是，server.stop() 是只停止接收新的请求，但是那些keepalive的请求是无效的。
+
+然后supervisor默认发送的信号是 `signal.SIGTERM` ，可能有其他关闭信号是 `signal.SIGINT` 。
+
+```python
+async def shutdown():
+    periodic_task.stop()
+    http_server.stop()
+    for client in ws_clients.values():
+        client['handler'].close()
+    await gen.sleep(1)
+    ioloop.IOLoop.current().stop()
+
+def exit_handler(sig, frame):
+    ioloop.IOLoop.instance().add_callback_from_signal(shutdown)
+
+...
+if __name__ == '__main__':
+    signal.signal(signal.SIGTERM, exit_handler)
+    signal.signal(signal.SIGINT,  exit_handler)
+```
+
+也许应该注意关闭动作里面的休眠时间使用的是 gen.sleep 。有待进一步观察。
+
 ## Application对象
 
     tornado.web.Application(handlers=None, default_host='', transforms=None, **settings)
@@ -139,6 +198,10 @@ app = Application([
     url(r"/story/([0-9]+)", StoryHandler, dict(db=db), name="story")
     ])
 ```
+
+
+
+
 
 ### 配置部分
 
