@@ -26,6 +26,14 @@ from loguru import logger
 logger.add('<filename>.log')
 ```
 
+此外还支持这样带时间戳的文件名：
+
+```
+logger.add('file_{time}.log')
+```
+
+
+
 文件控制更高级的用法如下：
 
 ```

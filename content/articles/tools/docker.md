@@ -348,9 +348,99 @@ RUN apt-get update && apt-get install -y \
 
 
 
+## docker的权限控制最佳实践
+
+在某些docker项目下可能使用默认的root会更方便一些，而且docker容器就算里面使用root，安装性相对于容器外使用root区别还是有一些的，也可以说是相对安全吧。其他情况一般来说，还是推荐使用非root账号，而最好的实践是保持容器外运行用户和容器内运行用户是一致的。这样容器不仅会更加的安全，更重要的是你的容器里面运行的程序输出的文件，容器外相同的用户也是可以正常访问的，而你容器外该用户所有的文件夹，挂载到容器里面时，容器内的该用户运行的程序也是可以正常访问这些文件，而不会遇到任何权限方面的问题。
+
+这方面目前docker版本【18.06】还没有直接的支持，而只能通过如下的DIY定制方式达到，好在不是特别的麻烦。首先是docker通过Dockerfile来运行容器，你可以加上：
+
+```
+--user 1000:1000
+```
+
+来决定运行容器的用户。
+
+而通过docker-compose来启动容器的话，你可以在docker-compose.yml上如下配置：
+
+```yaml
+  web:
+    build:
+      context: .
+      args:
+        - UNAME=${UNAME}
+        - UID=${UID}
+        - GID=${GID}
+	...
+    user: ${UID}:${GID}
+```
+
+然后你需要配置环境变量，再运行 docker-compose ，或者如下写一个bash脚本：
+
+```bash
+#!/usr/bin/env bash
+
+export UNAME=$(whoami)
+export UID=$(id -u)
+export GID=$(id -g)
+
+exec docker-compose "$@"
+```
+
+这样你可以运行：
+
+```
+bash runinenv-docker-compose.sh up
+```
+
+来达到传递环境参数和启动docker-compose 命令的效果。
+
+此外你还需要在容器里面进行一些配置：
+
+```dockerfile
+FROM python:3.6
+
+ARG UNAME=wanze
+ARG UID=1000
+ARG GID=1000
+
+ENV UHOME=/home/$UNAME
+
+RUN groupadd -g $GID -o $UNAME
+RUN useradd -m -u $UID -g $GID -o -s /bin/bash -d $UHOME $UNAME
+USER $UNAME
+```
+
+新建立的容器一般是只有root用户的，所以你需要新建一个容器外用户对应的用户和群组。这样你的容器默认的登录用户就配置好了。
+
+如果你如下进行了挂载VOLUMN上的配置：
+
+```
+    volumes:
+      - ./data:/home/${UNAME}/data
+      - ./pycode:/home/${UNAME}/pycode
+```
+
+只要目标文件夹在容器外所有者是容器运行者，那么容器内的程序都是可以正常访问的。
+
+本小节参考了 [这个网页](<https://medium.com/redbubble/running-a-docker-container-as-a-non-root-user-7d2e00f8ee15>) 和 [这个网页](<https://stackoverflow.com/questions/44683119/dockerfile-replicate-the-host-user-uid-and-gid-to-the-image>) 。
+
+## docker镜像存储地配置
+
+本小节参考了 [这个网页](<https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.2/installing/docker_dir.html>) ，值得一提的是这个方法如果服务器重启有需要重新配置的，好处就是这个配置很简单：
+
+```
+sudo docker rm -f $(docker ps -aq); docker rmi -f $(docker images -q)
+sudo systemctl stop docker
+sudo rm -rf /var/lib/docker
+sudo mkdir /var/lib/docker
+sudo mkdir /mnt/docker
+sudo mount --rbind /mnt/docker /var/lib/docker
+sudo systemctl start docker
+```
 
 
-​	
+
+
 
 ## 参考资料
 

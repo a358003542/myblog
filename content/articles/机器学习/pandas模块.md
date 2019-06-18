@@ -284,6 +284,67 @@ topk_all = pd.concat([topk_df, local_topk], ignore_index=True)
 
 你如果需要找最大的几个值，那么推荐使用Dataframe的nlargest方法，这个方法经过优化了的，简单来说就是使用了快速排序的前半部分，这样会更高效。
 
+### 不要用逐个索引操作风格
+
+### 尽量不要用apply
+
+### 向量操作风格最高效
+
+这个优化建议主要参看了 [这篇文章](<https://engineering.upside.com/a-beginners-guide-to-optimizing-pandas-code-for-speed-c09ef2c6a4d6>) ，我们也可以多学习下这篇文章的分析问题测速的思路。
+
+对pandas的某个列的所有值进行操作，如下的逐个索引风格：
+
+```
+    for i in range(0, len(df)):
+        d = haversine(40.671, -73.985, df.iloc[i]['latitude'], df.iloc[i]['longitude'])
+        distance_list.append(d)
+```
+
+这很慢，这样的代码不应该出现。 `iterrows` 写法如下：
+
+```python
+    haversine_series = []
+    for index, row in df.iterrows():
+        haversine_series.append(haversine(40.671, -73.985, row['latitude'], row['longitude']))
+```
+
+比上面的逐个索引稍微好点，但也不应该使用。如下apply写法稍微好点，但也尽量不使用：
+
+```
+df['distance'] = df.apply(lambda row: haversine(40.671, -73.985, row['latitude'], row['longitude']), axis=1)
+```
+
+pandas 最高效的操作风格是向量式操作，这需要你在定义函数的时候就习惯numpy的那种ndarray向量操作风格，上面的函数就是支持的：
+
+```python
+import numpy as np
+
+# Define a basic Haversine distance formula
+def haversine(lat1, lon1, lat2, lon2):
+    MILES = 3959
+    lat1, lon1, lat2, lon2 = map(np.deg2rad, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1 
+    dlon = lon2 - lon1 
+    a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2
+    c = 2 * np.arcsin(np.sqrt(a)) 
+    total_miles = MILES * c
+    return total_miles
+```
+
+这种写法需要我们对numpy的一些东西，尤其是向量操作很熟悉，这样我们直接把pandas的Series对象传递过去即可。
+
+这种向量式写法及时和之前优化了的apply写法，也快了56倍。
+
+```
+df['distance'] = haversine(40.671, -73.985, df['latitude'], df['longitude'])
+```
+
+而如果我们直接使用numpy的ndarray对象，速度还将继续提升4倍：
+
+```
+df['distance'] = haversine(40.671, -73.985, df['latitude'].values, df['longitude'].values)
+```
+
 
 
 
