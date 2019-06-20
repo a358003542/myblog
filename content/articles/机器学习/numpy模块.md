@@ -641,6 +641,8 @@ numpy.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)
 
 
 
+
+
 ## 广播(broadcasting)
 
 广播一种操作，shape较小的张量和shape较大的张量进行点对点运算时，需要对shape较小的张量进行广播操作，使其在运算上shape兼容。
