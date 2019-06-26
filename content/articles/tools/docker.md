@@ -39,7 +39,9 @@ windows下安装如果你的操作系统不是专业版或者企业版，那么�
 
 kitematic 是docker 镜像的管理工具，推荐使用，很方便的。
 
-### centos安装
+### centos下安装
+
+更详细的内容见 [官方文档](https://docs.docker.com/install/linux/docker-ce/centos/) 。
 
 ```
 yum install -y yum-utils
@@ -48,6 +50,30 @@ yum install -y lvm2
 yum-config-manager  --add-repo  https://download.docker.com/linux/centos/docker-ce.repo
 yum install docker-ce
 ```
+
+### ubuntu下安装
+
+更详细的内容见 [官方文档](https://docs.docker.com/install/linux/docker-ce/ubuntu/) 。
+
+```bash
+sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get update
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+```
+
+
 
 ### linux系统下安装之后
 
@@ -69,7 +95,7 @@ docker run hello-world
 sudo usermod -aG docker $USER
 ```
 
-
+【NOTCIE 这个命令生效要重新退出登录下】
 
 
 
@@ -78,7 +104,6 @@ sudo usermod -aG docker $USER
 下面的内容参考了这个视频：
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/YFl2mCHdv24" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
 这个项目我们将新建一个自己的docker 镜像或者说image。
 
 1. 首先新建一个文件夹，开始编写Dockerfile
@@ -273,9 +298,25 @@ docker exec -it <container> bash
 docker logs <container>
 ```
 
+```
+docker logs --tail=100 <container>
+```
 
+`--tail` 表示列出最近的多少条日志。
 
 ## docker compose
+
+### 安装
+
+更多详情参考 [官方文档](https://docs.docker.com/compose/install/) ，下面列出linux的简单下载安装。
+
+```
+sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+
 
 虽然docker-compose说是对docker多容器的编排工具，但实际上就是对单个容器的一些启动配置定制也是很方便的。
 
