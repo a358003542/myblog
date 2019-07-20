@@ -113,6 +113,5 @@ dmypy.json
 .idea/
 Pipfile.lock
 *.sqlite
-output/
 Pipfile
 
