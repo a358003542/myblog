@@ -1,7 +1,7 @@
 Title: flask模块
 Slug: flask-module
 Date: 2019-01-03
-Modified: 2019-05-11
+Modified: 2019-07-22
 Tags: flask
 
 [TOC]
@@ -12,7 +12,23 @@ django是一种构建大型商务网站的解决方案，除非目前贵公司�
 
 比如作为个人爱好去搭建的小网站或者api服务，那么选择flask是很适合的。本文也是作者有时鼓捣个人的小网站慢慢积累的一些东西。
 
-## 初始运行
+## 推荐的启动方式
+
+目前flask推荐的启动方式是通过：
+
+```
+flask run
+```
+
+或者
+
+```
+python -m flask run 
+```
+
+来启动flask。【这个方式很适合开发和测试，实际部署还是WSGI server来进行】
+
+要正常执行上面的命令，你需要设置好一些环境变量，最主要的是 `FLASK_APP` 这个变量：
 
 windows 
 
@@ -27,42 +43,36 @@ export FLASK_APP=hello.py
 flask run
 ```
 
+推荐是通过在当前工作目录下加上 `.env` 这个文件，里面定义：
 
+```
+FLASK_APP=myapp.py
+FLASK_ENV=development
+FLASK_DEBUG=1
+```
 
-flask的调试模式：
-开启调试模式是： `export FLASK_DEBUG=1`
+环境变量，在运行 flask 命令的时候会自动加载这些环境变量。【这种加载行为只是针对flask命令，load_dotenv 模块之前该做的还是要做，不受影响。】
+
+### FLASK_DEBUG
+
+如果设置为1则开启flask调试模式：
 
 - 重载器 所有源码文件变动自动重启服务器
 - 调试器 出现异常在浏览器中显示异常信息
 
-在生产服务器上一定要把调试模式关闭！
+生产环境一定要把调试模式关闭！
 
-flask run 额外的选项
-`--host 0.0.0.0`
+### pycharm启动
 
-`--port 8080`
+pycharm现在有专门的flask启动支持，不过也可以继续采用如上描述的启动方式，这样会更加接近服务器那边的部署环境。
 
-## flask的上下文设计
-flask的上下文设计：多个线程处理不同的请求，request对于每个线程都是不同的，request上下文属于线程内的全局变量。
+![img]({static}/images/python_third_party/pycharm_flask.png)
 
-应用上下文 current_app g
-请求上下文 request session
+选择启动python脚本，选择 `Module name` ，这样就对应 `python -m flask` 命令的效果，然后加上参数 `run` ，环境变量如上所示，不用再特别调配了，工作目录设置下即可。
 
-current_app 当前的应用实例 
-g 每次请求都会重设该值，也就是对于每个请求都有不同的全局变量g。
-request 请求对象
-session 会话对象
+类似的你还可以再加上一个 `python -m flask shell` 命令。
 
-每次请求都会推送（激活）应用和请求上下文，请求完就会删除。应用上下文被推送了，就可以在当前线程使用current_app 和g变量，请求上下文被推送了，就可以在当前线程使用request session变量。
 
-激活应用上下文：
-```
-from hello import app
-from flask import current_app
-app_ctx = app.app_context()
-app_ctx.push()
-print(current_app.name)
-```
 
 
 ## flask的请求分发
