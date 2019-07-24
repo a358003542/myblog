@@ -125,7 +125,7 @@ request请求对象有：
 - after_request 每次请求后执行 如果程序没有抛出异常的话
 - teardown_request 每次请求之后执行，即使抛出异常
 
-请求钩子和视图函数之间变量互通一般用上下文全局变量 g
+请求钩子和视图函数之间变量互通一般用上下文全局变量 g ，比如 `before_request` 处理的时候设置 `g.user` 为登录用户，后面视图函数可以调用 `g.user` 来得知当前登录用户。
 
 ## flask的响应对象
 
@@ -312,18 +312,44 @@ cmd里面要配置好环境变量 `export FLASK_APP=hello.py`
 
 `flask-migrate` 其基于sqlalchemy 的  alembic ，然后做了一些额外的工作。 主要提供了一些便捷的命令行接口，具体使用还是要熟悉sqlalchemy和alembic。
 
+一个简要的例子如下：
+
 ```python
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+
+db = SQLAlchemy()
+
+db.init_app(app)
 migrate = Migrate(app, db)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
 ```
 
-然后运行
+新项目首先要运行：
 
 ```
 flask db init
 ```
 
+这对应alembic的 `alembic init` 命令，其将创建 `migrations` 文件夹，里面的文件就是alembic需要的，migrations文件夹是推荐和源代码一起加入版本控制的。
 
+和简单的使用的alembic不同，其新建的 `env.py` 有一些优化，flask的配置环境里只要配置了 `SQLALCHEMY_DATABASE_URI` 这样变量，alembic就能正确找到数据库了。
+
+然后：
+
+```
+flask db revision # 对应的是 alembic revison
+flask db migrate # 对应的是 alembic revision --autogenerate
+flask db upgrade # 对应的是 alembic upgrade
+flask db downgrade # 对应的是 alembic downgrade
+```
 
 一般工作流程：
 
@@ -331,6 +357,70 @@ flask db init
 2. `flask db migrate` 创建迁移脚本
 3. 检查自动生成的脚本，改正不正确的地方
 4. `flask db upgrade`  将改动应用到数据库
+
+
+
+### 删除无用的迁移脚本
+
+alembic的自动生成脚本并不是万能的，需要人工审核。而就算没问题的某些迁移脚本，如果你觉得已经毫无意义了，那么将那个版本的迁移脚本删除是没有任何问题的。
+
+### 彻底从零开始的迁移脚本
+
+虽然alembic的官方文档觉得没有这个必要，不过我觉得还是很有用的。
+
+1. 首先我们在flask应用下加上这样两个命令，负责最开始的创建数据库和根本代码生成表格工作。
+2. 表格生成成功之后后面都用flask-migrate 或者说 alembic来管理，经过测试比如在models.py 哪里新加一列，然后利用 `flask db migrate` 是能够自动检测新加入了一列，从而自动生成的代码会更加精准。
+
+```python
+from sqlalchemy_utils import database_exists, create_database, drop_database
+
+@app.cli.command()
+def initdb():
+    user_input = input('本命令只用于数据库初始化，后续更改请使用alembic来管理，确定请输入 [Y]')
+
+    if user_input.lower() == 'y':
+        engine = db.engine
+
+        if not database_exists(engine.url):
+            create_database(engine.url)
+        else:
+            print('db exists...')
+            import sys
+            sys.exit(-1)
+
+        assert database_exists(engine.url)
+
+        db.create_all()
+
+        from alembic.config import Config
+        from alembic import command
+        alembic_cfg = Config('migrations/alembic.ini')
+
+        command.stamp(alembic_cfg, "head")
+
+
+@app.cli.command()
+def dropdb():
+    """
+    TODO 生产环境不允许调用本命令
+    :return:
+    """
+    user_input = input('警告!!! 本操作将删除数据库，数据将完全丢失，确定请输入： [YYY]')
+
+    if user_input == 'YYY':
+        engine = db.engine
+
+        db.drop_all()
+
+        if database_exists(engine.url):
+            drop_database(engine.url)
+        else:
+            print('db not exists...')
+
+        assert not database_exists(engine.url)
+```
+
+
 
 ## 电子邮件
 
