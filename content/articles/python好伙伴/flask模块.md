@@ -159,6 +159,14 @@ def page_not_found(e):
     return render_template('404.html'),404
 ```
 
+如果是蓝图的话，要有全局的效果，则应该使用 `app_errorhandler` ：
+
+```python
+@main.app_errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+```
+
 
 
 ## url_for
@@ -171,97 +179,19 @@ url_for('index', _external=True)
 2. 送入一些参数进去
 3. `_external` 绝对路径 ，一般使用相对路径即可，浏览器之外的某些链接一定要使用绝对路径
 
+如果是对应蓝图的视图函数，则前面应该加上蓝图名：
+
+```
+url_for('main.index')
+```
+
+
+
 ## 静态文件
 
 ```
 url('static', filename='favicon.ico')
 ```
-
-
-
-## flask-moment
-
-Moment JS 送入UTC时间会自动转换成为本地时间，服务器那边的时间戳最好是记录UTC时间。用户则应该看到本地时间。
-
-```jinja2
-{% block scripts %}
-    {{ super() }}
-    {{ moment.include_moment() }}
-    {{ moment.lang("zh-cn") }}
-{% endblock %}
-```
-
-
-
-在模板上使用：
-
-```jinja2
-    <p>当前时间是： {{ moment(current_time).format('LLLL') }}.</p>
-    <p>{{ moment(current_time).fromNow(refresh=True) }}刷新过.</p>
-```
-
-具体格式请参看 [MomentJs 官网](http://momentjs.cn/) 。
-
-
-
-## 表单
-
-flask-wtf 
-
-```python
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
-
-app.config['SECRET_KEY'] = 'hard to guess string'
-
-class NameForm(FlaskForm):
-    name = StringField('请输入您的名字？', validators=[DataRequired()])
-    submit = SubmitField('提交')
-```
-
-WTForms支持的HTML字段
-
-- BooleanField 复选框
-- DateField 文本字段 for datetime.date
-- DateTimeField 文本字段 for datetime.datetime
-- DecimalField 文本字段 for  decimal.Decimal
-- FileField 文件上传字段
-- HiddenField 隐藏文本字段
-- FieldList 一组指定类型的字段
-- FloatField 文本字段 for float
-- FormField 把一个表单作为字段嵌入另一个表单
-- IntegerField 文本字段 for integer
-- PasswordField 密码文本字段
-- RadioField 单选按钮
-- SelectField 下拉列表
-- SelectmultipleField 下拉多选列表
-- SubmitField 表单提交按钮
-- StringField 文本字段
-- TextAreaField 多行文本字段
-
-WTForms提供的验证函数
-
-- DataRequired 确保类型转换后字段有数据
-- Email 验证电子邮箱
-- EqualTo 比较两个字段的值 常用于比较两次密码是否输入一致
-- InputRequired 确保类型转换前字段有数据
-- IPAddress 验证IPv4地址
-- Length 长度验证
-- MacAddress 验证MAC地址
-- NumberRange 数字范围校验
-- Optional 允许字段没有输入，将跳过其他校验函数
-- Regexp 正则表达式校验
-- URL URL校验
-- UUID UUID校验
-- AnyOf 输入值在任一可能值中
-- NoneOf 输入值不在一组可能值中
-
-
-
-## 表单提交模式
-
-一般表单提交模式是 POST 重定向到本视图函数 GET ，POST操作需要保存用户的一些信息则修改session中的值。
 
 
 
@@ -278,7 +208,50 @@ flash消息方便让用户知道一些必要的信息。flash函数可以实现�
     {% endfor %}
 ```
 
-## 对接数据库
+
+
+## 大型应用结构
+
+请参看参考资料1，即有名的flasky项目的结构。下面简单说一下：
+
+1. 配置开发测试生产分离
+
+2. 使用应用工厂函数 `create_app` 来延迟创建应用。
+
+3. 使用蓝图（Blueprint）
+
+   -  蓝图模块写法如下：
+
+   ```python
+   from flask import Blueprint
+   
+   main = Blueprint('main', __name__)
+   
+   from . import views, errors
+   ```
+
+   因为views errors模块那边还需要使用蓝图对象main，所以应该放在它的的后面引入进来。
+
+   - 蓝图在应用中注册写法如下：
+
+   ```python
+       from .main import main as main_blueprint
+       app.register_blueprint(main_blueprint)
+   ```
+
+   - 蓝图的错误页面需要使用 `app_errorhandler` 要注册为全局的错误处理，如果是 `errorhandler` 则只负责本蓝图内的错误。
+
+   ```python
+   @main.app_errorhandler(404)
+   def page_not_found(e):
+       return render_template('404.html'), 404
+   ```
+
+   - 蓝图内注册的视图函数，用 `url_for` 来获取的是 `main.index` 这种形式，即蓝图名加上视图函数名。
+
+
+
+## 数据库相关
 
 `__tablename__` 定义表名，默认的表名没有遵循使用复数命名的约定 like  `users`  。
 
@@ -286,15 +259,13 @@ flash消息方便让用户知道一些必要的信息。flash函数可以实现�
 
 
 
-## 集成python shell
+## flask shell命令定制
 
 ```python
 @app.shell_context_processor
 def make_shell_context():
     return dict(db=db, User=User, Role=Role)
 ```
-
-
 
 运行： 
 
@@ -420,15 +391,102 @@ def dropdb():
         assert not database_exists(engine.url)
 ```
 
+## flask-moment
+
+Moment JS 送入UTC时间会自动转换成为本地时间，服务器那边的时间戳最好是记录UTC时间。用户则应该看到本地时间。
+
+```jinja2
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+    {{ moment.lang("zh-cn") }}
+{% endblock %}
+```
 
 
-## 电子邮件
+
+在模板上使用：
+
+```jinja2
+    <p>当前时间是： {{ moment(current_time).format('LLLL') }}.</p>
+    <p>{{ moment(current_time).fromNow(refresh=True) }}刷新过.</p>
+```
+
+具体格式请参看 [MomentJs 官网](http://momentjs.cn/) 。
+
+
+
+
+
+## flask-wtf
+
+```python
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+
+app.config['SECRET_KEY'] = 'hard to guess string'
+
+class NameForm(FlaskForm):
+    name = StringField('请输入您的名字？', validators=[DataRequired()])
+    submit = SubmitField('提交')
+```
+
+WTForms支持的HTML字段
+
+- BooleanField 复选框
+- DateField 文本字段 for datetime.date
+- DateTimeField 文本字段 for datetime.datetime
+- DecimalField 文本字段 for  decimal.Decimal
+- FileField 文件上传字段
+- HiddenField 隐藏文本字段
+- FieldList 一组指定类型的字段
+- FloatField 文本字段 for float
+- FormField 把一个表单作为字段嵌入另一个表单
+- IntegerField 文本字段 for integer
+- PasswordField 密码文本字段
+- RadioField 单选按钮
+- SelectField 下拉列表
+- SelectmultipleField 下拉多选列表
+- SubmitField 表单提交按钮
+- StringField 文本字段
+- TextAreaField 多行文本字段
+
+WTForms提供的验证函数
+
+- DataRequired 确保类型转换后字段有数据
+- Email 验证电子邮箱
+- EqualTo 比较两个字段的值 常用于比较两次密码是否输入一致
+- InputRequired 确保类型转换前字段有数据
+- IPAddress 验证IPv4地址
+- Length 长度验证
+- MacAddress 验证MAC地址
+- NumberRange 数字范围校验
+- Optional 允许字段没有输入，将跳过其他校验函数
+- Regexp 正则表达式校验
+- URL URL校验
+- UUID UUID校验
+- AnyOf 输入值在任一可能值中
+- NoneOf 输入值不在一组可能值中
+
+
+
+### 表单提交模式
+
+一般表单提交模式是 POST 重定向到本视图函数 GET ，POST操作需要保存用户的一些信息则修改session中的值。
+
+
+
+## flask-mail
 
 flask-mail
 
+##  flask-login
+
+flask-login引入进来之后 所有的jinja2模块都支持 `current_user` 这个变量了。
 
 
-## 大型应用结构
 
+## 参考资料
 
-
+1. Flask Web 开发第二版 米格尔·格林贝格著 安道译

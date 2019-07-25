@@ -1,7 +1,7 @@
 Title: jinja2模板
 Slug: jinja2-template
 Date: 2017-10-12 
-Modified: 2018-12-26
+Modified: 2019-07-25
 Tags: python, template,
 
 [TOC]
@@ -17,15 +17,81 @@ jinja2模板在flask和pelican中都有使用，而且就是在django框架中�
 
 这里面的内容是模板文件的注释内容。
 
-    {# ... #}
+```jinja2
+{# ... #}
+```
 
 ## 变量
+如下所示，里面包含某个变量，jinja2渲染模板的时候会解析这些变量。
 
-这里算是jinja2模板的主体内容了，里面的变量可以直接使用，在render的时候传进去即可。然后 `object.a` 这样的dot法引用，或者 `object['a']` 这样的利用对象 `__getitem__` 内置方法来调用值的形式也支持。
+```jinja2
+{{ ... }}
+```
+然后 `object.a` 这样的dot法引用，或者 `object['a']` 这样的写法，甚至是调用实例的某个方法 `object.func()` 都是支持的。
 
-    {{ ... }}
 
-变量的值在jinja2模板系统中调用之后将会变成字符串然后插入在文档中，这就不多说了。
+
+## 过滤器filters
+
+变量可以进一步加上某个过滤器来进行进一步的处理。过滤器是有点类似于linux系统的管道作业风格，多个过滤器可以叠加，如： `{{ var | striptags | title }}` 。
+
+jinja2中内置的过滤器有：
+
+- `safe` 渲染值不转义
+- `capitalize` 值首字母大写 其他字母小写
+- `lower` 字母都小写
+- `upper` 字母都大写
+- `title` 值每个单词首字母大写
+- `trim`值首尾空格去除
+- `striptags` 渲染之前把所有HTML标签去掉
+
+关于safe过滤器请参看下面讨论的特殊符号的问题。
+
+## html特殊符号问题
+
+如果你的变量有这些html的特殊符号:
+
+```html
+<  >  &  "
+```
+
+jinja2模板系统默认是不做处理的，如果你没有配置全局自动escape的话。比如：
+
+```python
+from jinja2 import Template
+t = Template('test {{ x }}')
+t.render(x = '<h1>abc</h1>')
+'test <h1>abc</h1>'
+```
+
+如上输出在html中是有html效果的，你可以使用 **escape** 过滤器来转义这些特殊符号:
+
+```python
+t = Template('test {{ x|escape }}')
+t.render(x = '<h1>abc</h1>')
+'test &lt;h1&gt;abc&lt;/h1&gt;'
+```
+
+转义之后的输出在html中只是单纯的显示 `< > ` 等等这些符号，并不具有html效果了。
+
+flask是设置为全局auto escape的，这是正确的。如果你确实有某些html标签就希望是html标签的形式显示出来，而不经过escape，那么可以采用 **safe** 过滤器<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> 。
+
+```jinja2
+{{ "<b>test</b>"|safe }}
+```
+
+
+## if语句
+
+条件分支主要用于有条件的显示某些内容。
+
+```jinja2
+{% if user %}
+ Hello, {{ user }}!
+ {% else %}
+ Hello , stranger!
+ {% endif %}
+```
 
 ## for语句
 
@@ -39,51 +105,22 @@ for语句结构如下所示:
 </ul>
 ```
 
+## 移除块前后的空白
 
-
-## 条件分支
-
-条件分支主要用于有条件的显示某些内容。
+这里所谓的空白指 空格，制表符，换行符等，jinja2这块有全局配置选项。或者可以如下手工配置，大体意思加上 `-` 表示这里要跟上一个 `trim_blocks` 操作。
 
 ```jinja2
-{% if user %}
- Hello, {{ user }}!
- {% else %}
- Hello , stranger!
- {% endif %}
+{% for item in seq -%}
+    {{ item }}
+{%- endfor %}
 ```
 
 
 
-## html特殊符号问题
-
-如果你的变量有这些html的特殊符号:
-
-```html
-<  >  &  "
-```
-
-假设你没有在flask中使用jinja2模板系统，那么这些字符是没有经过特殊处理的，那么比如说 `<b>test</b>` 这段字符串到了html文档中就将以粗体的形式显示。如果你希望显示这些符号，那么可以使用 **escape** 过滤器来做到这点:
-
-    {{ test|escape }}
-
-或者:
-
-    {{ test|e }}
-
-都是一样的。
-
-这里的过滤器有点类似bash的管道的意思，意思是将输出的字符串经过额外的操作。
-
-但一般推荐的风格是html标签都放在jinja2模板系统的外面，jinja2模板系统只处理最核心的那些字符串。所以flask是设置为全局auto escape的，这是正确的思路。如果你确实有某些html标签就希望是html标签的形式显示出来，而不经过escape，那么可以采用 **safe** 过滤器<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> 。
-
-```jinja2
-{{ "<b>test</b>"|safe }}
-```
 
 ## 模板文件继承机制
 
-jinja2的模板文件有一种继承机制，可以让你基于某个模板文件来建构出另外一个模板文件，前面那个模板文件大概可以称作模板文件的模板文件吧。具体使用是在父模板（模板文件的模板文件）构建一些block区块，如下所示:
+jinja2的模板文件有一种继承机制，可以让你基于某个模板文件来建构出另外一个模板文件。具体使用是在父模板（模板文件的模板文件）构建一些block区块，如下所示:
 
 ```jinja2
 <title>{% block title %} {% endblock %}</title>
@@ -93,39 +130,30 @@ jinja2的模板文件有一种继承机制，可以让你基于某个模板文�
 
 然后子模板首先继承父模板所有的内容:
 
-    {% extends "base.html" %}
+```jinja2
+{% extends "base.html" %}
+```
 
 然后一些需要定制的部分，比如说这里的title部分，做成block之后，子模板文件可以重新定义这个title block:
 
-    {% extends "base.html" %}
-    {% block title}books - the classic books of  which you want to collected
-    {% endblock %}
+```jinja2
+{% extends "base.html" %}
+{% block title %}the awesome title{% endblock %}
+```
 
 此外子模块在block重载的时候，你还可以用
 
-    {{ super() }}
+```jinja2
+{{ super() }}
+```
 
 来加载父模块在该block中的一些定义。
 
 上面title block的内容你可以如下引用之:
 
-    {{ self.title() }}
-
-
-
-## 过滤器filters
-
-过滤器就是一些额外的字符串操作函数，一般推荐还是在python代码中把要输出显示的字符串处理好吧，下面列出一些函数简单了解下即可。
-
-
-
-- safe 渲染值不转义
-- capitalize 值首字母大写 其他字母小写
-- lower 字母都小写
-- upper 字母都大写
-- title 值每个单词首字母大写
-- trim 值首尾空格去除
-- striptags 渲染之前把所有HTML标签去掉
+```jinja2
+{{ self.title() }}
+```
 
 
 
@@ -137,6 +165,7 @@ jinja2的模板文件有一种继承机制，可以让你基于某个模板文�
 {% macro render_comment(comment) %}
 <li>{{ comment }}</li>
 {% endmacro %}
+
 <ul>
 {% for comment in comments %}
 {{ render_comment(comment) }}
@@ -149,7 +178,6 @@ jinja2的模板文件有一种继承机制，可以让你基于某个模板文�
 ```jinja2
 {% import 'macros.html' as macros %}
 
-{% import 'macros.html' as macros %}
 <ul>
 {% for comment in comments %}
 {{ macros.render_comment(comment) }}
@@ -157,11 +185,27 @@ jinja2的模板文件有一种继承机制，可以让你基于某个模板文�
 </ul>
 ```
 
-引入
+import 的模板是不会传递当前上下文的，你可以如下要求上下文也传递给引入进来的模板：
+
+```jinja2
+{% from 'forms.html' import input with context %}
+```
+
+
+
+## include
+
+宏文件是推荐使用import，模板文件已经有继承机制了，那么这个include语句主要有什么用呢？
+
+某个模板代码片段被多次反复使用推荐使用include语句。
 
     {% include 'common.html' %}
 
+同样include语句也可以要求传递上下文：
 
+```
+{% include 'header.html' with context %}
+```
 
 
 
