@@ -1,206 +1,236 @@
-{% extends 'base.html' %} {% block title %} {{ super() }} {% endblock title %} 
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ super() }}
+{% endblock title %}
 
 
-{% block meta_tags_in_head %} {{ super() }}
-{% from '_includes/_defaults.html' import LANDING_PAGE_ABOUT with context %} {% if LANDING_PAGE_ABOUT and LANDING_PAGE_ABOUT.title
-%}
-<meta property="og:title" content="{{ LANDING_PAGE_ABOUT.title|e }}" />
-<meta name="twitter:title" content="{{ LANDING_PAGE_ABOUT.title|e }}"> {% else %}
-<meta property="og:title" content="{{ SITENAME|striptags|e }}" />
-<meta name="twitter:title" content="{{ SITENAME|striptags|e }}"> {% endif %}
-<meta property="og:url" content="{{ SITEURL }}" /> {% from '_includes/_defaults.html' import SITE_DESCRIPTION with context %} {% if SITE_DESCRIPTION %}
-<meta property="og:description" content="{{SITE_DESCRIPTION|e}}" />
-<meta name="twitter:description" content="{{SITE_DESCRIPTION|e}}"> {% endif %}
-<meta property="og:site_name" content="{{ SITENAME|striptags|e }}" />
-<meta property="og:article:author" content="{{ AUTHOR }}" /> {% from '_includes/_defaults.html' import FEATURED_IMAGE with context %} {% if FEATURED_IMAGE %}
-<meta property="og:image" content="{{FEATURED_IMAGE}}" />
-<meta name="twitter:image" content="{{FEATURED_IMAGE}}"> {% endif %} {% endblock meta_tags_in_head %} {% block content %} {% from '_includes/_defaults.html' import LANDING_PAGE_ABOUT
-with context %} {% from '_includes/_defaults.html' import PROJECTS with context %}
-
-<style>
-    article {
-        border: 1px solid #aaa;
-    }
-
-    section {
-        padding: 1em;
-    }
-
-    article > p {
-        padding-left: 0.5em;
-        padding-right: 0.5em;
-    }
-
-    #gotop{
-        position:fixed;
-        right: 12% ;
-        float:right ;
-        top: 50%;
-    }
-    @media screen and (max-width: 600px) {
-        #gotop{
-            display:none;
-        }
-    }
-</style>
-
-<button id="gotop" type="button" class="btn btn-default">
-    <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
-  </button>
-
-
-
-<div class="row">
-    {% if LANDING_PAGE_ABOUT and LANDING_PAGE_ABOUT.title %} {% set css_class = 'col-md-10 col-md-offset-2' %} {% if PROJECTS
-    and LANDING_PAGE_ABOUT %} {% set css_class = 'col-md-12' %} {% endif %}
-    <header class="page-header {{css_class}}">
-        <h1>
-            <a href="{{ SITEURL }}">{{ LANDING_PAGE_ABOUT.title }}</a>
-        </h1>
-    </header>
+{% block meta_tags_in_head %}
+    {{ super() }}
+    {% from '_includes/_defaults.html' import LANDING_PAGE_ABOUT with context %}
+    {% if LANDING_PAGE_ABOUT and LANDING_PAGE_ABOUT.title %}
+        <meta property="og:title" content="{{ LANDING_PAGE_ABOUT.title|e }}"/>
+        <meta name="twitter:title" content="{{ LANDING_PAGE_ABOUT.title|e }}">
+    {% else %}
+        <meta property="og:title" content="{{ SITENAME|striptags|e }}"/>
+        <meta name="twitter:title" content="{{ SITENAME|striptags|e }}">
     {% endif %}
+    <meta property="og:url" content="{{ SITEURL }}"/>
+    {% from '_includes/_defaults.html' import SITE_DESCRIPTION with context %}
+    {% if SITE_DESCRIPTION %}
+        <meta property="og:description" content="{{ SITE_DESCRIPTION|e }}"/>
+        <meta name="twitter:description" content="{{ SITE_DESCRIPTION|e }}">
+    {% endif %}
+    <meta property="og:site_name" content="{{ SITENAME|striptags|e }}"/>
+    <meta property="og:article:author" content="{{ AUTHOR }}"/>
+    {% from '_includes/_defaults.html' import FEATURED_IMAGE with context %}
+    {% if FEATURED_IMAGE %}
+        <meta property="og:image" content="{{ FEATURED_IMAGE }}"/>
+        <meta name="twitter:image" content="{{ FEATURED_IMAGE }}">
+    {% endif %}
+{% endblock meta_tags_in_head %}
+
+{% block content %}
+
+    {% from '_includes/_defaults.html' import LANDING_PAGE_ABOUT
+with context %}
+    {% from '_includes/_defaults.html' import PROJECTS with context %}
+
+    <style>
+        article {
+            border: 1px solid #aaa;
+        }
+
+        section {
+            padding: 1em;
+        }
+
+        article > p {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        #gotop {
+            position: fixed;
+            right: 12%;
+            float: right;
+            top: 50%;
+        }
+
+        @media screen and (max-width: 600px) {
+            #gotop {
+                display: none;
+            }
+        }
+    </style>
+
+    <button id="gotop" type="button" class="btn btn-default">
+        <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+    </button>
+
+
 
     <div class="row">
-        {% if LANDING_PAGE_ABOUT and LANDING_PAGE_ABOUT.details %} {% set css_class = 'col-md-8 col-md-offset-2' %} {% if PROJECTS
+        {% if LANDING_PAGE_ABOUT and LANDING_PAGE_ABOUT.title %}
+            {% set css_class = 'col-md-10 col-md-offset-2' %} {% if PROJECTS
+    and LANDING_PAGE_ABOUT %} {% set css_class = 'col-md-12' %} {% endif %}
+            <header class="page-header {{ css_class }}">
+                <h1>
+                    <a href="{{ SITEURL }}">{{ LANDING_PAGE_ABOUT.title }}</a>
+                </h1>
+            </header>
+        {% endif %}
+
+        <div class="row">
+            {% if LANDING_PAGE_ABOUT and LANDING_PAGE_ABOUT.details %}
+                {% set css_class = 'col-md-8 col-md-offset-2' %} {% if PROJECTS
         and LANDING_PAGE_ABOUT %} {% set css_class = 'col-md-8' %} {% endif %}
-        <div class="{{css_class}}">
-            <header>
-                <h1 id="about-me">About me</h1>
-            </header>
-            <div class="article-content">
-                {{ LANDING_PAGE_ABOUT.details }}
+                <div class="{{ css_class }}">
+                    <header>
+                        <h1 id="about-me">About me</h1>
+                    </header>
+                    <div class="article-content">
+                        {{ LANDING_PAGE_ABOUT.details }}
+                    </div>
+                </div>
+            {% endif %} {% if PROJECTS %}
+            {% set css_class = 'col-md-8 col-md-offset-2' %}
+            {% if PROJECTS and LANDING_PAGE_ABOUT %}
+                {% set css_class = 'col-md-4' %} {% endif %}
+            <div class="{{ css_class }}">
+                <header>
+                    <h1 id="my-projects">My Projects</h1>
+                </header>
+                {% for project in PROJECTS %}
+                    <ul class="list-all-articles">
+                        <li>
+                            <a href="{{ project.url }}"
+                               title="{{ project.name }}">{{ project.name }}</a>
+                            <span class="proj-desc">{{ project.description }}</span>
+                        </li>
+                    </ul>
+                {% endfor %}
             </div>
+        {% endif %}
         </div>
-        {% endif %} {% if PROJECTS %} {% set css_class = 'col-md-8 col-md-offset-2' %} {% if PROJECTS and LANDING_PAGE_ABOUT %} {%
-        set css_class = 'col-md-4' %} {% endif %}
-        <div class="{{css_class}}">
-            <header>
-                <h1 id="my-projects">My Projects</h1>
-            </header>
-            {% for project in PROJECTS %}
-            <ul class="list-all-articles">
-                <li>
-                    <a href="{{ project.url }}" title="{{ project.name }}">{{ project.name }}</a>
-                    <span class="proj-desc">{{ project.description }}</span>
-                </li>
-            </ul>
-            {%endfor %}
-        </div>
+
+        {% if articles %} {% set css_class = 'col-md-8 col-md-offset-2' %}
+            {% if articles and PROJECTS and LANDING_PAGE_ABOUT %}
+                {% set css_class = 'col-md-12' %} {% endif %}
+            <div class="row">
+                <div class="{{ css_class }}">
+                    <header>
+                        <h1 id="recent-posts">最近博文
+                            <a id="allposts" href="{{ SITEURL }}/archives.html">所有博文</a>
+                        </h1>
+                    </header>
+
+
+                    <div class="recent-posts">
+                        {% if articles_page.has_other_pages() %}
+                            {% include 'pagination.html' %} {% endif %}
+                        {% for article in articles_page.object_list %}
+
+                            <article>
+
+                                <h1 class="page-header"><a
+                                        href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}
+                                    {% if article.subtitle %}
+                                        <small> {{ article.subtitle }}</small>
+                                    {% endif %} </a></h1>
+
+                                <section>
+                                    posted in
+                                    <a href="{{ SITEURL }}/categories.html#{{ article.category.slug }}-ref">{{ article.category }}
+                                    </a>
+                                    <div class="recent-posts-time">
+                                        <time pubdate="pubdate"
+                                              datetime="{{ article.date.isoformat() }}">{{ article.locale_date }}
+                                        </time>
+                                    </div>
+                                </section>
+                                {{ article.summary }}
+                            </article>
+
+                        {% endfor %} {% if articles_page.has_other_pages() %}
+                        {% include 'pagination.html' %} {% endif %}
+                    </div>
+                </div>
+            </div>
         {% endif %}
     </div>
 
-    {% if articles %} {% set css_class = 'col-md-8 col-md-offset-2' %} {% if articles and PROJECTS and LANDING_PAGE_ABOUT %}
-    {% set css_class = 'col-md-12' %} {% endif %}
-    <div class="row">
-        <div class="{{css_class}}">
-            <header>
-                <h1 id="recent-posts">最近博文
-                    <a id="allposts" href="{{ SITEURL }}/archives.html">所有博文</a>
-                </h1>
-            </header>
+{% endblock content %}
 
+{% block script %}
+    {{ super() }}
+    <script>
+        (function ($) {
+            // custom css expression for a case-insensitive contains()
+            jQuery.expr[':'].Contains = function (a, i, m) {
+                return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
+            };
 
-            <div class="recent-posts">
-            {% if articles_page.has_other_pages() %} {% include 'pagination.html' %} {% endif %}
-                {% for article in articles_page.object_list %}
+            function listFilter() {
 
-                <article>
+                $('#findtag')
+                    .change(function () {
+                        var filter = $(this).val();
+                        if (filter) {
+                            // this finds all links in a list that contain the input,
+                            // and hide the ones not containing the input while showing the ones that do
+                            $('.list-of-tags').find("a:not(:Contains(" + filter + "))").parent().hide();
+                            $('.list-of-tags').find("a:Contains(" + filter + ")").parent().show();
+                        } else {
+                            $('.list-of-tags').find("li").show();
+                        }
+                        return false;
+                    })
+                    .keyup(function () {
+                        // fire the above change event after every letter
+                        $(this).change();
+                    });
+            }
 
-                    <h1 class="page-header"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }} {%if article.subtitle %}
-                        <small> {{ article.subtitle }}</small>
-                        {% endif %} </a></h1>
+            //ondomready
+            $(function () {
+                listFilter($());
+            });
+        }(jQuery));
 
-                    <section>
-                        posted in
-                        <a href="{{ SITEURL }}/categories.html#{{ article.category.slug }}-ref">{{ article.category }}
-                        </a>
-                        <div class="recent-posts-time">
-                            <time pubdate="pubdate" datetime="{{ article.date.isoformat() }}">{{ article.locale_date }}
-                            </time>
-                        </div>
-                    </section>
-                    {{article.summary}}
-                </article>
+    </script>
 
-                {% endfor %} {% if articles_page.has_other_pages() %} {% include 'pagination.html' %} {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-</div>
-
-
-
-
-{% endblock content %} {% block script %} {{ super() }}
-
-<script>
-    (function ($) {
-        // custom css expression for a case-insensitive contains()
-        jQuery.expr[':'].Contains = function (a, i, m) {
-            return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
-        };
-
-        function listFilter() {
-
-            $('#findtag')
-                .change(function () {
-                    var filter = $(this).val();
-                    if (filter) {
-                        // this finds all links in a list that contain the input,
-                        // and hide the ones not containing the input while showing the ones that do
-                        $('.list-of-tags').find("a:not(:Contains(" + filter + "))").parent().hide();
-                        $('.list-of-tags').find("a:Contains(" + filter + ")").parent().show();
-                    } else {
-                        $('.list-of-tags').find("li").show();
-                    }
-                    return false;
-                })
-                .keyup(function () {
-                    // fire the above change event after every letter
-                    $(this).change();
-                });
-        }
-
-        //ondomready
+    <script>
         $(function () {
-            listFilter($());
-        });
-    }(jQuery));
-
-</script> 
-
-<script>
-    $(function(){
-        //点击回到顶部的元素
-        $("#gotop").click(function(e) {
+            //点击回到顶部的元素
+            $("#gotop").click(function (e) {
                 //以1秒的间隔返回顶部
-                $('body,html').animate({scrollTop:0},1000);
+                $('body,html').animate({scrollTop: 0}, 1000);
+            });
         });
-    });
-</script>
+    </script>
 
-<script>
-  $('.page-header').hover(function(){
-    $(this).css("color",'#3875d7')
-  }, function(){
-    $(this).css('color','#8B0000')
-  })
-</script>
+    <script>
+        $('.page-header').hover(function () {
+            $(this).css("color", '#3875d7')
+        }, function () {
+            $(this).css('color', '#8B0000')
+        })
+    </script>
 
 
-<script>
-  $(document).ready(function(){
-    $('a.slowscroll').click(function(event){
-      var $anchor = $(this);
-      $('html, body').animate({scrollTop: $($anchor.attr('href')).offset().top},1500);
-      event.preventDefault();
-      // $('a.slowscroll').parent().removeClass('active');
-      // $('.navbar-header').hide();
-      // $anchor.parent().addClass('active');
-    })
-  })
-  console.log('document init...')
-</script>
+    <script>
+        $(document).ready(function () {
+            $('a.slowscroll').click(function (event) {
+                var $anchor = $(this);
+                $('html, body').animate({scrollTop: $($anchor.attr('href')).offset().top}, 1500);
+                event.preventDefault();
+                // $('a.slowscroll').parent().removeClass('active');
+                // $('.navbar-header').hide();
+                // $anchor.parent().addClass('active');
+            })
+        })
+        console.log('document init...')
+    </script>
 
 {% endblock script %}
