@@ -190,3 +190,29 @@ app_ctx.push()
 print(current_app.name)
 ```
 
+### 问题六 session到底是个什么东西
+
+前面提到flask在创建请求上下文的时候session这个参数是不知道从哪里直接传进来的，那个flask的这个session到底是个什么东西？
+
+首先说下背景知识：我们知道服务器那么响应内容可以设置这样的响应头： `Set-Cookie` ，对应flask里面的：
+
+```
+r = Response('test')
+r.set_cookie('a','1')
+```
+
+客服端client或者说浏览器在接收到这样的响应之后，下次对目标服务器的请求会在请求头上加上对应的Cookie。
+
+如下图所示：
+
+![img]({static}/images/python_third_party/session_and_cookie.png)
+
+说明： 上面是第二次刷新的结果，如果用浏览器的无痕模式测试，第一次request的请求头没有Cookie的。
+
+然后我们在上图的Cookie中看到了 `session` 这个字段，只是内容含义不明。这个就是对应flask里面的session：
+
+```
+from flask import session
+```
+
+只是经过了flask的加密。

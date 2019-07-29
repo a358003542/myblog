@@ -420,19 +420,152 @@ Moment JS 送入UTC时间会自动转换成为本地时间，服务器那边的�
 
 ## flask-wtf
 
+这块初接触在理解上是有点困难的，其实flask-wtf提供的主要是对WTForms这个模块的集成支持，然后还有一些功能比如 `wtf.quick_form(form)` 这个是 flask-bootstrap 对 WTForms的一些额外的支持。这里理解上的关键在于理解 WTForms 这个模块到底在干什么事情。
+
+### WTForms模块
+
+简单来说WTForms模块做的工作就是方便你在模板引擎上比如jinja2模块引擎上快速创建输入表单和相关验证事宜。
+
+首先需要定义一个Form类：
+
 ```python
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import Form, BooleanField, StringField, validators
 
-app.config['SECRET_KEY'] = 'hard to guess string'
-
-class NameForm(FlaskForm):
-    name = StringField('请输入您的名字？', validators=[DataRequired()])
-    submit = SubmitField('提交')
+class RegistrationForm(Form):
+    username     = StringField('Username', [validators.Length(min=4, max=25)])
+    email        = StringField('Email Address', [validators.Length(min=6, max=35)])
+    accept_rules = BooleanField('I accept the site rules', [validators.InputRequired()])
 ```
 
-WTForms支持的HTML字段
+Form类里面有一些Field类，然后Field类里面可以通过一个列表定义一系列的Validators 验证器。每个Field都有一个Widget ，Widget的任务就是负责HTML的渲染工作。
+
+关于这个form类值得我们注意的有：
+
+1. 这个form对象，你可以通过 `form.username.data` 来获取表单中的值。
+2. 如果你在定义这个form对象的时候定义了其他 `validate_<field_name>` 函数，这些函数会针对特定的field_name而进行调用。如果验证失败，则抛出 `ValidationError` 异常，异常的信息将作为错误信息。
+
+这个Form类在python中的代码使用如下：
+
+```python
+@app.route('/submit', methods=('GET', 'POST'))
+def submit():
+    form = MyForm(request.form)
+    if request.method == 'POST' and form.validate():
+         return redirect('/success')
+    return render_template('submit.html', form=form)
+```
+
+然后 flask-wtf 下的使用代码如下：
+
+```python
+@app.route('/submit', methods=('GET', 'POST'))
+def submit():
+    form = MyForm()
+    if form.validate_on_submit():
+        return redirect('/success')
+    return render_template('submit.html', form=form)
+```
+
+flask-wtf 定义的Form类在使用上提供的便利有：
+
+1. 会自动将 `request.form` 或者 `request.files` 塞进去。
+2. 直接使用 `validate_on_submit` 方法即可，里面集成了对 request.method 的判断——`POST PUT PATCH DELETE` 都是可以的。
+
+WTForms 初始化接收值，除了第一个值 `request.form` 等，还支持对接某个model 对象，后面还可以跟上一些关键词参数：
+
+```
+form = MyForm(request.form, user, username='zhangsan')
+```
+
+WTForms提供了很多内置的验证器支持，你还可以定义自己的验证器。这些验证器对应到上面的 `validate` 方法中，这个后面再说。
+
+### WTForms的渲染
+
+上面提到的form类实例中的Field是可以直接调用str() 来获得如下的一段HTML代码的：
+
+```
+<input id="content" name="content" type="text" value="foobar" />
+```
+
+我们看到一般模板引擎渲染时，比如jinja2，会接受form实例。然后一个一般的表单渲染如下：
+
+```python
+class LoginForm(Form):
+    username = StringField('Username')
+    password = PasswordField('Password')
+
+form = LoginForm()
+```
+
+```jinja2
+<form method="POST" action="/login">
+    <div>{{ form.username.label }}: {{ form.username(class="css_class") }}</div>
+    <div>{{ form.password.label }}: {{ form.password() }}</div>
+</form>
+```
+
+在python代码那边，form的Field部分是可以接受一些额外的关键词参数，其将作为属性传入从而作为input标签的属性。
+
+### csrf_token相关
+
+WTForms 已经有了 `csrf_token` 的支持功能：
+
+```
+ {{ form.csrf_token }}
+```
+
+关于这块具体细节请参看WTForms的csrf_token相关章节，这里不深究了，一个csrf_token安全校验。
+
+而 flask-wtf 这边推荐的写法是：
+
+```jinja2
+<form method="POST" action="/">
+    {{ form.hidden_tag() }}
+    {{ form.name.label }} {{ form.name(size=20) }}
+</form>
+```
+
+`hidden_tag` 这个方法是flask-wtf提供的，就是将所有隐藏的html field 渲染在这里，因为 flask-wtf 默认会加上 csrf_token 支持，也就是上面的语句：
+
+```
+ {{ form.csrf_token }}
+```
+
+这是一个hidden标签，所以最后还是会渲染在这里。
+
+### flask-bootstrap提供的额外支持
+
+flask-bootstrap又提供了一些额外的支持，简单来说就是编写了一些jinja2的宏。比如 `quick_form` 宏：
+
+```
+{{ wtf.quick_form(form) }}
+```
+
+大体对应于输出这样的语句：
+
+```jinja2
+{% import "bootstrap/wtf.html" as wtf %}
+<form class="form form-horizontal" method="post" role="form">
+  {{ form.hidden_tag() }}
+  {{ wtf.form_errors(form, hiddens="only") }}
+
+  {{ wtf.form_field(form.field1) }}
+  {{ wtf.form_field(form.field2) }}
+</form>
+```
+
+这里只是说大体对应，因为quick_form 宏还有一些参数可以调配。上面对应的只是默认参数的输出情况。
+
+然后上面的 `form_errors` 宏 和 `form_field` 宏也都是 flask-bootstrap 那个宏文件里面定义的。总之如果刚开始对表单的显示没有什么特别的要求的话， `quick_form` 宏还是很好用的。
+
+有的时候有特别的要求，个人觉得是没有必要深究flask-bootstrap 那边宏定义的情况，退化为上面的写法，再稍作定制看看是否满足你的要求。否则直接用 flask-wtf 如下这种最原始的写法，再调配下即可。
+```jinja2
+<form method="POST" action="/">
+    {{ form.hidden_tag() }}
+    {{ form.name.label }} {{ form.name(size=20) }}
+</form>
+```
+### WTForms支持的Field
 
 - BooleanField 复选框
 - DateField 文本字段 for datetime.date
@@ -452,7 +585,7 @@ WTForms支持的HTML字段
 - StringField 文本字段
 - TextAreaField 多行文本字段
 
-WTForms提供的验证函数
+### WTForms提供的Validator
 
 - DataRequired 确保类型转换后字段有数据
 - Email 验证电子邮箱
@@ -471,21 +604,17 @@ WTForms提供的验证函数
 
 
 
-### 表单提交模式
-
-一般表单提交模式是 POST 重定向到本视图函数 GET ，POST操作需要保存用户的一些信息则修改session中的值。
-
-
-
-## flask-mail
-
-flask-mail
-
 ##  flask-login
 
 flask-login引入进来之后 所有的jinja2模块都支持 `current_user` 这个变量了。
 
+然后其提供了 `login_required` 来对url进行权限控制。
 
+具体flask-login的使用请参看官方文档，这里重点讲一下flask-login都做了哪些事情，这个参考资料1说的很好。
+
+1. `login_user` 函数用于登录用户，核心任务就是将用户的id写入flask的session。类似的 `logout_user` 就是将这个id从session中删除。
+2. 渲染jinja2模板的时候，会出现对 flask-login 的 `current_user` 这个变量的请求。具体就是调用flask-login 的`_get_user` 函数。`_get_user` 首先检查session中有没有用户id，没有则返回 `AnonymousUser` ，有则调用 `user_loader` 装饰器注册的函数。
+3. `login_required` 是对当前的 `current_user` 的 `is_authenticated` 方法进行调用，如果True 则通过，False则拒绝。
 
 ## 参考资料
 
