@@ -114,4 +114,4 @@ dmypy.json
 Pipfile.lock
 *.sqlite
 Pipfile
-
+.DS_Store

@@ -479,6 +479,16 @@ sudo mount --rbind /mnt/docker /var/lib/docker
 sudo systemctl start docker
 ```
 
+## docker对系统hosts的配置
+
+现在你不需要手工修改 `/etc/hosts` 文件了，docker已经支持如下写法了【参考 [这个网页](https://stackoverflow.com/questions/38302867/how-to-update-etc-hosts-file-in-docker-image-during-docker-build) 】：
+
+```
+extra_hosts:
+ - "somehost:162.242.195.82"
+ - "otherhost:50.31.209.229"
+```
+
 
 
 

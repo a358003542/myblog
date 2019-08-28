@@ -2,8 +2,7 @@ Title: emacs的org模式学习笔记
 Slug: emacs-orgmode-learning-notes
 Date: 2016-10-30 20:31
 Modified: 2016-10-30 20:31
-Tags: emacs,
-Status: draft
+Tags: emacs
 
 [TOC]
 
@@ -914,9 +913,7 @@ TODO list  ch 05
 <div id="text-footnotes">
 
 <div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara">[参考网站](http://stackoverflow.com/questions/26636562/org-mode-weirdness-with-org-export-with-sub-superscripts)</div></div>
-
 <div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara">参考了[这个网站](http://stackoverflow.com/questions/20541322/how-to-remove-installed-elpa-package)</div></div>
-
 
 </div>
 </div>

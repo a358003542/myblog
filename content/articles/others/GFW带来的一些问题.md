@@ -26,8 +26,25 @@ windows下是 `%HOMEPATH%\pip\pip.ini` 。
 
 推荐 [这个网站](http://www.bootcdn.cn/) 。
 
+
+
+## docker国内加速镜像
+
+推荐用类似下面的命令：
+
+```
+docker pull daocloud.io/ubuntu:16.04
+docker pull daocloud.io/centos:7
+docker pull daocloud.io/python:3
+```
+
+把镜像文件下载下来。
+
+
+
 # ubuntu的更新源
 ubuntu的更新源换成国内的源。
 
 # android studio sdk更新太慢
 请参考 [https://github.com/inferjay/AndroidDevTools](https://github.com/inferjay/AndroidDevTools) 。这个网站还有很多和android开发相关的资料。
+
