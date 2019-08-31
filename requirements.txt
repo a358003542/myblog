@@ -1,4 +1,3 @@
-flask
 click
 beautifulsoup4
 jieba
