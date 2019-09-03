@@ -189,3 +189,17 @@ TODO
 ## 术语解释
 
 TODO
+
+
+
+## 17. Transcations
+
+SIP 是一个事务处理型协议：各个组件之间的交互发生在一系列的独立的信息交换上。更具体来说，一个SIP Transcation 由一个请求和该请求的任何响应组成，这可能包含零个或更多的临时响应和一个或更多的最终响应。就以一个INVITE请求的事务例子来说（即所谓的INVITE事务），该事务也是包含ACK的，只要最终响应不是2xx。如果响应是2xx的话，ACK会认为不是该事务的一部分。
+
+之所以这样区分是基于传输200响应给发送INVITE的UAC是很重要的。把他们都传输给UAC，UAS这边要负责重发他们（第13.3.1.4小节），UAC这边要负责用ACK来确认他们。（第13.2.2.4小节）因为这个ACK只被UAC转发，所以认为这是属于他自己的事务是很有效的。
+
+事务一边是client，另一边是server。client那边被称之为client transaction，server那边被称之为server transaction。client transaction发送请求，server transaction发送响应。client和server transaction都是逻辑函数嵌入到很多元素中。更确切的，他们存在于user agent和stateful代理服务器哪里。考虑第4节的例子，在这个例子中，UAC执行了client 事务，它的outbound proxy 出站代理执行了server事务。出站代理也执行了client事务，因为它发送了请求到入站代理哪里。入站代理哪里也执行了client事务，因为它发送了请求到UAS哪里。具体如下图所示：
+
+![Jietu20190903-182208](/Users/beixi/Desktop/Jietu20190903-182208.jpg)
+
+无状态代理不含client事务和server事务，事务存在于UA或一边的有状态代理和UA或另一边的有状态代理之间。就SIP事务层面上的考虑，无状态代理可以认为是完全透明的。client事务的目的就是接受某个元素上的请求，client事务就封装在该元素上（该元素被称为事务用户 TU，它可以是个UA或者状态代理），然后就是可靠地将请求传输给server事务。
