@@ -22,7 +22,125 @@ SIP协议算是物联网的核心底层基础了，网上有一份关于SIP协�
 
 
 
+## 一个简单的会话建立例子
 
+![Jietu20190910-150709](/Users/beixi/Desktop/Jietu20190910-150709.jpg)
+
+
+
+1. Tesla先给Marconi发送INVITE消息
+
+```
+INVITE sip:marconi@radio.org SIP/2.0
+Via: SIP/2.0/UDP lab.high-voltage.org:5060;branch=z9hG4bKfw19b 
+Max-Forwards: 70
+To: G. Marconi <sip:Marconi@radio.org>
+From: Nikola Tesla <sip:n.tesla@high-voltage.org>;tag=76341 
+Call-ID: 123456789@lab.high-voltage.org
+CSeq: 1 INVITE
+Subject: About That Power Outage...
+Contact: <sip:n.tesla@lab.high-voltage.org>
+Content-Type: application/sdp
+Content-Length: 158
+
+v=0
+o=Tesla 2890844526 2890844526 IN IP4 lab.high-voltage.org 
+s=Phone Call
+c=IN IP4 100.101.102.103
+t=0 0
+m=audio 49170 RTP/AVP 0
+a=rtpmap:0 PCMU/8000
+```
+
+关于头字段的的含义解释更多的请参看官方文档对应部分。
+
+2. Marconi给Tesla发送180响应 （To From Call-Id CSeq 都是直接Copy过来的， Via添加了一个received参数）更多响应信息制造细节参看官方文档
+```
+SIP/2.0 180 Ringing
+Via: SIP/2.0/UDP lab.high-voltage.org:5060;branch=z9hG4bKfw19b
+;received=100.101.102.103
+To: G. Marconi <sip:marconi@radio.org>;tag=a53e42
+From: Nikola Tesla <sip:n.tesla@high-voltage.org>;tag=76341 
+Call-ID: 123456789@lab.high-voltage.org
+CSeq: 1 INVITE
+Contact: <sip:marconi@tower.radio.org>
+Content-Length: 0
+```
+3. 180响应会被忽略
+4. 200响应 （还包含了sdp载体）
+
+```
+SIP/2.0 200 OK
+Via: SIP/2.0/UDP lab.high-voltage.org:5060;branch=z9hG4bKfw19b
+;received=100.101.102.103
+To: G. Marconi <sip:marconi@radio.org>;tag=a53e42
+From: Nikola Tesla <sip:n.tesla@high-voltage.org>;tag=76341 
+Call-ID: 123456789@lab.high-voltage.org
+CSeq: 1 INVITE
+Contact: <sip:marconi@tower.radio.org>
+Content-Type: application/sdp
+Content-Length: 155
+
+v=0
+o=Marconi 2890844528 2890844528 IN IP4 tower.radio.org 
+s=Phone Call
+c=IN IP4 200.201.202.203
+t=0 0
+m=audio 60000 RTP/AVP 0
+a=rtpmap:0 PCMU/8000
+```
+
+5. T给M发送ACK消息
+
+```
+ACK sip:marconi@tower.radio.org SIP/2.0
+Via: SIP/2.0/UDP lab.high-voltage.org:5060;branch=z9hG4bK321g 
+Max-Forwards: 70
+To: G. Marconi <sip:marconi@radio.org>;tag=a53e42
+From: Nikola Tesla <sip:n.tesla@high-voltage.org>;tag=76341 
+Call-ID: 123456789@lab.high-voltage.org
+CSeq: 1 ACK
+Content-Length: 0
+```
+
+6. 实际媒体会话过程
+7. M给T发送BYE消息
+
+```
+BYE sip:n.tesla@lab.high-voltage.org SIP/2.0
+Via: SIP/2.0/UDP tower.radio.org:5060;branch=z9hG4bK392kf 
+Max-Forwards: 70
+To: Nikola Tesla <sip:n.tesla@high-voltage.org>;tag=76341 
+From: G. Marconi <sip:marconi@radio.org>;tag=a53e42 
+Call-ID: 123456789@lab.high-voltage.org
+CSeq: 1 BYE
+Content-Length: 0
+```
+
+8. T给M发送BYE消息的200响应
+
+```
+SIP/2.0 200 OK
+Via: SIP/2.0/UDP tower.radio.org:5060;branch=z9hG4bK392kf
+;received=200.201.202.203
+To: Nikola Tesla <sip:n.tesla@high-voltage.org>;tag=76341 
+From: G. Marconi <sip:marconi@radio.org>;tag=a53e42 
+Call-ID: 123456789@lab.high-voltage.org
+CSeq: 1 BYE
+Content-Length: 0
+```
+
+INVITE方法是SIP协议里面很重要的一个方法，本例子可以说是最核心的SIP协议功能实现了。
+
+关于本例子更多细节请参见官方文档，下面我会补充说明一些东西。
+
+## 通过代理建立SIP呼叫例子
+
+![Jietu20190911-114217](/Users/beixi/Desktop/Jietu20190911-114217.jpg)
+
+
+
+## SIP注册例子
 
 
 
@@ -222,13 +340,98 @@ SIP协议中最重要的方法就是INVITE方法，它用于建立参与者之�
 
 ## 6. 术语解释
 
-TODO
+- Address-of-Record 有时简称AOR 或者 aor，是一个SIP或SIPS的URI地址 简单来说就是user用户对外的公共地址，寻址服务在注册时会填充这些信息。
+- Back-to-Back User Agent 简称 B2BUA 是一个逻辑实体它接收一个请求然后行为好像UAS。在决定请求如何应答上，它就像一个UAC，会产生请求，而不是像代理服务器，它维护着对话状态，必须参与到它所建立的的对话中所有发送过来的请求。因为它是一种UAC和UAS的联合，对于它的行为并没有明确的定义。
+- Call 一个呼叫是一个正式的词语指的是有些交流是发生在对端，通常用于建立多媒体交谈。
+- Client client客户端是一个网络上的元素指的它发送SIP请求和接收SIP响应。客户端可能不直接和用户交互，UAC和代理都是clients。
+- Conference 会议是一个多媒体会话包含多个参与者
+- Core Core对于特定的SIP实体指定了特定的功能，SIP实体比如说有状态代理，无状态代理，user agent和注册机。所有的Core除了无状态代理，都是事务用户。【简单来说就是SIP协议的核心功能组件，SIP的各个实体都要通过Core来确定不同的功能】
+- Dialog 对话是一个端对端的SIP关系，存在于两个UA之间一段时间。一个对话由SIP消息确立，比如对于一个INVITE请求的200响应。一个对话由Call-ID，local-tag，remote-tag标记。
+- Downstream 下游 描述了一种信息流向，指的是在一个事务中，请求从UAC流向UAS的方法。
+- Final Response 该响应将终止一个SIP事务，作为对应的临时响应将不会终止事务。所有的2xx, 3xx, 4xx, 5xx, 6xx响应都是最终响应。
+- Header 头字段
+- Header Field
+- Header Field value
+- Informational Response 等同于临时响应
+- Initiator 谁使用INVITE请求初始化了一个会话或对话
+- Invitation 一个INVITE请求
+- Invitee 被邀请者
+- Location Service SIP重定向服务或者代理服务使用寻址服务来获得被呼叫者的可能地址
+- Loop 指的是一种异常情况，相同的请求经过某个代理之后，又以相同的姿态回到该代理来。
+- Loose Routing 【TODO 具体含义要等看到代理那节才清楚】一种特殊的懒散路由 该代理按照本协议标准的定义来处理Route头字段。
+- Message
+- Method
+- Outbound Proxy 出站代理
+- Parallel Search 指的是代理寻址的并行搜索
+- Provisinal Response 临时响应 1xx是临时响应 其他都是最终响应
+- Proxy
+- Recursion 一个客户端在3xx响应上发生递归，它产生了一个新的请求到一个或多个URI上，这些URI中有值在本3xx响应的Contact头字段上。
+- Redirect Server 重定向服务是一个UAS它产生3xx响应，将它接收到的请求。重定向到其他client上。
+- Registrar 注册机是一个server接收REGISTER请求，然后将这些信息放入到寻址服务商，便于它进行域名操作。
+- Regular Transaction 常规事务指的是除了INVITE ACT CANCEL的其他方法的事务。
+- Request
+- Response
+- Ringback
+- Route Set 寻址集
+- Server
+- Sequential Search 指的是代理的顺序搜索
+- Session 会话
+- SIP Transaction SIP事务
+- Spiral 指的是一个请求到了一个代理，然后又回到了该代理的过程，但这次请求状态不同了。Spiral不是一个异常，不像Loop。
+- Stateful Proxy 有状态代理
+- Stateless Proxy 无状态代理
+- Strict Routing 严格路由分发【具体应该要等待代理那节才能理解】
+- Target Refresh Request 目标刷新请求 指的是一个请求能够修改本对话的远程目标
+- Transaction User 事务用户
+- Upstream 上游 类似上面的下游，这里指的是事务中响应流从UAS流向UAC的方向。
+- UAC
+- UAC Core
+- UAS
+- UAS Core
+- UA 
 
 
 
 ## 7. SIP消息
 
-【TODO】
+SIP是一个基于文本的使用UTF-8编码的协议。
+
+SIP消息要某是一个请求从client到server，要某是一个响应从server到client。
+
+请求和响应信息都使用的是RFC2822定义的基本格式，即使语法从字符集到语法具体规范有所不同。（SIP允许的头字段在RFC2822头字段里面是不合法的）所有类型的信息都由一个start-line，一个或者多个头字段，一个空行标记头字段的结束，一个可选的信息体组成。
+
+```
+generic-message  =  start-line
+                    *message-header
+                     CRLF
+                     [ message-body ]
+start-line       =  Request-Line / Status-Line
+```
+
+起始行，每个头字段行，空行都必须以 CRLF 符号终止【也就是 `\r\n`】。注意即时信息体body没有也需要把那个空行加上。
+
+【上面的内容简单看下即可，大概说的就是上面文字描述的意思，然后后面多看点SIP具体信息，大概心里就有数了。其实基本格式上的规范和HTTP协议很相似，也可能他们都属于RFC2822规范吧】
+
+### 7.1 请求
+
+SIP的请求可以通过起始行为请求行来分辨。一个请求行包含一个方法名，一个请求URI，协议版本号，由单个空格(SP)字符分割。
+
+请求行以CRLF结束【这个上面说过了】，然后请求行里面不允许出现 CR 和 LF 字符，除了最后的CRLF。LWS字符在请求行各元素中不允许出现。【LWS linear whitespace 我查了一下，并不是某个特定的键盘按键字符，具体指的是任意数目的空白SP或者制表符】
+
+```
+Request-Line  =  Method SP Request-URI SP SIP-Version CRLF
+```
+
+- Method 本协议定义了六个方法：REGISTER INVITE ACK CANCEL BYE OPTIONS 【这里描述有点简化，具体了解各个方法在后面】扩展协议标准可能还定义了额外的方法【比如rfc3428的MESSAGE方法】
+- Request-URI 请求URI是SIP或者SIPS的URI，具体在第19.1节中描述，或更加通用的URI在RFC2396中。它指出了本请求将要被寻址到哪里，送给某个用户或者服务。Request-URI一定不能包含未转义的空格字符或者control字符，然后一定不能被 `<>` 包起来。
+
+SIP元素可能支持Request-URIs 不是sip或者sips的scheme，比如说RFC2806的 tel URI schem。SIP元素可能将不是SIP URIs 按照它们自己的安排转成SIP URI或者SIPS URI或者其他scheme。
+
+- SIP-Version 请求和响应都包含一个SIP的版本号，为了考虑版本顺序，便于管理依赖，升级版本数字。服从本协议的应用发送SIP消息应该包含SIP-Version `"SIP/2.0"` 。SIP-Version字符串是大小写不敏感的，具体实现发送的时候还是一定要大写。
+
+不像 `HTTP/1.1` ，SIP把这版本数字看做一个字面意义上的字符串，实践上，还是应该没有什么区别的。
+
+
 
 ## 8. 一般User Agent行为
 
