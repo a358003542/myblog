@@ -24,9 +24,8 @@ SIP协议算是物联网的核心底层基础了，网上有一份关于SIP协�
 
 ## 一个简单的会话建立例子
 
-![Jietu20190910-150709](/Users/beixi/Desktop/Jietu20190910-150709.jpg)
 
-
+![img]({static}/images/sip_example_1.jpg)
 
 1. Tesla先给Marconi发送INVITE消息
 
