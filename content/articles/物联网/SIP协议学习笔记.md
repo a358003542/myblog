@@ -30,7 +30,7 @@ SIP协议算是物联网的核心底层基础了，网上有一份关于SIP协�
 
 1. Tesla先给Marconi发送INVITE消息
 
-```
+```text
 INVITE sip:marconi@radio.org SIP/2.0
 Via: SIP/2.0/UDP lab.high-voltage.org:5060;branch=z9hG4bKfw19b 
 Max-Forwards: 70
@@ -55,7 +55,7 @@ a=rtpmap:0 PCMU/8000
 关于头字段的的含义解释更多的请参看官方文档对应部分。
 
 2. Marconi给Tesla发送180响应 （To From Call-Id CSeq 都是直接Copy过来的， Via添加了一个received参数）更多响应信息制造细节参看官方文档
-```
+```text
 SIP/2.0 180 Ringing
 Via: SIP/2.0/UDP lab.high-voltage.org:5060;branch=z9hG4bKfw19b
 ;received=100.101.102.103
@@ -69,7 +69,7 @@ Content-Length: 0
 3. 180响应会被忽略
 4. 200响应 （还包含了sdp载体）
 
-```
+```text
 SIP/2.0 200 OK
 Via: SIP/2.0/UDP lab.high-voltage.org:5060;branch=z9hG4bKfw19b
 ;received=100.101.102.103
@@ -92,7 +92,7 @@ a=rtpmap:0 PCMU/8000
 
 5. T给M发送ACK消息
 
-```
+```text
 ACK sip:marconi@tower.radio.org SIP/2.0
 Via: SIP/2.0/UDP lab.high-voltage.org:5060;branch=z9hG4bK321g 
 Max-Forwards: 70
@@ -106,7 +106,7 @@ Content-Length: 0
 6. 实际媒体会话过程
 7. M给T发送BYE消息
 
-```
+```text
 BYE sip:n.tesla@lab.high-voltage.org SIP/2.0
 Via: SIP/2.0/UDP tower.radio.org:5060;branch=z9hG4bK392kf 
 Max-Forwards: 70
@@ -119,7 +119,7 @@ Content-Length: 0
 
 8. T给M发送BYE消息的200响应
 
-```
+```text
 SIP/2.0 200 OK
 Via: SIP/2.0/UDP tower.radio.org:5060;branch=z9hG4bK392kf
 ;received=200.201.202.203
@@ -414,7 +414,7 @@ start-line       =  Request-Line / Status-Line
 
 ### 7.1 请求
 
-SIP的请求可以通过起始行为请求行来分辨。一个请求行包含一个方法名，一个请求URI，协议版本号，由单个空格(SP)字符分割。
+SIP的请求可以通过有请求行作为第一行来分辨。一个请求行包含一个方法名，一个请求URI，协议版本号，由单个空格(SP)字符分割。
 
 请求行以CRLF结束【这个上面说过了】，然后请求行里面不允许出现 CR 和 LF 字符，除了最后的CRLF。LWS字符在请求行各元素中不允许出现。【LWS linear whitespace 我查了一下，并不是某个特定的键盘按键字符，具体指的是任意数目的空白SP或者制表符】
 
@@ -431,7 +431,172 @@ SIP元素可能支持Request-URIs 不是sip或者sips的scheme，比如说RFC280
 
 不像 `HTTP/1.1` ，SIP把这版本数字看做一个字面意义上的字符串，实践上，还是应该没有什么区别的。
 
+### 7.2 响应
 
+SIP响应可以通过有状态行作为第一行来分辨。一个状态行由协议版本号，跟着一个数字状态码和与之相关的文本组成，每个元素彼此用SP符号分割。
+
+CR和LF符号是不允许的，除了最后的CRLF字符。
+
+```
+Status-Line  =  SIP-Version SP Status-Code SP Reason-Phrase CRLF
+```
+
+状态码是一个3位的整数结果码，指出了试图理解和满足请求的结果。Reason-Phrase试图给状态码一个简短的文本描述。状态码是准备给自动机用的，Reason-phrase原因文本是准备给人类使用的。客户端并不要求检查或显示原因文本。
+
+本协议对于原因文本建议的具体用语，在实践中可能选择其他文本，比如说使用在请求的Accept-Language头字段中指示的语言。
+
+状态码的第一个数字位定义了响应的类型。最后两位数字并没有分类的作用。因此，任何响应的状态码在100到199之间的都可认为是 1xx 响应。任何响应的状态码在200到299之间的都可认为是2xx 响应，以此类推。SIP/2.0 的第一位数字允许六个值：
+
+- 1xx 临时响应 请求已接收 继续处理中
+- 2xx 成功响应 行为已成功接收，理解和接受。
+- 3xx 重定向响应 需要进一步的行为来完成本请求
+- 4xx 客户端错误 请求包含错误的语法，服务器不能完成本请求
+- 5xx 服务器错误 服务器对于完成这个看起来是有效的请求处理失败了
+- 6xx 全局失败 请求不能在任何服务器上完成
+
+第21节定义了这些类型并分别描述了这些状态码。
+
+### 7.3 头字段
+
+SIP的头字段和HTTP的头字段在语法和语义上都很相似。具体来说SIP头字段遵从H4.2 定义的语法（对于信息头和头字段扩展到多行的规则）然而，多行扩展规则在HTTP是用隐含的空白和折叠folding，本协议遵从的是RFC2234，只使用明确的空白和作为语法集的一部分的折叠。
+
+H4.2 也定义了多个头字段有相同的头字段名时，它们的值是逗号分隔的，能够合并为一个头字段。这在SIP中也是如此，但具体的规则有所不同，因为使用的是不同的语法。具体来说，任何SIP头字段格式使用如下语法是允许通过逗号分隔列表合并为一个头字段，在相同的头字段名下。
+
+```
+header  =  "header-name" HCOLON header-value *(COMMA header-value)
+```
+
+Contact头字段允许逗号comma分隔列表除非头字段的值是 `*` 。
+
+#### 7.3.1 头字段的格式
+
+头字段遵从RFC2822第2.2小节给定的通用头字段格式。每个头字段有一个字段名，后面跟着colon冒号，然后是字段值。
+
+```
+field-name: field-value
+```
+
+第25节规定的信息头的正式语法是允许冒号两侧有任意数量的空白的，然而，实践中应该避免字段名和冒号之间的空白，然后在冒号和字段值之间用一个SP即可。
+
+```
+Subject:      lunch
+Subject   :     lunch
+Subject       :lunch
+Subject: lunch
+```
+
+因此，上面的都是有效的和等同的，但最后的是推荐的格式。
+
+头字段能够扩展到多行，额外的行之前至少应该有一个SP或者HT【制表符】。换行和后续行之前的空白会被认为是一个SP字符。因此下面是等同的：
+
+```
+Subject: I know you’re there, pick up the phone and talk to me!
+Subject: I know you’re there,
+         pick up the phone
+         and talk to me!
+```
+
+有不同字段名的头字段之间的相对顺序是不重要的，然而，**推荐** 那些被代理处理需要的头字段（比如 Via Route Record-Route Proxy-Require Max-Forward Proxy-Authorization ）最好出现在信息的顶部，方便快速分析。相同字段名的头字段们的相对顺序是重要的，多个头字段行有着相同的字段名在信息中可能表示当且仅当整个字段值对于该头字段是一个逗号分隔的列表（也就是它遵从第7.3节定义的语法）。它必须可能将多个头字段行组合成为一个 `field-name: field-value` 对，通过appending操作将后续的field-value到append第一个，用逗号分隔，然后不改变信息的语义。这个规则是由例外的，比如 `WWW-Authenticate` `Authorization` `Proxy-Authenticate` `Proxy-Authorization` 头字段，这些名字的多个头字段行在信息中，然而因为它们的语法并不遵从第7.3节的基本格式，它们一定不能合并为一个单一的头字段行。
+
+实现必须能够处理多个头字段行有相同头字段名的，不管是单值单行形式，还是逗号分隔值的形式。
+
+如下头字段行组是有效的和等同的：
+
+```text
+Route: <sip:alice@atlanta.com>
+Subject: Lunch
+Route: <sip:bob@biloxi.com>
+Route: <sip:carol@chicago.com>
+
+Route: <sip:alice@atlanta.com>, <sip:bob@biloxi.com>
+Route: <sip:carol@chicago.com>
+Subject: Lunch
+
+Subject: Lunch
+Route: <sip:alice@atlanta.com>, <sip:bob@biloxi.com>,
+<sip:carol@chicago.com>
+```
+
+下面的块是有效的但是并不等同于其他的【看的出来是顺序不同】：
+
+```
+Route: <sip:alice@atlanta.com>
+Route: <sip:bob@biloxi.com>
+Route: <sip:carol@chicago.com>
+
+Route: <sip:bob@biloxi.com>
+Route: <sip:alice@atlanta.com>
+Route: <sip:carol@chicago.com>
+
+Route: <sip:alice@atlanta.com>,<sip:carol@chicago.com>,
+<sip:bob@biloxi.com>
+```
+
+一个头字段值得格式是由具体某个头字段名来定义的。它总是要某是一个难懂的TEXT-UTF8八进制序列，要某是空白，标记，分隔符和转义字符的组合。很多已经存在的头字段将会依附一种通用形式的值，由分号分隔，后面是一系列的参数名和参数值：
+
+```
+field-name: field-value *(;parameter-name=parameter-value)
+```
+
+尽管任意数目的参数对可以依附在头字段值上，但给定的参数名一定不要出现多于一次。
+
+当比较头字段时，头字段名总是大小写不敏感的。除非在定义中指出某个特定的头字段，头字段名，参数名和参数值是大小写敏感的。Token标记通常是大小写敏感的，除非特别指出。通过双引号表达的字符串是大小写敏感的，比如：
+
+```
+Contact: <sip:alice@atlanta.com>;expires=3600
+CONTACT: <sip:alice@atlanta.com>;ExPiReS=3600
+```
+是相等的。
+
+```
+Content-Disposition: session;handling=optional
+content-disposition: Session;HANDLING=OPTIONAL
+```
+是相等的
+```
+Warning: 370 devnull "Choose a bigger pipe"
+Warning: 370 devnull "CHOOSE A BIGGER PIPE"
+```
+
+是不相等的。
+
+#### 7.3.2 头字段分类
+
+有些头字段只在请求或者响应中才有意义，它们被分别称为请求头字段和响应头字段。如果一个头字段在信息中和它的分类不匹配（比如一个请求头字段在响应中），它 **一定** 要被忽略。第20节对每个头字段的分类进行了讨论。
+
+#### 7.3.3 紧促格式
+
+SIP提供了一种机制去表达常见的头字段名以一种缩写形式。当信息变得很大时，这对于传输层传输信息可能会有用（比如说用UDP的时候超过了MTU最大传输单位）。这些紧促格式在第20节中定义。一个紧促格式可能任何时候去取代一个头字段名的长名格式，而不会更改信息的语义。一个头字段名在相同的信息中即可能是长名格式，也可能是紧促格式。实现一定要同时接收相同头字段名的长名格式和紧促格式。
+
+
+
+### 7.4 信息体
+
+请求，包括本协议的扩展协议定义的请求，可能包含信息体，除非特别说明。具体信息体的解释在各个请求方法哪里，
+
+对于响应信息来说，请求方法和响应状态码决定了它的类型和信息体的解释。所有响应可能包含信息体。
+
+#### 7.4.1 信息体类型
+
+信息体的互联网媒体类型一定要在 Content-Type 头字段中给定。如果信息体经历了编码比如说压缩，那么它一定要在 Content-Encoding 头字段中说明。否则，Content-Encoding 头字段一定要省略。如果合适的话，信息体的字符集可以由Content-Type头字段的某部分值给定。
+
+由RFC2046定义的多部分信息MIME类型可能在信息体中使用。如果远程实现发送的请求Accept头字段并不含有multipart，实现发送请求包含多部分信息体一定要发送一个会话描述，这个会话描述是一个非多部分信息体。
+
+SIP信息可能含有二进制信息体或者部分，当没有明确的字符集参数提供的时，媒体类型中的text类型默认的字符集是UTF-8。
+
+#### 7.4.2 信息体长度
+
+信息体的长度由Content-Length提供（单位bytes）。第20.12描述了这个头字段必要的内容和细节。
+
+chunked 传输编码，HTTP/1.1使用的一定不能用于SIP（chunked编码修改信息体为了把它转换为一系列的chunks，每一个有它自己的size说明）
+
+### 7.5 构造信息体
+
+不同于HTTP，SIP实现可以使用UDP或其他不可靠的datagram协议。每个datagram携带一个请求或者响应。第18节说了一些不可靠传输的使用上的约束。
+
+实现处理SIP消息在流向传输中一定要忽略开头的任何 CRLF 作为起始行。
+
+Content-Lenght头字段被用户定位本SIP消息在流的结束，它在SIP消息通过流向传输中一定要展示出来。
 
 ## 8. 一般User Agent行为
 
