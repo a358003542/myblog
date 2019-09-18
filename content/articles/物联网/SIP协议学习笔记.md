@@ -16,6 +16,18 @@ SIP协议算是物联网的核心底层基础了，网上有一份关于SIP协�
 
 
 
+## 事务层从何而来 TODO
+
+事务层的初步学习，发现第17节事务层主要讨论了内部机制，比如状态，计时，和传输层的交互，和事务用户的交互，事务层基本上不包含信息处理逻辑，只相当于一个信息周转层。
+
+这里有个基本的问题，事务层从何而来。
+
+
+
+
+
+
+
 ---
 
 **下面是学习 Alan B. Johnston SIP Understanding the Session Initiation Protocol 这本书的内容 ** ，在学习阅读官方协议文档的基础上，选择了某些内容摘记在这里。
@@ -599,11 +611,33 @@ Content-Lenght头字段被用户定位本SIP消息在流的结束，它在SIP消
 
 ## 8. 一般User Agent行为
 
-一个user agent代表了一个终端系统。它包含user agent client (UAC)，这产生请求，和一个user agent server，这响应请求。一个UAC能够产生请求基于一些外部刺激（用户点击按钮或者PSTN行的信号）然后处理响应。一个UAS能够接收请求然后产生响应基于用户的输入，外部刺激，程序的执行结果或者其他机制。
+一个user agent代表了一个终端系统。它包含user agent client (UAC)，它产生请求，和一个user agent server（UAS），它响应请求。一个UAC能够产生请求基于一些外部刺激（用户点击按钮或者PSTN行的信号）然后处理响应。一个UAS能够接收请求然后产生响应基于用户的输入，外部刺激，程序的执行结果或者其他机制。
 
 当一个UAC发送请求，请求通过一些代理服务器，这将把请求转发到UAS。当UAS产生了一个响应，响应也会转发到达UAC。
 
+UAC和UAS程序极大地依赖于这两个因素：第一，基于请求和响应是否在或者不在对话里面；第二，基于请求的方法。对话会在第12节详细地讨论，它们表示一种在UA之间的端对端关系，然后通过特定的SIP方法，比如说INVITE，建立起来。
+
+在本节，我们讨论对UAC和UAS行为来说方法独立的规则，处理的这些请求在对话之外。这当然包括那些建立对话的请求。
+
+对于请求和响应的安全过程在对话之外的在第26节描述。具体来说，就是UAC和UAS存在着一种相互认证机制。也支持一种隐私特性有限集通过用S/MIME来对于信息体进行加密。
+
+### 8.1 UAC行为
+
+本节讲述了UAC在对话之外的行为。
+
+#### 8.1.1 产生请求
+
+一个UAC构造的有效的SIP请求一定，至少，包含以下头字段：To，From，CSeq，Call-ID，Max-Forwards和Via。所有这些头字段在SIP请求中都是强制性的。这六个头字段是SIP消息的基本构成单元，因为它们一起提供了分发服务大部分最重要的信息，包括信息的目标地，分发响应，限制信息扩散，信息排序和事务的唯一标识。这些头字段还要加上必要的请求行，它包含方法，请求URI和SIP版本号。
+
+对话外发送请求的例子，包含INVITE到建立一个会话（第13节），然后一个OPTIONS请求去查询能力（第11节）
+
+##### 8.1.1.1 Request-URI
+
+
+
 ## 9. 取消一个请求
+
+
 
 
 
@@ -637,7 +671,70 @@ SIP 是一个事务处理型协议：各个组件之间的交互发生在一系�
 
 ![Jietu20190903-182208](/Users/beixi/Desktop/Jietu20190903-182208.jpg)
 
-无状态代理不含client事务和server事务，事务存在于UA或一边的有状态代理和UA或另一边的有状态代理之间。就SIP事务层面上的考虑，无状态代理可以认为是完全透明的。client事务的目的就是接受某个元素上的请求，client事务就封装在该元素上（该元素被称为事务用户 TU，它可以是个UA或者状态代理），然后就是可靠地将请求传输给server事务。
+无状态代理不含client事务和server事务，事务存在于一边是UA或有状态代理和另一边是UA或有状态代理之间。就SIP事务层面上的考虑，无状态代理可以认为是完全透明的。client事务的目的就是接受某个元素上的请求，client事务就封装在该元素上（该元素被称为事务用户 TU，它可以是个UA或者状态代理），然后就是可靠地将请求传输给server事务。
+
+client事务也负责接收响应然后将它们传给事务用户，过滤掉任何重发或不允许的响应（比如说对ACK的响应）。另外，在INVITE请求案例中，client事务负责产生ACK请求，对于任何最终响应是2xx的响应。
+
+类似的，server事务的目的是接收从传输层而来的请求然后传给事务用户。server事务会过滤掉网路中任何重发的请求。server事务接收从事务用户而来的请求然后从传输层将它们发送到网路中。在哪个INVITE事务案例中，它接收ACK请求对于任何最终响应被期待是2xx 响应。
+
+2xx响应和它的ACK接收需要特别对待。它的响应只被UAS重发，而它的ACK只由UAC生成。这种端对端的处理是需要的，这样一个呼叫者知道所有用户都已经接受呼叫了。因为这种特殊的处理，2xx的重发是由UA core处理的，而不是传输层。类似的2xx的ACK请求生成，也是由UA core处理的。在路由上的代理仅仅只是向前分发2xx响应到INVITE请求和它的相关的ACK。
+
+### 17.1 Client Transaction
+
+client事务通过维护一个状态机来提供它的功能。
+
+事务用户和client事务交流通过一个简单的接口。当事务用户希望初始化一个新的事务，它新建了一个client事务实例，然后将要发送的SIP请求，还有IP地址，端口号和要发送请求的传输层传给client事务实例。client事务开始执行它的状态机。有效的响应通过client事务的将会传给事务用户。
+
+有两种类型的client事务状态机，有事务用户具体的请求方法决定。一个是针对INVITE请求的client事务，这种类型状态机叫做INVITE client事务。另一个处理除了INVITE和ACK之外的请求请求的client事务，这被叫做non-INVITE client事务。对于ACK并没有client事务，如果事务用户希望发送ACK，它会直接将请求发送给传输层。
+
+INVITE事务和其他方法事务不同是因为它的长期间隔。一般对于INVITE来说用户输入是为了一个响应的。长时间的delay延迟期待着发送一个响应要支持三次握手。另一方面，其他方法的氢气球期待着快速完成，因为非INVITE事务依赖于两次握手，事务用户们对于非INVITE请求应该立刻响应。
+
+#### 17.1.1 INVITE client事务
+
+##### 17.1.1.1 INVITE事务总览
+
+INVITE事务由三次握手组成。client事务发送INVITE，server事务发送响应，然后client事务发送ACK。对于不可靠传输层（比如UDP），client事务重发请求在一个T1时间间隔，然后后面加倍每次重发。T1是 roud-trip time(RTT) 往返时间估计，它默认是500ms。基本上所有的事务计时器，这里描述的都是以T1来进行扩展的，然后改变T1来吻合它们的值。请求在可靠传输层不会重发。在接收1xx响应之后，所有重发都要终止，然后client等待进一步的响应。server事务可以发送额外的1xx响应，它不是可靠地被server事务传输。最终，server事务决定发送最终响应。对于不可靠传输层，响应会周期性重发，对于可靠传输层，它只发送一次。对于每个最终响应，被client事务接收的，client事务会发送一个ACK，发送这个的目的就是对该响应的重发的熄火。
+
+##### 17.1.1.2 正式描述
+
+具体过程请参见下图：
+
+![Jietu20190916-115417](/Users/beixi/Desktop/Jietu20190916-115417.jpg)
+
+初始态， `calling` ，在事务用户跟着INVITE请求初始化一个client事务时一定要进入该状态。client事务一定将请求发送给传输层为了传送（第18节）。如果使用的是不可靠传输层，client事务必须启动 timer A，timerA的值是T1。如果是可靠传输层，那么client事务不应该启动timer A（timer A控制请求的重发）。对于任何传输层，client事务一定要启动timer B，timer B的值是64*T1秒（Timer B控制事务超时）
+
+当timer A到时间，client事务一定要重发请求，通过传输层，然后一定要把计时器的值设为2*T1，重发的正式定义是在事务层的上下文中是将之前发送到传输层的消息再一次送给传输层。
+
+当timer A的2*T1秒时间过了，请求一定还要重发（假设client事务还在这个状态【即calling状态】）。这个过程一定要继续下去，这样请求重发的时间间隔是每次发送的两倍。这样的重发只在client事务还在calling状态下进行。
+
+T1的默认值是500ms。T1是client事务和server事务之间的RTT估计。SIP元素可能使用（尽管不推荐）更小的T1值在封闭的私有网络下（不允许通用的互联网连接）。T1可能选择更大的值，这是推荐的如果确知（连接的高延迟）RTT是更大的值。不管T1的值是多少，本节描述的重发的指数级别的后移一定要使用。
+
+在client事务还在calling状态时，当timer B到时间了，client事务一定要通知事务用户 timeout 已经发生了。client事务一定不能产生ACK。64*T1这个值大概等于在不可靠传输层中发送了七次请求的时间。
+
+如果client事务接收了一个临时的响应，此时的状态还是calling，状态将会过渡到proceeding态。在proceeding态，client事务不应该再重发请求了。更进一步，临时响应一定要传给事务用户。任何更进一步的临时响应一定要传递给事务用户当处于proceeding态时。
+
+不管是calling态还是在proceeding态，接收300-699这些状态码一定将会导致client事务过渡到completed态。client事务一定要将接收到的响应传递给事务用户，client事务一定要产生一个ACK请求，即使传输层是可靠地（根据响应构建ACK请求的指导意见参见17.1.1.3节），然后把ACK发送给传输层。ACK一定要发送给相同的地址，端口号，传输层也是原请求发送的那个。client事务应该启动timer D当它进入completed态，timer D的值对于不可靠传输层至少是32秒，对于可靠传输层是0秒。Timer D反映的是服务事务能够在completed态停留的时间，当是不可靠传输层时。这等于INVITE服务事务的timer H时间，它默认是64*T1。然而而，client事务并不知道服务事务那边用的T1时间是多少，所以一个最小的32s被使用而不是基于T1的Timer D。
+
+```
+Any retransmissions of the final response that are received while in
+the "Completed" state MUST cause the ACK to be re-passed to the
+transport layer for retransmission, but the newly received response
+MUST NOT be passed up to the TU.  A retransmission of the response is
+defined as any response which would match the same client transaction
+based on the rules of Section 17.1.3.
+```
+
+##### 17.1.1.3 构建ACK请求
+
+### 17.2 Server Transaction
+
+#### 17.2.1 INVITE服务事务
+
+#### 17.2.2 非INVITE服务事务
+
+#### 17.2.3 匹配请求事务和服务事务
+
+#### 17.2.4 处理传输异常
 
 
 
