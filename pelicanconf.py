@@ -5,7 +5,7 @@ import sys
 
 AUTHOR = 'cdwanze'
 SITENAME = "cdwanze的博文"
-SITEURL = ''
+SITEURL = 'https://docs.cdwanze.work'
 
 PATH = 'content'
 
