@@ -476,11 +476,11 @@ UAC和UAS程序极大地依赖于这两个因素：第一，基于请求和响�
 
 一个UAC构造的有效的SIP请求一定，至少，包含以下头字段：To，From，CSeq，Call-ID，Max-Forwards和Via。所有这些头字段在SIP请求中都是强制性的。这六个头字段是SIP消息的基本构成单元，因为它们一起提供了分发服务大部分最重要的信息，包括信息的目标地，分发响应，限制信息扩散，信息排序和事务的唯一标识。这些头字段还要加上必要的请求行，它包含方法，请求URI和SIP版本号。
 
-对话外发送请求的例子，包含INVITE到建立一个会话（第13节），然后一个OPTIONS请求去查询能力（第11节）
+对话外发送请求的例子有：INVITE建立一个会话（第13节），一个OPTIONS请求去查询能力（第11节）
 
 ##### 8.1.1.1 Request-URI
 
-消息的Request-URI的初始化应该将其设为To头字段的值。一个值得一提的例外是REGISTER方法，REGISTER方法在设置Request-URI上的行为在第10节中给出。出于隐私或者便捷方面的考虑，将To头字段和请求URI设为相同的值可能是不可取（尤其是如果原始UA预期Request-URI在传输中将会发生改变）。
+消息的Request-URI的初始化应该将其设为To头字段的值。一个值得一提的例外是REGISTER方法，REGISTER方法在设置Request-URI上的行为在第10节中给出。出于隐私或者便捷方面的考虑，将To头字段和请求URI设为相同的值可能是不可取的（尤其是如果原始UA预期Request-URI在传输中将会发生改变）。
 
 在某些特定条件下，预存路由集的存在可能影响消息中的Request-URI。一个预存路由集是一个排序了的URI集合，它能够从一连串的服务器中鉴别出UAC在对话之外要发送外出请求的那个。一般来说，这是由用户在UA或者服务提供商那里手工配置的，或者通过某种非SIP机制。当一个提供商想要配置UA的出站代理时，推荐是通过预存路由集提供的那一个URI来完成这点。
 
@@ -490,51 +490,25 @@ UAC和UAS程序极大地依赖于这两个因素：第一，基于请求和响�
 
 ##### 8.1.1.2 To头字段
 
- The To header field first and foremost specifies the desired
-"logical" recipient of the request, or the address-of-record of the
-user or resource that is the target of this request. This may or may
-not be the ultimate recipient of the request. The To header field
-MAY contain a SIP or SIPS URI, but it may also make use of other URI
-schemes (the tel URL (RFC 2806 [9]), for example) when appropriate.
-All SIP implementations MUST support the SIP URI scheme. Any
-implementation that supports TLS MUST support the SIPS URI scheme.
-The To header field allows for a display name.
+To头字段首先和最重要的指定了期望的那个 "逻辑上的" 请求接受者，该用户或该请求的目标资源的记录地址。这可能是或者不是该请求的最终接受者。To头字段可能包含SIP或者SIPS URI，但它也可能合适的时候使用其他URI scheme（比如说RFC2806介绍的tel URL）。任何支持TLS的实现一定要支持SIPS URI。To头字段允许一个display name显示名字。
 
-A UAC may learn how to populate the To header field for a particular
-request in a number of ways. Usually the user will suggest the To
-header field through a human interface, perhaps inputting the URI
-manually or selecting it from some sort of address book. Frequently,
-the user will not enter a complete URI, but rather a string of digits
-or letters (for example, "bob"). It is at the discretion of the UA
-to choose how to interpret this input. Using the string to form the
-user part of a SIP URI implies that the UA wishes the name to be
-resolved in the domain to the right-hand side (RHS) of the at-sign in
-the SIP URI (for instance, sip:bob@example.com). Using the string to
-form the user part of a SIPS URI implies that the UA wishes to
-communicate securely, and that the name is to be resolved in the
-domain to the RHS of the at-sign. The RHS will frequently be the
-home domain of the requestor, which allows for the home domain to
-process the outgoing request. This is useful for features like
-"speed dial" that require interpretation of the user part in the home
-domain. The tel URL may be used when the UA does not wish to specify
-the domain that should interpret a telephone number that has been
-input by the user. Rather, each domain through which the request
-passes would be given that opportunity. As an example, a user in an
-airport might log in and send requests through an outbound proxy in
-the airport. If they enter "411" (this is the phone number for local
-directory assistance in the United States), that needs to be
-interpreted and processed by the outbound proxy in the airport, not
-the user’s home domain. In this case, tel:411 would be the right
-choice.
-A request outside of a dialog MUST NOT contain a To tag; the tag in
-the To field of a request identifies the peer of the dialog. Since
-no dialog is established, no tag is present.
-For further information on the To header field, see Section 20.39.
-The following is an example of a valid To header field:
+UAC可能会学习如何填充To头字段，对于一个特定的请求来说有多种方式。通常用户会通过人机界面来建议To头字段来填什么，可能是手工输入URI，或者通过某种地址栏来选择。更多的，用户不会完整的输入URI，而是几位数字或者字母（比如"bob"）。UA自行斟酌决定如何解释用户的输入。使用这样的字符串来作为SIP URI的用户部分，意味着该UA希望这个名字被SIP URI的@符号的右手边RHS的域解析（比如说： sip:bob@example.com）。使用这样的字符串来作为SIPS URI的用户部分意味着该UA希望能够安全的交流，那个名字要被@符号的RHS右手边的域解析。这个RHS通常是请求者的家庭域，这允许家庭域能够处理外出请求。这对于某些特性是很有用的，比如说快速拨号需要解释家庭域的用户部分。tel URL可能被UA使用，当UA不希望指定域名时，该域名需要是一个被用户输入的电话号码。然而不是这样的，请求每次穿过域都有机会这样做。举个例子，一个用户在机场可能登陆然后发送请求，通过机场的出站代理。如果他们输入"411"（这是美国的本地电话号码查询电话号码），这需要机场的出站代理解释和处理，而不是用户的家庭域。在这种情况下，tel:411可能是正确的选择。
+
+在对话外的请求一定不能包含To tag，To头字段的这个tag是用来标记对话的peer端的。因此，没有对话建立，没有tag在这里。
+
+To头字段的更多相关信息请参见第20.39节，下面是一个有效的To头字段例子：
+
+```text
+ To: Carol <sip:carol@chicago.com>
+```
 
 
 
 ##### 8.1.1.3 From头字段
+
+From头字段显示了请求的发起人的逻辑标识，可能是该用户的aor记录地址。像To头字段，它包含一个URI和一个可选的显示名字。它被SIP元素用来决定应用何种规则于该请求上（比如说自动呼叫拒绝）。因此，这很重要，From URI不应该包含UA正在上面运行的host的IP地址或者FQDN，因为那样就没有逻辑名字了。
+
+
 
 ##### 8.1.1.4 Call-ID
 
@@ -548,7 +522,49 @@ The following is an example of a valid To header field:
 
 #### 8.1.2 发送请求
 
+
+
 #### 8.1.3 处理响应
+
+响应首先经过传输层，处理后传递给事务层。事务层经过它的处理然后将其递给事务用户。大部分响应的处理在事物用户那边是方法特定的，不过，这里还是有一些普遍行为是方法无关的。
+
+##### 8.1.3.1 事务层错误
+
+
+
+##### 8.1.3.2 无法识别的响应
+
+
+
+##### 8.1.3.3 Vias
+
+
+
+##### 8.1.3.4 处理3xx响应
+
+
+
+##### 8.1.3.5 处理4xx响应
+
+确定的4xx响应需要特定的UA处理方式，和方法无关。
+
+如果是 401（Unauthorized）或者 407 （Proxy Authentication Required）响应，UAC遵循第22.2节第22.3节描述的认证过程去带着认证重试请求。
+
+如果是 413（Request Entity Too Large）响应，请求包含的信息体超过了UAS愿意接收的长度。如果可能的话，UAC应该试着重试该请求，或者忽略信息体或者使用更小的长度。
+
+如果是415（Unsupported Media Type）响应，请求包含的媒体类型不被UAS支持。UAC应该试着重发该请求，这一次只使用在响应中Accept头字段上列出的类型，然后编码采用响应中Accept-Encoding头字段列出来的编码，然后语言采用响应中Accept-Language头字段列出来的语言。
+
+如果是416（Unsupported URI Scheme）响应，Request-URI中使用的URI schem不被服务器支持。client应该试着重发请求，这一次使用SIP URI。
+
+如果是420（Bad Extension）响应，请求包含的Require或者Proxy-Require头字段列出来的option-tag的某个特性不被proxy或者UAS支持。UAC应该重发请求，这一次忽略在响应中Unsupported头字段中列出来扩展。
+
+在上面的情况中，请求通过合适的修改创建一个新的请求来重试。新的请求组成一个新的事务，Call-ID，To和From应该和之前的请求有相同的值，不过CSeq应该包含一个新的序列数，要比原来的序列数大。其他的4xx响应，包括哪些已经定义了的，重试可能也可能不可能，具体要看使用场景和方法。
+
+---
+
+第一阶段任务
+
+
 
 ### 8.2 UAS行为
 
