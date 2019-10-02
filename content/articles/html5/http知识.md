@@ -543,5 +543,3 @@ http的方法method和状态码为大家所熟知，下面就header的一些内�
 ```
 目前几乎绝大部分URI就是URL，URN只在某些特别领域使用。
 
-# 参考资料<a id="orgheadline9"></a>
-
