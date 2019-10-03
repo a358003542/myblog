@@ -3,6 +3,7 @@ Slug: tensorflow-module
 Date: 2018-11-05
 Modified: 2018-11-05
 Tags: tensorflow
+Status: draft
 
 [TOC]
 

@@ -1,6 +1,6 @@
 Title: SIP协议官方文档
 Slug: SIP-protocol
-Date: 2019-08-30
+Date: 2012-12-21
 Modified: 2019-09-20
 Tags: protocol, sip
 
