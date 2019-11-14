@@ -38,3 +38,100 @@ lxml类似于beautifulsoup也提供了find和find_all方法，但还是推荐读
 xpath方法一般会返回一个列表，不过如果你xpath语句使用 `string` 包装了的话，就会返回一个字符串，这个要注意下。
 
 关于具体的使用下面有时间慢慢写上一些。
+
+## xpath简明教程
+
+下面主要通过各个例子简要介绍xpath语法之，参考了 [阮一峰的这篇文章](http://www.ruanyifeng.com/blog/2009/07/xpath_path_expressions.html) 和菜鸟教程的xpath教程。
+
+基本东西简单了解下即可，然后多看例子吧。
+
+```
+/what   基本路径表达，下个节点
+//what  基本路径表达，任意位置的下个节点
+```
+
+这里 `/` 表示在下个节点中匹配， `//` 下个或所有子节点匹配。 
+
+```
+//div[@id='what']   根据id定位
+//div[@id='what']/a[1] 根据id定位后找下面的第一个a标签
+//div[@id='what']/a[*] 根据id定位后找下面的所有a标签
+```
+
+这里 `*` 表示所有的意思。
+
+```
+//div[@name]   找具有name属性的div标签
+
+//div[@name='what'] 找name属性等于what的div标签 
+
+//*[contains(@class,'what')] 找某个标签class属性有 what NOTICE: 这里的意思是有，多个class属性也是可以匹配的 class="what what_what"
+//div[@class='what'] 那个目标标签的class属性就是what，也就是匹配的是 class="what"
+
+//*[@id="list"]//dd[*]/a[@href and @title] 找id=list的标签下面的所有dd标签下面的a标签，a标签必须有href和title属性。
+```
+
+
+
+```
+//title[@*]  选择title，随意属性，但title标签必须有属性
+```
+
+
+
+### 选择title
+
+```
+//title
+```
+
+这是选择到了文档中任意位置的 title 标签， `/` 开头的话会选择根节点，这不太好用。
+
+### 选择title包含的文本
+
+```
+//title/text()
+```
+
+### 按照id选择
+
+```
+//div[@id='post-date']/text()
+```
+
+上面例子的意思是选择一个div标签，其有id属性 `post-date` ，如果div改为 `*` 则为随便什么标签名字。
+
+### 继续往下选
+
+```
+//*[@id='js_profile_qrcode']/div/p[1]/span/text()
+```
+
+### 选择目标标签的属性
+
+```
+////*[@id='js_profile_qrcode']//a/@href
+```
+
+
+
+### 选择属性
+
+```
+//*[@id="list"]//dd[*]/a[@href and @title]/@href  
+```
+
+### 选择文本
+
+```
+//title/text()
+```
+
+### string
+
+对于选择的节点（注意如果返回的是节点集 nodeset将只取第一个），将所有的节点（也就是包括子节点）的文本抽取出来并合并。
+
+```
+string(//div[@class="lemma-summary"])
+```
+
