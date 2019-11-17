@@ -489,6 +489,13 @@ extra_hosts:
  - "otherhost:50.31.209.229"
 ```
 
+## 设置时区
+
+```dockerfile
+# set timezone to hongkong
+RUN  unlink /etc/localtime && ln -s /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
+```
+
 
 
 

@@ -43,7 +43,7 @@ postgresql处理我们通常所谓的登录用户或者其他用户概念的术�
 ### 修改postgres的密码
 
     sudo -u postgres psql postgres
-
+    
     postgres=# \password postgres
     Enter new password: 
     Enter it again:
@@ -229,12 +229,66 @@ char( N ) , varchar( N ) , date , time , timestamp , and interval ,
 
 其中对于整数简单的就用integer，字符串简单的就用text，然后小数简单的就用real，布尔值就用boolean，此外还有一些特殊用途的数据类型值得引起我们的注意，如uuid，json，arrays，money，bytea，还有日期和时间的date，time；几何类型支持的point，line等等
 
+
+
+## Cookbook
+
+### 修改某列为unique
+
+参考了 [这个网页]( https://stackoverflow.com/questions/469471/how-do-i-alter-a-postgresql-table-and-make-a-column-unique ) 。
+
+```sql
+ALTER TABLE the_table ADD CONSTRAINT constraint_name UNIQUE (thecolumn);
+```
+
+### 删除基于某列重复值的重复行
+
+参考了 [这个网页]( https://stackoverflow.com/questions/6583916/delete-duplicate-records-in-postgresql ) 。
+
+```sql
+DELETE FROM dupes T1
+    USING   dupes T2
+WHERE   T1.id < T2.id  -- delete the older versions
+    AND T1.key  = T2.key;  -- add more columns if needed
+```
+
+USING语句有点古怪，具体要参看postgresql的delete一章，里面就介绍了如下语法：
+
+```
+DELETE FROM [ ONLY ] table_name [ * ] [ [ AS ] alias ]
+    [ USING using_list ]
+    [ WHERE condition | WHERE CURRENT OF cursor_name ]
+    [ RETURNING * | output_expression [ [ AS ] output_name ] [, ...] ]
+```
+
+```
+using_list
+A list of table expressions, allowing columns from other tables to appear in the WHERE condition. This is similar to the list of tables that can be specified in the FROM Clause of a SELECT statement; for example, an alias for the table name can be specified. Do not repeat the target table in the using_list, unless you wish to set up a self-join.
+```
+
+```
+DELETE FROM films USING producers
+  WHERE producer_id = producers.id AND producers.name = 'foo';
+```
+
+这个using和select里面的using有点区别，这里的using更像是引用了某个表，让其可以在后面的where语句中使用。
+
+### 理解postgresql的timestamptz字段类型
+
+首先数据库里面都应该是存放UTC时间，只是说以前使用timestamp的时候是属于程序上的强制性规范要求，这样避免各种纠结时区问题。而现在postgresql的timestamp字段对外说是支持时区的，但其实它内部存放的还是UTC时间，只是它帮你进行了一些自动转换。
+
+如果你是以isoformat格式存放进入timestamptz字段，或者以isoformat格式查询时间，程序员都是不用操心时区的问题的，因为isoformat里面已经有时区信息了。为了你的程序各方面表现良好，推荐你程序运行时的服务器时区设置好。然后如果你数据库服务器时区设置好在查看时间上会有更好的本地体验。
+
+
+
+
+
 ## 附录
 
 ### 配置文件在那里
 
     sudo -u postgres psql postgres
-
+    
     psql> SELECT name,setting FROM pg_settings WHERE category = 'File Locations';
            name        |                 setting                  
     -------------------+------------------------------------------
