@@ -1,4 +1,5 @@
 Title: 关于本网站
+Slug: about
 
 
 

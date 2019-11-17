@@ -89,7 +89,7 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <a class="navbar-brand" href="https://www.cdwanze.work"><span
+            <a class="navbar-brand" href="{{ SITEURL }}/"><span
                     class=site-name>网站首页</span></a>
         </div>
 
@@ -128,7 +128,7 @@
 
 
                 {% if DISPLAY_PAGES_ON_MENU %}
-                    {% for p in pages %}
+                    {% for p in pages | sort(attribute='slug', reverse = True) %}
                         <li {% if p== page %} class="active" {% endif %}>
                             <a href="{{ SITEURL }}/{{ p.url }}">{{ p.title }}</a>
                         </li>
