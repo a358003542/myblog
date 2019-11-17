@@ -1,1 +1,1 @@
-start /b pipenv run python run.py devserve
+start /b python run.py devserve
