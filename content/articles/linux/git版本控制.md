@@ -342,7 +342,13 @@ git submodule update
 git clone --recursive what.git
 ```
 
-​    
+ 如果你之前clone某个带有子模块的项目并没有将子模块clone下来，后来你又想clone了，那么可以使用下面的命令：
+
+```
+git submodule update --init --recursive
+```
+
+
 
 ### 日常子模块操作
 

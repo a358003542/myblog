@@ -47,6 +47,19 @@ jinja2中内置的过滤器有：
 
 关于safe过滤器请参看下面讨论的特殊符号的问题。
 
+
+
+## 列表排序
+
+参考了 [这个网页]( https://stackoverflow.com/questions/1959386/how-do-you-sort-a-list-in-jinja2 ) ：
+
+```jinja2
+{% for movie in movie_list|sort(attribute='rating') %}
+{% for movie in movie_list|sort(attribute='rating', reverse = True) %}
+```
+
+
+
 ## html特殊符号问题
 
 如果你的变量有这些html的特殊符号:
@@ -114,6 +127,8 @@ for语句结构如下所示:
     {{ item }}
 {%- endfor %}
 ```
+
+
 
 
 

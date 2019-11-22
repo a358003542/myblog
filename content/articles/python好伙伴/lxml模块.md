@@ -123,3 +123,11 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 string(//div[@class="lemma-summary"])
 ```
 
+如果你想提取本element节点下所有的问题：
+
+```
+e.xpath('string(.)')
+```
+
+这里 `.` 的意思是选取当前节点，而 `..` 是选取当前节点的父节点。
+
