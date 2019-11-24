@@ -13,6 +13,14 @@ Slug: pdf-ebooks
 ## 小说
 
 - [沧浪之水](https://drive.google.com/open?id=19sBP0tf9JgUiSV4lYS_44UdT-9CETiK2)
+- [大唐双龙传](https://drive.google.com/open?id=1RWmogKDfI6AbK7XKKjBB-lKaxJjIVtJD)
+- [大唐游侠传](https://drive.google.com/open?id=1pcZj3xJ8mXZ-jreDPD7S4J9roDz6R638)
+- [盗墓笔记](https://drive.google.com/open?id=1wSopfSbN8jw2y9hYnrBRsgyqTCed_cy6)
+- [二号首长](https://drive.google.com/open?id=1KnDSunZNs3zVptnMh0hHvYoTDVPQBeW0)
+- [福尔摩斯探案全集](https://drive.google.com/open?id=116iPrLOOweVV8gAx6FtTV2KyBT6YxSSC)
+- [鬼吹灯](https://drive.google.com/open?id=1VpHflw-PTsG1YHS-iaeUlDvBhy1hXA3m)
+- [绝代双骄](https://drive.google.com/open?id=17WfKjPPck8eYDSwKUb4iTcssrSL6cd2d)
+- 
 
 
 
