@@ -6,7 +6,7 @@ Slug: about
 ## 说明
 
 本网站的搜索功能还是有点用的，有几次不太想玩pelican这个东西了，然后发现不管是本地markdown写作体验，还是搜索功能支持等等，都比某书要好，当然其他的就更加不用提了。
-
+https://github.com/a358003542/myblog/blob/master/content/pages/About.md
 
 
 网站挂在外面有时查阅一些信息还是很便捷的。
