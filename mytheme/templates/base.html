@@ -181,8 +181,14 @@
             }
         }
 
+        function adjust_markdown_css(){
+            $('table').addClass('table');
+            $('table').addClass('table-striped');
+        }
+
         $(document).ready(function () {
             adjust_search_width();
+            adjust_markdown_css();
         });
 
         window.onresize = function () {

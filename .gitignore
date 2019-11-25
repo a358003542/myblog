@@ -115,3 +115,5 @@ Pipfile.lock
 *.sqlite
 Pipfile
 .DS_Store
+
+dev_output/

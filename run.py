@@ -17,8 +17,8 @@ import threading
 PROJECT = 'myblog'
 BASEDIR = os.getcwd()
 INPUTDIR = os.path.join(BASEDIR, 'content')
-OUTPUTDIR = os.path.join(BASEDIR, 'output')
-PUBLISHDIR = os.path.abspath(os.path.join(BASEDIR, '..', 'html'))
+OUTPUTDIR = os.path.join(BASEDIR, 'dev_output')
+PUBLISHDIR = os.path.join(BASEDIR, '..', 'output')
 CONFFILE = os.path.join(BASEDIR, 'pelicanconf.py')
 PUBLISHCONF = os.path.join(BASEDIR, 'publishconf.py')
 PORT = 9000

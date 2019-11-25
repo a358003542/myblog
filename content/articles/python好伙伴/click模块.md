@@ -6,7 +6,7 @@ Tags:  命令行,
 
 [TOC]
 
-# 简介
+## 简介
 
 click模块是一个类似getopt和argparse的python第三方模块，在简单了解之后，觉得其简直就是python快速创建命令行工具的类似requests之于urllib的存在，writed human-friendly。click的官方文档在 [这里](http://click.pocoo.org) ，下面就让我们来学习这么好的一个模块吧。
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     Hello wanze!
     Hello wanze!
 ```
-# 必填参数，文件操作和如何测试
+## 必填参数，文件操作和如何测试
 
 必填参数用 `@click.argument()` 来装饰添加之，如下所示:
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 ```
 标准输入的那个例子你需要按下 `Ctrl-D` 来结束文件流。
 
-# 分组和多个子命令
+## 分组和多个子命令
 
 click模块在分组和建立多个子命令功能上也设计得很简洁:
 
@@ -167,23 +167,23 @@ if __name__ == '__main__':
 
 通过 `@click.group` 来定义某个命令组，然后通过这个命令组函数的command方法 `@cli.command()` 来添加某个子命令。
 
-# 命令行选项详解
+## 命令行选项详解
 
 click模块必填参数通过 `argument()` 引入，然后可选参数通过 `option()` 引入，这里值得一提的是这两个函数的参数并不完全一样，比如说option可以跟 `prompt` 来做到当该可选参数没有输入的时候，则请求输入；但argument并无此概念。更多细节请参看下面的请求输入一小节。
 
-## default
+### default
 
 设置默认值，显然argument必填参数无此概念。
 
-## type
+### type
 
 控制数据类型，这个都有。
 
-## 接受多个输入
+### 接受多个输入
 
 `nargs` 如果设置为大于等于1的值，则命令行中要刷入这么多值，这个和argparse模块类似，不同的是不定量的多个值的情况是 `nargs=-1` ，相当于内置模块argparse的 `*` 。然后对应argparse的 `+` 也就是必须要有一个以上的值的情况，则需要额外加上 `required=True` 来控制。
 
-## count
+### count
 
 这个是option有，在某种情景下可能很有用。
 
@@ -194,11 +194,11 @@ click模块必填参数通过 `argument()` 引入，然后可选参数通过 `op
     $ log -vvv
     Verbosity: 3
 
-## 布尔值
+### 布尔值
 
 如果默认 `default=True` 这样设置了，那么默认就是存储的布尔值了，其实际上暗含加上了 `is_flag=True` 。所以如果没有设置default，则可以通过 `is_flag` 来控制具体存储的是布尔值。
 
-## 短名选项和长名选项和布尔值
+### 短名选项和长名选项和布尔值
 ```
     import sys
 
@@ -219,7 +219,20 @@ click模块必填参数通过 `argument()` 引入，然后可选参数通过 `op
 ```
 也就是通过上面的这种 `/` 分割语句来创建这种多个flag的布尔值控制，其中 `/` 左边是True，右边是False，然后短名选项跟着写入就是了。 **注意** 上面例子短名情况前面的空格是不可少的。
 
-## 多个choice选项的用法
+如果你想要这样的效果，不输入某个flag那么该flag的值就是False，输入之后则是True。可以如下做到：
+
+```python
+import click
+@click.command()
+@click.option('--break', is_flag=True)
+def main(break):
+    if break:
+        print('break')
+```
+
+
+
+### 多个choice选项的用法
 
 ```python
 @click.command()
@@ -228,7 +241,7 @@ def digest(hash_type):
     click.echo(hash_type)
 ```
 
-## 请求输入prompt控制
+### 请求输入prompt控制
 
 这个只是option才有的概念。最简单的情况如下所示:
 
@@ -241,7 +254,7 @@ def hello(name):
 
 弹出提示只有在你没有输入 `--name=` 给出值时才会出来。
 
-### 请求输入密码
+#### 请求输入密码
 
 如下所示:
 
@@ -262,7 +275,7 @@ def encrypt(password):
     click.echo('Encrypting password to %s' % password.encode('rot13'))
 ```
 
-### 请求的默认值控制
+#### 请求的默认值控制
 
 请求prompt是可以通过 `default` 来设置默认值的，在那种情况下你直接按下Enter就相当于输入默认值了。然后你还可以如下来获取系统环境下的某个值作为默认值。
 
@@ -283,9 +296,18 @@ def hello(username):
     if click.confirm('Do you want to continue?'):
         click.echo('Well done!')
 ```
-# 全局环境变量控制
+## Press any Key to continue
 
-# 命令行选项控制其他动作
+有的时候我们需要终端显示稍微停留那么一会，然后显示 Press any Key to continue ，随便按个键然后再退出，好让用户可以看到终端显示的一些信息。通过click你可以很简单的来实现这个效果：
+
+```
+import click
+click.pause()
+```
+
+
+
+## 命令行选项控制其他动作
 
 如下所示，通过 `is_eager=True` 来让该选项优先级高于其他选项。然后 `expose_value=False` 意思是如果没有输入这个选项，则不影响原命令的执行流。然后 `callback` 就是具体要跳转到的那个函数上。
 
@@ -305,7 +327,7 @@ def hello():
 
 这里最关键性的问题是理解 `ctx` `param` 和 `value` 这几个参数。
 
-# 带颜色的终端回显
+## 带颜色的终端回显
 
 click借助python模块 `colorama` 的力量有在终端显示带颜色的字体的功能，首先确认按照了 `colorama` :
 ```
