@@ -46,10 +46,8 @@ LINKS = (('MyGitHub', 'http://www.github.com/a358003542'),
 #RELATIVE_URLS = True
 
 STATIC_PATHS = ['images',
-                'pdfs',
                 'data',
-                'extra',
-                'typeset']
+                'extra']
 
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'},
