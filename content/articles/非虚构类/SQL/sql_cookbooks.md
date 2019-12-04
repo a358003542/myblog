@@ -98,3 +98,15 @@ where news.html = '' and news.insert_time >= '2019-11-19' and news.id = t2.id;
 同样参考postgresql的官方文档，这里update...from... 也类似于 select 里面的from_list table，如果是本表格自身的话那么就是 self join。
 
 这样self join之后后面你的update操作是可以引用这个表格的值的。
+
+
+
+## 快速检查某一行是否存在
+
+参考了 [这个网页](<https://stackoverflow.com/questions/7471625/fastest-check-if-row-exists-in-postgresql> ) ，如下所示：
+
+```
+select exists(select 1 from contact where id=12)
+```
+
+这里值得一提的是，用python的SQL数据库通用的DB2接口，也就是pymysql或者psycopg2查询得到的直接是python的bool对象，True或者False，因为上面使用exists函数。

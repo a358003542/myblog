@@ -18,20 +18,26 @@ Slug: python-pypi
 
 安装就是先安装pip3：
 
-    sudo apt-get install python3-pip
+```text
+sudo apt-get install python3-pip
+```
 
 然后通过pip3来安装setuptools：
 
-    sudo pip3 install setuptools
+```text
+sudo pip3 install setuptools
+```
 
 最简单的"setup.py"文件如下所示：
 
-    from setuptools import setup, find_packages
-    setup(
-        name = "HelloWorld",
-        version = "0.1",
-        packages = find_packages(),
-    )
+```python
+from setuptools import setup, find_packages
+setup(
+    name = "HelloWorld",
+    version = "0.1",
+    packages = find_packages(),
+)
+```
 
 第一行是从setuptools模块中引入setup函数和 `find_packages` 函数。
 
@@ -82,17 +88,7 @@ description
 : 本软件的简要描述
 long_description
 
-: 本软件的完整描述，一般如下定义一行函数，然后读取本地目录下面README.md文件。
-
-```python
-import codecs
-
-def long_description():
-    with codecs.open('README.md', encoding='utf-8') as f:
-        return f.read()
-```
-
-
+: 本软件的完整描述
 
 platforms
 
@@ -100,7 +96,7 @@ platforms
 
 classifiers
 
-: 本软件的分类，请参考 [这个网页](https://pypi.python.org/pypi?%3Aaction=list_classifiers) 给出一些值。是字符串的列表。
+: 本软件的分类，请参考 [这个网页](<https://pypi.org/classifiers/> ) 给出一些值。是字符串的列表。
 
 keywords
 
@@ -109,7 +105,7 @@ keywords
 packages
 
 : 你的软件依赖的模块。一般如下使用： 
-```
+```text
 packages = find_packages()
 ```
 则文件夹下有 `__init__.py` 文件的，都将视作python模块包，其内的py文件都将加入进去。
@@ -118,7 +114,7 @@ packages = find_packages()
 
 entry_point
 : 
-```
+```text
 entry_points = {
 'console_scripts' :[ 'zwc=zwc.zwc:main',],
 }
@@ -150,7 +146,7 @@ include_package_data
 
 - data_files 前面的package_data是只能在你的模块文件夹里面的其他数据文件等，然后可能还有一些数据文件你需要包含的，用data_files来控制，具体后面跟着的参数格式如下面例子所示：
 
-```
+```text
 data_files = [('icos',['icos/wise.ico'])],
 #这是添加的icos文件夹下面的wise.ico文件
 data_files = [('',['skeleton.tar.gz'])],
@@ -173,8 +169,6 @@ pipenv的 `pipenv install -e .` 也是这个develop模式，你修改的代码�
 
 
 
-
-
 ## pkg_resources模块来管理读取资源文件
 
 如下所示：
@@ -189,27 +183,91 @@ pipenv的 `pipenv install -e .` 也是这个develop模式，你修改的代码�
 上面的例子是resource_filename，返回的是引用的文件名。此外还有命令：resource_string，参数和resource_filename一样，除了它返回的是字节流。这个字节流可以赋值给某个变量从而直接使用，或者存储在某个文件里面。
 
 
-## 在pypi上注册你的软件
+## 在pypi上传你的软件
 
-具体很简单，就是
+### 正确处理README文档
 
+现在pypi已经支持markdow文档格式了。推荐按照官方文档 [这里](<https://packaging.python.org/guides/making-a-pypi-friendly-readme/> ) 来处理：
+
+```python
+from setuptools import setup
+
+# read the contents of your README file
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+setup(
+    name='an_example_package',
+    # other arguments omitted
+    long_description=long_description,
+    long_description_content_type='text/markdown'
+)
 ```
-python3 setup.py register
+
+有段时间我用 `codecs` 来读取README文件一直出现一切奇怪的问题，原因不明。就如同上面这样直接读取即可。
+
+注意上面配置的 `long_description_content_type` ，如果你喜欢 `reStructuredText` 格式，那么设置为 `text/x-rst` 即可。
+
+首先推荐升级最新的setuptools，wheel和twine模块。
+
+然后直接用下面这句：
+
+```text
+python setup.py sdist bdist_wheel
+```
+
+这样将直接dist文件夹下面生成源码tar包和wheel包。
+
+然后推荐运行下：
+
+```text
+twine check dist/*
+```
+
+来确保你的文档格式没问题。
+
+### 推荐使用twine上传
+
+使用twine上传到pypi很简单：
+
+```text
+twine upload dist/*
+```
+
+你每次都需要输入用户名和密码，你可以安装 `keyring` 模块，然后运行：
+
+```text
+keyring set https://upload.pypi.org/legacy/ your-username
+```
+
+来本地安全保存你的用户名和密码。
+
+## pypi下载使用国内源
+
+豆瓣的pypi源 `https://pypi.douban.com/simple`  或者 清华的pypi源 `https://pypi.tuna.tsinghua.edu.cn/simple` 都可以吧。
+
+临时使用用 `-i` 或者 `--index` 选项： 
+
+```text
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple some-package
+```
+
+永久更改本地配置：
+
+```text
+pip install pip -U
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 
-你需要在pypi官网上注册一个帐号，然后你的软件不一定能够注册成功，因为很多好名字都被别人取了。。
 
-## 在pypi上上传你的软件
-```
-python3 setup.py sdist upload
-```
+## pypi只下载软件源文件
 
-## 下载pypi上的软件源文件
+下载pypi上的目标软件源文件而不是安装。参考了 [这个网页](http://stackoverflow.com/questions/7300321/how-to-use-pythons-pip-to-download-and-keep-the-zipped-files-for-a-package) 。
 
-参考了 [这个网页](http://stackoverflow.com/questions/7300321/how-to-use-pythons-pip-to-download-and-keep-the-zipped-files-for-a-package) 。
-
-```
+```text
 pip install --download="/pth/to/downloaded/files" package_name
 ```
 
@@ -224,7 +282,7 @@ Virtualenv模块的主要作用就是建立一个封闭独立的python开发环�
 
 安装就是用pip来安装常规安装即可。
 
-```
+```text
 sudo pip install virtualenv
 ```
 
@@ -232,7 +290,7 @@ sudo pip install virtualenv
 ### 新建一个项目
 新建一个项目就是使用virutalenv命令，然后后面跟一个文件夹名字，等下要新建的文件夹名字。
 
-```
+```text
 virutalenv [path]
 ```
 
@@ -243,7 +301,7 @@ virutalenv [path]
 
 - `--system-site-packages` ，如果加上这个选项，那么你的虚拟环境是可以使用安装到系统里去的那些python模块的。参考了 [这个网页](http://stackoverflow.com/questions/3371136/revert-the-no-site-packages-option-with-virtualenv) ，这是个很值得一提的小技巧，那就是如果你之前设定是venv可以引用系统级的那些python模块，后面你又不想了，这个时候是不需要重新安装虚拟环境的，只需要在虚拟环境中创建一个这个空白文件即可：
 
-```
+```text
 lib/python3.5/no-global-site-packages.txt
 ```
 
@@ -255,7 +313,7 @@ lib/python3.5/no-global-site-packages.txt
 
 运行下面的命令即进入本地虚拟环境：
 
-```
+```text
 cd venv
 source bin/activate
 ```
@@ -267,11 +325,7 @@ source bin/activate
 
 运行deactivate命令即可
 
-```
+```text
 deactivate
 ```
-
-
-## pipenv模块
-强烈推荐读者了解下pipenv模块。
 
