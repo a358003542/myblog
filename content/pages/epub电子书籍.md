@@ -10,8 +10,6 @@ Slug: epub-ebooks
 
 
 
-## 小说
-
 | 左列                                                         | 右列                                                         |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [沧浪之水](https://drive.google.com/open?id=1KfJkWWtyCUOY_zvFqV3Ml8Yz1Qe3gMFx) | [大唐双龙传](https://drive.google.com/open?id=1AEvbGEK_XAdRtsEtx1Ro1kJYsWuzvwf3) |
@@ -20,10 +18,6 @@ Slug: epub-ebooks
 | [鬼吹灯](https://drive.google.com/open?id=1XOrzLeOzjaKMNh3puWXaiAx-U4sn6u3Q) | [绝代双骄](https://drive.google.com/open?id=1OlzbmUg509v8P9Rix0LR9aiIFUNsAOAI) |
 | [连城诀](https://drive.google.com/open?id=1ecrY2r0dbP3F1do5a7xWx3khH3S-3RtW) | [鹿鼎记](https://drive.google.com/open?id=1OjkMTaNDMTHY3tK4qs0Bl2tYa8L-OcJF) |
 | [明朝那些事](https://drive.google.com/open?id=1I2h2nhD35spm2ezChpbBowze-f-RooNs) | [如懿传](https://drive.google.com/open?id=1AOmBNnFSrBLMVW8MIbS5HJg61CtrI8JD) |
-
-
-
-## 文学
 
 
 
