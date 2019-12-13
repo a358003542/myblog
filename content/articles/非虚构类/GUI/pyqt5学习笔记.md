@@ -7,12 +7,6 @@ Slug: pyqt5-learning-notes
 
 
 
-Title: pyqt5编程之-安装和配置
-Date: 2018-05-26
-Slug: pyqt5-development-environment
-
-[TOC]
-
 # 安装和配置
 
 就是利用pip3 安装之：
