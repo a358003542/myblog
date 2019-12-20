@@ -6,7 +6,7 @@ Slug: epub-ebooks
 
 ## 简介
 
-这里列出的epub电子书籍，或个人收集而来的精华书籍，或个人排版整理的电子书籍，都放在google硬盘上，分享给大家。
+这里列出的epub电子书籍，为个人排版整理的电子书籍，都放在google硬盘上，分享给大家。
 
 
 
@@ -16,7 +16,6 @@ Slug: epub-ebooks
 - [大唐游侠传](https://drive.google.com/open?id=1DVGFoA1VEjh8ryKbtdQfNwafvlvlMmXl) 
 - [盗墓笔记](https://drive.google.com/open?id=1nXddk3OaqULnqH8Pz_9HVj7irpVNREr9) 
 - [二号首长](https://drive.google.com/open?id=1TojhiF7FIEtk-gmYyqVrj7ivl9A7Gcs-) 
-- [福尔摩斯探案全集](https://drive.google.com/open?id=1oNWyZF0_xd3FAAXAZbUuGa50hu9GyBZ2) 
 - [鬼吹灯](https://drive.google.com/open?id=1XOrzLeOzjaKMNh3puWXaiAx-U4sn6u3Q) 
 - [绝代双骄](https://drive.google.com/open?id=1OlzbmUg509v8P9Rix0LR9aiIFUNsAOAI) 
 - [连城诀](https://drive.google.com/open?id=1ecrY2r0dbP3F1do5a7xWx3khH3S-3RtW) 
@@ -26,7 +25,6 @@ Slug: epub-ebooks
 - [活出意义来](https://drive.google.com/open?id=1jvKkYaRsxx0LdUqu6pL_E9_Ww6on3Tyy)
 - [少年维特的烦恼](https://drive.google.com/open?id=10OVhgn4ijqMmGNAt0bhKnNZMh6AuyABb)
 - [唐诗三百首](https://drive.google.com/open?id=1Uj1ceIv6KNDoQDWu4xNHrau0kxNBBrnK)
-- [西方哲学史](https://drive.google.com/open?id=1_4J9Jkox8z28RDagolnnOKXfeUVa8obS)
 - [unix编程艺术](https://drive.google.com/open?id=1LvQdWZ5ZG0Xytapv5N2ehC5ZPYWm8Yir)
 
 
