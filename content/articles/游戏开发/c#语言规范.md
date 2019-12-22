@@ -1,7 +1,7 @@
 Title: c#语言规范
-Slug: c#-specification
+Slug: csharp-specification
 Date: 2019-12-22
-Tags: c#
+Tags: c#, csharp
 
 [TOC]
 

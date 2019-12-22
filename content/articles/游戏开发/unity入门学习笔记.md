@@ -77,32 +77,31 @@ Tags: unity
 
     现在GridSpace脚本文件第一阶段初步版本【未完全版】大致如下所示：
 
-    ```c#
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
-    
-    using UnityEngine.UI;
-    public class GridSpace : MonoBehaviour
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+using UnityEngine.UI;
+public class GridSpace : MonoBehaviour
+{
+    public Button button;
+    public Text buttonText;
+    public string playerSide;
+
+    private GameController gameController;
+    public void SetGameControllerReference(GameController controller)
     {
-        public Button button;
-        public Text buttonText;
-        public string playerSide;
-    
-        private GameController gameController;
-        public void SetGameControllerReference(GameController controller)
-        {
-            gameController = controller;
-        }
-        public void SetSpace()
-        {
-            buttonText.text = gameController.GetPlayerSide();
-            button.interactable = false;
-            gameController.EndTurn();
-        }
+        gameController = controller;
     }
-    
-    ```
+    public void SetSpace()
+    {
+        buttonText.text = gameController.GetPlayerSide();
+        button.interactable = false;
+        gameController.EndTurn();
+    }
+}
+```
 
 29. 点击prefabs的Grid Space ，然后点击 Add Componet ，选择scripts脚本，选择Grid Space
 
@@ -113,8 +112,9 @@ Tags: unity
 32. 下面是为游戏新增一个全局控制对象 ，create -> create Empty ，创建一个空对象
 
 33. 然后在scripts哪里新建一个c#脚本 GameController，初步内容如下：
-    ```c#
-    using System.Collections;
+
+```c#
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -198,9 +198,8 @@ public class GameController : MonoBehaviour
         }
     }
 }
+```
 
-    ```
-    
 34. 这个脚本定义了 `public Text[] buttonList;`  将这个脚本 add component 到 Game controller那个空对象上之后，将Button list的大小设为 9 ，然后逐个将之前定义的那些按钮的文本对象添加进来，注意顺序。
 
 35. 关于C#脚本语言的熟悉和理解这个往后面放一放，关于本例子涉及到的东西的详细了解和本例子的继续完善后面再说，本例子主要是对unity游戏开发大概情况有个了解。 

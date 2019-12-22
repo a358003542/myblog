@@ -1,7 +1,7 @@
 Title: c#入门学习笔记
-Slug: c#-beginning-learning-notes
+Slug: csharp-beginning-learning-notes
 Date: 2019-12-22
-Tags: c#
+Tags: c#, csharp
 
 [TOC]
 
