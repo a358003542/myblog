@@ -2,6 +2,7 @@ Title: c#语言规范
 Slug: csharp-specification
 Date: 2019-12-22
 Tags: c#, csharp
+Status: draft
 
 [TOC]
 
