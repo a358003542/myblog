@@ -275,26 +275,23 @@ git push origin dev:master
 
 ## tag功能
 
-我们看到github上有个release栏就是基于git的tag功能 ，参考了 [这篇文章](http://zengrong.net/post/1746.htm) 。
+我们看到github上有个release栏就是基于git的tag功能 ，可以通过如下命令来推送一个release或者说提交一个tag。如果你需要修改额外的说明信息或者额外附加某个bin或者exe文件，要到github上网页操作。
 
-### 查看tag
-
+- 查看tag
 ```
 git tag
 ```
-
-### 添加tag
+- 添加tag
 
 ```
 git tag tag_name
 ```
-
-
-### 将tag推送到远程
+- 将tag推送到远程
 
 ```
 git push --tag
 ```
+
 
 
 ## commit几次之后的后悔行为

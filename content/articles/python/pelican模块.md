@@ -1,8 +1,9 @@
 Title: pelican模块
 Slug: pelican-module
 Date: 2016-09-25 
-Modified: 2019-03-07  
+Modified: 2019-12-30
 Tags: pelican, 静态网站生成, python
+
 [TOC]
 
 # 简介
@@ -74,7 +75,18 @@ STATIC_PATHS = ['images',
                 'extra',]
 ```
 
+## 引用本博客内部文章
+
+引用本博客内部文章不需要考虑该文章的slot细节，直接如下引用：
+
+```text
+{filename}path/to/what.md
+```
+
+
+
 ## 引用静态资源
+
 比如在markdown里面引入图片如下所示：
 
 ```md
