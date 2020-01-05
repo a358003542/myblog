@@ -191,7 +191,95 @@ set和setq的区别就在那个引号，setq不需要加上那个引号，第一
 
 然后我们再进入emacs，我们发现smex里面多了一个open命令，之前没有的，然后原有的find-file命令也还在。
 
+## CLISP开发环境搭建
 
+推荐使用 **protacle** 。
+
+### 利用quicklisp安装cl-project
+
+在slime-repl里面输入：
+
+```lisp
+(ql:quickload :quickproject)
+(quickproject:make-project "wanze_clisp_project")
+```
+
+这就是一个快速创建lisp项目的模板项目，参考一下即可。
+
+quicklisp 大概有这些操作：
+
+```lisp
+(ql:quickload "vecto") 
+(ql:uninstall system-name)
+```
+
+### 加载自己编写的项目
+
+新建的项目移动到 protacle 安装目录的 projects那个文件夹下，然后就可以调用：
+
+```lisp
+(ql:quickload "wanze_clisp_project") 
+```
+
+但是这样加载之后还什么东西都没有，package.lisp 下如要加上如下内容：
+
+```lisp
+;;;; package.lisp
+
+(defpackage #:wanze_clisp_project
+  (:use #:cl)
+  (:export #:hello
+  ))
+  
+(in-package wanze_clisp_project)
+```
+
+然后把那个hello函数加到 `wanze_clisp_project.lisp` 文件里面去。
+
+```lisp
+(defun hello () (print "hello"))
+```
+
+现在在slime repr 哪里你可以这样做了：
+
+```text
+CL-USER> (ql:quickload :wanze_clisp_project)
+To load "wanze_clisp_project":
+  Load 1 ASDF system:
+    wanze_clisp_project
+; Loading "wanze_clisp_project"
+
+(:WANZE_CLISP_PROJECT)
+CL-USER> (wanze_clisp_project:hello)
+
+"hello" 
+"hello"
+CL-USER> 
+```
+
+这是一种做法，此外你还可以在emacs打开文件，一边编写函数一边在slime repr哪里测试。
+
+具体就是首先在slime repr哪里加载目标项目，然后运行：
+
+```
+(in-package wanze_clisp_project)
+```
+
+现在你可以在slime repr哪里直接运行：
+
+```
+(hello)
+```
+
+然后你打开主lisp文件编写函数，然后光标放在那个函数哪里，然后执行 `Ctrl+c Ctrl+c` ，重新编译该函数。
+
+然后再到slime repr 哪里运行 
+
+```
+(hello)
+```
+
+你会发现函数新的修改立马生效了。
 
 --------------
 
