@@ -39,6 +39,12 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 关于具体的使用下面有时间慢慢写上一些。
 
+
+
+
+
+
+
 ## xpath简明教程
 
 下面主要通过各个例子简要介绍xpath语法之，参考了 [阮一峰的这篇文章](http://www.ruanyifeng.com/blog/2009/07/xpath_path_expressions.html) 和菜鸟教程的xpath教程。
@@ -52,7 +58,7 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 这里 `/` 表示在下个节点中匹配， `//` 下个或所有子节点匹配。 
 
-```
+```text
 //div[@id='what']   根据id定位
 //div[@id='what']/a[1] 根据id定位后找下面的第一个a标签
 //div[@id='what']/a[*] 根据id定位后找下面的所有a标签
@@ -60,7 +66,7 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 这里 `*` 表示所有的意思。
 
-```
+```text
 //div[@name]   找具有name属性的div标签
 
 //div[@name='what'] 找name属性等于what的div标签 
@@ -73,7 +79,7 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 
 
-```
+```text
 //title[@*]  选择title，随意属性，但title标签必须有属性
 ```
 
@@ -81,7 +87,7 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 ### 选择title
 
-```
+```text
 //title
 ```
 
@@ -89,13 +95,13 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 ### 选择title包含的文本
 
-```
+```text
 //title/text()
 ```
 
 ### 按照id选择
 
-```
+```text
 //div[@id='post-date']/text()
 ```
 
@@ -103,13 +109,13 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 ### 继续往下选
 
-```
+```text
 //*[@id='js_profile_qrcode']/div/p[1]/span/text()
 ```
 
 ### 选择目标标签的属性
 
-```
+```text
 ////*[@id='js_profile_qrcode']//a/@href
 ```
 
@@ -119,13 +125,13 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 对于选择的节点（注意如果返回的是节点集 nodeset将只取第一个），将所有的节点（也就是包括子节点）的文本抽取出来并合并。
 
-```
+```text
 string(//div[@class="lemma-summary"])
 ```
 
 如果你想提取本element节点下所有的问题：
 
-```
+```text
 e.xpath('string(.)')
 ```
 
