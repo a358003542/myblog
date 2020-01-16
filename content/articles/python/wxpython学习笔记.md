@@ -1,7 +1,7 @@
 Title: wxpython学习笔记
 Date: 2012-12-21
 Slug: wxpython-learning-notes
-Tags: wxpython,
+Tags: wxpython, GUI
 
 
 [TOC]

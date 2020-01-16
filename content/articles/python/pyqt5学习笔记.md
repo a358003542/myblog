@@ -1,6 +1,7 @@
 Title: pyqt5学习笔记
 Date: 2012-05-26
 Slug: pyqt5-learning-notes
+Tags: GUI
 
 
 [TOC]
