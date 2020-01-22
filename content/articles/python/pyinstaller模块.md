@@ -34,5 +34,13 @@ pyinstaller you_entry_point.spec
 
 
 
+### 添加额外的文件
 
+spec文件下配置 `datas` 这个列表值：
+
+```text
+datas=[ ('src/README.txt', '.') ],
+```
+
+大概意思是把那里的那个文件copy到目标dist文件夹的那里。
 
