@@ -3,7 +3,6 @@ Slug: pycharm-webstrom-editor
 Date: 2018-03-13 10:27
 Modified: 2018-03-13 10:27
 Tags: editor,
-Status: draft
 [TOC]
 
 一般的操作就不多说了，下面主要说一些略显高级的技巧。
