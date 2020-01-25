@@ -1,6 +1,6 @@
 Title: pandas模块
 Date: 2018-07-01
-Modified: 2019-03-12
+Modified: 2020-01-25
 Tags: 科学计算, 
 
 [TOC]
@@ -31,7 +31,7 @@ pandas的io子模块写得很便捷，实际上我经常看到有些python程序
 
 
 
-### 读txt文件
+### 读csv文件
 
 实际上我们可能更常遇到的是txt文件，还是用 read_csv 函数来读，只是需要做一些额外的配置，比如 [这个问题](https://stackoverflow.com/questions/21546739/load-data-from-txt-with-pandas) 里面的例子是这样的：
 
@@ -48,7 +48,17 @@ read_csv 有很多选项，应付初步加载csv数据进入df内是绝对没问
 
 利用pd.read_excel来读excel文件里面的数据，这个功能需要安装 **xlrd** 模块。
 
+### 读取html网页
 
+读取html网页具体就是分析网页里面的table标签所在，然后刷table并将数据填充到df里面去。 `read_html` 我遇到的一个问题是它会自动分析里面的数值并将其转成整型、浮点型等，因为网页数据一般不是很规范，这个自动转换很可能不合你的心意。
+
+我遇到这种情况后，分析源码后发现 `read_html` 这个函数并不能接受额外的参数，而你需要将 dtypes 传递进去，里面有个过程会判断是否有dtypes 传递进来，否则自动试着判断数据类型，主要是数值型。也就是首先你需要定制read_html函数，简单来说就是copy原代码然后加上 `**kwargs` 传递到 `_parse` 哪里。然后：
+
+```
+df = read_html(html, dtype=str)
+```
+
+这样就控制所有的数据都是字符串了，参考了 [这个网页](https://stackoverflow.com/questions/49684951/pandas-read-csv-dtype-read-all-columns-but-few-as-string)。
 
 ### 执行某个sql查询语句
 

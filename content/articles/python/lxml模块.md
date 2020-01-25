@@ -1,7 +1,7 @@
 Title: lxml模块
 Slug: lxml-module
 Date: 2019-11-05
-Modified: 2019-11-05
+Modified: 2020-01-25
 Tags:  xml, lxml, html
 
 [TOC]
@@ -41,7 +41,16 @@ xpath方法一般会返回一个列表，不过如果你xpath语句使用 `strin
 
 
 
+## 如何按照xpath删除元素
 
+参考了 [这个网页](https://stackoverflow.com/questions/7981840/how-to-remove-an-element-in-lxml) 。
+
+```python
+def remove_tag_by_xpath(tree, xpath):
+    for bad in tree.xpath(xpath):
+        bad.getparent().remove(bad)
+    return tree
+```
 
 
 

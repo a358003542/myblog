@@ -546,7 +546,27 @@ array([[0.11653471, 0.72362219, 0.93142213],
        [2.03263166, 0.1941374 , 1.23463108]])
 ```
 
+### unique函数
 
+```text
+import numpy as np
+
+list_dupes = [1, 5, 6, 2, 5, 6, 8, 3, 8, 3, 3, 7, 9]
+
+res = np.unique(list_dupes)
+
+>>> [1 2 3 5 6 7 8 9]
+
+import numpy as np
+
+list_dupes = [[1, 5, 6, 2, 5, 6, 8, 7, 9], [1, 1, 2, 2, 3, 3, 5, 6, 7]]
+
+res = np.unique(np.array(list_dupes))
+
+>>> [1 2 3 5 6 7 8 9]
+```
+
+将返回给定数据集的唯一元素集合。对于ndarray的多维对象，将会flatten还有再找出唯一值。
 
 ### tile函数
 
@@ -612,8 +632,6 @@ numpy.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)
 ### np.logical_and
 
 点对点的逻辑and操作。
-
-
 
 ### np.all
 

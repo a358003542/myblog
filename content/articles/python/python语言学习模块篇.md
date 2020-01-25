@@ -2074,13 +2074,28 @@ name改成小写，我不太喜欢这种风格，因为将configparser刷成字�
     self.cfg.optionxform = str## not auto make it lowercase
 
 
+
 ## csv模块
 
-下面主要介绍了自定义csv方言的情况，更加简单的txt文本样式，有时使用pandas会很方便，有时就是简单的使用自己定义的逗号分隔，一行行附加打印入文本即可，并不需要特别的处理。
+csv模块的使用主要是 `reader` 和 `writer` 两个函数，此外还提供了 `DictReader` 和 `DictWriter` 两个基于 reader和 writer的两个辅助类。reader和writer是接受的文件对象，具体使用参见官方的样例：
 
-### 自定义csv方言
+```python
+import csv
 
-首先我们看到最通用的excel格式的csv方言写法：
+with open('eggs.csv', 'w', newline='') as csvfile:
+    spamwriter = csv.writer(csvfile, delimiter=' ',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    spamwriter.writerow(['Spam'] * 5 + ['Baked Beans'])
+    spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
+
+with open('eggs.csv', newline='') as csvfile:
+    spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+    for row in spamreader:
+        print(', '.join(row))
+```
+
+reader和writer两个函数后面接受的参数根据你的需要定制，具体就是所谓的csv方言格式。首先你可能不需要做任何修改，默认是采用的excel格式的csv方言：
+
 
 ```python
 class excel(Dialect):
@@ -2091,40 +2106,52 @@ class excel(Dialect):
     skipinitialspace = False
     lineterminator = '\r\n'
     quoting = QUOTE_MINIMAL
-register_dialect("excel", excel)
 ```
 
 下面就这些字段的含义作出说明：
 
 - **delimiter**  分隔符，这个意义很明显。
-
 - **lineterminator**  换行符，这个意义也很明显，目前主要就两种： `\r\n`  和 `\n` 。
-
 - **skipinitialspace**  默认是False，其主要是对于如果你将空格设置为分隔符时有意义，这样后面字符开始的空格将会被忽略，其他情况设置为True或者False区别不大。
-
-    ---
-
 - **quoting**  设置quote规则
-
-    - csv.QUOTE_MINIMAL 意思是只有在需要的情况下才加上双引号，比如逗号在字符串里面，双引号在字符串里面，换行符号在字符串里面等等。
-
-    - csv.QUOTE_ALL 意思是都加上双引号，即使是数字。
-
-    - csv.QUOTE_NONNUMERIC 数字不加，字符串都加上双引号。（只有在这种情况下csv模块才会正确将数字解析为float类型）
-
-    - csv.QUOTE_NONE 都不加（此时需要设置好escapechar选项）
-
+- csv.QUOTE_MINIMAL 意思是只有在需要的情况下才加上双引号，比如逗号在字符串里面，双引号在字符串里面，换行符号在字符串里面等等。
+    
+- csv.QUOTE_ALL 意思是都加上双引号，即使是数字。
+    
+- csv.QUOTE_NONNUMERIC 数字不加，字符串都加上双引号。（只有在这种情况下csv模块才会正确将数字解析为float类型）
+    
+- csv.QUOTE_NONE 都不加（此时需要设置好escapechar选项）
 - **quotechar** 设置quote具体的字符，一般设置为双引号。
-
 - **doublequote** 用来处理双引号在字符串中的情况，默认是True，字符串将会双引号之外再加上双引号，如果设置为False，会前面加上一个 `escapechar` 。
 
+如果你对csv的输出格式并没有太多要求或者和excel格式是一致的，那么简单的csv文件的读写如下所示，是不需要太多参数的：
 
-自己定义csv方言就是类似的写上这样一个方言类，然后如下注册好即可：
-
-```
+```python
 import csv
 
-class MindMapCSV(csv.Dialect):
+with open('eggs.csv', 'w', newline='', encoding='utf8') as csvfile:
+    spamwriter = csv.writer(csvfile)
+    spamwriter.writerow(['Spam'] * 5 + ['Baked Beans'])
+    spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
+
+with open('eggs.csv', newline='', encoding='utf8') as csvfile:
+    spamreader = csv.reader(csvfile)
+    for row in spamreader:
+        print(', '.join(row))
+```
+
+
+
+
+### 编写自己的csv方言
+
+
+如之前所示你可以指定一些csv方言的选项，或者如下所示定义一个你的csv方言类：
+
+```python
+import csv
+
+class YourDialectCSV(csv.Dialect):
     delimiter = ',' # 分隔符
     quotechar = '"' # quote符号
     doublequote = True # 双引号在字符中的情况
@@ -2132,93 +2159,44 @@ class MindMapCSV(csv.Dialect):
     lineterminator = '\n' # 换行符
     quoting = csv.QUOTE_MINIMAL # 最小quote
 
-csv.register_dialect("MindMapCSV", MindMapCSV)
+csv.register_dialect("YourDialectCSV", YourDialectCSV)
 ```
 
+这样后面你使用csv模块的reader和writer函数加上 `dialect='YourDialectCSV'`  即可。
 
+### DictReader和DictWriter类
 
-#### 对应的Reader编写
-
-下面贴出一个样例，具体要看你设计的csv方言来的。
+对于开头一行是字段名的csv文件，推荐使用DictReader和DictWriter两个类，两个类初始实例化的时候同样可以接受dialect选项或其他参数，这些参数会原封不动传递给reader
 
 ```python
-class Reader():
-    def __init__(self,f,dialect='sv'):
-        self.lines = []
-        for line in csv.reader(f, dialect):
-            line = [self.to_float(e) for e in line]
-            self.lines.append(line)
+class DictReader:
+    def __init__(self, f, fieldnames=None, restkey=None, restval=None,
+                 dialect="excel", *args, **kwds):
+		self.reader = reader(f, dialect, *args, **kwds)
 
-    def getrow(self,num):
-        return self.lines[num-1]
-
-    def getcol(self,head):
-        index = self.getrow(1).index(head)
-        lst = []
-        for line in self.lines:
-            lst.append(line[index])
-        return lst
-
-    def getdata(self):
-        return self.lines
-
-    @staticmethod
-    def to_float(e):
-        try:
-            return float(e)
-        except ValueError:
-            return e
+class DictWriter:
+    def __init__(self, f, fieldnames, restval="", extrasaction="raise",
+                 dialect="excel", *args, **kwds):
+		self.writer = writer(f, dialect, *args, **kwds)
 ```
 
-其中有：
-
--   getrow 取某一行的值
--   getcol 取某一列的值
--   getdata 取整个表格的数据值
-
-#### 对应的Writer编写
-
-同样也要根据你的csv方言设计来的，下面只是贴出一个样例：
+所以之前的讨论同样使用，具体使用很简单，如下看下官方样例即可：
 
 ```python
-class Writer():
-    def __init__(self,f,dialect='sv'):
-        self.lines = []
-        self.writer = csv.writer(f, dialect)
+with open('names.csv', 'w', newline='', encoding='utf8') as csvfile:
+    fieldnames = ['first_name', 'last_name']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-    def addrow(self,row):
-        self.lines.append(row)
+    writer.writeheader()
+    writer.writerow({'first_name': 'Baked', 'last_name': 'Beans'})
+    writer.writerow({'first_name': 'Lovely', 'last_name': 'Spam'})
+    writer.writerow({'first_name': 'Wonderful', 'last_name': 'Spam'})
 
-    def addcol(self,col):
-        for index in range(len(self.lines)):
-            self.lines[index].append(col[index])
-
-    def setrow(self,num,row):
-        self.lines[num-1] = row
-    def setcol(self,num,col):
-        for index in range(len(self.lines)):
-            self.lines[index][num-1] = col[index]
-
-    def set(self,row,col,e):
-        self.lines[row-1][col-1] = e
-
-    def setdata(self,data):
-        self.lines = data
-
-    def write(self):
-        for line in self.lines:
-            self.writer.writerow(line)
+with open('names.csv', newline='', encoding='utf8') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        print(row['first_name'], row['last_name'])
 ```
-
-提供的方法有：
-
--   addrow 添加一行值
--   addcol 添加一列值
--   set 设置某行某列的某个值为什么
--   setdata 设置整个数据
--   write 实际写入到文件中去。
-
-
 
 
 
