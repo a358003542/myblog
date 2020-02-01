@@ -1,9 +1,6 @@
-Title: C语言编程之-C语言基础
+Title: C语言学习笔记
 Date: 2019-08-28
 Modified: 2019-08-28
-Slug: c-lang-basic
-Tags: c-lang, 
-Status: draft
 
 [TOC]
 
@@ -11,7 +8,7 @@ Status: draft
 
 第一个helloworld的例子实在是太经典了。
 
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -50,7 +47,7 @@ int main(void){
 
 下面主要演示下除法和求余数，其他加法减法乘法还是很直白的。
 
-```
+```text
 	float x = 12.2;
 	float y = 2;
 	
@@ -75,7 +72,7 @@ int main(void){
 
 简要证明如下：
 
-```
+```text
 a = mk
 b = nk
 a和b的最大公约数是k，所以m和n互质
@@ -123,7 +120,7 @@ int gcd(int a, int b) {
 
 另外辗转相除法，网上实现也已经有了：
 
-```
+```c
 int gcd_two(int a, int b) {
 	int t; // 只是一个临时变量,记录最小值
 	while (b) { // b最小值成为零了返回a

@@ -1,7 +1,7 @@
 Title: python语言学习模块篇
 Slug: python-modules
 Date: 2016-03-03
-Modified: 2019-10-02
+Modified: 2020-01-28
 Tags: python,
 
 [TOC]
@@ -2115,11 +2115,11 @@ class excel(Dialect):
 - **skipinitialspace**  默认是False，其主要是对于如果你将空格设置为分隔符时有意义，这样后面字符开始的空格将会被忽略，其他情况设置为True或者False区别不大。
 - **quoting**  设置quote规则
 - csv.QUOTE_MINIMAL 意思是只有在需要的情况下才加上双引号，比如逗号在字符串里面，双引号在字符串里面，换行符号在字符串里面等等。
-    
+  
 - csv.QUOTE_ALL 意思是都加上双引号，即使是数字。
-    
+  
 - csv.QUOTE_NONNUMERIC 数字不加，字符串都加上双引号。（只有在这种情况下csv模块才会正确将数字解析为float类型）
-    
+  
 - csv.QUOTE_NONE 都不加（此时需要设置好escapechar选项）
 - **quotechar** 设置quote具体的字符，一般设置为双引号。
 - **doublequote** 用来处理双引号在字符串中的情况，默认是True，字符串将会双引号之外再加上双引号，如果设置为False，会前面加上一个 `escapechar` 。
@@ -2228,3 +2228,21 @@ with os.fdopen(fd, 'wb') as temp_cache_file:
 ```
 
 返回的第二个参数就是目标临时文件的路径名，第一个文件参数比较特殊，是操作系统级别的文件句柄（应该是C语言那边的文件句柄吧），要转成一般使用的python文件对象如上所示，使用 `os.fdopen` 来打开。
+
+
+
+## textwrap模块
+
+textwrap模块实现了编辑器常见的换行显示功能。默认 `width=70`  。
+
+```python
+from textwrap import fill
+wrapped = fill(output)
+```
+
+fill函数等于：
+
+```text
+"\n".join(wrap(text, ...))
+```
+
