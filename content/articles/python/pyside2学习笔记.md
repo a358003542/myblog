@@ -909,7 +909,6 @@ pyside2-lupdate.exe timer.pro
 具体使用翻译文件，也就是那个qm文件
 
 ```python
-
 # 先自动加载最佳语言方案
 default_translator = QTranslator()
 default_translator.load(f':translations/timer_{QLocale.system().name()}')
@@ -1016,21 +1015,33 @@ pyinstaller you_entry_point.py
 
 ### 安装程序的制作
 
-推荐使用 advanceinstaller程序，这是该程序的 [官网地址](https://www.advancedinstaller.com/) 。推荐一开始安装官网的simple 过程来，请参看官网的这个基本 [入门tutorial](https://www.advancedinstaller.com/user-guide/tutorial-simple.html) 。
-
-在设置文件和文件夹的时候把在 `dist` 里面的所有内容都加进去即可，其他请参看该软件的指导说明了。
-
-如果一切运行顺利，那么太好了，我们就有了我们程序的安装程序，赶快分享给小伙伴们吧。
-
-![img]({static}/images/adinstaller.png  "adinstaller")
+你可以使用 advanceintaller 或者 nsis 等工具来制作具体程序的安装文件。
 
 
+
+## 使用qt designer
+
+安装pyside2之后实际上就已经安装qt designer了：
+
+```text
+pyside2-designer.exe
+```
+
+你可以使用这个设计器快速地设计你的图形界面，然后将其转成python代码文件：
+
+```text
+pyside2-uic.exe test.ui > test.py
+```
+
+然后在这个输出python文件的基础上进一步进行代码修改完善工作。并不推荐直接在python代码中加载ui文件的使用风格，这会造成你项目代码的一种分裂感。
+
+总的来说个人对生成的代码不是很满意，权作参考吧。
 
 
 
 ## 配置文件管理
 
-pyqt5里的QtCore子模块里提供了 **QSettings** 类来方便管理软件的配置文件。
+QtCore模块里提供了 **QSettings** 类来方便管理软件的配置文件。
 
 ### QSettings构造函数
 
