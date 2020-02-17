@@ -1080,7 +1080,7 @@ windows下配置是放在注册表里面的。
 
 如果你希望配置文件都以ini形式存储，那么你需要采取如下格式初始化配置文件对象：
 
-```
+```text
 self.settings = QSettings(QSettings.IniFormat,QSettings.UserScope,"Wise","wise")
 ```
 
@@ -1094,25 +1094,23 @@ self.settings = QSettings(QSettings.IniFormat,QSettings.UserScope,"Wise","wise")
 
 如果你希望ini文件放在你喜欢的地方，下面是配置文件构造函数的第三种形式：
 
-```
+```text
 QSettings("wise.ini",QSettings.IniFormat)
 ```
 
 第一个参数是你的配置文件名，第二个参数是format。如上相对路径的话则是从你目前软件运行时的文件夹算起。
 
-你可以通过调用 `settings.fileName()` 来看看该配置文件的具体所在。
-
 #### ini文件注意事项
 
 ini文件是大小写不敏感的，所以尽量避免两个变量名相近只是大小写不同。
 
-不要使用“\\”和“/”。windows里\\会转换成/，而“/”使用来表示配置文件中分组关系的。
+不要使用 `\` 和 `/` 。windows里 `\` 会转换成`/`，而 `/` 是用来表示配置文件中分组关系的。
 
 #### 存值和读值
 
 配置文件对象建立之后你就可以很方便地存放一些值和读取值了。存值用 `setValue` 方法，取值用 `value` 方法。如下所示：
 
-```
+```python
 settings.setValue("editor/wrapMargin", 68)
 margin = self.settings.value("editor/wrapMargin")
 ```
@@ -1130,13 +1128,13 @@ margin = self.settings.value("editor/wrapMargin")
 
 ### 群组管理
 
-```
+```python
 settings.setValue("editor/wrapMargin", 68)
 ```
 
-如上例子所示“/”表示数据结构中的分组，如果有很多值都有相同的前缀，也就是同属一组，那么可以使用beginGroup方法和endGroup方法来管理。如下所示：
+如上例子所示 `/` 表示数据结构中的分组，如果有很多值都有相同的前缀，也就是同属一组，那么可以使用beginGroup方法和endGroup方法来管理。如下所示：
 
-```
+```python
 settings.beginGroup("editor")
 settings.setValue("wrapMargin", 68)
 settings.engGroup()
@@ -1144,9 +1142,11 @@ settings.engGroup()
 
 
 
-## 快捷键和Tab键管理
+-------------
 
-我们在创建ui文件的时候就可以把一些Action对应的快捷键给设置好。
+
+
+## 快捷键和Tab键管理
 
 ### 什么是伙伴关系
 
@@ -1156,24 +1156,16 @@ settings.engGroup()
 
 QShortcut类
 
-文本前用&会引入对应的Alt+w之类的快捷键。
-
-然后QAction在初始化的时候有
-
-然后QAction有方法
-
 ### QKeySequence
 
-`QKeySequence` 类在pyqt4和pyqt5中来自QtGui子模块，是快捷键的解决方案。比如可以直接引用 `QKeySequence.Open` 来表示快捷键Ctrl+O。可用的构造函数如下所示：
+`QKeySequence` 类是快捷键的解决方案。比如可以直接引用 `QKeySequence.Open` 来表示快捷键Ctrl+O。可用的构造函数如下所示：
 
-```
+```python
 QKeySequence(QKeySequence.Print)
 QKeySequence(tr("Ctrl+P"))
 QKeySequence(tr("Ctrl+p"))
 QKeySequence(Qt.CTRL + Qt.Key_P)
 ```
-
-我不太喜欢第一种表达方式，不是任何软件都有打印操作，况且打印和某个快捷键之间并没有逻辑联系，只有程序员的个人使用经验，这是不小的记忆负担。我比较喜欢第四种写法，看上去意义更加清晰，Qt来自QtCore子模块。
 
 字母按键就是类似 `Qt.Key_W` 这样的形式，Shift按键是Qt.SHIFT，Meta按键是Qt.META，CTRL按键是 `Qt.CTRL` ，ALT按键是 `Qt.ALT` 。
 
