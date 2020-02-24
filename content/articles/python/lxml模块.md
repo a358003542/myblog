@@ -58,6 +58,10 @@ def remove_tag_by_xpath(tree, xpath):
 
 下面主要通过各个例子简要介绍xpath语法之，参考了 [阮一峰的这篇文章](http://www.ruanyifeng.com/blog/2009/07/xpath_path_expressions.html) 和菜鸟教程的xpath教程。
 
+**[xpath参考手册提供了更多的使用样例](https://devhints.io/xpath)**
+
+
+
 基本东西简单了解下即可，然后多看例子吧。
 
 ```
