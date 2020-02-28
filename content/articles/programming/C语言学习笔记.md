@@ -424,7 +424,7 @@ void print_name3(void) {
 }
 ```
 
-然后我们之前看到的双引号括起来的内容叫做 *字符串常量* ，其进入编译器会自动加上 `\0` 字符。字符串常量用法如下：
+然后我们之前看到的双引号括起来的内容叫做 *字符串常量* 或叫做 *字符串字面量* ，其进入编译器会自动加上 `\0` 字符。字符串常量用法如下：
 
 ```c
 void print_name4(void) {
@@ -450,7 +450,7 @@ void print_name5(void) {
 
 ### strlen函数
 
-strlen函数由 `<string.h>` 包提供，它会返回字符串的长度。
+strlen函数由 `<string.h>` 包提供，它会返回字符串的长度，这里所说的长度是不包括 `\0` 这个字符的。
 
 ### printf函数
 
@@ -595,10 +595,18 @@ C语言是直接支持用这样的形式 `matrix[3][4]` 来表示多维数组的
 本来打算编写一个简单的函数先打印二维数组，然后竟发现还不是很方便。首先一维数组的情况怎么的都行，数组名你就可以看做一个指针：
 
 ```c
-int print_1d(int* arr, int length) {
+void print_int_array(int* arr, int length) {
 	for (int i = 0; i < length; i++) {
 		printf("%d ", arr[i]);
 	}
+}
+
+int sum_int_array(int* arr, int length) {
+	int res = 0;
+	for (int i = 0; i < length; i++) {
+		res += arr[i];
+	}
+	return res;
 }
 ```
 
@@ -606,7 +614,7 @@ int print_1d(int* arr, int length) {
 
 此外我在 [这个网页](https://solarianprogrammer.com/2019/03/27/c-programming-passing-multi-dimensional-array-to-function/) 了解到一种通过 malloc 函数 自动分配二维指针数组内存的方法，当然其内在本质还是依靠二维指针数组这个过于复杂的东西，个人不喜欢，尤其这种玩法还引入了 `int ** p` 这种东西，C语言的指针已经让大家很厌倦了，你还弄两个指针，显然这种玩法过于复杂现在不应该推荐了。
 
-但我还是发现了唯一的解决方案，而这个方案利用的C语言的struct结构，个人觉得是优美的解决方案【也许你觉得里面的一维表达很丑，但实际上计算机内存里面存储的就是这种一维表达结构】。如果采取这种方案那么就应该抛弃C语言里面 `x[3][2]` 这样的表达，而回归一维数组的本源，然后继而可以扩展一些支持方法来进一步表达分组分行等内部属性。
+但还有一个解决方案，而这个方案利用的C语言的struct结构，个人觉得是优美的解决方案【也许你觉得里面的一维表达很丑，但实际上计算机内存里面存储的就是这种一维表达结构】。如果采取这种方案那么就应该抛弃C语言里面 `x[3][2]` 这样的表达，而回归一维数组的本源，然后继而可以扩展一些支持方法来进一步表达分组分行等内部属性。
 
 ```c
 typedef struct {
@@ -649,7 +657,124 @@ int main(void) {
 }
 ```
 
+结构体在函数中是可以直接传递地址过去的，因为数组名就是数组的首元素地址，一维数组直接传递数组名作为对象的指向指针也是没问题的。这里我们可以把结构体看做一种内部长度不一的一维数组形式，这样就可以理解为什么这样做是可行的。然后结构体的指针引用内部对象采用的是 `m->cols` 这样的写法。二维数组之所以不行是因为计算机只知道你传递过去的首元素地址和内部数据类型，但是具体几行几列这些信息是丢失了的。
 
+### 再谈指针
+
+正如前面谈论的，数组名就是数组的首元素地址，所以在编程中很多对于指针的操作都可以作用于数组名，只是说这个数组名相对于指针来说具体存储的内存地址是不可以变动了。指针的操作包括如下：
+
+- 指针加一  具体内存地址偏移值是增加一个存储单元【一个数据对象】，对于int加4个字节，对于double加8个字节等【这里的讨论数值只是一个假设】。因为指针在声明的时候就包含了类型声明，所以指针偏移计算是知道具体我要偏移多少的。所以假设一个结构体指针加一，偏移值可能会比较大，具体就是偏移了一个结构体数据。
+- 指针减一类似上面指针加一的讨论，就不赘述了。
+- 所以利用数组名来进行某些编程中的指针偏移操作有的时候是很方便的，然后指针数组中的两个指向指针，相减得到的差的绝对值就是这个数组中这两个数据之间索引差。
+
+个人觉得现代C语言代码的编写指针不要滥用了，但是对于数组名的某些操作，如上讨论的情况，是可以尽情使用的。
+
+总之 `arr[1]` 和 `*(arr+1)` 是一个意思，知道这个就行了。
+
+### 计算数组的长度
+
+C语言里面涉及到数组的操作需要传递一个额外的长度参数，我们可以利用如下宏来将第二个参数的计算工作丢给程序。
+
+```c
+#define SIZEOF(ARRAY) (sizeof(ARRAY)/sizeof(*ARRAY))
+```
+
+上面是一个带参数的宏，如下：
+
+```c
+res = sum_int_array(y, SIZEOF(y));
+```
+
+将替换为：
+
+```c
+res = sum_int_array(y, (sizeof(y)/sizeof(*y)));
+```
+
+这是没有问题的，不过如果上面的y改为结构体里面的数组似乎就不行了，这个和sizeof函数有关。不过就上面 `Matrix2D` 问题不大，`rows*cols`即可。
+
+### const来保护数组中的数据
+
+因为数组在函数中传递的是指针，所以对于数组的修改动作就是修改原数组，如果你没有另外新建一个数组副本的话。但有的时候你需要保护某个数组里面的数据不被修改，那么可以通过修饰符 `const` 来做到这点。
+
+```c
+int sum_int_array(const int* arr, int length)
+```
+
+
+
+## 字符串操作
+
+### puts和 gets_s函数
+
+scanf在处理字符串的时候遇到空格就会停止，而gets函数可用于读取一整行的字符串输入，但现在不应该再使用gets函数了，因为如果用户输入行的字符串【这通常是未知的】超过了你在程序中声明的要存储的目的地的声明长度，就会导致缓冲区溢出错误。gets_s函数相当于安全版本的gets函数，下面是一个简单的演示例子：
+
+```c
+#define LINE_MAX_LENGTH 100
+
+int echo_line(void) {
+	char words[LINE_MAX_LENGTH];
+	puts("please input a line.");
+	gets_s(words, LINE_MAX_LENGTH);
+	puts(words);
+	return 0;
+}
+```
+
+参考资料1 谈到行输入过长问题，利用fgets函数实现了一个函数，但是fgets更多的是针对文件io的读取操作，在这里就谈论的行输入问题有点大材小用了，最好是利用getchar函数来实现一个函数：
+
+```c
+
+
+void empty_string(char* st, int length) {
+	// make target string fill with \0
+	// size is the target string char array length
+	for (int i = 0; i < length; i++) {
+		st[i] = '\0';
+	}
+}
+char* line_gets(char* st, int num) {
+	// here num is the max character number not include the \n
+	char ch;
+	int i = 0;
+
+	// make st is a empty string notice here need +1
+	empty_string(st, num+1);
+
+	ch = getchar();
+	while (ch != '\n') {
+		if (i < num) {
+			st[i] = ch;
+		}
+		else {
+			puts("your input line is too long, please input it again.");
+			
+			// empty the previous user input buffer
+			while (getchar() != '\n') {
+				continue;
+			}
+			return line_gets(st, num);
+		}
+		
+		i++;
+		ch = getchar();
+	}
+	return st;
+}
+```
+
+```c
+int main(void) {
+	char words[5];
+
+	puts("please input a line.");
+	line_gets(words, 4);
+	puts(words);
+	return 0;
+}
+```
+
+上面num的含义是字符不包括 `\n` 的长度，从用户的角度理解可以看做允许的可见字符数。
 
 
 
