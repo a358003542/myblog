@@ -540,10 +540,11 @@ int * p;
 swap函数接受两个变量的值，然后交换这两个变量的值，这个函数在C语言里面的实现必须要用到指针。
 
 ```c
-void swap(int * p1, int * p2) {
+void swap_int(int* p1, int* p2) {
+	// swap two int value
 	int temp;
 	temp = *p1;
-	*p1= *p2;
+	*p1 = *p2;
 	*p2 = temp;
 }
 ```
@@ -552,7 +553,7 @@ void swap(int * p1, int * p2) {
 int main(void) {
 	int x = 2;
 	int y = 3;
-	swap(&x, &y);
+	swap_int(&x, &y);
 	printf("%d %d", x, y);
 	return 0;
 }
@@ -775,6 +776,103 @@ int main(void) {
 ```
 
 上面num的含义是字符不包括 `\n` 的长度，从用户的角度理解可以看做允许的可见字符数。
+
+### strcat函数
+
+接受两个字符串参数，将后一个字符串附加到前一个字符串上，返回前一个字符串的指针，注意附加动作不要超过前一个字符串的容纳空间了。
+
+### strcmp函数
+
+比较两个字符串的实际内容，多余的`\0` 会被容忍，如果内容相同则返回0，否则返回非0。
+
+### strcpy函数
+
+接受两个字符串参数，将后一个字符串的内容拷贝到前一个字符串上，注意执行拷贝动作的时候内容不要超过前一个字符串的容纳空间了。
+
+### 字符串排序
+
+现在我们实现一个 strsort函数，其接受一个字符串数组参数和该数组的长度，内部动作将会把这个字符串数组进行排序。
+
+```c
+void swap_pointer(void * p_1, void* p_2) {
+	// swap two pointer value
+	int* p1 = (int*)p_1;
+	int* p2 = (int*)p_2;
+
+	int* temp = NULL;
+
+	temp = *p1;
+	*p1 = *p2;
+	*p2 = temp;
+}
+
+void strsort(char* strings[], int num) {
+	for (int i=0; i < num; i++) {
+		for (int j = i + 1; j < num; j++) {
+			if (strcmp(strings[i], strings[j]) > 0) {
+				swap_pointer(&strings[i], &strings[j]);
+			}
+		}
+	}
+}
+```
+
+```c
+int main(void) {
+	char st[] = "abcf";
+	char st2[] = "abcd";
+	char st3[] = "zzzz";
+	char st4[] = "eeee";
+	char* strings[] = { st, st2 ,st3, st4};
+
+	strsort(strings, SIZEOF(strings));
+
+	for (int i = 0; i < SIZEOF(strings); i++) {
+		puts(strings[i]);
+	}
+
+	return 0;
+}
+```
+
+这里strcmp函数如果返回大于0的值意思是第一个字符串按照机器排序【并不是按照字母顺序排序】在后一个字符串前面。这只是一个临时排序方案，但在这里不是重点。上面的排序算法叫做选择排序，基本上就是一轮轮找序列最前面的值，将其放置在前面。
+
+这里特别需要值得一提的一点就是 `char * strings[]` 严格的叫法应该叫做字符串指针数组，实际上在C语言里面并没有所谓的字符串数组的说法，因为字符串长度不一是不可能在C语言形成数组。所谓这个字符串指针数组实际上存储的一系列指针，也正是因为如此，上面试着实现了一种通用的交换两个指针的值得swap_pointer 函数。上面的空指针操作值得特别说明一下。
+
+**上面的例子如果直接用swap_int也是可以的，但那显然是不规范的，只是恰好int型可以存储指针罢了。然后直接写 `strings[i]` 也是可以的，那也是不规范的，只是打印字符串正常显示，但感到奇怪的是字符串也就是字符数组的指针指向是可以修改的，所以 `char * st` 和 `char st[]` 还真的没啥区别，不过程序员还是要自我约束下，就上面的例子来说从逻辑清晰的角度出发，必然是要传递指向字符串指针的地址进去的。** 
+
+### 空指针
+
+```c
+int* temp = NULL;
+```
+
+上面这一行是声明了一个指针，具体值是0【需要注意的是这里的0不是本指针在内存里面实际存储的位置，那是程序另外分配的】。
+
+C语言在编写函数的时候可以如同上面这样声明 `void *` void类型指针：
+
+```c
+void swap_pointer(void * p_1, void* p_2) 
+```
+
+其可以接受随便指向什么类型的指针。但是在函数里面，接下来你需要针对这个空类型指针进行强制类型转换，否则无法使用：
+
+```c
+	int* p1 = (int*)p_1;
+	int* p2 = (int*)p_2;
+```
+
+就上面这个 swap_pointer 函数例子来说，`int *` 是随便选的，因为这里的操作都是针对指针实际存储的值，而不是指针映射的值。
+
+## 命令行参数
+
+```c
+int main(int argc, char * argv[]){
+
+}
+```
+
+编写的程序如上编写接受命令行参数，argc是接受的参数个数，argv是参数字符串指针数组。
 
 
 
