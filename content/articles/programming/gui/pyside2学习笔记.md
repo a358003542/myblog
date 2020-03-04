@@ -1,6 +1,6 @@
 Slug: pyside2-learning-notes
 Category: gui
-Tags: GUI
+Tags: gui
 
 
 [TOC]

@@ -1,6 +1,6 @@
 Slug: pyqt5-learning-notes
 Category: archived
-Tags: GUI
+Tags: gui
 
 
 [TOC]
