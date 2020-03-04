@@ -3,28 +3,35 @@
 
 import sys
 
-AUTHOR = 'cdwanze'
-SITENAME = "cdwanze的博文"
-# SITEURL = 'https://docs.cdwanze.work'
+# set the author metadata
+AUTHOR = 'wanze'
+
+# the filename decide the title metadata
+FILENAME_METADATA = '(?P<title>.*)'
+
+# set default category
+DEFAULT_CATEGORY = 'others'
+# the sub folder name not decide the category name
+USE_FOLDER_AS_CATEGORY = False
+# show the pages
+DISPLAY_PAGES_ON_MENU = True
+
+SITENAME = "wanze的博文"
 SITEURL = ''
 
 PATH = 'content'
 
 TIMEZONE = 'Asia/Shanghai'
 
-
-
+# set default date
+DEFAULT_DATE = 'fs'
 if sys.platform == 'win32':
     DEFAULT_LANG = 'zh'
 else:
     DEFAULT_LANG = 'zh_CN'
-    LOCALE='zh_CN'
+    LOCALE = 'zh_CN'
 DEFAULT_DATE_FORMAT = '%Y年 %b %-d日'
 
-# set default date
-DEFAULT_DATE = 'fs'
-# set default category
-DEFAULT_CATEGORY = 'others'
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
@@ -36,15 +43,14 @@ AUTHOR_FEED_RSS = None
 # 不要自动删除的文件
 OUTPUT_RETENTION = [".git"]
 
-
-# Blogroll
+# Blog roll
 LINKS = (('MyGitHub', 'http://www.github.com/a358003542'),
-         ('MyEmail', 'a358003542@gmail.com'),)
-
+         ('MyEmail', 'a358003542@outlook.com'),)
 
 # Uncomment following line if you want document-relative URLs when developing
-#RELATIVE_URLS = True
+# RELATIVE_URLS = True
 
+# static path copy it to the destination
 STATIC_PATHS = ['images',
                 'data',
                 'extra']
@@ -53,9 +59,6 @@ EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'},
     'extra/CNAME': {'path': 'CNAME'},
 }
-
-# foler as category
-USE_FOLDER_AS_CATEGORY = True
 
 ARTICLE_URL = 'articles/{slug}.html'  # articles 里面的内容
 ARTICLE_SAVE_AS = ARTICLE_URL
@@ -78,11 +81,11 @@ IGNORE_FILES = ['.ipynb_checkpoints']
 # changing theme
 THEME = 'mytheme'
 
-
 # the plugin
 PLUGIN_PATHS = ['myplugins']
 
-PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search', 'render_math']
+PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search',
+           'render_math']
 
 MATH_JAX = {'tex_extensions': ['mhchem.js']}
 
@@ -101,3 +104,5 @@ MARKDOWN = {
     },
     'output_format': 'html5',
 }
+
+SITE_DESCRIPTION = '欢迎来到本网站，希望本网站的文章能够对您有所帮助。'

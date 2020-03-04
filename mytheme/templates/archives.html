@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-All Posts · {{ super() }}
+所有博文 {{ super() }}
 {% endblock title %}
 
 {% block head_description %}
-Full archives of {{ SITENAME|striptags|e }} blog.
+{{ SITENAME|striptags|e }} 网站的所有博文
 {% endblock head_description %}
 
 {% block meta_tags_in_head %}
@@ -25,7 +25,6 @@ Full archives of {{ SITENAME|striptags|e }} blog.
 {% endblock meta_tags_in_head %}
 
 {% block content %}
-
 <div class="row">
     <header class="page-header col-md-10 col-md-offset-2">
     <h1><a href="{{ SITEURL }}/archives.html">All Posts</a></h1>

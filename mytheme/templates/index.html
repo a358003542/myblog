@@ -1,9 +1,5 @@
 {% extends 'base.html' %}
 
-{% block title %}
-    {{ super() }}
-{% endblock title %}
-
 
 {% block meta_tags_in_head %}
     {{ super() }}
@@ -30,8 +26,8 @@
     {% endif %}
 {% endblock meta_tags_in_head %}
 
-{% block content %}
 
+{% block content %}
     {% from '_includes/_defaults.html' import LANDING_PAGE_ABOUT
 with context %}
     {% from '_includes/_defaults.html' import PROJECTS with context %}
@@ -50,24 +46,7 @@ with context %}
             padding-right: 0.5em;
         }
 
-        #gotop {
-            position: fixed;
-            right: 12%;
-            float: right;
-            top: 50%;
-        }
-
-        @media screen and (max-width: 600px) {
-            #gotop {
-                display: none;
-            }
-        }
     </style>
-
-    <button id="gotop" type="button" class="btn btn-default">
-        <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
-    </button>
-
 
 
     <div class="row">
@@ -200,15 +179,6 @@ with context %}
 
     </script>
 
-    <script>
-        $(function () {
-            //点击回到顶部的元素
-            $("#gotop").click(function (e) {
-                //以1秒的间隔返回顶部
-                $('body,html').animate({scrollTop: 0}, 1000);
-            });
-        });
-    </script>
 
     <script>
         $('.page-header').hover(function () {
@@ -218,19 +188,5 @@ with context %}
         })
     </script>
 
-
-    <script>
-        $(document).ready(function () {
-            $('a.slowscroll').click(function (event) {
-                var $anchor = $(this);
-                $('html, body').animate({scrollTop: $($anchor.attr('href')).offset().top}, 1500);
-                event.preventDefault();
-                // $('a.slowscroll').parent().removeClass('active');
-                // $('.navbar-header').hide();
-                // $anchor.parent().addClass('active');
-            })
-        })
-        console.log('document init...')
-    </script>
 
 {% endblock script %}

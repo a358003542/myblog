@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Page not found · {{ super() }}
+页面未找到... {{ super() }}
 {% endblock title %}
 
 {% block head_description %}
-Page does not exist at {{ SITENAME|striptags|e }} blog.
+{{ SITENAME|striptags|e }} 网站里没有这个页面.
 {% endblock head_description %}
 {% block content %}
 <div class="row">
     <header class="page-header col-md-10 col-md-offset-2">
-    <h1>That page doesn't exist!</h1>
+    <h1>页面不存在!</h1>
     </header>
 </div>
 

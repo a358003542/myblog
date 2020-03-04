@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="baidu-site-verification" content="D4VqC4HppC"/>
     <meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625"/>
 
     {% if article and article.author %}
@@ -23,49 +22,31 @@
         <meta name="description"
               content="{% block head_description %}{{ SITE_DESCRIPTION|e }}{% endblock head_description %}"/>
     {% endif %}
+
     {% block meta_tags_in_head %}
-        {% from '_includes/_defaults.html' import GOOGLE_PLUS_PROFILE_URL with context %}
-        {% if GOOGLE_PLUS_PROFILE_URL %}
-            <link rel="author" href={{ GOOGLE_PLUS_PROFILE_URL }}/>
-        {% endif %}
-        {% from '_includes/_defaults.html' import TWITTER_USERNAME with context %}
-        {% if TWITTER_USERNAME %}
-            <meta name="twitter:creator" content="@{{ TWITTER_USERNAME }}">
-        {% endif %}
         <meta property="og:type" content="article"/>
         <meta name="twitter:card" content="summary">
     {% endblock meta_tags_in_head %}
-    <title>
-        {% block title %}{{ SITENAME|striptags|e }}{% endblock title %}</title>
+
+    <title>{% block title %}{{ SITENAME|striptags|e }}{% endblock title %}</title>
 
     {% block head_links %}
-
         <link href="{{ SITEURL }}/theme/css/font-awesome.css" rel="stylesheet"
               media="screen">
         <link href="{{ SITEURL }}/theme/css/bootstrap.min.css" rel="stylesheet"
               media="screen">
 
-        {% if 'assets' in PLUGINS %}
-            {% include '_includes/minify_css.html' with context %}
-        {% else %}
-            <link rel="stylesheet" type="text/css"
+        <link rel="stylesheet" type="text/css"
                   href="{{ SITEURL }}/theme/css/pygments.css" media="screen">
-            <link rel="stylesheet" type="text/css"
+        <link rel="stylesheet" type="text/css"
                   href="{{ SITEURL }}/theme/css/elegant.css" media="screen">
-            <link rel="stylesheet" type="text/css"
-                  href="{{ SITEURL }}/theme/css/custom.css" media="screen">
-        {% endif %}
+        <link rel="stylesheet" type="text/css"
+                  href="{{ SITEURL }}/theme/css/base.css" media="screen">
 
     {% endblock head_links %}
 
 
-    {% include '_includes/favicon_links.html' %}
-    {% block feed_links %}
-        {% include '_includes/feeds.html' %}
-    {% endblock feed_links %}
-    {% include '_includes/analytics.html' %}
-
-
+    {# pelican_javascript #}
     {% if article %}
         {% if article.stylesheets %}
             {% for stylesheet in article.stylesheets %}
@@ -108,23 +89,11 @@
 
 
             <ul class="nav navbar-nav nav-pills navbar-right">
-                <li {% if page_name=='index' %} class="active"{% endif %}>
-                    <a href="{{ SITEURL }}">博文首页</a></li>
+                <li {% if page_name == 'archives' %} class="active"{% endif %}>
+                    <a  href="/archives.html">所有文章</a></li>
 
-                {% block more_navbar %}
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle"
-                           data-toggle="dropdown" role="button"
-                           aria-haspopup="true" aria-expanded="false">查找文章<span
-                                class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a class="slowscroll" href="/categories.html">按分类</a>
-                            </li>
-                            <li><a class="slowscroll" href="/tags.html">按标签</a>
-                            </li>
-                        </ul>
-                    </li>
-                {% endblock %}
+                <li {% if page_name == 'categories' %} class="active"{% endif %}><a href="/categories.html">文章分类</a></li>
+                <li {% if page_name == 'tags' %} class="active"{% endif %}><a href="/tags.html">文章标签</a></li>
 
 
                 {% if DISPLAY_PAGES_ON_MENU %}
@@ -154,7 +123,9 @@
 
 
 <div id="push"></div>
-
+<button id="gotop" type="button" class="btn btn-default">
+    <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+</button>
 
 {% include '_includes/footer.html' %}
 
@@ -162,45 +133,11 @@
 {% block script %}
     <script src="{{ SITEURL }}/theme/js/jquery.min.js"></script>
     <script src="{{ SITEURL }}/theme/js/bootstrap.min.js"></script>
-    <script>
-        function validateForm(query) {
-            return (query.length > 0);
-        }
-    </script>
 
-    <script>
-        function adjust_search_width() {
-            var w = document.documentElement.clientWidth;
-            if ((w > 755) && (w < 975)) {
-                plus_width = w - 755;
-                $('.navbar-form .form-control').outerWidth(210 + plus_width);
-            } else if (w >= 975) {
-                $('.navbar-form .form-control').outerWidth(210 + 220);
-            } else if (w <= 755) {
-                $('.navbar-form .form-control').css('width', '100%')
-            }
-        }
-
-        function adjust_markdown_css(){
-            $('table').addClass('table');
-            $('table').addClass('table-striped');
-        }
-
-        $(document).ready(function () {
-            adjust_search_width();
-            adjust_markdown_css();
-        });
-
-        window.onresize = function () {
-            adjust_search_width();
-        }
-
-    </script>
-
+    <script src="{{ SITEURL }}/theme/js/base.js"></script>
 {% endblock script %}
-{% include '_includes/stat_counter.html' %}
 
-
+{# pelican_javascript #}
 {% if article %}
     {% if article.javascripts %}
         {% for javascript in article.javascripts %}

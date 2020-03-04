@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Search · {{ super() }}
+搜索 {{ super() }}
 {% endblock title %}
 
 {% block head_description %}
-    Search results for {{ SITENAME|striptags|e }} blog.
+{{ SITENAME|striptags|e }} 网站的搜索结果
 {% endblock head_description %}
 
 {% block meta_tags_in_head %}

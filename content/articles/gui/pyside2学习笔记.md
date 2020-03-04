@@ -1,7 +1,5 @@
-Title: pyside2学习笔记
-Date: 2020-01-15
-Modified: 2020-01-15
 Slug: pyside2-learning-notes
+Category: gui
 Tags: GUI
 
 
@@ -15,7 +13,7 @@ Tags: GUI
 
 就是利用pip 安装之：
 
-```
+```bash
 pip install pyside2
 ```
 
@@ -632,7 +630,7 @@ if __name__ == '__main__':
 
 上面两行是自定义信号，此信号有两个参数，一个是str字符变量，一个是Qt.CaseSensitivity的枚举值。假设我们输入一些文字了，然后点击Find按钮，请看到：
 
-```
+```python
 self.findButton.clicked.connect(self.findClicked)
 ```
 
@@ -869,7 +867,7 @@ import funnyclock_rc
 
 然后在你的项目里新建一个translations文件夹，新建如下一个小文件 `wise.pro` ，这里的wise是你的模块具体的名字，随意修改之。这个文件的内容简要如下：
 
-```
+```text
 SOURCES += timer.py
 TRANSLATIONS += timer_zh_CN.ts
 ```
@@ -878,7 +876,7 @@ SOURCES 是你希望扫描的py文件，如果该文件有前面所说的翻译�
 
 第二个变量就是TRANSLATIONS就是你希望生成的目标翻译ts文件的文件名，一般是如下格式：
 
-```
+```text
 {PROJECT_NAME}_{QLocale.system().name()}.ts
 ```
 
@@ -1064,13 +1062,13 @@ fromat如果取默认的NativeFormat那么具体软件配置文件的安装目�
 
 - 如果是linux系统，比如上面的例子具体配置文件就是：
 
-```
+```text
 /home/wanze/.config/Wise/wise.conf
 ```
 
 - 如果是windows系统，那么上面的例子具体就是：
 
-```
+```text
 HKEY_CURRENT_USER\Software\Wise\wise
 ```
 

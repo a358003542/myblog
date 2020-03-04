@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-All Categories · {{ super() }}
+所有分类 {{ super() }}
 {% endblock title %}
 
 {% block head_description %}
-All categories of the {{ SITENAME|striptags|e }} blog. 
+{{ SITENAME|striptags|e }} 网站的所有分类
 {% endblock head_description %}
 
 {% block meta_tags_in_head %}
@@ -24,10 +24,6 @@ All categories of the {{ SITENAME|striptags|e }} blog.
 {% endif %}
 {% endblock meta_tags_in_head %}
 
-{% block feed_links %}
-{{ super() }}
-{% include '_includes/feeds_categories.html' %}
-{% endblock feed_links %}
 
 {% block content %}
 <div class="row">
