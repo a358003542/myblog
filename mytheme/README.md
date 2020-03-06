@@ -5,9 +5,7 @@
 
 
 ## 1.4.1
-
 优化了分页显示逻辑和显示代码。
-
 
 
 ## 1.4.0
@@ -18,6 +16,7 @@ update to bootstrap v3
 对接 pelican_javascript 插件。
 
 
+---------
 
 Please visit [Elegant - a theme for Pelican](http://oncrashreboot.com/pelican-elegant) at my blog for detailed features and documentation.
 

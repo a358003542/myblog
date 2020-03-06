@@ -1,0 +1,162 @@
+Category: python_companion
+Tags: python
+
+[TOC]
+
+
+测试开发风格是如此重要，下面进一步讨论之来提高我们的测试驱动型开发。首先推荐使用pytest。
+
+## pytest简介
+pytest模块是站在unittest基础上的，就简单的应用如下，通过pip安装pytest，然后你之前通过 unittest 写的测试案例，全部都不用更改照样有用，接下来你要写一个新的测试，不需要再新建一个 `unittest.TestCase` 类了（如果你希望多个测试在一个类里面，就新建一个类即可，这个类不需要继承自任何类了。），直接如下写测试函数就是了，然后也不确认就是最简单的 `assert` 确认返回为 True 即可。
+
+```
+def test_prime():
+    assert prime(4) == 7
+```
+
+### 确认抛出某个异常
+把官方的例子copy过来了，看一下就懂了。
+
+```
+import pytest
+def f():
+    raise SystemExit(1)
+
+def test_mytest():
+    with pytest.raises(SystemExit):
+        f()
+```
+
+完了，如果你赶时间的话，这就足够了。下面说一些让你更加优雅地进行测试工作的技巧。
+
+### 实时修改代码实时测试
+推荐安装的有：`pytest` 和 `pytest-runner` 。然后新建 `setup.cfg` 文件，里面的内容是：
+
+```
+[aliases]
+test=pytest
+```
+
+这样当你输入 `python setup.py test` 实际等于输入 `python setup.py pytest` 。
+
+以后你要测试就输入：
+```
+python setup.py test
+```
+
+这样做的好处是，其是直接利用本地修改的源码，也就是一边修改源码一边实时测试。
+
+这样写的话记得要给pytest传递参数需要加上 `--addopts=` 选项，比如打印更多的信息：
+
+```
+python setup.py test --addopts="-v"
+```
+
+可能每次写 `--addopts="-v"` 有点麻烦，在 `setup.cfg` 上加上这样一句吧：
+```
+[tool:pytest]
+addopts = --verbose
+```
+
+好了，就是：
+```
+python setup.py test
+```
+然后专心一边测试一边写代码吧。
+
+
+### 只单独测试某个文件
+还是跟着上面的 `--addopts=` 选项来，把具体某个测试py文件相对路径写上即可。
+
+
+### 自动发现测试文件
+pytest是支持自动发现测试文件的，所有的 `test_*.py` 和 `*_test.py` 文件都被认为是测试文件。
+
+一般是推荐统一管理测试文件，如这样设置：新建一个 `pytest.ini` 文件，里面的内容是：
+
+```
+[pytest]
+testpaths = tests
+```
+
+这样pytest就只处理这个tests文件夹下的测试文件了。
+
+可能有某些情况你希望你的测试文件和代码文件在一起（请确定你必须这样做，毕竟将测试代码和模块源码放在一起很不美观），没问题，写上就是了，pytest会自动发现它的。记得将上面的那个 `pytest.ini` 文件的 `testpaths` 配置删除掉算了。
+
+
+
+### fixture功能
+pytest里面比较高级一点的功能大概就是fixture功能了，这个等下再讲。TODO。
+
+
+
+### 测试过一次下次不测试了
+
+函数上加上这个装饰器。
+
+```
+@pytest.mark.skip(reason="i have test it")
+```
+
+
+
+
+
+## mock模块的使用
+
+在大型框架中写单元测试，在涉及到网络，套接字等编程问题是，必然有这个需求，那就是你希望伪造一些数据，拦截某些函数或类的返回值，从而将整个测试从大型软件框架中抽离出来，这个时候就必须要了解mock模块了。python3自带的有mock模块，直接用就是了：
+
+```
+from unittest import mock
+```
+
+使用mock模块最关键性的问题是理解mock在做什么。mock模块里面最核心的概念是 `Mock` 类 ，我们看到官方文档的这个例子：
+
+```
+from unittest import mock
+class Test(): pass
+t = Test()
+t.method = Mock(return_value=3)
+t.method = mock.Mock(return_value=3)
+t.method()
+3
+t.method(1,2,3)
+3
+```
+
+一开始的话我们还是不要管那个 MagicMock 是个什么东西吧，暂时 Mock够用了。然后Mock也可以通过 `side_effect` 来定制抛出异常。
+
+在来个定制函数返回的例子：
+
+```
+test = mock.Mock(return_value='hello world.')
+test()
+'hello world.'
+```
+
+
+### just patch it
+实际编码中我们更多的是和现有的代码或者现有的第三方库的代码来交互，而不是凭空创造个Mock对象进行测试。我们看下面这个例子：
+
+```
+    @mock.patch('users.views.WXAPPAPI.jscode2session', \
+                return_value={"openid": "o1ZL90Blemh5ylei7sBfQotG7PLM", "session_key": "4XXDVTc0e4nuDVp20CIcOg==",
+                              "expires_in": 7200})
+    def test_login(self, mock_jscode2session):
+        data = {'js_code': '003xXUd30hnknF1gLeg30ua5e30xXUdr'}
+        response = self.client.get(reverse('mini-login'), data)
+
+        # for next testcase
+        self.our_session_key = response.data.get('our_session_key')
+    
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+```
+
+
+如何理解上面的代码？当这段测试代码运行的时候，它的变量名字空间被patch给污染了，比如上面的 `users.views.WXAPPAPI.jscode2session` 这个函数，被污染成为一个 Mock 对象了，这个Mock对象传递给了这个函数的第二个参数（额外的的这个参数哪怕你后面不用也必须写上） `mock_jscode2session` 。
+
+然后代码在运行的时候遇到`jscode2session` 总会返回上面给出的值，这样你就不用考虑数据库啊，网络情况之类的问题了。上面还有一些小技巧和django框架相关，比如 `self.client.get(reverse('mini-login'), data)` 是直接利用自己django，然后自己请求自己的url获得什么响应，这个和django相关，在这里就不多说了。
+
+
+
+

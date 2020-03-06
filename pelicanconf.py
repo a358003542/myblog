@@ -32,8 +32,7 @@ else:
     LOCALE = 'zh_CN'
 DEFAULT_DATE_FORMAT = '%Y年 %b %-d日'
 
-
-# Feed generation is usually not desired when developing
+#  disable feed generation
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
@@ -78,10 +77,31 @@ READERS = {'html': None}
 MARKUP = ('md', 'ipynb')
 IGNORE_FILES = ['.ipynb_checkpoints']
 
+######################### MARKDOWN CONFIG #################
+MARKDOWN = {
+    'extension_configs': {
+        'markdown.extensions.codehilite': {'css_class': 'highlight',
+                                           'guess_lang': False},
+        'markdown.extensions.toc': {},
+        'markdown.extensions.fenced_code': {},
+        'markdown.extensions.extra': {},
+        'markdown.extensions.meta': {},
+    },
+    'output_format': 'html5',
+}
+#############################################################
+
+
+################## theme ##########################
 # changing theme
 THEME = 'mytheme'
 
-# the plugin
+SITE_DESCRIPTION = '欢迎来到本网站，希望本网站的文章能够对您有所帮助。'
+
+######################################################
+
+
+################################### plugin #################
 PLUGIN_PATHS = ['myplugins']
 
 PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search',
@@ -93,16 +113,4 @@ DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
 
 DEFAULT_PAGINATION = 20
 
-# auto toc support
-MARKDOWN = {
-    'extension_configs': {
-        'markdown.extensions.codehilite': {'css_class': 'highlight'},
-        'markdown.extensions.toc': {},
-        'markdown.extensions.fenced_code': {},
-        'markdown.extensions.extra': {},
-        'markdown.extensions.meta': {},
-    },
-    'output_format': 'html5',
-}
-
-SITE_DESCRIPTION = '欢迎来到本网站，希望本网站的文章能够对您有所帮助。'
+##################################################################
