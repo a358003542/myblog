@@ -21,71 +21,63 @@ Slug: html5-style-guide
 ## html
 
 1.  缩进，这个一个好的编辑器会提供这个自动缩进功能的。
-
 2.  属性名全部小写，用 `-` 隔开。
-
 3.  属性的定义用 **双引号** 包围起来。
-
 4.  `<hr>` `<img src=...>` 这样的不用后面加个 `/` 号了。
-
 5.  关闭标签不要省略 `<li>...</li>`  这是没有疑问的。
-
 6.  开头格式都是： `<!DOCTYPE html>` 
-
 7.  语言指定遵循规范 ，`<html lang="zh-cn">` 
-
 8.  字符编码推荐指定utf8，`<meta charset="utf-8">` 
-
 9.  IE兼容模式，推荐加上这样一行：
 
-  ```html
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-  ```
+```html
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+```
 
 10.  引用css和javascript，如下所示（不要再像以前加上一些杂七杂八的东西，尽可能保持代码简洁。）：
 
-  ```html
-  <!-- External CSS -->
-  <link rel="stylesheet" href="code_guide.css">
+```html
+<!-- External CSS -->
+<link rel="stylesheet" href="code_guide.css">
 
-  <!-- In-document CSS -->
-  <style>
-  ...
-  </style>
+<!-- In-document CSS -->
+<style>
+...
+</style>
 
-  <!-- External JS -->
-  <script src="code_guide.js"></script>
+<!-- External JS -->
+<script src="code_guide.js"></script>
 
-  <!-- In-document JS -->
-  <script>
-  ...
-  </script>
-  ```
+<!-- In-document JS -->
+<script>
+...
+</script>
+```
 
 11.  属性的顺序：
-
-   1.  class
-   2.  id name
-   3.  data-*
-   4.  src for type href value
-   5.  title alt 
-   6.  role aria-*
+    1)  class
+    2)  id name
+    3)  data-*
+    4)  src for type href value
+    5)  title alt 
+    6)  role aria-*
 
 12.  布尔属性，html规范原文就是：
 
-   >   The values "true" and "false" are not allowed on boolean attributes. To represent a false value, the attribute has to be omitted altogether.
-   >
-   >   布尔属性存在就表示true，不存在就取值false。
+>   The values "true" and "false" are not allowed on boolean attributes. To represent a false value, the attribute has to be omitted altogether.
+>
+>   布尔属性存在就表示true，不存在就取值false。
 
-   ```html
-   <input type="text" disabled>
 
-   <input type="checkbox" value="1" checked>
+```html
+<input type="text" disabled>
 
-   <select>
-   <option value="1" selected>1</option>
-   </select>
-   ```
+<input type="checkbox" value="1" checked>
+
+<select>
+<option value="1" selected>1</option>
+</select>
+```
 
 13. 代码简洁简洁，尽可能减少标签数量。这是没有疑问的。
 

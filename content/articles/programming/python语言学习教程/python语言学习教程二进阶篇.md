@@ -1783,45 +1783,45 @@ python操作线程的主要模块是**threading**模块，简单的使用就是�
 
 这个例子主要参考了[这个网页](https://mail.python.org/pipermail/tutor/2004-November/033333.html)。
 
-    #!/usr/bin/env python3
-    # -*- coding: utf-8 -*-
-    import time
-    import threading
-    
-    class Timer(threading.Thread):
-        def __init__(self,interval, action=lambda:print('\a')):
-            threading.Thread.__init__(self)
-            self.interval = interval
-            self.action = action
-    
-        def run(self):
-            time.sleep(self.interval)
-            self.action()
-    
-        def set_interval(self,interval):
-            self.interval = interval
-    
-    #timer = Timer(5)
-    #timer.start()
-    
-    class CountDownTimer(Timer):
-        def run(self):
-            counter = self.interval
-            for sec in range(self.interval):
-                print(counter)
-                time.sleep(1.0)
-                counter -= 1
-            ##
-            self.action()
-    
-    #timer = CountDownTimer(5)
-    #timer.start()
-    
-    def hello():
-        print('hello\a')
-    
-    timer = CountDownTimer(5, action = hello)
-    timer.start()
+```python
+import time
+import threading
+
+class Timer(threading.Thread):
+    def __init__(self,interval, action=lambda:print('\a')):
+        threading.Thread.__init__(self)
+        self.interval = interval
+        self.action = action
+
+    def run(self):
+        time.sleep(self.interval)
+        self.action()
+
+    def set_interval(self,interval):
+        self.interval = interval
+
+#timer = Timer(5)
+#timer.start()
+
+class CountDownTimer(Timer):
+    def run(self):
+        counter = self.interval
+        for sec in range(self.interval):
+            print(counter)
+            time.sleep(1.0)
+            counter -= 1
+        ##
+        self.action()
+
+#timer = CountDownTimer(5)
+#timer.start()
+
+def hello():
+    print('hello\a')
+
+timer = CountDownTimer(5, action = hello)
+timer.start()
+```
 
 具体还是很简单的，这里之所以使用线程就是为了timer.sleep函数不冻结主程序。
 
@@ -1849,101 +1849,103 @@ python操作线程的主要模块是**threading**模块，简单的使用就是�
 
 最后写文件那里降低内存消耗，使用了下面的语句来强制文件流写入文件中，好释放内存，否则你的下载程序内存使用率是剧增的。
 
-    f.flush()
-    os.fsync(f.fileno())
-    
-    import re
-    def guess_url_filename(url):
-        '''根据url来猜测可能的目标文件名，'''
-        response = requests.get(url, stream=True)##还有一个content-type信息可以利用
-        s = urlsplit(url)
-        guess_element = s.path.split('/')[-1]
-        guess_pattern = re.compile(r'''
-        (.png|.flv)
-        $           # end of string
-        ''', re.VERBOSE | re.IGNORECASE)
-    
-        if re.search(guess_pattern,guess_element):
-            filename = guess_element
+```python
+f.flush()
+os.fsync(f.fileno())
+
+import re
+def guess_url_filename(url):
+    '''根据url来猜测可能的目标文件名，'''
+    response = requests.get(url, stream=True)##还有一个content-type信息可以利用
+    s = urlsplit(url)
+    guess_element = s.path.split('/')[-1]
+    guess_pattern = re.compile(r'''
+    (.png|.flv)
+    $           # end of string
+    ''', re.VERBOSE | re.IGNORECASE)
+
+    if re.search(guess_pattern,guess_element):
+        filename = guess_element
+    else:
+        filename = guess_element + '.html'
+    return filename
+
+import threading
+import os
+class DownloadThread(threading.Thread):
+    def __init__(self, url,begin,chunk_size = 1024*300):
+        threading.Thread.__init__(self)
+        self.url = url
+        self.begin = begin
+        self.chunk_size = chunk_size
+        self.result = b''
+    def run(self):
+        headers = {'Range':'bytes={begin}-{end}'.format(begin = str(self.begin),
+            end = str(self.begin + self.chunk_size-1))}
+
+        response = requests.get(url, stream=True, headers = headers)
+
+        if response.headers.get('content-range') is None:
+            self.result = 0##表示已经越界了
         else:
-            filename = guess_element + '.html'
-        return filename
-    
-    import threading
-    import os
-    class DownloadThread(threading.Thread):
-        def __init__(self, url,begin,chunk_size = 1024*300):
-            threading.Thread.__init__(self)
-            self.url = url
-            self.begin = begin
-            self.chunk_size = chunk_size
-            self.result = b''
-        def run(self):
-            headers = {'Range':'bytes={begin}-{end}'.format(begin = str(self.begin),
-                end = str(self.begin + self.chunk_size-1))}
-    
-            response = requests.get(url, stream=True, headers = headers)
-    
-            if response.headers.get('content-range') is None:
-                self.result = 0##表示已经越界了
-            else:
-                self.result = response.content
-                print('start download...', self.begin/1024, 'KB')
-    
-        def getvalue(self):
-            return self.result
-    
-    def get_content_partly(url, index):
-        threads = []
-        content = b''
-        chunk_size = 1024*300# 这个不能设置太大也不能设置太小
-        block_size = 10*chunk_size# 具体线程数
-    
-        for i in range(10):
-            t = DownloadThread(url, index * block_size + i*chunk_size )
-            t.start()
-            threads.append(t)
-    
-        for i,t in enumerate(threads):
-            t.join()
-    
-        for t in threads:
-            if  t.getvalue():
-                content += t.getvalue()
-    
-        return content
-    
-    import os
-    def get_content_tofile(url,filename = ''):
-        '''简单的根据url获取content，并将其存入内容存入某个文件中。
-        如果某个内容size 小于1M 1000000 byte ，则采用多线程下载法'''
-    
-        if not filename:
-            filename = guess_url_filename(url)
-    
-        # NOTE the stream=True parameter
-        response = requests.get(url, stream=True)
-        if not response.headers.get('content-length'):
-            print('this url does not have a content .')
-            return 0
-        elif response.headers.get('content-length') < '1000000':
-            with open(filename, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=1024):
-                    if chunk: # filter out keep-alive new chunks
-                        f.write(chunk)
-                        f.flush()
-                        os.fsync(f.fileno())
-        else:
-            with open(filename, 'wb') as f:
-                for i in range(1000000):##very huge
-                    content = get_content_partly(url, i)
-                    if content:
-                        f.write(content)
-                        f.flush()
-                        os.fsync(f.fileno())
-                    else:
-                        print('end...')
-                        break
+            self.result = response.content
+            print('start download...', self.begin/1024, 'KB')
+
+    def getvalue(self):
+        return self.result
+
+def get_content_partly(url, index):
+    threads = []
+    content = b''
+    chunk_size = 1024*300# 这个不能设置太大也不能设置太小
+    block_size = 10*chunk_size# 具体线程数
+
+    for i in range(10):
+        t = DownloadThread(url, index * block_size + i*chunk_size )
+        t.start()
+        threads.append(t)
+
+    for i,t in enumerate(threads):
+        t.join()
+
+    for t in threads:
+        if  t.getvalue():
+            content += t.getvalue()
+
+    return content
+
+import os
+def get_content_tofile(url,filename = ''):
+    '''简单的根据url获取content，并将其存入内容存入某个文件中。
+    如果某个内容size 小于1M 1000000 byte ，则采用多线程下载法'''
+
+    if not filename:
+        filename = guess_url_filename(url)
+
+    # NOTE the stream=True parameter
+    response = requests.get(url, stream=True)
+    if not response.headers.get('content-length'):
+        print('this url does not have a content .')
+        return 0
+    elif response.headers.get('content-length') < '1000000':
+        with open(filename, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+                    f.flush()
+                    os.fsync(f.fileno())
+    else:
+        with open(filename, 'wb') as f:
+            for i in range(1000000):##very huge
+                content = get_content_partly(url, i)
+                if content:
+                    f.write(content)
+                    f.flush()
+                    os.fsync(f.fileno())
+                else:
+                    print('end...')
+                    break
+```
 
 
 

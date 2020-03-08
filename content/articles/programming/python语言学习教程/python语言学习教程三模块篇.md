@@ -1827,38 +1827,33 @@ nargs='?'
 ​    `--foo` 这个东西但是后面又不跟值，则foo取 **const**
 ​    选项赋的值。不太喜欢这个东西。
 
-### 一个完整的例子
-
 下面给出一个完整的例子:
 
-    #!/usr/bin/env python3
-    # -*- coding: utf-8 -*-
-    
-    import argparse
-    usage = '''
-    resize the image
-    '''
-    
-    def main():
-        parser = argparse.ArgumentParser(usage=usage)
-        parser.add_argument('-c','--config',dest="configpath",help="the config file path")
-        parser.add_argument('inputimg',help="the input image",nargs='+')
-        parser.add_argument('--width',help="the input image",type=int)
-    
-        args = vars(parser.parse_args())
-    
-        configpath = args['configpath']
-        width = args['width']
-        inputimg = args['inputimg']
-    
-        for inputimg in args['inputimg']:
-            print('resize image')
-            print('the input image is {}'.format(inputimg))
-            print('the target width is {}'.format(width))
+```python
+import argparse
+usage = '''
+resize the image
+'''
 
+def main():
+    parser = argparse.ArgumentParser(usage=usage)
+    parser.add_argument('-c','--config',dest="configpath",help="the config file path")
+    parser.add_argument('inputimg',help="the input image",nargs='+')
+    parser.add_argument('--width',help="the input image",type=int)
 
-    if __name__ == '__main__':
-        main()
+    args = vars(parser.parse_args())
+
+    configpath = args['configpath']
+    width = args['width']
+    inputimg = args['inputimg']
+
+    for inputimg in args['inputimg']:
+        print('resize image')
+        print('the input image is {}'.format(inputimg))
+        print('the target width is {}'.format(width))
+if __name__ == '__main__':
+    main()
+```
 
 具体运行情况如下所示:
 
@@ -1922,37 +1917,35 @@ parser的 `add_argument` 方法的 `action`
 `argparse.Action` 的方法，还是有点麻烦的。然后发现 *click*
 模块非常好（一个解决创建命令行脚本工具问题推荐使用的第三方模块），处理这个问题也很容易:
 
-    import click
-    
-    def print_version(ctx, param, value):
-        if not value or ctx.resilient_parsing:
-            return
-        click.echo('Version 1.0')
-        ctx.exit()
-    
-    def quick(ctx,param,value):
-        print(ctx,param,value)
-        ctx.exit()
-    
-    @click.command()
-    @click.option('--version', is_flag=True, callback=print_version,
-                  expose_value=False, is_eager=True)
-    @click.option('--quick',callback=quick,is_flag=True)
-    def hello():
-        while True:
-            userinput = input('input:')
-            click.echo(userinput)
-    
-            if userinput == 'exit':
-                break
+```python
+import click
 
+def print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo('Version 1.0')
+    ctx.exit()
 
-    if __name__ == '__main__':
-        hello()
+def quick(ctx,param,value):
+    print(ctx,param,value)
+    ctx.exit()
+
+@click.command()
+@click.option('--version', is_flag=True, callback=print_version,
+              expose_value=False, is_eager=True)
+@click.option('--quick',callback=quick,is_flag=True)
+def hello():
+    while True:
+        userinput = input('input:')
+        click.echo(userinput)
+
+        if userinput == 'exit':
+            break
+if __name__ == '__main__':
+    hello()
+```
 
 这里的ctx和param到click模块那边再细讲吧，我们看到整个过程比argparse美观多了。
-
-
 
 
 

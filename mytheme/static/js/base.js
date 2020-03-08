@@ -31,6 +31,6 @@ $(function () {
     //点击回到顶部的元素
     $("#gotop").click(function (e) {
         //以1秒的间隔返回顶部
-        $('body,html').animate({scrollTop: 0}, 1000);
+        $('html').animate({scrollTop: 0}, "fast");
     });
 });

@@ -9,7 +9,7 @@ Tags: gui
 
 ## WARNING
 
-**警告，本文档已经归档，缺少新的内容，旧的内容也可能存在错误，现在推荐使用pyside2来进行GUI编程。关于GUI编程请参看 [pyside2学习笔记]({filename}../gui/pyside2学习笔记.md)** 。
+**警告，本文档已经归档，缺少新的内容，旧的内容也可能存在错误，现在推荐使用pyside2来进行GUI编程。关于GUI编程请参看 [pyside2学习笔记]({filename}../programming/gui/pyside2学习笔记.md)** 。
 
 ## 安装和配置
 
