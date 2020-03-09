@@ -862,7 +862,7 @@ void swap_pointer(void * p_1, void* p_2)
 
 就上面这个 swap_pointer 函数例子来说，`int *` 是随便选的，因为这里的操作都是针对指针实际存储的值，而不是指针映射的值。
 
-## 命令行参数
+### 命令行参数
 
 ```c
 int main(int argc, char * argv[]){
@@ -871,6 +871,79 @@ int main(int argc, char * argv[]){
 ```
 
 编写的程序如上编写接受命令行参数，argc是接受的参数个数，argv是参数字符串指针数组。
+
+### 进制转换例子
+
+把字符串转成数字推荐使用 `stdlib.h` 的 `strtol` 函数【转成long类型】，或者 `strtoul` 函数【转成unsigned long类型】，或者 `strtod` 函数【转成double类型】。这些函数相比原 `atoi` 等函数更加的安全，而且该函数还可以指定进制位数。
+
+这个例子引入一个问题，那就是函数如何返回字符串。C语言就字符串操作来说，如同上面strsort函数演示的，结果字符串指针可以传递进来，如下所示，这种方案是最简单的，也是最好的方案。
+
+```c
+void number_radix_conversion(char* number, char * result, int input_radix, int output_radix) {
+	char* end;
+	unsigned long value;
+	value = strtoul(number, &end, input_radix);
+
+	if (output_radix == 2) {
+		_itoa(value, result, 2);
+	}
+	if (output_radix == 8) {
+		sprintf(result, "%o", value);
+	}
+	else if (output_radix == 10) {
+		sprintf(result, "%u", value);
+	}
+	else if (output_radix == 16) {
+		sprintf(result, "%x", value);
+	}
+	return result;
+}
+```
+
+当然还有另外一种实现方法，那就是我们在函数内部新定义结果字符串，但是这就带来一个问题，那就是函数内部块声明的字符串定义，出了函数就是不可以访问了的，哪怕你返回该字符串的指针，因为C语言默认变量叫做自动变量，其访问权限是大家熟悉的编程语言的那种块作用域，而伴随着这种块作用域随之而来的是在内存管理上，该变量是被自动分配和释放的，简言之，就是大家熟悉的那种局部变量的概念。具体到这里函数内部声明的字符串，出了函数该字符串在内存里面也已经被清洗掉了，哪怕你有指针也只是在访问一个内存里面的莫名数据罢了。
+
+下面我们看上面函数的第二个版本：
+
+```c
+char * number_radix_conversion(char* number, int input_radix, int output_radix) {
+	char* end;
+	unsigned long value;
+	static char result[100];
+	value = strtoul(number, &end, input_radix);
+
+	if (output_radix == 2) {
+		_itoa(value, result, 2);
+	}
+	if (output_radix == 8) {
+		sprintf(result, "%o", value);
+	}
+	else if (output_radix == 10) {
+		sprintf(result, "%u", value);
+	}
+	else if (output_radix == 16) {
+		sprintf(result, "%x", value);
+	}
+	return result;
+}
+```
+
+上面这个函数版本就真的实现了返回字符串，这个字符串是在函数内部声明的，之所以出了函数该字符串在内存里面没被清洗掉，是因为加上了 `static` 关键词，从而该result变量成了所谓的 *静态变量* 。静态变量在程序运行时内在内存里面是一直被保留而存在着的。
+
+除了这个静态变量，C语言甚至可以跳出变量声明传统语法，直接指定内存我要多少空间。这个对内存的控制由浅到深是C语言的威力所在也是一把双刃剑，只有你真的明白了你在做什么，而且是除了这么做没有更好的方法，那么才可以这么做，如果默认的自动变量就能完成工作，是不应该纯粹为了炫技而编写那种代码的。
+
+参考资料1提到了很多术语，就静态变量就分为三种，但其实我们程序员对于变量的访问域这个概念还是很熟悉的，所以我们当然清楚函数内部声明的静态变量，如果不返回指针的话，哪怕它还是在内存里面的，也是无法访问的。在函数外面的，本文件内的函数都是可以使用该变量的，其实这个规则对于自动变量也是适用的。
+
+唯一值得一提的是，通过如下语法，别的文件声明的静态变量也可以引入进来：
+
+```c
+extern char Coal;
+```
+
+总之内存管理和变量的可访问域是两个分开的概念。关于内存管理的寄存器变量的讨论本文略过了。
+
+## malloc和free
+
+malloc函数可以直接手工声明一个内存空间，要记得free该内存空间。这个本文暂时略过了，同样，只有在那种确实不得不使用malloc函数的情况才使用。
 
 
 
