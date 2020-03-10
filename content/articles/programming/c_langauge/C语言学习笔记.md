@@ -1,5 +1,6 @@
 Category: c_language
 Slug: c-language-learning-notes
+
 [TOC]
 
 ## 前言
@@ -862,15 +863,7 @@ void swap_pointer(void * p_1, void* p_2)
 
 就上面这个 swap_pointer 函数例子来说，`int *` 是随便选的，因为这里的操作都是针对指针实际存储的值，而不是指针映射的值。
 
-### 命令行参数
 
-```c
-int main(int argc, char * argv[]){
-
-}
-```
-
-编写的程序如上编写接受命令行参数，argc是接受的参数个数，argv是参数字符串指针数组。
 
 ### 进制转换例子
 
@@ -931,19 +924,196 @@ char * number_radix_conversion(char* number, int input_radix, int output_radix) 
 
 除了这个静态变量，C语言甚至可以跳出变量声明传统语法，直接指定内存我要多少空间。这个对内存的控制由浅到深是C语言的威力所在也是一把双刃剑，只有你真的明白了你在做什么，而且是除了这么做没有更好的方法，那么才可以这么做，如果默认的自动变量就能完成工作，是不应该纯粹为了炫技而编写那种代码的。
 
-参考资料1提到了很多术语，就静态变量就分为三种，但其实我们程序员对于变量的访问域这个概念还是很熟悉的，所以我们当然清楚函数内部声明的静态变量，如果不返回指针的话，哪怕它还是在内存里面的，也是无法访问的。在函数外面的，本文件内的函数都是可以使用该变量的，其实这个规则对于自动变量也是适用的。
+### 文件作用域
 
-唯一值得一提的是，通过如下语法，别的文件声明的静态变量也可以引入进来：
+继续上面的讨论，就函数内部声明的局部变量来说【C语言严格的说法是块作用域，也就是只要你写上一个花括号的块，里面声明一个变量，该变量的作用域都只局限在这个块里面，但就讨论简单，下面就简单说为函数内部声明的局部变量。】，作为程序员对于这些变量的访问域和规则都是很熟悉的了。这一块各个编程语言差别不大。
+
+但是因为C语言的链接过程上的差异，比如下面这两个变量声明：
 
 ```c
-extern char Coal;
+int giants = 5;
+static int dodgers = 3;
+int main(){
+    ...
+}
 ```
 
-总之内存管理和变量的可访问域是两个分开的概念。关于内存管理的寄存器变量的讨论本文略过了。
+这两个变量都是文件作用域，不过 `giants` 是所有其他文件都是可以访问的，这个可以简单称作全局变量。而 `dodgers` 也是文件作用域的静态变量，其还有一个专业称呼叫做内部链接，因为其只可以被该文件的其他函数访问，也就是文件内部私有的。
 
-## malloc和free
+还有一点值得一提，那就是上面的 `dodgers` 在其他文件里面如果如下声明：
+
+```c
+extern int dodgers;
+```
+
+则该变量又成了外部链接的变量了， `extern` 声明是告诉编译器这个变量在其他地方声明的，所以在程序链接的过程中就会有相应的处理。总之这样 `dodgers` 在该文件中也是可以访问的了。
+
+上面提到的全局变量情况其他文件是可以直接使用的，但是一般的做法是推荐加上 `extern` 关键词，来增加程序的清晰性。
+
+### 寄存器变量
+
+```c
+register int c;
+```
+
+这里的寄存器变量声明是告诉C编译器这个变量会频繁用到，最好把它放入寄存器里面，仅仅只是加速用的，其他变量属性等同于 `int c` 。
+
+### malloc和free
 
 malloc函数可以直接手工声明一个内存空间，要记得free该内存空间。这个本文暂时略过了，同样，只有在那种确实不得不使用malloc函数的情况才使用。
+
+
+
+## 命令行参数
+
+```c
+int main(int argc, char * argv[]){
+
+}
+```
+
+编写的程序如上编写接受命令行参数，argc是接受的参数个数，argv是参数字符串指针数组，其中argv[0] 为程序的名字，后面就是一些参数了。这种命令行参数的写法最好是对接大家都熟悉的通用接口， [这个Github项目](https://github.com/alex85k/wingetopt) 给出了一个实现版本。我做了一些简化。
+
+即使简化之后就getopt里面的逻辑还是挺多的，但是还是需要使用这个和大家一致的刷参数的接口。
+
+初看这个项目代码有些基本知识补充，比如头文件部分：
+
+```c
+#ifdef what
+...
+#else
+...
+#endif
+```
+
+这是C语言预处理的条件编译语句。
+
+```c
+#ifndef _WINGETOPT_H_
+#define _WINGETOPT_H_
+...
+#endif
+```
+
+这是一种常用的让本宏包只加载一次的手段。
+
+```c
+extern "C" {
+...
+}
+```
+
+这个声明是让C++以C的风格来处理这些声明。
+
+### 统计文件字数程序
+
+下面我们使用这个getopt刷参数函数来编写一个简单的模仿linux系统那边的wc命令行工具，主要提供三个参数选项： `-c` 打印字符数和 `-l` 打印行数和 `-w` 打印词数，然后必须通过 `-f` 指定输入文件。
+
+下面这个例子也附带介绍了一下C语言里面文件是如何操作的，然后还有很多其他文件操作函数，比如 `fprintf` 函数还有之前提到过的 `fgets` 和 `fputs` 函数等等，这些简单了解一下即可。
+
+```c
+#include "myhead.h"
+#include "wingetopt.h"
+
+
+int main(int argc, char* argv[]) {
+	char c;
+	char ch;
+	unsigned long char_count = 0;
+	unsigned long line_count = 0;
+	unsigned long word_count = 0;
+	extern char* optarg;
+	bool char_turn_on = false;
+	bool line_turn_on = false;
+	bool word_turn_on = false;
+	char* filename[100] = {[0]='\0'};
+	FILE* fp;
+
+	while ((c = getopt(argc, argv, "hclwf:")) != -1) {
+		switch (c) {
+		case 'h':
+			printf("Useage: wc [-clw] -f filename\n");
+			exit(EXIT_FAILURE);
+		case 'c':
+			char_turn_on = true;
+			break;
+		case 'l':
+			line_turn_on = true;
+			break;
+		case 'w':
+			word_turn_on = true;
+			break;
+		case 'f':
+			if (optarg == NULL) {
+				exit(EXIT_FAILURE);
+			}
+			else {
+				strcpy(filename, optarg);
+				break;
+			}
+		case '?':
+			printf("unknown option: 0%o\n", c);
+			break;
+		default:
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	if (strlen(filename) == 0) {
+		printf("Need filename\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if ((fp = fopen(filename, "r")) == NULL) {
+		printf("Can't open %s\n", filename);
+		exit(EXIT_FAILURE);
+	}
+
+	bool inword = false;
+	char prev;
+	while ((ch = getc(fp)) != EOF) {
+		// putc(ch,stdout );
+
+		if (char_turn_on) {
+			char_count++;
+		}
+		if (line_turn_on && ch == '\n') {
+			line_count++;
+		}
+
+		if (word_turn_on && !isspace(ch) && !inword) {
+			inword = true;
+			word_count++;
+		}
+		if (word_turn_on && isspace(ch) && inword) {
+			inword = false;
+		}
+		prev = ch;
+	}
+
+	if (prev != '\n') {
+		line_count++;
+	}
+
+	if (char_turn_on) {
+		printf("%s has %ld characters\n", filename, char_count);
+	}
+
+	if (line_turn_on) {
+		printf("%s has %ld lines\n", filename, line_count);
+	}
+
+	if (word_turn_on) {
+		printf("%s has %ld words\n", filename, word_count);
+	}
+
+	return 0;
+}
+```
+
+
+
+## 结构体
 
 
 
