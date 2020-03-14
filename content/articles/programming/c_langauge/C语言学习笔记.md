@@ -1115,6 +1115,91 @@ int main(int argc, char* argv[]) {
 
 ## 结构体
 
+### 结构体的基本使用
+
+结构体首先需要声明才能使用：
+
+```c
+struct book{
+    char title[100];
+    char author[50];
+};
+```
+
+这样声明之后，后面使用 `struct book` 就可以类似 `int` 一样声明相应的变量了：
+
+```c
+int x;
+struct book y;
+```
+
+结构体的变量的初始化如下所示：
+
+```c
+struct book library = {
+    "this is a title",
+    "author",
+};
+```
+
+此外C99和C11还提供了如下初始化语法：
+
+```c
+struct book library = {
+    .title = "this is a title",
+    .author = "author",
+};
+```
+
+访问结构体的成员变量采用 `.` 运算符：
+
+```
+library.title
+library.author
+```
+
+在函数参数上你可以直接传递结构体或者传递结构体指针，传递结构体指针的时候你可以采用如下语法来访问结构体成员变量：
+
+```
+library->title
+library->author
+```
+
+
+
+### typedef
+
+typedef 为某一类型声明一个别名，比如：
+
+```c
+typedef unsigned char BYTE;
+BYTE x;
+```
+
+typedef结合之前你定义的结构体类型会很好用：
+
+```c
+typedef struct {
+	int rows;
+	int cols;
+	int data[];
+} Matrix2D;
+
+Matrix2D x;
+```
+
+
+
+## 其他
+
+### enum
+
+### union
+
+### 更复杂的声明
+
+### 指向函数的指针
+
 
 
 ## 参考资料
