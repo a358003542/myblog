@@ -1188,6 +1188,78 @@ typedef struct {
 Matrix2D x;
 ```
 
+### 链表
+
+现在来实现LISP语言中常见的链表数据结构，本小节主要参考了 **参考资料4** 。就基本的结构定义写法还是很清晰的：
+
+```c
+struct node{
+	int data;
+	struct node * next;
+};
+```
+
+就是一个node节点里面第一个单元存储数据，第二个单元是一个指向下一个节点的指针。我在参考资料4看到如下的写法：
+
+```c
+typedef struct node* LIST;
+
+struct node{
+	int data;
+	LIST next;
+};
+
+```
+
+老实说如果没有上面那个清晰的写法，初次看见这种写法还是有点让人困惑的。不过后面这个 `struct  node *` 也就是指向下一个节点的指针类型会经常出现，那么这种改写就可以接受了。
+
+首先是打印列表和简单熟悉下这个数据结构：
+
+```c
+#define EMPTY_LIST NULL 
+
+void print_list(LIST list) {
+	LIST ptr = list;
+	printf("\n[ ");
+
+	while (ptr != NULL) {
+		printf("%d, ", ptr->data);
+		ptr = ptr->next;
+	}
+
+	printf(" ]");
+}
+
+
+
+int main(void) {
+	struct node node2 = {
+		2,
+		NULL
+	};
+
+	struct node node1 = {
+		1,
+		&node2
+	};
+
+	LIST list1 = &node1;
+
+	print_list(EMPTY_LIST);
+	print_list(list1);
+
+	return 0;
+}
+```
+
+插入和删除和查找动作在参考资料4 C6.4 都有定义，我们来测试下。
+
+```
+
+```
+
+
+
 
 
 ## 其他
@@ -1207,3 +1279,4 @@ Matrix2D x;
 1. C Primer Plus 第六版中文版
 2. Practical C programming Steve Oualline
 3. 菜鸟教程
+4. 计算机科学的基础  Alfred V. Aho　Jeffrey D. Ullman
