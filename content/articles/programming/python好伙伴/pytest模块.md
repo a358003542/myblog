@@ -4,20 +4,123 @@ Tags: python
 [TOC]
 
 
-测试开发风格是如此重要，下面进一步讨论之来提高我们的测试驱动型开发。首先推荐使用pytest。
 
-## pytest简介
-pytest模块是站在unittest基础上的，就简单的应用如下，通过pip安装pytest，然后你之前通过 unittest 写的测试案例，全部都不用更改照样有用，接下来你要写一个新的测试，不需要再新建一个 `unittest.TestCase` 类了（如果你希望多个测试在一个类里面，就新建一个类即可，这个类不需要继承自任何类了。），直接如下写测试函数就是了，然后也不确认就是最简单的 `assert` 确认返回为 True 即可。
+unittest模块
+------------
 
+编写python测试代码，学习pytest模块之前，必须先学习和了解python官方模块 **unitest** 。首先上例子：
+
+```python
+import unittest
+import math
+
+class TooBigError(Exception):
+    pass
+
+def hello(n):
+    if n>2:
+        raise TooBigError('too big input error')
+    else:
+        print('hello'*n)
+
+class FirstTest(unittest.TestCase):
+    def setUp(self):
+        """setUp函数在每个测试单元执行前被执行，其通常用于预先配置
+        一些后面测试单元会用到的参数"""
+        pass
+
+    def tearDown(self):
+        """tearDown函数在每个测试单元执行之后再执行。"""
+        pass
+
+    def test_bool(self):
+        """具体的测试单元，名字需要以test字符开始"""
+        self.assertTrue(True)
+        self.assertFalse(False)
+        
+    def test_equal(self):
+        self.assertEqual(1,1)
+        self.assertNotEqual(1,2)
+        self.assertAlmostEqual(math.pi, 3.1416,4)
+        self.assertNotAlmostEqual(math.pi, 3.1415,4)
+
+    def test_raises(self):
+        self.assertRaises(TooBigError, hello, 3)
+        
+if __name__ == '__main__':
+    unittest.main()
 ```
+
+unittest模块的main函数具体实际执行各个测试单元类，这些测试单元类继承自unittest的TestCase类。在这些继承自TestCase的类中，`setUp` 函数和 `tearDown` 函数有特殊的用途，具体见上面代码的说明。然后里面定义的函数test字符串开头的都是所谓的测试单元，其将被逐个执行。
+
+TestCase有很多方法，比如 `assertTrue` ，`assertFalse` 用于断言某个bool值是真或假，然后 `assertEqual` 用来断言某两个值是相等的(==)，类似的还有 `assertNotEqual` 用来断言两个值不相等。这里值得一提的 `assertAlmostEqual` 方法是用来断言某两个float值在多少小数位上是大致相等的，比如上面的例子，
+$\pi$ 值具体到小数点4位是3.1416。上面这些方法后面还可以额外接受一个提示字符串参数（Msg参数），用来具体没有断言成功的时的补充信息。
+
+`assertRaises`方法用来断言某个函数在接受某些参数之后必然返回某个异常。该方法第一个参数是期望捕捉到的异常，第二个参数是具体调用的函数，后面的参数将送给这个函数，所以就不能跟之前谈及的Msg参数了。
+
+更多信息请参看该模块的 [官方文档](https://docs.python.org/3/library/unittest.html) ，大概简单了解下unittest模块即可，实践中推荐使用pytest模块。
+
+
+
+## pytest模块
+
+pytest模块是站在unittest基础上的，你之前通过 unittest 写的测试案例，全部都不用更改照样有用，接下来你要写一个新的测试，不需要再新建一个 `unittest.TestCase` 类了（如果你希望多个测试在一个类里面，就新建一个类即可，这个类不需要继承自任何类了。），直接如下写测试函数就是了，然后也不确认就是最简单的 `assert` 确认返回为 True 即可。
+
+```python
 def test_prime():
     assert prime(4) == 7
 ```
 
-### 确认抛出某个异常
-把官方的例子copy过来了，看一下就懂了。
+这样确实简单方便了不少。下面继续讨论编写单元测试代码中的知识。
+
+
+
+## mock
+
+在写单元测试时，涉及到网络，套接字等编程问题，必然有这个需求，那就是你希望伪造一些数据，拦截某些函数或类的返回值，从而将整个测试从大型软件框架中抽离出来，这个时候就必须要了解mock模块了。mock模块是unittest模块的子模块，即使是使用上pytest，这个mock子模块也是很有用的。
 
 ```
+from unittest import mock
+```
+
+使用mock模块最关键性的问题是理解mock在做什么。mock模块里面最核心的概念是 `Mock` 类 ，我们看到官方文档的这个例子：
+
+```
+from unittest import mock
+class Test(): pass
+t = Test()
+t.method = Mock(return_value=3)
+t.method = mock.Mock(return_value=3)
+t.method()
+3
+t.method(1,2,3)
+3
+```
+
+简单来啊就是伪造一个python对象，然后通过定制某些特别的属性和方法来实现你的单元测试代码中你想要的那个python对象。在实践中推荐使用 `MagicMock` ，MagicMock继承自Mock，然后实现了很多python对象的magic method【也就是那一大堆`__what__` 的方法】。
+
+## fixture
+
+上面的mock类只是模拟python对象，但有的时候你也需要一些仿真的数据，你也希望这些仿真的数据能够作为参数进入你的测试函数中。
+
+```python
+import pytest
+
+@pytest.fixture
+def sample_config():
+    return {'a': 1}
+
+def test_config_read(sample_config):
+    assert sample_config['a'] == 1
+```
+
+如果你在 `tests` 文件夹下面新建一个 `conftest.py` 文件，你在里面定义的pytest的fixture是全局共享的。
+
+## 确认抛出某个异常
+
+把官方的例子copy过来了，看一下就懂了。
+
+```python
 import pytest
 def f():
     raise SystemExit(1)
@@ -27,17 +130,26 @@ def test_mytest():
         f()
 ```
 
-完了，如果你赶时间的话，这就足够了。下面说一些让你更加优雅地进行测试工作的技巧。
 
-### 实时修改代码实时测试
+
+## 测试过一次下次不测试了
+
+如果你希望测试函数之前测试过一次了，然后后面就不用测试了，那么就在这个函数上面加上如下装饰器。
+
+```
+@pytest.mark.skip(reason="i have test it")
+```
+
+
+
+## 自己写的python模块和pytest集成
+
 推荐安装的有：`pytest` 和 `pytest-runner` 。然后新建 `setup.cfg` 文件，里面的内容是：
 
 ```
 [aliases]
 test=pytest
 ```
-
-这样当你输入 `python setup.py test` 实际等于输入 `python setup.py pytest` 。
 
 以后你要测试就输入：
 ```
@@ -65,14 +177,12 @@ python setup.py test
 然后专心一边测试一边写代码吧。
 
 
-### 只单独测试某个文件
-还是跟着上面的 `--addopts=` 选项来，把具体某个测试py文件相对路径写上即可。
 
+## 自动发现测试文件
 
-### 自动发现测试文件
 pytest是支持自动发现测试文件的，所有的 `test_*.py` 和 `*_test.py` 文件都被认为是测试文件。
 
-一般是推荐统一管理测试文件，如这样设置：新建一个 `pytest.ini` 文件，里面的内容是：
+此外你还可以更明确地新建一个 `pytest.ini` 文件，里面的内容是：
 
 ```
 [pytest]
@@ -81,69 +191,21 @@ testpaths = tests
 
 这样pytest就只处理这个tests文件夹下的测试文件了。
 
-可能有某些情况你希望你的测试文件和代码文件在一起（请确定你必须这样做，毕竟将测试代码和模块源码放在一起很不美观），没问题，写上就是了，pytest会自动发现它的。记得将上面的那个 `pytest.ini` 文件的 `testpaths` 配置删除掉算了。
-
-
-
-### fixture功能
-pytest里面比较高级一点的功能大概就是fixture功能了，这个等下再讲。TODO。
-
-
-
-### 测试过一次下次不测试了
-
-函数上加上这个装饰器。
-
-```
-@pytest.mark.skip(reason="i have test it")
-```
+可能有某些情况你希望你的测试文件和代码文件在一起【请确定你必须这样做，毕竟将测试代码和模块源码放在一起很不美观】，没问题，写上就是了，pytest会自动发现它的。记得将上面的那个 `pytest.ini` 文件的 `testpaths` 配置删除掉算了。
 
 
 
 
+## patch
 
-## mock模块的使用
+实际编码中我们可能有这样的需求，那就是需要Mock的对象很复杂，最好是贴近某个真实对象，但是呢又需要做一些修改，这个时候我们就需要使用patch了：
 
-在大型框架中写单元测试，在涉及到网络，套接字等编程问题是，必然有这个需求，那就是你希望伪造一些数据，拦截某些函数或类的返回值，从而将整个测试从大型软件框架中抽离出来，这个时候就必须要了解mock模块了。python3自带的有mock模块，直接用就是了：
-
-```
-from unittest import mock
-```
-
-使用mock模块最关键性的问题是理解mock在做什么。mock模块里面最核心的概念是 `Mock` 类 ，我们看到官方文档的这个例子：
-
-```
-from unittest import mock
-class Test(): pass
-t = Test()
-t.method = Mock(return_value=3)
-t.method = mock.Mock(return_value=3)
-t.method()
-3
-t.method(1,2,3)
-3
-```
-
-一开始的话我们还是不要管那个 MagicMock 是个什么东西吧，暂时 Mock够用了。然后Mock也可以通过 `side_effect` 来定制抛出异常。
-
-在来个定制函数返回的例子：
-
-```
-test = mock.Mock(return_value='hello world.')
-test()
-'hello world.'
-```
-
-
-### just patch it
-实际编码中我们更多的是和现有的代码或者现有的第三方库的代码来交互，而不是凭空创造个Mock对象进行测试。我们看下面这个例子：
-
-```
+```python
     @mock.patch('users.views.WXAPPAPI.jscode2session', \
-                return_value={"openid": "o1ZL90Blemh5ylei7sBfQotG7PLM", "session_key": "4XXDVTc0e4nuDVp20CIcOg==",
-                              "expires_in": 7200})
+                return_value={"openid": "o1ZL90Ble54545ylei7sBhjkjhtG7PLM", "session_key": "4XXDVTc0e4nuDjgjghhfCIcOg==","expires_in": 7200})
     def test_login(self, mock_jscode2session):
-        data = {'js_code': '003xXUd30hnknF1gLeg30ua5e30xXUdr'}
+        data = {'js_code': '003xXUd30hnknF15454ua5e30xXUdr'}
+        
         response = self.client.get(reverse('mini-login'), data)
 
         # for next testcase
@@ -156,7 +218,3 @@ test()
 如何理解上面的代码？当这段测试代码运行的时候，它的变量名字空间被patch给污染了，比如上面的 `users.views.WXAPPAPI.jscode2session` 这个函数，被污染成为一个 Mock 对象了，这个Mock对象传递给了这个函数的第二个参数（额外的的这个参数哪怕你后面不用也必须写上） `mock_jscode2session` 。
 
 然后代码在运行的时候遇到`jscode2session` 总会返回上面给出的值，这样你就不用考虑数据库啊，网络情况之类的问题了。上面还有一些小技巧和django框架相关，比如 `self.client.get(reverse('mini-login'), data)` 是直接利用自己django，然后自己请求自己的url获得什么响应，这个和django相关，在这里就不多说了。
-
-
-
-
