@@ -7,6 +7,20 @@
 {% block head_description %}
 {{ SITENAME|striptags|e }} 网站里没有这个页面.
 {% endblock head_description %}
+
+
+{% block head_links %}
+{{super()}}
+
+    <style>
+        #gotop {
+            display:none;
+        }
+    </style>
+
+{% endblock %}
+
+
 {% block content %}
 <div class="row">
     <header class="page-header col-md-10 col-md-offset-2">
@@ -17,14 +31,21 @@
 
 <div class="row">
     <div class="col-md-8 col-md-offset-2">
-        <p>Sorry, but the page you are looking for cannot be found. It seems that the page you were trying to reach doesn't exist, or may be it has just moved, or it no longer exists.</p>
-        <p>The best thing to do is to use the search form or start again from the <a href="{{ SITEURL }}">home page</a>.</p>
-        <div class="input-group">
-            <form action="{{ SITEURL }}/search.html" onsubmit="return validateForm(this.elements['q'].value)">
-                <input type="text" class="col-md-12" placeholder="Search" name="q" id="tipue_search_input_404">
-                <button class="btn btn-default" type="submit">Search</button>
-            </form>
-        </div>
+        <p>不好意思，您试图查看的页面不存在。可能该页面并不存在或者已经不存在了或者已经被移动了。</p>
+        <p>你可以试着下面的搜索栏来查找该文章看看。</p>
+
+
+        <form action="{{ SITEURL }}/search.html"
+              onsubmit="return validateForm(this.elements['q'].value);"
+              class="navbar-form navbar-left">
+            <div class="form-group">
+                <input type="text" name="q" id="tipue_search_input"
+                       class="form-control" placeholder="Search..."
+                       style="width:430px;">
+            </div>
+            <button class="btn btn-default" type="submit">搜索</button>
+        </form>
+
     </div>
 </div>
 {% endblock content %}

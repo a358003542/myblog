@@ -98,6 +98,8 @@ THEME = 'mytheme'
 
 SITE_DESCRIPTION = '欢迎来到本网站，希望本网站的文章能够对您有所帮助。'
 
+TEMPLATE_PAGES = {'404.html': '404.html'}
+
 ######################################################
 
 
@@ -105,12 +107,26 @@ SITE_DESCRIPTION = '欢迎来到本网站，希望本网站的文章能够对您
 PLUGIN_PATHS = ['myplugins']
 
 PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search',
-           'render_math']
+           'render_math','sitemap']
 
 MATH_JAX = {'tex_extensions': ['mhchem.js']}
 
 DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
 
 DEFAULT_PAGINATION = 20
+
+SITEMAP = {
+    'format': 'xml',
+    'priorities': {
+        'articles': 0.5,
+        'indexes': 0.5,
+        'pages': 0.5
+    },
+    'changefreqs': {
+        'articles': 'monthly',
+        'indexes': 'daily',
+        'pages': 'monthly'
+    }
+}
 
 ##################################################################

@@ -5,7 +5,7 @@ Slug: c-language-learning-notes
 
 ## 前言
 
-本教程参考 [这个github样例项目](https://github.com/a358003542/HelloWorldC) 阅读更方便。
+本教程参考 [这个github样例项目](https://github.com/a358003542/c_practice) 阅读更方便。
 
 
 

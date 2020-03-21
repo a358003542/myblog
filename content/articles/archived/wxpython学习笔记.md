@@ -983,8 +983,6 @@ import wx
 
 ## 代码重构：思考如何视图操作分离
 
-本小节有些是自己思考的，但更多的是学习 [这篇文章](https://wiki.wxpython.org/ModelViewController) 提出的架构思路。
-
 首先说一下整个编程世界公认的一些理念，比如DRY原则。
 
 然后在具体编码中wxpython额外有些风格推荐。
