@@ -398,6 +398,8 @@ int is_input_integer(void) {
 ```
 
 ```c
+#include "myhead.h"
+
 int main(void) {
 	bool res;
 	res = is_input_integer();
@@ -622,6 +624,8 @@ void swap_int(int* p1, int* p2) {
 ```
 
 ```c
+#include "myhead.h"
+
 int main(void) {
 	int x = 2;
 	int y = 3;
@@ -693,7 +697,7 @@ int sum_int_array(int* arr, int length) {
 typedef struct {
 	int rows;
 	int cols;
-	int data[];
+	int data[0];
 } Matrix2D;
 
 void print_2d(Matrix2D* m) {
@@ -717,6 +721,8 @@ void print_2d(Matrix2D* m) {
 ```
 
 ```c
+#include "myhead.h"
+
 int main(void) {
 	Matrix2D x = {
 		.rows = 3,
@@ -731,6 +737,12 @@ int main(void) {
 ```
 
 结构体在函数中是可以直接传递地址过去的，因为数组名就是数组的首元素地址，一维数组直接传递数组名作为对象的指向指针也是没问题的。这里我们可以把结构体看做一种内部长度不一的一维数组形式，这样就可以理解为什么这样做是可行的。然后结构体的指针引用内部对象采用的是 `m->cols` 这样的写法。二维数组之所以不行是因为计算机只知道你传递过去的首元素地址和内部数据类型，但是具体几行几列这些信息是丢失了的。
+
+### Flexible array member in structure
+
+本小节参看了 [这篇文章](https://www.geeksforgeeks.org/flexible-array-members-structure-c/) 。上面结构体里面 `int data[0]` 是C99引入的新特性，叫做Flexible array member，其在一个结构体里面，而且其必须是结构体的最后一个成员。结构体除了lexible array member之外还必须有其他成员。
+
+**NOTICE: 上面声明 `int data[]` 这种写法在visual studio那边可以，gcc按照默认的gnu11我试了只能是 `int data[0]` 这种写法才行。 **
 
 ### 再谈指针
 
@@ -837,6 +849,8 @@ char* line_gets(char* st, int num) {
 ```
 
 ```c
+#include "myhead.h"
+
 int main(void) {
 	char words[5];
 
@@ -890,6 +904,8 @@ void strsort(char* strings[], int num) {
 ```
 
 ```c
+#include "myhead.h"
+
 int main(void) {
 	char st[] = "abcf";
 	char st2[] = "abcd";
@@ -1272,74 +1288,180 @@ struct node{
 };
 ```
 
-就是一个node节点里面第一个单元存储数据，第二个单元是一个指向下一个节点的指针。我在参考资料4看到如下的写法：
+在上面的基础上，参考资料4做了一些灵活性拓展，个人做了一些修改于是有了下面的`list.h` 文件：
 
 ```c
-typedef struct node* LIST;
+#ifndef LIST_H_
+#define LIST_H_
+#include <stdbool.h>
 
-struct node{
-	int data;
-	LIST next;
-};
 
+#define ItemType int
+
+#define DefNode(NodeType, ListType) \
+typedef struct node  { \
+ItemType item; \
+struct node * next; \
+}NodeType; \
+typedef NodeType* ListType;\
+
+
+DefNode(Node, List);
+
+
+List init_list();
+
+List make_list(ItemType x);
+
+void print_list(List list);
+
+void free_list(List* plist);
+
+bool insert_list(ItemType x, List* plist);
+
+bool is_list_empty(const List* plist);
+
+unsigned int list_length(List list);
+
+#endif
 ```
 
-老实说如果没有上面那个清晰的写法，初次看见这种写法还是有点让人困惑的。不过后面这个 `struct  node *` 也就是指向下一个节点的指针类型会经常出现，那么这种改写就可以接受了。
-
-首先是打印列表和简单熟悉下这个数据结构：
+待参数的 `#define` 宏之前在介绍 `SIZEOF` 的时候提到了。然后 `list.c` 文件如下所示：
 
 ```c
-#define EMPTY_LIST NULL 
+#include "list.h"
+#include <stdio.h>
 
-void print_list(LIST list) {
-	LIST ptr = list;
+
+List make_list(ItemType x) {
+	// init_list with an item
+	List new_list;
+	new_list = (List)malloc(sizeof(Node));
+	new_list->item = x;
+	new_list->next = NULL;
+	return new_list;
+
+}
+
+List init_list() {
+	// init_list with no item
+	return NULL;
+}
+
+
+void print_list(List list) {
 	printf("\n[ ");
 
-	while (ptr != NULL) {
-		printf("%d, ", ptr->data);
-		ptr = ptr->next;
+	while (list != NULL) {
+		printf("%d, ", list->item);
+		list = list->next;
 	}
 
 	printf(" ]");
 }
 
 
+bool insert_list(ItemType x, List* plist) {
+	if ((*plist) == NULL) {
+		(*plist) = (List)malloc(sizeof(Node));
+
+		if (*plist == NULL) { // malloc failed.
+			return false;
+		}
+
+		(*plist)->item = x;
+		(*plist)->next = NULL;
+
+		return true;
+	}
+	else {
+		insert_list(x, &((*plist)->next));
+	}
+}
+
+
+bool is_list_empty(const List * plist) {
+	if (*plist == NULL) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
+unsigned int list_length(List list) {
+	unsigned int count = 0;
+
+	while (list != NULL) {
+		count++;
+		list = list->next;
+	}
+	return count;
+}
+
+
+void free_list(List* plist) {
+	/* NOTICE: assume all list is create by malloc 
+	otherwise there will be a bug.
+	*/
+	Node* psave;
+
+	while ((*plist) != NULL)
+	{
+		psave = (*plist)->next;
+		free(*plist);
+		*plist = psave;
+	}
+}
+```
+
+然后有运行文件：
+
+```c
+#include "myhead.h"
+#include "list.h"
+
 
 int main(void) {
-	struct node node2 = {
-		2,
-		NULL
-	};
+	List list1 = make_list(1);
 
-	struct node node1 = {
-		1,
-		&node2
-	};
-
-	LIST list1 = &node1;
-
-	print_list(EMPTY_LIST);
 	print_list(list1);
+
+	insert_list(2, &list1);
+	print_list(list1);
+
+	List list2 = init_list();
+	insert_list(3, &list2);
+	print_list(list2);
+
+	assert(list_length(list1) == 2);
+
+	free_list(&list1);
+	free_list(&list2);
 
 	return 0;
 }
 ```
 
-插入和删除和查找动作在参考资料4 C6.4 都有定义，我们来测试下。
-
-```
-
-```
-
-
-
-
+上面还有一些基本的链表操作动作函数没有实现，后续有时间补上。然后我们看到一旦你定义了一个你自己的数据结构，一般来说针对该数据结构的排序查找相关动作都要另外配套函数跟上。这就是面向对象编程风格的优点也是缺点。优点就是这些基础配套函数写好之后后面操作按照相应接口会很简单，缺点就是每引入一个新的对象或者数据结构，就会带来一系列的代码量和工作量，同时提升了整个项目的复杂度。
 
 ## 其他
 
 ### enum
 
 ### union
+
+联合 一种数据类型，其能在同一内存空间中存储不同的数据类型，比如：
+
+```
+union hold {
+    int digit;
+    double bigfl;
+}
+```
+
+这个联合数据类型可以存储一个int类型或者一个double数据类型。具体分配内存空间是按照占用空间最大的数据类型来的。
 
 ### 更复杂的声明
 
