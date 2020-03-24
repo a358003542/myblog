@@ -628,7 +628,10 @@ X.deepcopy() 由`__deepcopy__(self)`提供。
 按照PEP343的说法：
 
 ```text
-with VAR = EXPR: # as EXPR 应该只是一个语法糖
+with VAR = EXPR: 
+    BLOCK
+    
+with EXPR as VAR:
     BLOCK
 ```
 
@@ -643,7 +646,47 @@ finally:
     VAR.__exit__()
 ```
 
-比如我们执行 `with open(...) as f` 的这类语句，最终离开就应该调用了文件对象的 `__exit__` 方法。
+比如我们执行 `with open(...) as f` 的这类语句，最终离开就应该调用了文件对象的 `__exit__` 方法：
+
+```
+with open(...) as f:
+    BLOCK
+
+f = open(...)
+f.__enter__()
+try: 
+    BLOCK
+finally:
+    f.__exit__()
+```
+
+此外在`contextlib` 那里还提供了一个**contextmanager** 装饰器，写法有点差异，但要实现的效果大致是类似的。下面是一个演示例子：
+
+```python
+class Mylock():
+    def __enter__(self):
+    	self.lock = acquire_lock()
+        return self.lock
+    def __exit__(self):
+        self.lock.release()
+        
+with Mylock() as lock:
+    # do something
+    
+
+from contextlib import contextmanager
+@contextmanager
+def get_lock(...):
+    lock = acquire_lock()
+    try:
+        yield lock
+    finally:
+        lock.release()
+        
+with get_lock(...) as lock:
+    # do something
+
+```
 
 
 
@@ -675,7 +718,7 @@ class Position():
 
 ## `__repr__` 和 `__str__` 的区别
 
-简单来说就是 repr(what) 调用的是 `__repr__` 方法，str(what) 调用的是 `__str__` 方法。
+简单来说就是 repr(what) 调用的是 `__repr__` 方法，str(what) 调用的是 `__str__` 方法。然后再简单实验了一下，和print函数和字符串format相关的使用的是 `__str__` 方法，如果你在python的REPL环境下，简单的输入该变量回显使用的是 `__repr__` 方法。如果你不实现`__str__` 方法，print函数或者字符串format相关的使用会调用 `__repr__` 方法，至于 `__repr__` 方法就算你不实现所有python对象都有默认的 `__repr__` 方法的。
 
 ## \_\_new\_\_
 
