@@ -25,11 +25,8 @@ TIMEZONE = 'Asia/Shanghai'
 
 # set default date
 DEFAULT_DATE = 'fs'
-if sys.platform == 'win32':
-    DEFAULT_LANG = 'zh'
-else:
-    DEFAULT_LANG = 'zh_CN'
-    LOCALE = 'zh_CN'
+DEFAULT_LANG = 'Chinese (Simplified)'
+
 DEFAULT_DATE_FORMAT = '%Y年 %b %-d日'
 
 #  disable feed generation
