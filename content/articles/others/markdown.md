@@ -18,7 +18,7 @@ Tags: markdown
 
 具体效果如下所示：
 
-这里显示如何插入脚注[^1]
+这里显示如何插入脚注 [^1]
 
 ## 插入描述列表
 ```text
@@ -64,3 +64,4 @@ gfm的官方文档在 [这里](https://help.github.com/articles/github-flavored-
 
 
 [^1]: 这是一个脚注。
+

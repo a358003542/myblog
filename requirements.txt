@@ -3,4 +3,4 @@ beautifulsoup4
 jieba
 nbconvert
 pelican
-markdown
+markdown==3.1.1

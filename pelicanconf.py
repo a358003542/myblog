@@ -83,6 +83,7 @@ MARKDOWN = {
         'markdown.extensions.fenced_code': {},
         'markdown.extensions.extra': {},
         'markdown.extensions.meta': {},
+        'markdown.extensions.footnotes': {}
     },
     'output_format': 'html5',
 }
@@ -109,8 +110,6 @@ PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search',
 MATH_JAX = {'tex_extensions': ['mhchem.js']}
 
 DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
-
-DEFAULT_PAGINATION = 20
 
 SITEMAP = {
     'format': 'xml',
