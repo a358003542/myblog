@@ -1574,41 +1574,6 @@ re模块的split函数可以看作字符串的split方法的升级版本，对�
 
 
 
-## abc模块
-
-abc模块帮助你实现抽象基类，有点类似于java中抽象类的概念。
-
-具体实现如下所示：
-
-```python
-from abc import abstractmethod
-from abc import ABC 
-
-class Graph(ABC):
-    """
-    一般图
-    """
-    DIRECTED = None
-
-    @abstractmethod
-    def nodes(self):
-        """
-        :return:
-        """
-        raise NotImplementedError("Not Implement nodes methods")
-
-```
-
-抽象类不可实例化，实例化将会报错。继承于它的类，如果如上定义了抽象方法，那么继承它的类必须定义好对应方法的实现，否则将会报错。
-
-抽象类里面也可以定义不是抽象方法的其他实际动作的方法。
-
-抽象类里面还可以定义抽象属性。
-
-
-
-
-
 argparse模块
 ------------
 
@@ -1890,75 +1855,6 @@ if __name__ == '__main__':
 
 
 
-ast模块
--------
-
-更多信息请参看 [官方文档](https://docs.python.org/3.4/library/ast.html) 。
-
-### literal\_eval函数
-
-`literal_eval`函数是一个非常有用的函数，其可用于将某个短小的python字符串转化成python
-object。如下所示:
-
-    import ast
-    def str2pyobj(val):
-        '''str to python obj or not changed'''
-        try:
-            val = ast.literal_eval(val)
-        except Exception:###
-            pass
-        return val
-
-支持的python object有: strings, bytes, numbers, tuples, lists, dicts,
-sets, booleans, and None.
-
-所以一般的字符串如 \"1\" \"3.14\" \"\[1,2,3\]\" 将其分别转化成为integer
-float
-和list是小菜一碟。当然最好建立异常捕捉，如果转化失败，则原样返回字符串即可。
-
-collections模块
----------------
-
-更多内容请参见[官方文档](https://docs.python.org/3/library/collections.html)。
-
-### namedtuple函数
-
-collections模块里面的namedtuple函数将会产生一个有名字的数组的类（有名数组），通过这个类可以新建类似的实例。比如：
-
-    from collections import namedtuple
-    
-    Point3d=namedtuple('Point3d',['x','y','z'])
-    p1=Point3d(0,1,2)
-    print(p1)
-    print(p1[0],p1.z)
-    
-    Point3d(x=0, y=1, z=2)
-    0 2
-
-### Counter计数类
-
-可以进行简单的输入数据统计频数计算。
-
-### OrderedDict对象
-
-python中的字典对象默认各个key是没有顺序的，OrderdDict对象的概念就是在字典概念的基础上让各个key有顺序。
-
-一个例子如下所示（来自官方文档）。简单的理解就是一个字典对象记住了各个key的插入顺序。
-
-    >>> d = {'banana': 3, 'apple':4, 'pear': 1, 'orange': 2}
-    
-    >>> # dictionary sorted by key
-    >>> OrderedDict(sorted(d.items(), key=lambda t: t[0]))
-    OrderedDict([('apple', 4), ('banana', 3), ('orange', 2), ('pear', 1)])
-    
-    >>> # dictionary sorted by value
-    >>> OrderedDict(sorted(d.items(), key=lambda t: t[1]))
-    OrderedDict([('pear', 1), ('orange', 2), ('banana', 3), ('apple', 4)])
-    
-    >>> # dictionary sorted by length of the key string
-    >>> OrderedDict(sorted(d.items(), key=lambda t: len(t[0])))
-    OrderedDict([('pear', 1), ('apple', 4), ('orange', 2), ('banana', 3)])
-
 
 
 
@@ -2005,7 +1901,9 @@ name改成小写，我不太喜欢这种风格，因为将configparser刷成字�
     self.cfg = configparser.ConfigParser()
     self.cfg.optionxform = str## not auto make it lowercase
 
+### configparse处理特殊字符
 
+configparse对于某些特殊字符可能会报错，参考了 [这个问题](https://stackoverflow.com/questions/14340366/configparser-and-string-with) ，推荐使用 `RawConfigParser` ，这样就可以解决问题。
 
 ## csv模块
 

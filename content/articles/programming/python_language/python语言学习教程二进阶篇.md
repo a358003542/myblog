@@ -1019,7 +1019,7 @@ print(new_x1,new_x2)
 
 # 装饰器
 
-装饰器的作用机制就是对接下来的函数（类class声明其实也类似于函数声明，所以后面会提到类装饰器的概念）进行进一步的封装，比如：
+装饰器的作用机制就是对接下来的函数进行进一步的封装，比如：
 
         @staticmethod
         def what():
@@ -1042,8 +1042,7 @@ print(new_x1,new_x2)
     
     print3('c')  # print1(print3)('c')
 
-比如上面的print1函数就做成了一个装饰器函数，后面的print3函数可以理解为
-`print3=print1(print3)` 。
+比如上面的print1函数就做成了一个装饰器函数，后面的print3函数可以理解为 `print3=print1(print3)` 。——在这里理解的关键在于理解python中函数名字是无关紧要的，关键是函数对象。比如这里右边的print3是`def print3 ` 时生成的那个函数对象，然后这个函数对象送给print1进行了处理并封装为一个新的函数对象，再把这个函数对象赋值给了变量print3。
 
 ## 多个装饰器
 
@@ -1060,13 +1059,13 @@ print(new_x1,new_x2)
     def print4(c):
         print(c)
     
-    print4('c')  # print2(print1(print4))(c)
+    print4('c')  
 
-类似上面的多个装饰器就可以简单理解为: print4 = print2(print1(print4))
+多个装饰器的装饰顺序是从下往上的，上面的例子原print4函数对象先经过print1处理，然后再经过print2的处理，最后这个函数对象赋值给了变量print4。
 
 ## 装饰器带上参数
 
-在前面的例子中，我们就可以简单将装饰器函数理解为一个接受函数对象返回返回函数对象的函数，这很直观和简单。实际上装饰器也是可以带上自己的参数的，这需要通过什么函数的闭包结构才能完成，如下面的例子所示:
+在前面的例子中，我们就可以简单将装饰器函数理解为一个接受函数对象返回返回函数对象的函数，这很直观和简单。实际上装饰器也是可以带上自己的参数的，这需要通过函数的闭包结构【也就是函数里面定义函数的结构，这样内部函数是可以使用外部函数的那些参数和变量的】才能完成，如下面的例子所示:
 
     def print1(f):
         print('1',f)
@@ -1083,59 +1082,68 @@ print(new_x1,new_x2)
     def print4(c):
         print(c)
     
-    print4('c')  # print2(print1(print4))('b')(c)
+    print4('c') 
 
-所谓闭包结构简单来说就是函数里面套函数的结构。前面在介绍nolocal关键词的时候说道，如果函数里面的嵌套函数的某个变量加上声明关键词nolocal，那么（如果嵌套函数内没有定义该本地变量），则该变量名是对应嵌套函数外面的自由变量的（自由变量在函数生存期具有记忆能力）。
 
-上面例子可以理解为`print2(print1(print4))('b')(c)`
-这样一个过程。首先执行print1(print4)，然后返回print4，这很直观。然后表达式变为`print2(print4)('b')(c)`，然后print2返回test，同时消费掉一个参数，即获得自由变量
-`b='b'` ，这样表达式变为 `test(print4)(c)` ，然后表达式继续规约为
-`print4(c)` 。
 
-## 装饰器和装饰器的衍生装饰器
+## 一般装饰器写法
 
-写一个装饰器现在很已经很简单通用了，有如下写法：
+本小节参考了 [这个网页](https://stackoverflow.com/questions/10294014/python-decorator-best-practice-using-a-class-vs-a-function) 。一般书写一个装饰器函数有如下通用写法：
+
+### 无参数装饰器版本
 
 ```python
 from functools import wraps
-def test_decorator(word):
-    def decorator(f):
-        @wraps(f)
-        def _decorator(*args, **kwargs):
-            print(word)
-            return f(*args, **kwargs)
-        return _decorator
-    return decorator
+
+def mydecorator(func):
+    @wraps(func)
+    def wraper_func(*args, **kwargs):
+        # do something
+        
+        return func(*args, **kwargs)
+    return wraper_func
+
+@mydecorator
+def test(*args, **kwargs):
+    """
+    this is test function
+    """
+    print(args, kwargs)
+
+    
+test('test', a=1)
+print(test.__doc__)
 ```
 
-有的时候处于编程便捷的考虑，需要某些参数作为默认值另外再单独开出一个装饰器：
+这里使用了 functools 模块的 wraps装饰器，其接受你要装饰的函数作为参数。如果不这样的话，你在原test函数中定义的说明文字将丢失，按照 `test=mydecorator(test)` ，实际上test变量接受的函数对象是 `wraper_func` ，不信你可以查看 `test.__name__` 其是等于 `wraper_func` 的。而如上使用wraps装饰器，你在原test函数中定义的名字和文档都将得到保留。
+
+### 带参数装饰器版本
 
 ```python
-bbb_decorator = test_decorator('bbb')
+from functools import wraps
+
+def mydecorator(arg1, arg2):
+    def _mydecorator(func):
+        @wraps(func)
+        def wraper_func(*args, **kwargs):
+            print('i know you pass to decorator parameters:', arg1, arg2)
+			# do something
+            
+            return func(*args, **kwargs)
+        return wraper_func
+    return _mydecorator
+
+@mydecorator('a', 'b')
+def test(*args, **kwargs):
+    """
+    this is test function
+    """
+    print(args, kwargs)
+
+    
+test('test', a=1)
+print(test.__doc__)
 ```
-
-这是可行的，然后还有种写法，实际上是一样的：
-
-```python
-def aaa_decorator(f):
-    return test_decorator('aaa')(f)
-```
-
-理解装饰器关键是理解：
-
-```python
-@aaa_decorator
-def hello2():
-    print('hello')
-```
-
-装饰器不仅仅是函数作为第一个函数这么简单，更进行了函数的命名重定义。
-
-```
-hello2 = aaa_decorator(hello2)
-```
-
-而可以传参数的装饰器其首先消化掉参数，然后decorator，也就是实际装饰函数的是内部的那个decorator函数，而 `wraps` 只是为了保留原函数头doc的优化。
 
 
 
@@ -1176,8 +1184,7 @@ hello2 = aaa_decorator(hello2)
 
 ## 类方法装饰器
 
-还有一个装饰器有时也会用到， `@classmethod`
-，叫什么类方法装饰器。其和前面的静态方法一样也可以不新建实例，而直接通过类来调用。其和静态方法的区别就是静态方法在调用的时候没有任何默认的第一参数，而类方法在调用的时候默认第一参数就是调用的那个类。
+还有一个装饰器有时也会用到， `@classmethod`，叫什么类方法装饰器。其和前面的静态方法一样也可以不新建实例，而直接通过类来调用。其和静态方法的区别就是静态方法在调用的时候没有任何默认的第一参数，而类方法在调用的时候默认第一参数就是调用的那个类。
 
     class Test:
         @classmethod
@@ -1193,7 +1200,7 @@ hello2 = aaa_decorator(hello2)
 
 
 
-## 属性饰器
+## 属性装饰器
 
 其他编程语言的开发者可能会在类里定义一些针对某些属性的get和set之类的方法，这并不是Pythonic的风格，对于某些特定名字的属性，一般利用属性装饰器来构建，如下所示：
 
@@ -1245,98 +1252,11 @@ hello2 = aaa_decorator(hello2)
     apple.color = 'yellow'
     print(apple.color)
 
-## 函数装饰器
 
-本小节参考了 [这个网页](https://stackoverflow.com/questions/10294014/python-decorator-best-practice-using-a-class-vs-a-function)。
-
-前面简单介绍了python的装饰器的概念，然后已经接触了带参数的函数装饰器的概念，之前的例子是为了直白，下面再写个例子表示函数的这种通用形式：
-
-```
-def mydecorator(arg1, arg2):
-    def _mydecorator(func):
-        print('i know you pass to decorator parameters:', arg1, arg2)
-
-        return func
-    return _mydecorator
-```
-
-```
-@mydecorator('a', 'b')
-def test(*args, **kwargs):
-    print(args, kwargs)
-```
-
-```
-test('test', a=1)
-
-('i know you pass to decorator parameters:', 'a', 'b')
-(('test',), {'a': 1})
-```
-
-上面的这种函数装饰器写法是在理解了装饰器的具体原理之后写出来的这种形式，和网上的这种写法有所区别，其更加简洁明了一点，不过还是推荐和大家使用一致的风格写法吧：
-
-```
-def mydecorator(arg1, arg2):
-    def _mydecorator(func):
-        def wraper_func(*args, **kwargs):
-            print('i know you pass to decorator parameters:', arg1, arg2)
-
-            return func(*args, **kwargs)
-        return wraper_func
-    return _mydecorator
-```
-
-```
-@mydecorator('a', 'b')
-def test(*args, **kwargs):
-    print(args, kwargs)
-```
-
-```
-test('test', a=1)
-```
-
-具体运行效果都是一致的，然后我们看到这里用到了函数套函数的结构，从而将装饰器上的一些参数都变为自由变量了，理解这一点是关键。
-
-更进一步的做法是利用functools模块的 `wraps` 函数来装饰最终实际执行的那个
-`wraper_func` 函数。
-
-```
-from functools import wraps
-```
-
-```
-def mydecorator(arg1, arg2):
-    def _mydecorator(func):
-        @wraps(func)
-        def wraper_func(*args, **kwargs):
-            print('i know you pass to decorator parameters:', arg1, arg2)
-
-            return func(*args, **kwargs)
-        return wraper_func
-    return _mydecorator
-```
-
-```
-@mydecorator('a', 'b')
-def test(*args, **kwargs):
-    """
-    this is test function
-    """
-    print(args, kwargs)
-```
-
-```
-test('test', a=1)
-print(test.__doc__)
-```
-
-这样做的好处就是目标函数的说明文档还保留着，目标函数的名字也保留着，目标函数的动作也保留着，只是经过装饰器之后需要经过一些额外的程序流程操作。
 
 ## 类作为装饰器
 
-类作为装饰器就是利用类的 `__call__`
-内置方法，我把这段代码粘贴在下面了，有时可能看别人的源码有用吧，但装饰器这部分就到此为止吧，没必要弄得这么复杂了。
+类作为装饰器就是利用类的 `__call__`内置方法，我把这段代码粘贴在下面了，有时可能看别人的源码有用吧，但装饰器这部分就到此为止吧，没必要弄得这么复杂了。
 
 ```
 class MyDecorator(object):

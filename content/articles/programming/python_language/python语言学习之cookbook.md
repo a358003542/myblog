@@ -220,6 +220,8 @@ ord函数接受 一个字符，然后返回其unicode编码，十进制的。chr
 
 
 
+
+
 ## 字符串
 
 ### format函数
@@ -400,7 +402,36 @@ print(list(itertools.chain(*a_list)))
 # Output: [1, 2, 3, 4, 5, 6]
 ```
 
+### 利用abc模块来实现抽象基类
 
+abc模块帮助你实现抽象基类，有点类似于java中抽象类的概念。
+
+具体实现如下所示：
+
+```python
+from abc import abstractmethod
+from abc import ABC 
+
+class Graph(ABC):
+    """
+    一般图
+    """
+    DIRECTED = None
+
+    @abstractmethod
+    def nodes(self):
+        """
+        :return:
+        """
+        raise NotImplementedError("Not Implement nodes methods")
+
+```
+
+抽象类不可实例化，实例化将会报错。继承于它的类，如果如上定义了抽象方法，那么继承它的类必须定义好对应方法的实现，否则将会报错。
+
+抽象类里面也可以定义不是抽象方法的其他实际动作的方法。
+
+抽象类里面还可以定义抽象属性。
 
 ### 在logging中使用pprint
 
@@ -414,14 +445,31 @@ ds = [{'hello': 'there'}]
 logging.debug(pformat(ds))
 ```
 
+### 利用ast模块的literal_evel函数来更安全的eval
+
+`literal_eval`函数是一个非常有用的函数，其可用于将某个短小的python字符串转化成python
+object。如下所示:
+
+    import ast
+    def str2pyobj(val):
+        '''str to python obj or not changed'''
+        try:
+            val = ast.literal_eval(val)
+        except Exception:###
+            pass
+        return val
+
+支持的python object有: strings, bytes, numbers, tuples, lists, dicts,
+sets, booleans, and None.
+
+所以一般的字符串如 \"1\" \"3.14\" \"\[1,2,3\]\" 将其分别转化成为integer
+float
+和list是小菜一碟。当然最好建立异常捕捉，如果转化失败，则原样返回字符串即可。
 
 
 
 
-
-
-
-### product函数
+### 利用itertools模块的product函数来遍历组合
 
 product函数在 `itertools` 模块里面，按照官方文档的说明是product(A, B)返回值等价于((x,y) for x in A for y in B)，也就是各种可能的组合情况（类似于笛卡尔积的概念）:
 
@@ -448,7 +496,7 @@ product函数在 `itertools` 模块里面，按照官方文档的说明是produc
 
 
 
-### deque结构
+### 利用collections模块的deque数据结构
 
 本小节主要参考了 [这个网页](http://python3-cookbook.readthedocs.io/zh_CN/latest/c01/p03_keep_last_n_items.html) 。
 
@@ -482,7 +530,7 @@ heapq.nlargest(3,lst)
 heapq.nsmallest(3,lst)
 ```
 
-### OrderedDict类
+### 利用collections模块的Orderdict类
 
 字典一般没有排序的需求吧，就是有也可以输出的时候再排序，再说OrderedDict和一般字典比较起来存储开销大了一倍，能不用就不用吧。不过在某些情况下，用这个类确实能带来一些便利。我第一次遇到这种情况大体是在bilibili的api对接那里，其计算密钥需要将所有参数排序然后urlencode为字符串然后再基于这个字符串进行一些计算。
 
@@ -545,11 +593,51 @@ Counter 对象是字典的子类，所以字典的一般方法它都有，下面
 
 这个数据结构最为人们数值的统计频数了，通过调用 `most_common(n)` 方法，n是排行榜的前n名。
 
+### 利用collections模块的namedtuple
+
+collections模块里面的namedtuple函数将会产生一个有名字的数组的类（有名数组），通过这个类可以新建类似的实例。比如：
+
+    from collections import namedtuple
+    
+    Point3d=namedtuple('Point3d',['x','y','z'])
+    p1=Point3d(0,1,2)
+    print(p1)
+    print(p1[0],p1.z)
+    
+    Point3d(x=0, y=1, z=2)
+    0 2
+
+### 构建一个dataclass类
+
+python3.7新加入的dataclass类是一个很有用的特性，对于代码中的某些函数之间彼此传输的特定数据，可以如下构建一个dataclass类：
+
+```
+@dataclass
+class InventoryItem:
+    '''Class for keeping track of an item in inventory.'''
+    name: str
+    unit_price: float
+    quantity_on_hand: int = 0
+```
+
+其大致效果等于：
+
+```
+def __init__(self, name: str, unit_price: float, quantity_on_hand: int=0):
+    self.name = name
+    self.unit_price = unit_price
+    self.quantity_on_hand = quantity_on_hand
+```
+
+编写这样的dataclass类主要是让你的项目代码数据定义更加清晰化。
+
+
+
 ### configparse处理特殊字符
 
 configparse对于某些特殊字符可能会报错，参考了 [这个问题](https://stackoverflow.com/questions/14340366/configparser-and-string-with) ，推荐使用 `RawConfigParser` ，这样就可以解决问题。
 
-### ChainMap
+### 利用collections模块的ChainMap定义搜索过程
 
 将多个字典组合成为一个map字典，想到的一个应用就是配置字典流，利用ChainMap定义搜索路径流，先搜索到的配置优先取用。
 

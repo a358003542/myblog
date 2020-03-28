@@ -2099,26 +2099,54 @@ not的语句中传递下来的lst实际上已经是非列表的其他元素了�
 
 ## lambda函式
 
-lambda
-λ表达式这个在刚开始介绍lisp语言的时候已有所说明，简单来说就是函数只是一个映射规则，变量名，函数名都无所谓的。这里就是没有名字的函数的意思。
+python中的函数作为一个对象一般是通过 `def` 语句来定义的，定义之后该函数对象和函数名变量已经绑定在一起了。但实际上python中的函数作为一个对象名字不是那么重要的：
 
-具体的样子如下面所示：
+```
+def add(x,y):
+...     return x+y
+... 
+add
+<function add at 0x000001B952B770D0>
 
-    f=lambda x,y,z:x+y+z
-    print(f(1,2,3))
-    
-    6
+add2 = add
+del add
+add2(1,2)
+3
+add
+Traceback (most recent call last):
+  File "<input>", line 1, in <module>
+NameError: name 'add' is not defined
+add2.__name__
+'add'
+```
 
-lanmbda函式在有些情况下要用到，比如pyqt里面的信号－槽机制用connect方法的时候，槽比如是函数名或者无参函数，如果用户想加入参量的话，可以使用lamba函式引入。
+而lambda λ表达式可以简单理解为没有名字的函数对象：
 
-读者如果对lambda函式表达不太熟悉强烈建议先简单学一学**scheme**语言。
+```
+add = lambda x,y: x+y
+add
+<function <lambda> at 0x000001B952B77378>
+add.__name__
+'<lambda>'
+add(1,2)
+3
+type(add)
+<class 'function'>
+type(add2)
+<class 'function'>
+```
+
+如上所示我们看到，不管是通过def定义的函数还是lambda函式在python里面都是函数对象，或者说都属于function class。具体调用和使用也很类似，除了lambda函数定义的函数对象那个 `__name__` 只是默认的 `<lambda>` 。
+
+lambda函数在某些地方会用到，一般是在将函数作为参数传递的情况下，某些简短的函数动作没必要另外再想个函数名字的应用场景。
 
 ## print函数
 
-print函数因为很常用和基础，就放在这里了。
+print函数接受任意的参量，逐个打印出来。然后它还有一些关键字参数：
 
-print函数接受任意的参量，逐个打印出来。然后它还有一些关键字参数，**sep**：默认值是'
-'，也就是一个空格，如果修改为空字符串，那么逐个打印出来的字符之间就没有间隔了。**end**：默认值是'\\n'，**file**默认值是sys.stdout，也就是在终端显示，你可以修改为某个文件变量，这样直接往某个文件里面输出内容。
+- **sep**：默认值是 `' '` ，也就是一个空格，如果修改为空字符串，那么逐个打印出来的字符之间就没有间隔了。
+- **end**：默认值是 `'\n'` ，为print函数执行完打印的字符，默认是打印一个换行符。
+- **file**默认值是 `sys.stdout` ，也就是在终端显示，你可以修改为某个文件变量，这样直接往某个文件里面输出内容。
 
 # 逻辑
 
