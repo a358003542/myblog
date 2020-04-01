@@ -1,4 +1,4 @@
-Category: programming
+Category: SQL
 Slug: sql-basic
 Tags: basic
 

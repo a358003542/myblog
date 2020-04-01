@@ -1,5 +1,5 @@
+Category: algorithm
 Slug: numpy-module
-Status: draft
 
 
 

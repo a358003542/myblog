@@ -1,4 +1,4 @@
-Status: draft
+Category: SQL
 Tags: sql, database
 
 
