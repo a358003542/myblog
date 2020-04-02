@@ -1799,9 +1799,7 @@ import global_var as g_var
 
 利用pubsub操作来更好的对异常信息进行捕捉，否则随着你的桌面程序代码变得庞大，如果你的异常无法定位了，将会让调试变得非常困难。具体请参看 [exception_utils.py](https://github.com/a358003542/image_process_tool/blob/master/src/exception_utils.py) 文件。
 
-### 实际图形界面编码
 
-到实际图形界面编码那就根据情况编写mainFrame到各个panel等等，更多的这方面编码细节和推荐规范，请参看 [wxpython编码规范]({filename}./wxpython编码风格推荐.md) 一文。
 
 # 参考资料
 

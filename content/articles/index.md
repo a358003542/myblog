@@ -18,7 +18,7 @@
 
 ## 二
 
-关于写作以前钻研过一段时间 [利用latex写作](https://github.com/a358003542/xelatex-guide-book) ，觉得latex写作会强制让你的文档结构层次更清晰。现在慢慢转移到利用 [pelican模块]({filename}programming/python好伙伴/pelican模块.md) 来进行博客写作了。[markdown]({filename}others/markdown.md) 写作更加灵活轻便，除了作图功能欠佳，其他都还好。个人知识体系甚至到内心世界体系的架构都是另外一个事，和写作工具关系不是太大。即使是只是简单的文字也可能写出最优美的小说或者世界，关键取决于自己的内心。
+关于写作以前钻研过一段时间 [利用latex写作](https://github.com/a358003542/xelatex-guide-book) ，觉得latex写作会强制让你的文档结构层次更清晰。现在慢慢转移到利用 [pelican模块]({filename}programming/python/python_companion/pelican模块.md) 来进行博客写作了。[markdown]({filename}others/markdown.md) 写作更加灵活轻便，除了作图功能欠佳，其他都还好。个人知识体系甚至到内心世界体系的架构都是另外一个事，和写作工具关系不是太大。即使是只是简单的文字也可能写出最优美的小说或者世界，关键取决于自己的内心。
 
 ## 三
 

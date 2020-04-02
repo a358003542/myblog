@@ -37,7 +37,7 @@ def devserve():
     click.echo("start devbuild your pelican project...")
 
     def devbuild():
-        cmd = "pelican --debug -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}".format(
+        cmd = "pelican -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}".format(
             INPUTDIR=INPUTDIR,
             OUTPUTDIR=OUTPUTDIR,
             CONFFILE=CONFFILE
@@ -79,7 +79,7 @@ def build():
     """
     click.echo("start build your pelican project...")
 
-    cmd = "pelican --debug {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
+    cmd = "pelican {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
         INPUTDIR=INPUTDIR,
         PUBLISHCONF=PUBLISHCONF,
         PUBLISHDIR=PUBLISHDIR
