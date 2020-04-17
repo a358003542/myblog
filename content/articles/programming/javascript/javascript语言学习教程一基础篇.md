@@ -1,13 +1,6 @@
-Status: draft
+Category: javascript
 
 [TOC]
-
-# javascript基础
-本文主要面向那些已经熟悉一门编程语言的读者，并不十分适合编程初学者来阅读。
-
-第二次修订版：本小节参考aribnb的javascript规范修订重写了。
-
-
 
 ## 注释
 
@@ -41,7 +34,7 @@ function getType() {
 
 ## javascript代码放在那里
 
-javascript的代码一般推荐是放在 `</body>` 之前，这样能够让浏览器更快地加载页面。至于其他倒没有特别的要求，刚开始简单的javascript代码就直接写上去也是可以的:
+javascript的代码一般推荐是放在HTML文档最后面， `</body>` 标签之前，这样能够让浏览器更快地加载页面。至于其他倒没有特别的要求，刚开始简单的javascript代码就直接写上去也是可以的:
 ```html
 <script>
 your awesome javascript code
@@ -53,44 +46,28 @@ your awesome javascript code
 ```
 
 
-## 声明常量和变量
 
-这是参考的aribnb的javascript规范，简单来说就是不用 `var` ，声明常量用 `const` ；声明变量用 `let` 。理由：`const` 和 `let` 都是 block-scoped（我们程序员习惯的变量作用域盒子模型）。
+## 程序中的操作对象
 
-```javascript
-const a = 1;
-const b = 2;
+### 简介
 
-let count = 1;
-if (true) {
-  count += 1;
-}
+javascirpt的数据类型分为两类，一类是原始类型：数值、字符串和布尔值；另一类是对象类型。此外javascript还有两个特殊的值：`null` 和 `undefined` 。javascript除了数值、字符串、布尔值、null、undefined之外就都是对象了。比如后面提到的数组，函数也都是对象，只不过其是javascipt内部定义的对象。
 
-{
-  let a = 1;
-  const b = 1;
-}
-console.log(a); // ReferenceError
-console.log(b); // ReferenceError
-```
+### 声明常量和变量
 
+javascript可以利用关键词 `var` ， `const` 和 `let` 来声明变量，其中const是声明常量的，var和let是声明变量的，其中var声明变量是大家在javascript中常用的声明变量关键词。其声明的变量的作用域很不同于其他编程语言，叫做 **函数作用域** 。即你在函数区块内声明的变量整个函数体都是可以使用的，包括哪些花括号结构或任意的嵌套函数。因为程序员对于变量的作用域习惯了块作用域，所有airbnb提出不推荐使用 `var` ，而是推荐使用 `let`，因为 `const` 和 `let` 都是块作用域（block-scoped）。对于此我持保留意见，因为javascript本身就是一个很宽松的语言，是否一定要遵从程序员那些习以为常的惯例，然后当作教条我决定大可不必。
 
-
-## 全局变量
+### 全局变量
 
 在网页中有个全局对象 `window` ，所以我们可以把一些全局变量挂在 `window` 对象里面。
 
+### 数值(number)
 
-## 数据类型简介
+**javascript不区分整数值和浮点数值**，javascript中所有数字都用浮点数值表示，这是javascript和其他编程语言的很大不同。然后数值型那些运算，比如加减乘除之类的就不用多说了。其中 `%` 和python一样也是求余操作。在python3中有 `5//2` 是求商的概念，javascript没有这个概念，我们需要如下来获得类似的效果。
 
-### 数值型(number)
-
-javascript整数和浮点数都不分了，都统一表示为number，然后数值型那些运算，比如加减乘除之类的就不用多说了。其中 `%` 和python一样也是求余操作。在python3中有 `5//2` 是求商的概念，javascript没有这个概念，我们需要如下来获得类似的效果。
 ```
 console.log(parseInt(5/2))
 ```
-
-
 
 #### parseInt()
 
@@ -101,8 +78,6 @@ parseInt('123', 10); // 123
 parseInt('11', 2); // 3
 ```
 
-
-
 #### parseFloat()
 
 将字符串转成浮点型，否则返回NaN。
@@ -111,8 +86,6 @@ parseInt('11', 2); // 3
 parseFloat('3.14') 
 3.14
 ```
-
-
 
 NaN也属于number型，判断是否是NaN，airbnb推荐的风格是：
 
@@ -129,23 +102,13 @@ true
 
 ### 字符串(string)
 
-javascript同python一样单引号和双引号都是可以的，按照aribnb的规范，字符串都推荐用 **单引号** 包围起来。
+javascript同python一样单引号和双引号都是可以的，airbnb规范是推荐使用 **单引号** 。
 
 ```javascript
 const name = 'Capt. Janeway';
 ```
 
-很长很长的字符串aribnb规范既不推荐用 `\` 也不推荐用 `+` 连接起来，而是直接写上，这又是一个让人眼睛一亮的建议，理由就是让代码更具搜索性。对此我持保留意见，我觉得用 ` （ Esc下面的那个）来包围多行更便捷一些：
-
-```javascript
-`多行
-字符串
-`
-```
-
-这类似于python的 `"""` 三双引号写法。
-
-aribnb规范提出字符串的程序性拼接推荐使用模块语言，也就是 `${variable}` ，这是很好的（注意必须用**`**符号）。
+你可以通过 `+` 来实现一些简单的字符串拼接工作，然后aribnb规范提出字符串的程序性拼接推荐使用模块语言，也就是 `${variable}` ，这是很好的（注意必须用**`**符号）。
 
 ```javascript
 `How are you, ${name}?`
@@ -192,26 +155,77 @@ class Jedi {
 }
 ```
 
+### 布尔值(boolean)
+
+javascript的布尔值是 `true` 和 `false` 。在进行比较判断操作时，如果你是希望比较值的话，类似python的比较判断 `==` 符号，在javascript中对应的是 `===` 。三个等号，这不是什么别出心裁，也没有任何实际的好处，就是javascript的历史遗留问题罢了。
+```
+=== Equal to
+!== Not equal to
+```
+boolean值的判断遵循以下规则：
+
+1.  `false` `0`  空字符串 `""`  `NaN`  `null`  `undefined` 都被视作false
+2.  其他都被视作true
+
+```js
+Boolean({})
+true
+```
+
+### null
+
+javascript的 `null` 。其是一个特殊值。类似于python的 `None` ，然后还有一个什么 `undefined` 。比如函数没有明确return值就会默认返回 `undefined` ，感兴趣的可能查一下这两个的区别，我看了一下，觉得挺无聊的。上面谈到 `==` 和 `===` 的区别，如果用 `===` ，则 `undefined` 是不等于 `null` 的，如果用 `==` ，则javascript会额外做一些类型转换工作，这两个又会看作相等的。
+
+ECMA-262 规定：
+
+```
+null == undefined; -> return true
+```
+
+按照airbnb的推荐风格，比较操作的时候一律推荐使用 `===`  和 `!==`  ，而不要使用 `==` 和 `!=` 。
+
+
+
+### typeof操作符
+
+查看某个对象的对象类型，typeof操作符只可能返回以下六种结果，比如说前面提到的数组是属于object的；null也是属于object的。
+
+-   number
+-   string
+-   object
+    -   function
+    -   array
+    -   date
+    -   regexp
+-   boolean
+-   null
+-   undefined
+-   symbol (new in es6)
+
+```javascript
+typeof x
+"undefined"
+typeof 1
+"number"
+```
+
 
 
 ### 数组
 
-javascript的数组（array）大体类似于python的列表:
+javascript的数组（array）在数据结构概念上大体类似于python的列表。
 
-新建一个空array：
+### 构建一个数组
 
 ```js
-const items = [];
-```
-
-或者
-
-```javascript
+var array1 = [];
+var array2 = new Array();
 const items = [1, 2, 3.14, 'Hello', null, true];
 ```
+
 其索引index编号法则也和python一致。
 
-#### 数组的一些方法
+### 数组的一些方法
 
 - **length:** 数组长度
 - **indexOf:** 返回数组某个子元素的索引位置
@@ -283,7 +297,7 @@ arr.join('-'); // 'A-B-C-1-2-3'
 ```
 -   **fill:** 数组用某个值来填充
 
-#### 比较两个数组是否相同
+### 比较两个数组是否相同
 
 参考了 [这个网页](http://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript) 。
 
@@ -302,6 +316,51 @@ if (a[i] !== b[i]) return false;
   return true;
 }
 ```
+
+
+
+### for遍历数组
+
+```js
+for (let value of array) {
+  // do something with value
+}
+```
+
+遍历数组还可以这样：
+
+```js
+> a = ['a', 'b', 'c']
+< a.forEach(function(value, index){
+    console.log(value, index);
+});
+> a 0
+> b 1
+> c 2
+```
+
+这大体实现了类似于python的 `enumerate` 写法。
+
+### 判断某个元素是否在数组中
+
+```
+['a','b'].indexOf('a')
+```
+
+如果返回 `-1` 则该元素不在数组中，否则在数组中。
+
+```js
+function is_in_array(array, element){
+    if (array.indexOf(element) === -1){
+        return false
+    }else{
+        return true
+    }
+}
+```
+
+
+
 
 
 ### object
@@ -414,63 +473,10 @@ const original = { a: 1, b: 2 };
 const copy = { ...original, c: 3 }; // copy => { a: 1, b: 2, c: 3 }
 ```
 
-### 布尔值(boolean)
-
-javascript的布尔值是 `true` 和 `false` 。然后需要额外强调的是，类似python的比较判断（==）符号在javascript中是 `===` ，三个等号，这不是什么别出心裁，也没有任何实际的好处，就是javascript的历史遗留问题罢了。
-```
-=== Equal to
-!== Not equal to
-```
-boolean值的判断遵循以下规则：
-
-1.  `false` `0`  空字符串 `""`  `NaN`  `null`  `undefined` 都被视作false
-2.  其他都被视作true
-
-```js
-Boolean({})
-true
-```
 
 
+## 函数
 
-### null
-
-javascript的是 `null` 。其也是一个单独的对象。类似于python的 `None` ，然后还有一个什么 `undefined` 。比如函数没有明确return值就会默认返回 `undefined` ，感兴趣的可能查一下这两个的区别，我看了一下，觉得挺无聊的。上面谈到 `==` 和 `===` 的区别，如果用 `===` ，则 `undefined` 是不等于 `null` 的，如果用 `==` ，则javascript会额外做一些类型转换工作，这两个又会看作相等的。
-
-ECMA-262 规定：
-
-```
-null == undefined; -> return true
-```
-
-按照airbnb的推荐风格，比较操作的时候一律推荐使用 `===`  和 `!==`  ，而不要使用 `==` 和 `!=` 。这样的话函数返回undefined的情况如何处理呢？ TODO。
-
-
-
-### typeof操作符
-
-查看某个对象的对象类型，typeof操作符只可能返回以下六种结果，比如说前面提到的数组是属于object的；null也是属于object的。
-
--   number
--   string
--   object
-    -   function
-    -   array
-    -   date
-    -   regexp
--   boolean
--   null
--   undefined
--   symbol (new in es6)
-
-```javascript
-typeof x
-"undefined"
-typeof 1
-"number"
-```
-
-## 定义函数
 一个简单的函数定义和使用如下所示（下面这种写法是airbnb规范推荐的风格）:
 ```javascript
 let greeting = function(name){
@@ -492,7 +498,7 @@ function abs(x){
 
 这两种定义风格是完全等价的。这里值得一提的是如果函数没有确定return值，则返回的是 `undefined` 。
 
-## arguments用法
+### arguments用法
 
 javascript的函数内部可以直接使用 `arguments` 这个变量，其不是一个Array，但可以如下使用:
 
@@ -503,7 +509,7 @@ arguments.length
 
 其会接受传入函数的所有参量。
 
-## rest用法
+### rest用法
 
 这个有点类似于lisp语言的rest参量控制概念，也就是如下
 
@@ -515,7 +521,7 @@ function func(a,b,...rest){
 
 rest是表示除了a和b之外的所有其余参量。注意前面三个点号: `...rest` 。
 
-## 箭头函数
+### 箭头函数
 
 简单来说箭头函数就是 lambda 表达式的更简洁写法，只是说在javascript语境里面其区别一般function的特点有：<u>其没有this绑定</u>。
 
@@ -523,7 +529,11 @@ rest是表示除了a和b之外的所有其余参量。注意前面三个点号: 
 (param1, param2, …, paramN) => { statements }
 ```
 
-## 条件判断结构
+
+
+## 逻辑
+
+### 条件判断结构
 
 条件判断结构，和python大同小异，除了那些圆括号（记住这个圆括号必须加上）和花括号。
 
@@ -551,11 +561,9 @@ console.log('teenager')
 
 javascript有switch语句，作为我们pythoner你懂的，用多个else if语句也是可以的。
 
-## 循环结构
+### for循环
 
 javascript和python都有while语句，但while语句用的较少，更多的是使用for语句。
-
-### for循环
 
 ```js
 var count = 10;
@@ -644,7 +652,7 @@ do {
 ```
 
 
-## 异常处理
+### 异常处理
 
 类似于python的 `try...except...` ，javascript有：
 
@@ -731,3 +739,4 @@ var s2 = new Set([1, 2, 3]); // 含1, 2, 3
 ```
 test ? expression1 : expression2
 ```
+
