@@ -4,7 +4,9 @@ Category: html5_tutorial
 
 [TOC]
 
-# html5基础
+If you are a english reader, I recommend [this article](https://www.websiteplanet.com/blog/html-guide-beginners/ ) for your html5 starting point. 
+
+
 
 
 ## 第一个模板
