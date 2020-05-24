@@ -149,6 +149,10 @@ int main(void) {
 
 就cpp和c语言的函数定义和函数原型声明这块来说区别不是太大。熟悉C语言的这块简单温习下就好。
 
+## CPP数据类型
+
+整型有：short，int，long 和 long long 。一般没有有说服力的理由就应使用int。
+
 
 
 
