@@ -7,7 +7,7 @@ Tags: linux
 
 ## debian系或者rpm系
 
-目前Linux主流的包管理系统分为debian系和rpm系这两个。CentOS和Redhat属于rpm系；ubuntu和debian系统属于rpm系。在ubuntu中第一个要学习的命令就是 apt 命令，通过它来进行系统软件的安装卸载更新等等工作；在centos第一个要学习的命令是 yum 命令，与apt命令类似进行了一系列的系统的软件包管理操作。
+目前Linux主流的包管理系统分为debian系和rpm系这两个。CentOS和Redhat属于rpm系；ubuntu和debian系统属于debian系。在ubuntu中第一个要学习的命令就是 apt 命令，通过它来进行系统软件的安装卸载更新等等工作；在centos第一个要学习的命令是 yum 命令，与apt命令类似进行了一系列的系统的软件包管理操作。
 
 ### yum命令和rpm命令
 
@@ -18,6 +18,7 @@ Tags: linux
 - yum groupremove what 卸载某个软件组
 - yum clean 清除系统软件包管理相关的缓存
 - rpm -i what.rpm  本地安装某个rpm包，一般使用会加上 `-vh` 选项来显示更多的安装信息和安装进度。    
+- rpm -qa| grep what 搜索本地已经安装了的名字带有what的rpm包，
 
 
 
