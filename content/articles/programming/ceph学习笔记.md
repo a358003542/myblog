@@ -393,7 +393,7 @@ mon daemon 默认把数据放在 `/var/lib/ceph/mon/$cluster-$id` 这里。
 
 
 
-#### mon的部署基本流程
+### mon的部署基本流程
 
 除非你用ceph-deploy工具不去考虑具体细节，否则mon的部署都应该如下流程走一遍，其中也包括一些cephx的认证配置的东西。
 
