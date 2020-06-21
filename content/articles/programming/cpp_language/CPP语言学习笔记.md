@@ -31,11 +31,11 @@ int main(void) {
 }
 ```
 
-## 头文件的扩展名
+### 头文件的扩展名
 
 cpp新的风格头文件是没有扩展名的，比如 `iostream` 就是 iostream ，并没有.h或者.hpp之类的，这样可以使用 `namespace std` 。旧的风格大体类似于C语言带上 `.h` 后缀。
 
-## 命名空间
+### 命名空间
 
 这个算是和C语言很大的一个不同点了，命名空间这个概念对于熟悉编程的人来说并不是一个默认的概念了，大体类似于python的模块名，一些其他编程语言也有类似的概念。比如：
 
@@ -67,7 +67,7 @@ using std::endl;
 
 这大体类似于python里面的 `from what import cout` ，只是具体导入了某个函数名之类的。
 
-## cout对象
+### cout对象
 
 cout是一个对象，其内部有方法知道如何打印字符串。
 
@@ -87,7 +87,7 @@ cout << 25;
 
 
 
-## 声明变量
+### 声明变量
 
 cpp这点和c语言最大的区别是cpp是推荐在首次使用变量之前声明它而不是集中在文件开头。
 
@@ -116,7 +116,7 @@ int main(void) {
 
 cin 和cout相比较之前C语言哪一套实在方便多了，然后我们看到cout可以进行简单的字符串拼接操作。
 
-## 定义函数
+### 定义函数
 
 ```cpp
 #include <iostream>
@@ -197,7 +197,7 @@ int main(void) {
 }
 ```
 
-
+**注解：** `%` 是取模运算，整数之间的除法是取商运算。
 
 3．编写一个程序，要求用户以度、分、秒的方式输入一个纬度，然后以度为单位显示该纬度。1度为60分，1分等于60秒，请以符号常量的方式表示这些值。对于每个输入值，应使用一个独立的变量存储它。下面是该程序运行时的情况：
 
@@ -243,7 +243,7 @@ int main(void) {
 }
 ```
 
-
+**注解：** 本例主要演示了const定义常数项的用法。
 
 5．编写一个程序，要求用户输入全球当前的人口和美国当前的人口（或其他国家的人口）。将这些信息存储在long long变量中，并让程序显示美国（或其他国家）的人口占全球人口的百分比。该程序的输出应与下面类似：
 
@@ -281,7 +281,7 @@ int main(void) {
 }
 ```
 
-
+**注解：** 本例主要演示了如何进行强制类型转换。
 
 7．编写一个程序，要求用户按欧洲风格输入汽车的耗油量（每100公里消耗的汽油量（升）），然后将其转换为美国风格的耗油量—每加仑多少英里。注意，除了使用不同的单位计量外，美国方法（距离/燃料）与欧洲方法（燃料/距离）相反。100公里等于62.14英里，1加仑等于3.875升。因此，19mpg大约合12.4l/100km，27mpg大约合8.71/100km。
 
@@ -507,7 +507,7 @@ int main(void) {
 }
 ```
 
-
+**注解：** 一般字符可以直接cout，但如果类型已经是int型了，那么希望输出对应的字符则需要使用`cout.get`。
 
 编写一个程序，它要求用户首先输入其名，然后输入其姓；然后程序使用一个逗号和空格将姓和名组合起来，并存储和显示组合结果。请使用char数组和头文件cstring中的函数。下面是该程序运行时的情形：
 
@@ -546,7 +546,7 @@ int main(void) {
 }
 ```
 
-
+**注解：** 本例主要了解下C风格的字符数组用法。
 
 结构CandyBar包含3个成员。第一个成员存储了糖块的品牌；第二个成员存储糖块的重量（可以有小数）；第三个成员存储了糖块的卡路里含量（整数）。请编写一个程序，声明这个结构，创建一个名为snack的CandyBar变量，并将其成员分别初始化为“Mocha Munch”、2.3和350。初始化应在声明snack时进行。最后，程序显示snack变量的内容。
 
@@ -577,6 +577,8 @@ int main(void) {
 	return 0;
 }
 ```
+
+**注解：** 本例主要演示了结构体的用法。
 
 结构CandyBar包含3个成员，如上面讨论的。请编写一个程序，创建一个包含3个元素的CandyBar数组【使用new来动态分配数组，而不是声明一个包含3个元素的CandyBar数组】，并将它们初始化为所选择的值，然后显示每个结构的内容。
 
@@ -625,6 +627,8 @@ int main(void) {
 	return 0;
 }
 ```
+
+**注解：** 本例主要演示了如何new一个结构体。
 
 William Wingate从事比萨饼分析服务。对于每个披萨饼，他都需要记录下列信息：
 
@@ -689,13 +693,321 @@ int main(void) {
 }
 ```
 
+**注解：** 本例主要演示了vector的用法。
+
 
 
 ## CPP程序逻辑
 
 这块C++和C语言内容基本上没什么区别，所以大多略过了，然后主要做一些习题也算是对前面学到的东西的再应用。
 
+C++的for语句多了一个新的下面这种形式，这个要了解下：
 
+```cpp
+for (int x: {1,2,3}){
+    cout << x;
+}
+```
+
+这个熟悉python语言等高级语言的知道这是迭代遍历循环操作，然后后面可以是数组或者vector或者array。
+
+关于cin的用法请看下面的演示例子，主要是这个补充知识点：cin.get获取字符之后返回的仍是cin对象，其如果在bool取值环境，如果读取成功则返回true，如果读取失败则返回fasle。读取失败也包括常规的EOF结尾情况。
+
+```cpp
+#include <iostream>
+
+
+int main() {
+	using namespace std;
+
+	char ch;
+	int count = 0;
+
+	cout << "Enter characters:\n";
+
+	while (cin.get(ch)) { //Ctrl+Z 
+		cout << ch;
+		++count;
+	}
+
+	cout << endl << count << endl;
+
+	return 0;
+}
+```
+
+
+
+1．编写一个要求用户输入两个整数的程序。该程序将计算并输出这两个整数之间（包括这两个整数）所有整数的和。这里假设先输入较小的整数。例如，如果用户输入的是2和9，则程序将指出2～9之间所有整数的和为44。
+
+xiti_c5_1.cpp
+
+```cpp
+#include <iostream>
+
+
+int main() {
+	using namespace std;
+
+	int start_int;
+	int end_int;
+	int sum = 0;
+	cout << "please input the start integer: ";
+
+	cin >> start_int;
+
+	cout << "please input the end integer: ";
+	cin >> end_int;
+
+
+	for (int n = start_int; n <= end_int; n++) {
+		sum += n;
+	}
+
+	cout << "the integer in range " << start_int << " - " << end_int << " summation is " << sum << endl;
+
+
+	return 0;
+}
+```
+
+**注解：** 本例主要演示了如何写for语句。
+
+3．编写一个要求用户输入数字的程序。每次输入后，程序都将报告到目前为止，所有输入的累计和。当用户输入0时，程序结束。
+
+xiti_c5_3.cpp
+
+```cpp
+#include <iostream>
+
+
+int main() {
+	using namespace std;
+
+	
+	int temp;
+	int sum = 0;
+
+	do {	
+		cout << "please input a number, input 0 quit : ";
+		cin >> temp;
+		sum += temp;
+	} while (temp);
+
+	cout << "your input number summation is " << sum << endl;
+
+
+	return 0;
+}
+```
+
+**注解：** 本例演示了do-while语句。
+
+5．假设要销售《C++ For Fools》一书。请编写一个程序，输入全年中每个月的销售量（图书数量，而不是销售额）。程序通过循环，使用初始化为月份字符串的char *数组（或string对象数组）逐月进行提示，并将输入的数据储存在一个int数组中。然后，程序计算数组中各元素的总数，并报告这一年的销售情况。
+
+xiti_c5_5.cpp
+
+```cpp
+#include <iostream>
+
+
+int main() {
+	using namespace std;
+
+	int sum = 0;
+
+	string months[12] = { "jan","feb","march","april","may","june","july","august","september","october","november","december" };
+	int sales[12] = {};
+
+	int count = 0;
+	for (string month : months) {
+		cout << "please input the sale of amount in " << month << " : ";
+		cin >> sales[count];
+
+		count++;
+	}
+
+	for (int x : sales) {
+		sum += x;
+	}
+	cout << "this year's sale amount is: " << sum << endl;
+
+	return 0;
+}
+```
+
+**注解：** 本例主要演示了如何使用新式的for语句。
+
+6．完成编程练习5，但这一次使用一个二维数组来存储输入—3年中每个月的销售量。程序将报告每年销售量以及三年的总销售量。
+
+xiti_c5_6.cpp
+
+```cpp
+#include <iostream>
+
+
+int main19() {
+	using namespace std;
+
+	int sum_all = 0;
+
+	string months[12] = { "jan","feb","march","april","may","june","july","august","september","october","november","december" };
+	int sales[3][12] = {};
+
+	for (int i = 0; i < 3; i++) {
+		int count = 0;
+		int sum_year = 0;
+
+		for (string month : months) {
+			cout << "please input year " << i << " the sale of amount in " << month << " : ";
+			cin >> sales[i][count];
+
+			sum_year += sales[i][count];
+
+			count++;
+		}
+
+		cout << "this year "<< i << "all sale amount is: " << sum_year << endl;
+
+		sum_all += sum_year;
+	}
+
+	cout << "the three year all sale amount is: "<< sum_all  << endl;
+
+	return 0;
+}
+```
+
+**注解：** 本例主要演示了二维数组的用法。
+
+10．编写一个使用嵌套循环的程序，要求用户输入一个值，指出要显示多少行。然后，程序将显示相应行数的星号，其中第一行包括一个星号，第二行包括两个星号，依此类推。每一行包含的字符数等于用户指定的行数，在星号不够的情况下，在星号前面加上句点。该程序的运行情况如下：
+
+![img]({static}/images/programming/xiti_c5_10.png)
+
+xiti_c5_10.cpp
+
+
+
+```cpp
+#include <iostream>
+
+int main20() {
+	using namespace std;
+
+	int rows;
+
+	cout << "Enter number of rows: ";
+
+	cin >> rows;
+
+	for (int i = 0; i < rows; i++) {
+		for (int j = i+1; j < rows; j++) { //here we can not use the if statement.
+			cout << ".";
+		}
+
+		for (int j = 0; j < i+1; j++) {
+			cout << "*";
+		}
+
+		cout << endl;
+	}
+
+
+	return 0;
+}
+```
+
+**注解：** 需要注意本例不能使用if语句，所以才有上面的写法。
+
+下面这个例子中 cin >> fish[i] 返回cin对象，其bool值含义是如果获取输入成功则返回true，如果获取输入失败则返回false。
+
+cinfish.cpp
+
+```cpp
+#include <iostream>
+
+
+const int Max = 5;
+
+int main() {
+	using namespace std;
+
+
+	double fish[Max];
+
+	cout << "fish #1: ";
+	int i = 0;
+
+	while (i < Max && cin >> fish[i]) {
+		if (++i < Max) {
+			cout << "fish #" << i + 1 << ": ";
+		}
+	}
+	double total = 0;
+	for (int j = 0; j < i; j++) {
+		total += fish[j];
+	}
+	if (i == 0) {
+		cout << "No fish\n";
+	}
+	else {
+		cout << "average weight is " << total / i;
+	}
+
+	return 0;
+}
+```
+
+cinfish2.cpp
+
+下面例子类似上面也是一个和用户交互请求输入数字的例子，不同的是上一个如果用户输入有误则退出，而这一个如果用户输入有误程序会继续请求用户输入。所以上一个例子是演示的不定数目的输入情况，而这一个演示的是如何处理用户输入有误时候的情况。为了和上面的例子进行比较我尽可能让这两个例子基本结构变动不大。
+
+```cpp
+#include <iostream>
+
+
+const int Max = 5;
+
+int main() {
+	using namespace std;
+
+	double fish[Max];
+
+	cout << "fish #1: ";
+	int i = 0;
+
+	while (i < Max) {
+		while (!(cin >> fish[i])) { //failed for input
+			cin.clear();
+			while (cin.get() != '\n') { //clear the wrong input line
+				continue;
+			}
+			if (i < Max) {
+				cout << "fish #" << i + 1 << ": ";
+			}
+		}
+		i++;
+		if (i < Max) {
+			cout << "fish #" << i + 1 << ": ";
+		}
+	}
+
+	double total = 0;
+	for (int j = 0; j < i; j++) {
+		total += fish[j];
+	}
+	if (i == 0) {
+		cout << "No fish\n";
+	}
+	else {
+		cout << "average weight is " << total / i;
+	}
+
+	return 0;
+}
+```
+
+**注解：** `cin.clear()` 是让cin在遇到错误输入之后可以继续开始接受输入。后面的while语句是清空缓存区那一行错误输入。
 
 ## CPP函数
 

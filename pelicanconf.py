@@ -122,7 +122,8 @@ SITEMAP = {
         'articles': 'monthly',
         'indexes': 'daily',
         'pages': 'monthly'
-    }
+    },
+    'exclude': ['tags/', 'categorys/']
 }
 
 ##################################################################
