@@ -1,10 +1,11 @@
 Category: archived
+Date: 2019
 
 [TOC]
 
 ## NOTICE
 
-**本文已归档，因makefile只能在linux环境下运行，加上现在类似makefile的这种工具有很多替代品了，如果嫌麻烦自己随便写个python脚本管理下也比项目里面插入一个makefile文件要好。**
+**本文已归档，因makefile只能在linux环境下运行，加上现在类似makefile的这种工具有很多替代品了，如果嫌麻烦自己随便写个python脚本管理下也比项目里面插入一个makefile文件要好。【2019】**
 
 ## 简单了解下makefile
 
