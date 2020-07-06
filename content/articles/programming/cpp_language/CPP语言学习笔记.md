@@ -149,7 +149,7 @@ int main(void) {
 
 就cpp和c语言的函数定义和函数原型声明这块来说区别不是太大。熟悉C语言的这块简单温习下就好。
 
-## CPP数据类型
+## 数据类型
 
 整型有：short，int，long 和 long long 。一般没有有说服力的理由就应使用int。
 
@@ -697,7 +697,7 @@ int main(void) {
 
 
 
-## CPP程序逻辑
+## 程序逻辑
 
 这块C++和C语言内容基本上没什么区别，所以大多略过了，然后主要做一些习题也算是对前面学到的东西的再应用。
 
@@ -1009,13 +1009,878 @@ int main() {
 
 **注解：** `cin.clear()` 是让cin在遇到错误输入之后可以继续开始接受输入。后面的while语句是清空缓存区那一行错误输入。
 
-## CPP函数
+下面这个例子演示了如何写入文件：
+
+outfile.cpp
+
+```cpp
+#include <iostream>
+#include <fstream>
+
+int main() {
+	using namespace std;
+
+	char automobile[50];
+
+	int year;
+	double a_price;
+	double d_price;
+
+	ofstream outFile;
+	outFile.open("carinfo.txt");
+
+	cout << "Enter the make and modle of automobile: ";
+	cin.getline(automobile, 50);
+
+	cout << "Enter the model year: ";
+
+	cin >> year;
+
+	cout << "Enter the original asking price: ";
+	cin >> a_price;
+
+	d_price = 0.913 * a_price;
+
+	cout << fixed; // 
+	cout.precision(2); //
+	cout.setf(ios_base::showpoint);
+	cout << "Make and modle: " << automobile << endl;
+	cout << "Year: " << year << endl;
+	cout << "Was asking $" << a_price << endl;
+	cout << "Now asking $" << d_price << endl;
+
+
+	outFile << fixed;
+	outFile.precision(2);
+	outFile.setf(ios_base::showpoint);
+	outFile << "Make and modle: " << automobile << endl;
+	outFile << "Year: " << year << endl;
+	outFile << "Was asking $" << a_price << endl;
+	outFile << "Now asking $" << d_price << endl;
+	outFile.close();
+
+
+	return 0;
+}
+```
+
+具体在新建一个ofstream对象之后，通过open方法将输出流和目标文件联系起来，然后剩下来的动作和使用cout没有区别，最后记得把文件输出流调用close方法关闭。
+
+```
+ofstream outFile;
+outFile.open("carinfo.txt");
+
+....
+
+outFile.close();
+```
+
+- precision方法  控制输出流浮点数的精度
+- `setf(ios_base::showpoint)` 显示浮点数小数点后面的零
+
+
+
+1．编写一个程序，读取键盘输入，直到遇到@符号为止，并回显输入（数字除外），同时将大写字符转换为小写，将小写字符转换为大写（别忘了cctype函数系列）。
+
+xiti_c6_1.cpp
+
+```cpp
+#include <iostream>
+#include <cctype>
+
+int main26() {
+	using namespace std;
+
+	char ch;
+
+	while (cin.get(ch)) {
+		if (ch == '@') {
+			break;
+		}
+		else if (isdigit(ch)) {
+			continue;
+		}
+		else if (isupper(ch)) {
+			cout.put(tolower(ch));
+		}
+		else if (islower(ch)) {
+			cout.put(toupper(ch));
+		}
+		else {
+			cout.put(ch);
+		}
+	}
+
+	return 0;
+}
+```
+
+3．编写一个菜单驱动程序的雏形。该程序显示一个提供4个选项的菜单——每个选项用一个字母标记。如果用户使用有效选项之外的字母进行响应，程序将提示用户输入一个有效的字母，直到用户这样做为止。然后，该程序使用一条switch语句，根据用户的选择执行一个简单操作。该程序的运行情况如下：
+
+![img]({static}/images/2020/xiti_c6_3.png)
+
+xiti_c6_3.cpp
+
+```cpp
+#include <iostream>
+
+using namespace std;
+void help();
+
+void help() {
+	cout << "c) carnivore              p) pianist\n" <<
+		"t) tree                   g) game\n";
+}
+
+
+
+int main() {
+
+	cout << "Please enter one of the following choices:\n";
+
+	help();
+
+	char ch;
+
+	(cin >> ch).get();
+
+	bool quit = false;
+
+	while (!quit) {
+		quit = true;
+		switch (ch) {
+		case 'c':
+			cout << "A maple is a carnivore";
+			break;
+		case 'p':
+			cout << "A maple is a pianist";
+			break;
+		case 't':
+			cout << "A maple is a tree";
+			break;
+		case 'g':
+			cout << "A maple is a game";
+			break;
+		default:
+			cout << "Please enter a c, p, t, or g: ";
+			(cin >> ch).get();
+			quit = false;
+
+		}
+	}
+
+
+	return 0;
+}
+```
+
+5．在Neutronia王国，货币单位是tvarp，收入所得税的计算方式如下：
+
+5000 tvarps：不收税
+
+5001～15000 tvarps：10%
+
+15001～35000 tvarps：15%
+
+35000 tvarps以上：20%
+
+例如，收入为38000 tvarps时，所得税为5000 0.00 + 10000 0.10 + 20000 0.15 + 3000 0.20，即4600 tvarps。请编写一个程序，使用循环来要求用户输入收入，并报告所得税。当用户输入负数或非数字时，循环将结束。
+
+xiti_c6_5.cpp
+
+
+
+```cpp
+#include <iostream>
+
+int calc_tax(int);
+
+int calc_tax(int x) {
+	float tax = 0;
+	int temp = 0;
+
+	temp = x - 35000;
+	if (temp > 0) {
+		tax += (temp * 0.2);
+		x -= temp;
+	}
+
+	temp = x - 15000;
+	if (temp > 0) {
+		tax += (temp * 0.15);
+		x -= temp;
+	}
+
+	temp = x - 5000;
+	if (temp > 0) {
+		tax += (temp * 0.10);
+		x -= temp;
+	}
+
+	return tax;
+}
+
+int main() {
+	using namespace std;
+
+	int tvarps = 0;
+	int count = 0;
+
+	do {
+		if (tvarps < 0) {
+			break;
+		}
+
+		if (count != 0) {
+			cout << "your income tax is " << calc_tax(tvarps) << " tvarps.\n";
+		}
+		count += 1;
+
+		cout << "please input how many tvarps of your income: ";
+	} while (cin >> tvarps);
+
+
+	return 0;
+}
+```
+
+8．编写一个程序，它打开一个文件文件，逐个字符地读取该文件，直到到达文件末尾，然后指出该文件中包含多少个字符。
+
+xiti_c6_8.cpp
+
+
+
+````cpp
+#include <iostream>
+#include <fstream>
+
+int main() {
+	using namespace std;
+
+	string filename;
+
+	cout << "Please input the filename you want to open: ";
+
+	cin >> filename;
+
+	ifstream inFile;
+
+	inFile.open(filename);
+	// check the file is open
+	if (!inFile.is_open()) {
+		cout << "Could not open the file " << filename << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	char ch;
+	int count = 0;
+	while (inFile.get(ch)) {
+		count++;
+	}
+
+	cout << "This file contains " << count << " characters.\n";
+
+	inFile.close();
+
+	return 0;
+}
+````
+
+
+
+## 函数
 
 我估计这块应该C++和C语言差异也不会太大，主要做一些习题练习下。
 
+### 数组作为函数的参数
+
+数组作为函数的参数实际传递的是该数组的首地址，但C++还需要知道这个数组内元素的类型，所以你在函数原型声明的时候应该类似这样进行声明： `int sum_arr(int * arr, int n)` ，或者 `int sum_arr(int arr[], int n)` ，这两种写法在函数原型声明上是没有区别的，告诉C++编译器该数组内的元素类型就完成任务了。如果函数不应该修改数组里面的内容，那么应该在声明前面加上 `const` 关键字。
+
+可以通过下面这个例子来加深对数组作为函数的参数的理解：
+
+arrfun.cpp
+
+```cpp
+#include <iostream>
+
+const int Max = 5;
+
+int fill_array(double ar[], int limit);
+void show_array(const double ar[], int size);
+void revalue(double r, double ar[], int n);
+double sum_array(const double* ar_begin, const double* ar_end);
+
+int main(){
+	using namespace std;
+
+	double properties[Max];
+
+	int size = fill_array(properties, Max);
+
+	show_array(properties, size);
+
+	if (size > 0) {
+		cout << "Enter revaluation factor: ";
+		double factor;
+		while (!(cin >> factor)) {
+			cin.clear();
+			while (cin.get() != '\n') continue;
+			cout << "Bad input; Please enter a number: ";
+		}
+
+		revalue(factor, properties, size);
+		show_array(properties, size);
+		
+		double total;
+		total = sum_array(properties, properties + size);
+		cout << "array total sum = " << total << " .\n";
+	}
+
+	return 0;
+}
 
 
-## CPP类
+double sum_array(const double* ar_begin, const double* ar_end) {
+	const double* pt;
+	double total = 0;
+
+	for (pt = ar_begin; pt != ar_end; pt++) {
+		total += *pt;
+	}
+	return total;
+}
+
+int fill_array(double ar[], int limit) {
+	using namespace std;
+
+	double temp;
+
+	int i;
+
+	for (i = 0; i < limit; i++) {
+		cout << "Enter value #" << (i + 1) << ": ";
+		cin >> temp;
+
+		if (!cin) {
+			cin.clear();
+			while (cin.get() != '\n') continue;
+			cout << "Bad input; input process terminated.\n";
+			break;
+		}
+		else if (temp < 0) break;
+		ar[i] = temp;
+	}
+	return i;
+}
+
+
+
+void show_array(const double ar[], int size) {
+	using namespace std;
+
+	for (int i = 0; i < size; i++) {
+		cout << "Property #" << (i + 1) << ": $";
+		cout << ar[i] << endl;
+	}
+}
+
+void revalue(double r, double ar[], int n) {
+	for (int i = 0; i < n; i++) {
+		ar[i] *= r;
+	}
+}
+```
+
+这个例子演示了基本的数组作为函数参数的使用方法，演示了const的使用，还演示了第二种数组作为函数参数的写法，具体请看sum_array函数，其接受的是数组的首地址和末地址，你可以通过 `sum_array(properties, properties + size);` 这种写法来传入数组的长度，或者随意计算数组前面几个元素的和都是可以的。
+
+### C风格字符串作为函数的参数
+
+本质上C风格字符串属于字符数组，只是里面有个`\0`来标记字符串的结尾。具体使用参考上面的数组的讨论。
+
+### 结构体作为函数的参数
+
+结构体其实更加简单，其使用基本上可以看作某种额外的基本数据类型，你可以传值，也可以传指针，只是如果结构体比较大的话，还是推荐传指针。
+
+关于C++新增的类的概念，比如string类，array类等，这些作为函数的参数大体可以参考结构体的使用，也就是可以看作某种额外的基本数据类型。关于类的使用后面会有更详细的讨论了。
+
+### 函数作为函数的参数
+
+函数名就是函数的地址，你可以直接将函数名作为参数传递进去，不过麻烦在这个函数指针的类型声明上：
+
+```
+void estimate(int repeat, double(*pf)(int));
+```
+
+声明的这个pf就是指针那个目标函数的指针，只是因为声明的时候要带上指向函数的类型声明，有的时候语句会很长。
+
+可以利用typedef进行简化：
+
+```
+typedef double(*test_func_type)(int);
+```
+具体请看下面的样例来加深理解：
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+typedef double(*test_func_type)(int);
+void estimate(int , test_func_type);
+double test_func(int a);
+
+
+double test_func(int a) {
+	double b;
+	b = a * 3.14;
+
+	cout << a << " * 3.14 = " << b << endl;
+	return b;
+}
+
+void estimate(int repeat, test_func_type pf) {
+	for (int i=0; i < repeat; i++) {
+		(*pf)(3);
+	}
+}
+
+int main() {
+	estimate(10, test_func);
+	return 0;
+}
+```
+
+
+
+1．编写一个程序，不断要求用户输入两个数，直到其中的一个为0。对于每两个数，程序将使用一个函数来计算它们的调和平均数，并将结果返回给main( )，而后者将报告结果。调和平均数指的是倒数平均值的倒数，计算公式如下：
+
+调和平均数=2.0 * x * y / (x + y)
+
+xiti_c7_1.cpp
+
+```cpp
+#include <iostream>
+#include <cctype>
+
+using namespace std;
+
+double calc_harmonic_mean(double, double);
+
+double calc_harmonic_mean(double x, double y) {
+	double result;
+
+	result = (2.0 * x * y) / (x + y);
+	return result;
+}
+
+
+int main() {
+	double f1;
+	double f2;
+	double result;
+	
+	while (true) {
+		if ((cout << "please input two number:") && (cin >> f1 >> f2)) {
+			bool input_line_right = true;
+			char ch;
+
+			while (cin.get(ch)) {
+				if (ch == '\n') {
+					break;
+				}
+				else if (isblank(ch)) {
+					;
+				}
+				else {
+					cin.clear();
+					while (cin.get() != '\n') continue;
+					cout << "Bad input!\n";
+					input_line_right = false;
+					break;
+				}
+			}
+
+			if (input_line_right) {
+				if (f1 == 0 || f2 == 0) break;
+
+				result = calc_harmonic_mean(f1, f2);
+				cout << f1 << " and " << f2 << " harmonic mean is: " << result << endl;
+			}
+		}
+		else {
+			cin.clear();
+			while (cin.get() != '\n') continue;
+			cout << "Bad input!";
+		}
+	}
+
+	return 0;
+}
+```
+
+
+
+3．下面是一个结构声明：
+
+```
+struct box{
+	char maker[40];
+	float height;
+	float width;
+	float length;
+	float volume;
+};
+```
+
+a．编写一个函数，按值传递box结构，并显示每个成员的值。
+
+b．编写一个函数，传递box结构的地址，并将volume成员设置为其他三维长度的乘积。
+
+c．编写一个使用这两个函数的简单程序。
+
+xiti_c7_3.cpp
+
+```cpp
+#include <iostream>
+
+
+using namespace std;
+
+typedef struct box {
+	char maker[40];
+	float height;
+	float width;
+	float length;
+	float volume;
+}Box;
+
+void show_box(Box box1);
+void calc_box_volume(Box* pbox);
+
+
+
+void show_box(Box box1) {
+	cout << 
+		"box: " << box1.maker << endl <<
+		"height: " << box1.height << endl <<
+		"width: " << box1.width << endl <<
+		"length: " << box1.length << endl <<
+		"volume: " << box1.volume
+		<< endl;
+}
+
+void calc_box_volume(Box* pbox) {
+	pbox->volume = pbox->width * pbox->height * pbox->length;
+}
+
+int main() {
+//int main33() {
+
+	Box box1 = {
+		"box1",
+		2.5,
+		3.6,
+		7,
+		0
+	};
+
+	show_box(box1);
+
+	calc_box_volume(&box1);
+
+	show_box(box1);
+
+	return 0;
+}
+```
+
+5．定义一个递归函数，接受一个整数参数，并返回该参数的阶乘。前面讲过，3的阶乘写作3!，等于`3*2!`，依此类推；而0!被定义为1。通用的计算公式是，如果n大于零，则`n!=n*（n−1）!`。在程序中对该函数进行测试，程序使用循环让用户输入不同的值，程序将报告这些值的阶乘。
+
+xiti_c7_5.cpp
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+int factorial(int);
+
+
+int factorial(int x) {
+	if (x == 0) {
+		return 1;
+	}else {
+		return factorial(x - 1) * x;
+	}
+}
+
+
+int main() {
+	//int main34() {
+	int n;
+	int result;
+
+	while (true) {
+		if ((cout << "please input one integer number:") && (cin >> n)) {
+			bool input_line_right = true;
+			char ch;
+
+			while (cin.get(ch)) {
+				if (ch == '\n') {
+					break;
+				}
+				else if (isblank(ch)) {
+					;
+				}
+				else {
+					cin.clear();
+					while (cin.get() != '\n') continue;
+					cout << "Bad input!\n";
+					input_line_right = false;
+					break;
+				}
+			}
+
+			if (input_line_right) {
+				if (n < 0) break;
+
+				result = factorial(n);
+				cout << n << " factorial is: " << result << endl;
+			}
+		}
+		else {
+			cin.clear();
+			while (cin.get() != '\n') continue;
+			cout << "Bad input!\n";
+		}
+	}
+
+	return 0;
+}
+```
+
+
+
+9．这个练习让您编写处理数组和结构的函数。下面是程序的框架，请提供其中描述的函数，以完成该程序。
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+const int SLEN = 30;
+struct student {
+	char fullname[SLEN];
+	char hobby[SLEN];
+	int ooplevel;
+};
+
+// getinfo has two arguments: a pointer to the first argument of
+// an array of student structures and an int representing the
+// number of elements of the array. the function solicits and
+// stores data about students. It terminates input upon filling 
+// the array or upon encountering a blank line for the student 
+// name. the function returns the actual number of array elements 
+// filled.
+int getinfo(student pa[], int n);
+
+// display1 takes a student structure as an argument
+// and display its contents.
+void display1(student st);
+
+// display2 takes the address of students structure as an 
+// argument and display the structure's cntents.
+void display2(const student* ps);
+
+// display3 takes the address of the first element of an array
+// of student structures and the number of array elements as 
+// arguments and displays the contents of the structures
+void display3(const student pa[], int n);
+
+int main() {
+//int main35() {
+	cout << "Enter class size: ";
+
+	int class_size;
+	cin >> class_size;
+
+	while (cin.get() != '\n') continue;
+
+	student* ptr_stu = new student[class_size];
+	int entered = getinfo(ptr_stu, class_size);
+	for (int i = 0; i < entered; i++) {
+		display1(ptr_stu[i]);
+		display2(&ptr_stu[i]);
+	}
+	display3(ptr_stu, entered);
+	delete[] ptr_stu;
+
+	cout << "Done\n";
+
+	return 0;
+}
+```
+
+xiti_c7_9.cpp
+
+```cpp
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+const int SLEN = 30;
+struct student {
+	char fullname[SLEN];
+	char hobby[SLEN];
+	int ooplevel;
+};
+
+int getinfo(student pa[], int n);
+void display1(student st);
+void display2(const student* ps);
+void display3(const student pa[], int n);
+
+int getinfo(student pa[], int n) {
+	int entered = 0;
+
+	for (int i = 0; i < n; i++) {
+		cout << "please input student fullname: ";
+		cin.getline(pa[i].fullname, SLEN);
+
+		cout << "please input student hobby: ";
+		cin.getline(pa[i].hobby, SLEN);
+
+		cout << "please input student ooplevel: ";
+		(cin >> pa[i].ooplevel).get();
+
+		entered += 1;
+	}
+	return entered;
+}
+
+
+void display1(student st) {
+	cout <<"student " << st.fullname <<
+		" hobby: " << st.hobby <<
+		" ooplevel: " << st.ooplevel << endl;
+}
+
+void display2(const student* ps) {
+	cout <<"student " << ps->fullname <<
+		" hobby: " << ps->hobby <<
+		" ooplevel: " << ps->ooplevel << endl;
+}
+
+void display3(const student pa[], int n) {
+	for (int i = 0; i < n; i++) {
+		display1(pa[i]);
+	}
+}
+
+int main() {
+//int main35() {
+	cout << "Enter class size: ";
+
+	int class_size;
+	cin >> class_size;
+
+	while (cin.get() != '\n') continue;
+
+	student* ptr_stu = new student[class_size];
+	int entered = getinfo(ptr_stu, class_size);
+	for (int i = 0; i < entered; i++) {
+		display1(ptr_stu[i]);
+		display2(&ptr_stu[i]);
+	}
+	display3(ptr_stu, entered);
+	delete[] ptr_stu;
+
+	cout << "Done\n";
+
+	return 0;
+}
+```
+
+
+
+10．设计一个名为calculate( )的函数，它接受两个double值和一个指向函数的指针，而被指向的函数接受两个double参数，并返回一个double值。calculate( )函数的类型也是double，并返回被指向的函数使用calculate( )的两个double参数计算得到的值。例如，假设add( )函数的定义如下：
+
+```
+double add(double x, double y){
+	return x + y;
+}
+```
+
+则下述代码中的函数调用将导致calculate( )把2.5和10.4传递给add( )函数，并返回add( )的返回值（12.9）：
+
+```
+double q = calculate(2.5, 10.4, add)
+```
+
+请编写一个程序，它调用上述两个函数和至少另一个与add( )类似的函数。该程序使用循环来让用户成对地输入数字。对于每对数字，程序都使用calculate( )来调用add( )和至少一个其他的函数。如果读者爱冒险，可以尝试创建一个指针数组，其中的指针指向add( )样式的函数，并编写一个循环，使用这些指针连续让calculate( )调用这些函数。提示：下面是声明这种指针数组的方式，其中包含三个指针：
+
+```
+double (*pf[3])(double, double);
+```
+
+可以采用数组初始化语法，并将函数名作为地址来初始化这样的数组。
+
+xiti_c7_10.cpp
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+typedef double (*func_call)(double, double);
+
+double addition(double , double );
+double subtraction(double, double);
+double multiplication(double, double);
+
+double calculate(double x, double y, func_call func);
+
+double calculate(double x, double y, func_call func) {
+	return (*func)(x, y);
+}
+double addition(double x, double y) {
+	cout << "running addition...\n";
+	return x + y;
+}
+double subtraction(double x, double y) {
+	cout << "running subtraction...\n";
+	return x - y;
+}
+double multiplication(double x, double y) {
+	cout << "running multiplication...\n";
+	return x * y;
+}
+
+
+int main() {
+	double (*pf[3])(double, double);
+
+	pf[0] = addition;
+	pf[1] = subtraction;
+	pf[2] = multiplication;
+
+	for (int i : {0, 1, 2}) {
+		double q = calculate(2.5, 10.4, pf[i]);
+		cout << "result: " << q << endl;
+	}
+
+	return 0;
+}
+```
+
+
+
+## 内存模型和名称空间
+
+
+
+## 类
 
 
 
