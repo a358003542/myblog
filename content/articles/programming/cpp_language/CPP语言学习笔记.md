@@ -1876,6 +1876,208 @@ int main() {
 
 
 
+## 函数补充
+
+接下来的内容多是C++特有的内容了。
+
+### 内联函数
+
+内联函数和普通函数的区别就是在函数定义或声明的时候加上关键字 `inline` ，具体实现上的区别就是普通函数编译出来的代码函数有一个跳转执行的过程，而内联函数的代码与调用该函数的代码是内联在一起的，并没有这个跳转动作。
+
+可以把内联函数比作C语言中的宏定义的函数，比如C++的：
+
+```cpp
+inline double square(double x){return x * x};
+```
+
+可以比作C语言的：
+
+```c
+#define SQUARE(X) ((X)*(X)) 
+```
+
+### 引用变量
+
+引用变量就程序员编程的角度出发可以将其看作某个函数的别名，比如：
+
+```cpp
+int a = 1;
+int & b = a;
+```
+
+这样上面变量名a和b指向的都是同一块内存空间。
+
+1. 引用变量是对某个变量的引用，所以初始化就必须赋值。
+2. 引用变量作为函数的参数，在该函数里面使用引用变量等于直接使用传递过来的那个变量。也就是任何操作都等于直接对原数据进行操作。
+3. 引用变量从实现上可以看作取了赋值变量的地址，然后使用的时候默认自动进行解引用 `*` 操作。但这个了解下即可，C++很多地方都在弱化指针这个概念，C++程序员也没必要继续C程序的老一套思维，什么都往指针上靠。对于数组是只能使用指针，对于结构体或类，是能够用引用变量这个概念就用引用变量，没必要使用指针，毕竟指针不是很安全。
+
+
+
+引用变量在函数参数上最经典的一个例子就是swap函数：
+
+```cpp
+void swap(int& a, int& b) {
+	int temp;
+	temp = a;
+	a = b;
+	b = temp;
+}
+```
+
+具体使用也只需要简单传递变量名即可：
+
+```cpp
+	int a = 1;
+	int b = 2;
+
+	swap(a, b);
+```
+
+引用变量用于结构体和类大体逻辑可以参考上面的讨论，值得一提的是返回结构体和类采用相关的返回引用变量的形式将是高效的，不像传统返回值还需要额外的拷贝动作。
+
+```cpp
+struct free_throws{
+    string name;
+    int made;
+}
+
+free_throws & accumulate(free_throws & target, const free_throws & source){
+    ...
+    return target;
+}
+```
+
+
+
+### 默认参数
+
+方法就是在函数原型声明的时候如下给定默认参数，具体函数定义实现那里不用变。
+
+```
+int harpo(int n, int m=4, int j = 5);
+```
+
+
+
+### 函数重载
+
+函数重载或函数多态具体来说就是几个函数拥有相同的函数名，不同的参数数目或类型，C++编译器会匹配合适的对应的那个函数。在匹配过程中不会考虑 `const` 关键字。这种匹配是基于函数的原型声明，不会考虑具体形参的名字。这种匹配不会考虑具体函数的返回类型。
+
+### 函数模板
+
+C++的函数模板运行你以一种泛型的概念来编写函数：
+
+```cpp
+template <typename AnyType>
+void swap(AnyType & a, AnyType & b){
+    AnyType temp;
+    temp = a;
+    a = b;
+    b = temp;
+}
+```
+
+
+
+模板函数同样也存在重载。这里情况会稍微有点复杂，以C++98标准来说，具体化类型版本是优先于模板版本的：
+
+```
+template <> void swap(job &, job &);
+
+template <typename T>
+void swap(T &, T &);
+```
+
+但这块里面东西还有很多，暂时略过了，有时间可以了解下，感觉这个东西就和运算符优先级问题一样，实在不行加个括号，这里也是实在不行改个函数名就是了。
+
+1．编写通常接受一个参数（字符串的地址），并打印该字符串的函数。然而，如果提供了第二个参数（int类型），且该参数不为0，则该函数打印字符串的次数将为该函数被调用的次数（注意，字符串的打印次数不等于第二个参数的值，而等于函数被调用的次数）。是的，这是一个非常可笑的函数，但它让您能够使用本章介绍的一些技术。在一个简单的程序中使用该函数，以演示该函数是如何工作的。
+
+xiti_c8_1.cpp
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+inline void print_string(string& s) { cout << s; }
+void print_string(string& s, int n );
+
+
+void print_string(string& s, int n) {
+	if (n <= 0) return;
+
+	for (int i = 0; i < n; i++) {
+		print_string(s);
+	}
+}
+
+int main() {
+//int main37() {
+
+	string s = "abc";
+
+	print_string(s,10);
+
+	return 0;
+}
+```
+
+
+
+2．CandyBar结构包含3个成员。第一个成员存储candy bar的品牌名称；第二个成员存储candy bar的重量（可能有小数）；第三个成员存储candy bar的热量（整数）。请编写一个程序，它使用一个这样的函数，即将CandyBar的引用、char指针、double和int作为参数，并用最后3个值设置相应的结构成员。最后3个参数的默认值分别为“Millennium Munch”、2.85和350。另外，该程序还包含一个以CandyBar的引用为参数，并显示结构内容的函数。请尽可能使用const。
+
+xiti_c8_2.cpp
+
+```cpp
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+const int SLEN = 50;
+
+struct CandyBar {
+	char name[SLEN];
+	double weight;
+	int calories;
+};
+
+CandyBar& init_CandyBar(CandyBar& candybar, const char * name="Millennium Munch", double weight=2.85, int calories=350);
+void print_CandyBar(const CandyBar& candybar);
+
+
+CandyBar& init_CandyBar(CandyBar& candybar, const char * name, double weight, int calories) {
+	strcpy_s(candybar.name, SLEN, name);
+	candybar.weight = weight;
+	candybar.calories = calories;
+	return candybar;
+}
+
+void print_CandyBar(const CandyBar& candybar) {
+	cout << "candybar name: " << candybar.name <<
+		" weight: " << candybar.weight << " calories: " << candybar.calories;
+}
+
+int main() {
+//int main38() {
+
+	CandyBar candybar;
+	
+	init_CandyBar(candybar);
+
+	print_CandyBar(candybar);
+
+	return 0;
+}
+```
+
+因为是指明要用char指针，所以才这样实现，如果用string的话会简单很多。
+
+5．编写模板函数max5( )，它将一个包含5个T类型元素的数组作为参数，并返回数组中最大的元素（由于长度固定，因此可以在循环中使用硬编码，而不必通过参数来传递）。在一个程序中使用该函数，将T替换为一个包含5个int值的数组和一个包含5个dowble值的数组，以测试该函数。
+
+6．编写模板函数maxn( )，它将由一个T类型元素组成的数组和一个表示数组元素数目的整数作为参数，并返回数组中最大的元素。在程序对它进行测试，该程序使用一个包含6个int元素的数组和一个包含4个double元素的数组来调用该函数。程序还包含一个具体化，它将char指针数组和数组中的指针数量作为参数，并返回最长的字符串的地址。如果有多个这样的字符串，则返回其中第一个字符串的地址。使用由5个字符串指针组成的数组来测试该具体化。
+
+
+
 ## 内存模型和名称空间
 
 
