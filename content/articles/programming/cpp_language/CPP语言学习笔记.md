@@ -1977,8 +1977,6 @@ void swap(AnyType & a, AnyType & b){
 }
 ```
 
-
-
 模板函数同样也存在重载。这里情况会稍微有点复杂，以C++98标准来说，具体化类型版本是优先于模板版本的：
 
 ```
@@ -2074,7 +2072,120 @@ int main() {
 
 5．编写模板函数max5( )，它将一个包含5个T类型元素的数组作为参数，并返回数组中最大的元素（由于长度固定，因此可以在循环中使用硬编码，而不必通过参数来传递）。在一个程序中使用该函数，将T替换为一个包含5个int值的数组和一个包含5个dowble值的数组，以测试该函数。
 
+xiti_c8_5.cpp
+
+```cpp
+#include <iostream>
+#include <assert.h>
+
+using namespace std;
+
+template <typename T>
+T max5(T arr[]);
+
+template <typename T>
+T max5(T arr[]) {
+	T max = arr[0];
+	for (int i = 0; i < 5; i++) {
+		if (arr[i] > max) {
+			max = arr[i];
+		}
+	}
+	return max;
+}
+
+int main() {
+	int arr1[5] = {45,54,1,8,0 };
+	int max1 = 0;
+	max1 = max5(arr1);
+	assert(max1 == 54);
+
+
+	double arr2[5] = { 5.58,6.5,0,3.14,1.25 };
+	double max2 = 0;
+	max2 = max5(arr2);
+	assert(max2 == 6.5);
+
+	return 0;
+}
+```
+
+这题还是很简单的，就是基本的模板函数用法，我们继续看下面这题。
+
 6．编写模板函数maxn( )，它将由一个T类型元素组成的数组和一个表示数组元素数目的整数作为参数，并返回数组中最大的元素。在程序对它进行测试，该程序使用一个包含6个int元素的数组和一个包含4个double元素的数组来调用该函数。程序还包含一个具体化，它将char指针数组和数组中的指针数量作为参数，并返回最长的字符串的地址。如果有多个这样的字符串，则返回其中第一个字符串的地址。使用由5个字符串指针组成的数组来测试该具体化。
+
+xiti_c8_6.cpp
+
+```cpp
+#include <iostream>
+#include <assert.h>
+#include <cstring>
+
+using namespace std;
+
+template <typename T>
+T maxn(T arr[], int n);
+
+template <> char* maxn(char* arr[], int n);
+
+template <typename T>
+T maxn(T arr[], int n) {
+	T max = arr[0];
+	for (int i = 0; i < n; i++) {
+		if (arr[i] > max) {
+			max = arr[i];
+		}
+	}
+	return max;
+}
+
+template<> char * maxn(char * arr[], int n) {
+	char * max = arr[0];
+	for (int i = 0; i < n; i++) {
+		if (strlen(arr[i]) > strlen(max)) {
+			max = arr[i];
+		}
+	}
+	return max;
+}
+
+
+int main() {
+	//int main40() {
+
+	int arr1[6] = {-5, 45,54,1,8,0 };
+	int max1;
+	max1 = maxn(arr1,6);
+	assert(max1 == 54);
+
+
+	double arr2[4] = { 5.58,6.5,3.14,1.25 };
+	double max2;
+	max2 = maxn(arr2,4);
+	assert(max2 == 6.5);
+
+	char s1[] = "abc";
+	char s2[] = "abc def";
+	char s3[] = "";
+	char s4[] = "hello world.";
+	char s5[] = "a";
+
+	char* arr3[5] = {s1,s2,s3,s4,s5 };
+	char* max3;
+	max3 = maxn(arr3, 5);
+	assert(strlen(max3) == 12);
+
+	return 0;
+}
+```
+
+函数模板的显示具体化具体函数部分编写和常规函数相比就是多了 `template <>` 这个东西，然后注意原型声明上有这样的顺序：
+
+1. 一般常规函数
+2. 模板函数
+3. 模板函数具体化
+
+然后具体重载顺序C++98给定的顺序是一般常规函数最优先，模板函数具体化优先于模板函数。
 
 
 
