@@ -2259,13 +2259,301 @@ using编译这时引入叫做引入了局部名称空间，说的再直白点就
 
 一般是推荐使用using声明，using编译只是为了方便。名称空间只是方便大型项目的管理工作的，一般小项目小程序用using编译是没什么问题的。
 
+命名空间可以如下嵌套：
+
+```cpp
+namespace abc{
+    namespace def{
+        int i;
+    }
+}
+```
+
+上面`int i` 的引用完整表达是： `abc::def::i`  。
+
+未命名的命名空间：
+
+```cpp
+namespace {
+    int ice;
+}
+```
+
+未命名的命名空间有点像外面的全局变量一样可以`::ice` 来引用，但区别在于其不能使用using语句，也就是这里面的变量只是本文件可见的。
+
+命令空间的样例程序请参看 test_namesp.cpp 和 namesp.h 和namesp.cpp这三个文件。
 
 
- 
+
+ 1．下面是一个头文件：
+
+```cpp
+//golf.h
+
+const int Len = 40;
+
+struct golf{
+    char fullname[Len];
+    int handicap;
+};
+
+// non-interactive version:
+// function sets golf structure to provided name, handicap 
+// using values passed as arguments to the function
+void setgolf(golf & g,const char * name, int hc);
+
+// interactive version:
+// function solicits name and handicap from user
+// and sets the members of g to the values entered
+// returns 1 if name is entered, 0 if name is empty string
+int setgolf(golf & g);
+
+// function resets handicap to new value
+void handicap(golf & g, int hc);
+
+// function displays contents of golf structure
+void showgolf(const golf & g);
+```
+
+注意到setgolf( )被重载，可以这样使用其第一个版本：
+
+```
+golf ann;
+setgolf(ann, "Ann Birdfree", 24);
+```
+
+上述函数调用提供了存储在ann结构中的信息。可以这样使用其第二个版本：
+
+```
+golf ann;
+setgolf(ann);
+```
+
+上述函数将提示用户输入姓名和等级，并将它们存储在andy结构中。这个函数可以（但是不一定必须）在内部使用第一个版本。
+
+根据这个头文件，创建一个多文件程序。其中的一个文件名为golf.cpp，它提供了与头文件中的原型匹配的函数定义；另一个文件应包含main( )，并演示原型化函数的所有特性。例如，包含一个让用户输入的循环，并使用输入的数据来填充一个由golf结构组成的数组，数组被填满或用户将高尔夫选手的姓名设置为空字符串时，循环将结束。main( )函数只使用头文件中原型化的函数来访问golf结构。
+
+golf.h大体类似上面定义的。
+
+golf.cpp
+
+```cpp
+#include <iostream>
+#include "golf.h"
+#include <cstring>
+
+void setgolf(golf& g, const char* name, int hc) {
+	strcpy_s(g.fullname, name);
+	g.handicap = hc;
+}
+
+
+int setgolf(golf& g) {
+	using std::cout;
+	using std::cin;
+
+	cout << "please input name: ";
+	cin.getline(g.fullname, Len);
+
+	if (strlen(g.fullname) == 0) return 0;
+
+	cout << "please input handicap: ";
+	(cin >> g.handicap).get();
+
+	return 1;
+}
+
+void handicap(golf& g, int hc) {
+	g.handicap = hc;
+}
+
+void showgolf(const golf& g) {
+	using std::cout;
+	using std::endl;
+	
+	if (strlen(g.fullname) > 0) {
+		cout << g.fullname << "'s handicap is: " << g.handicap << endl;
+	}
+}
+```
+
+xiti_c9_1.cpp
+
+```cpp
+#include <iostream>
+#include "golf.h"
+
+
+int main() {
+	const int ARR_MAX = 10;
+	golf golf_arr[ARR_MAX];
+
+	int res = 1;
+
+	for (int i = 0; i < ARR_MAX; i++) {	
+		if (res == 0) break;
+
+		if (i == 0) {
+			setgolf(golf_arr[i], "bob sam", 10);
+		}
+		else {
+			res = setgolf(golf_arr[i]);
+		}
+
+		showgolf(golf_arr[i]);
+	}
+
+	std::cout << "test handicap function....\n";
+	showgolf(golf_arr[0]);
+	handicap(golf_arr[0], 18);
+	showgolf(golf_arr[0]);
+
+	return 0;
+}
+```
+
+本习题主要是要求读者掌握多文件C++的编写过程。
+
+4．请基于下面这个名称空间编写一个由3个文件组成的程序：
+
+```cpp
+namespace SALES{
+    const int QUARTERS = 4;
+    struct Sales{
+        double sales[QUARTERS];
+        double average;
+        double max;
+        double min;
+    };
+    // copies the lesser of 4 or n items from the array ar
+    // to the sales member of s and computes and stores the 
+    // average, maximum, and minimum values of the entered items;
+    // remaining elements of sales, if any, set to 0;
+    void setSales(Sale & s, const double ar[], int n);
+    // gathers sales for 4 quarters interactively, stores them 
+    // in the sales member of s and computes and stores the
+    // average, maximum, and minimum values.
+    void setSales(Sale & s);
+    // display all information in structure s
+    void showSales(const Sales & s);
+}
+```
+
+第一个文件是一个头文件，其中包含名称空间；第二个文件是一个源代码文件，它对这个名称空间进行扩展，以提供这三个函数的定义；第三个文件声明两个Sales对象，并使用setSales( )的交互式版本为一个结构提供值，然后使用setSales( )的非交互式版本为另一个结构提供值。另外它还使用showSales( )来显示这两个结构的内容。
+
+sales.cpp
+
+```cpp
+#include <iostream>
+#include "sales.h"
+
+
+namespace SALES {
+    void calcSales(Sales& s) {
+        double max = s.sales[0];
+        double min = s.sales[0];
+        double sum = 0;
+        double average = 0;
+        int i;
+
+        for (i = 0; i < 4; i++) {
+            if (s.sales[i] < min) {
+                min = s.sales[i];
+            }
+            if (s.sales[i] > max) {
+                max = s.sales[i];
+            }
+
+            sum += s.sales[i];
+        }
+
+        average = sum / 4;
+
+        s.average = average;
+        s.max = max;
+        s.min = min;
+    }
+
+
+    void setSales(Sales & s, const double ar[], int n) {
+        int i;
+
+
+        for (i = 0; i < 4; i++) {
+            if (n > 0) {
+                s.sales[i] = ar[i];
+                n--;
+            }
+            else {
+                s.sales[i] = 0;
+            }
+        }
+
+        calcSales(s);
+    }
+
+    void setSales(Sales & s) {
+        using std::cout;
+        using std::cin;
+
+        for (int i = 0; i < 4; i++) {
+            cout << "please input QUARTERS " << i + 1  << " sales: ";
+            (cin >> s.sales[i]).get();
+        }
+
+        calcSales(s);
+    }
+
+    void showSales(const Sales & s) {
+        using std::cout;
+        using std::endl;
+        for (int i = 0; i < 4; i++) {
+            cout << "QUARTERS " << i+1 << " sales: " << s.sales[i] << endl;
+        }
+
+        cout << "average: " << s.average << endl;
+        cout << "maximum: " << s.max << endl;
+        cout << "minimum: " << s.min << endl;
+    }
+}
+
+```
 
 
 
+xiti_c9_4.cpp
 
+```cpp
+#include <iostream>
+#include "sales.h"
+
+
+int main() {
+
+	double ar[4] = { 1.0,3.2,2.5,5.6 };
+
+	using SALES::Sales;
+	using SALES::setSales;
+	using SALES::showSales;
+
+	Sales s;
+
+	setSales(s, ar, 4);
+
+	showSales(s);
+
+	Sales s2;
+	setSales(s2);
+
+	showSales(s2);
+
+	return 0;
+}
+```
+
+
+
+本习题主要要求读者掌握名称空间的用法。
 
 
 
