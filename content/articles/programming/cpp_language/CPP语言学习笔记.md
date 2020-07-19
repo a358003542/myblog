@@ -2559,6 +2559,285 @@ int main() {
 
 ## 类
 
+下面进入C++语言区别C语言引入的最大特性，那就是类和相关面向对象编程的概念。本文假定读者已经熟悉一门高级编程语言比如python了，所以就面向对象编程相关概念不会做过多的讨论，预先假定读者已经对这一块很熟悉了。下面我们来看C++类是如何声明的：
+
+
+
+```c++
+class Stock
+{
+private:
+    std::string company;
+    long shares;
+    double share_val;
+    void set_tot(){total_val = shares * share_val;}
+    
+public:
+    void acquire(const std::string & co, long n, double pr);
+}
+```
+
+上面出现的一个新的概念就是 `private` 和 `public` 这两个区块定义了该类的私有变量和公有变量，私有变量是不可以直接访问的变量【这里所谓的变量也包括函数名】，而公有变量是该类可以直接访问的变量。在其他高级编程语言中也会出现类似的概念，只是一些语言不是强制要求，只是作为编程规范提及。这里需要提醒读者的是私有变量不光是出于安全方面的考虑，很多时候一些数据仅仅出于类和软件系统架构上的设计，出于便捷易用性也会考虑隐藏某些数据而只提供必要的接口给外界使用。
+
+由于类的变量属性默认就是private，所以实际编程可以考虑不写这个private，只在公有变量部分声明public即可。
+
+类方法的具体实现就是编写函数，只不过其函数名字要写成这样的形式：
+
+```c++
+void Stock::acquire(const std::string & co, long n, double pr)
+{
+    // your function
+}
+```
+### 类作用域
+
+类里面定义的变量具体在C++里面作用域又新增一个概念，叫做类作用域，因为类的声明本身包含一个花括号区块，这个倒不是出人意料之外。你可以把类作用域看作另外一个花括号区块来理解其中的变量作用域关系，然后需要特别强调的是类作用域之内的变量是可以直接调用——这里强调的是类的成员函数里面是可以直接使用类里面的各个变量，因为C++的类的成员函数具体定义是在外面的分开的，所以这里强调下。
+
+### 构造函数
+
+创建Stock对象在面向对象编程有专门的说法叫做创建Stock实例，如下所示：
+
+```c++
+Stock sally;
+sally.hello();
+```
+
+上面语句就是创建了一个Stock实例Sally，然后调用了sally内的hello方法。
+
+读者从C语言学到这里可能觉得 `Stock sally` 有点类似于声明了一个结构体，没什么好奇怪的，但如果已经熟悉了面向对象编程的，听到这里说 `Stock sally` 这一句就创建了一个Stock实例内心就会生出一些困惑的。他会想因为类有时很复杂，实例化需要通过一个实例化初始函数来完成一些工作，他会想是不是有 `Stock()` 这个东西，他想的没有错。
+
+C++在面向对象编程这块概念上和其他高级语言其实差别不大，C++的所有类的实例化同样要经过一个实例化函数，只是C++这边专业术语叫做构造函数，C++的类实例化都要调用这个构造函数的，如果你没有定义，那么将调用默认的构造函数。
+
+比如上面的 `Stock sally` 其属于隐式调用默认构造函数，其等于 `Stock sally = Stock()` 。构造函数的定义如下：
+
+```c++
+Stock::Stock(const std::string & co, long n, double pr)
+{
+    //
+}
+```
+
+此外C++还有一种隐式调用构造函数的形式：
+
+```
+Stock sally(...)
+```
+
+其等于：
+
+```
+Stock sally = Stock(...)
+```
+
+### 析构函数
+
+析构函数简单来说就是该对象即将过期时最后要调用的成员函数，其功能可以类比python类的 `__del__` 方法。析构函数的写法如下：
+
+```c++
+Stock::~Stock()
+{
+//
+}
+```
+
+构造函数和析构函数同样如下在头文件中声明下：
+
+```
+class Stock
+{
+ ....
+ public:
+    Stock();
+    ~Stock();
+    ...
+}
+```
+
+
+
+### this指针
+
+C++这个this指针的概念可以类比python的`self` ，而且这个this参数在C++的类方法里面还是作为默认参数传递进去的，也就是直接用就是了，其代表的就是对本实例的一个**指针**。注意this是一个指针，其调用内部成员要使用 `this->a` 这样的语法。
+
+关于返回 `*this` 有点让人困惑，请参看 [这个网页](https://stackoverflow.com/questions/2750316/this-vs-this-in-c) ，其和方法或说成员函数的返回声明类型有关，如果是声明的 `Stock &` 则 `*this` 是对本实例的引用，一个**引用变量** ；否则返回的是本对象的一个复制。
+
+### const成员函数
+
+```cpp
+class Stack{
+    ...
+public:
+    double total() const;
+}
+```
+
+前面提到this指针，本实例作为参数是隐含传递进去了，如果希望该成员函数不修改调用对象也就是本实例的数据，则可以用上面的写法，成员函数后面跟一个const，具体术语叫做const成员函数，这样该const成员函数是不会修改本实例的数据的。
+
+### 类内定义的数组长度是常量的情况
+
+如下类里面定义一个数组，其长度是一个常量，下面的写法是**错误的**。
+
+```c++
+class Stack{
+    const int MAX=3;
+    double costs[MAX];
+}
+```
+
+这是因为类的声明还只是描述类的形式，还并没有实际进行实例化创建动作。而后面要进行这种创建动作的要找这个MAX的值却发现找不到了。你可以使用enum枚举，因为枚举只是一个符号名称，代码编译时已经自动替换为某个数值了。
+
+```c++
+class Stack{
+    enum {MAX = 3};
+    double costs[MAX];
+}
+```
+
+或者创建一个静态常量：
+
+```c++
+class Stack{
+    staic const int MAX=3;
+    double costs[MAX];
+}
+```
+
+下面请参考 test_stack.cpp 这个例子来详细理解前面的内容。
+
+
+
+2．下面是一个非常简单的类定义：
+
+```cpp
+#include <string>
+
+class Person {
+private:
+    static const int LIMIT = 25;
+    std::string lname;
+    char fname[LIMIT];
+public:
+    Person() { lname = ""; fname[0] = '\0'; };
+    Person(const std::string& ln, const char* fn = "Heyyou");
+    void Show() const; // firstname lastname format
+    void FormalShow() const; // lastname firstname format
+};
+```
+
+它使用了一个string对象和一个字符数组，让您能够比较它们的用法。请提供未定义的方法的代码，以完成这个类的实现。再编写一个使用这个类的程序，它使用了三种可能的构造函数调用（没有参数、一个参数和两个参数）以及两种显示方法。下面是一个使用这些构造函数和方法的例子：
+
+```cpp
+Person one;
+Person two("Smythecraft");
+Person three("Dimwiddy", "Sam");
+one.Show();
+cout << endl;
+one.FormalShow();
+//etc for two and three person
+```
+
+上面 `Person() { lname = ""; fname[0] = '\0'; };` 这种在声明时就写上成员函数的定义的函数会自动成为内联函数。你也可以如下按照传统inline方法来写：
+
+```c++
+class Person{
+    ...
+public:
+    Person();
+}
+inline Person::Person(){
+    lname = "";
+    fname[0] = '\0';
+}
+```
+
+像C++这种额外的写法，那些不重要的语法糖性质的东西我不会在介绍语言特性的正文中引入，必要时提到即可。
+
+本例子主要检验了读者对本章节前面关于类的编写的一些基本知识和应用。
+
+person.h
+
+```cpp
+#include "person.h"
+#include <iostream>
+
+
+
+Person::Person(const std::string& ln, const char* fn ) {
+	strcpy_s(this->fname, fn);
+	this->lname = ln;
+}
+
+void Person::Show() const {
+	std::cout << this->fname << " " << this->lname << std::endl ;
+}
+
+void Person::FormalShow() const {
+	std::cout << this->lname << " " << this->fname << std::endl;
+}
+```
+
+xiti_c10_2.cpp
+
+```cpp
+#include <iostream>
+#include "person.h"
+
+
+int main() {
+	using namespace std;
+
+	Person one;
+	Person two("Smythecraft");
+	Person three("Dimwiddy", "Sam");
+
+	one.Show();
+	cout << endl;
+	one.FormalShow();
+
+	two.Show();
+	cout << endl;
+	two.FormalShow();
+
+	three.Show();
+	cout << endl;
+	three.FormalShow();
+
+	return 0;
+}
+```
+
+3．重做前面`xiti_c9_1` 编程，但要用正确的golf类声明替换那里的代码。用带合适参数的构造函数替换 `setgolf（golf &, const char *, int）`，以提供初始值。保留 `setgolf( )` 的交互版本，但要用构造函数来实现它（例如，setgolf( )的代码应该获得数据，将数据传递给构造函数来创建一个临时对象，并将其赋给调用对象，即 `*this` ）。
+
+4．重做前面的 `xiti_c9_4`  编程，但将Sales结构及相关的函数转换为一个类及其方法。用构造函数替换`setSales（sales &，double [ ]，int）`函数。用构造函数实现 `setSales（Sales &）`方法的交互版本。将类保留在名称空间SALES中。
+
+8．可以将简单列表描述成下面这样：
+
+- 可存储0或多个某种类型的列表；
+- 可创建空列表；
+- 可在列表中添加数据项；
+- 可确定列表是否为空；
+- 可确定列表是否为满；
+- 可访问列表中的每一个数据项，并对它执行某种操作。
+
+可以看到，这个列表确实很简单，例如，它不允许插入或删除数据项。
+
+请设计一个List类来表示这种抽象类型。您应提供头文件list.h和实现文件list.cpp，前者包含类定义，后者包含类方法的实现。您还应创建一个简短的程序来使用这个类。
+
+该列表的规范很简单，这主要旨在简化这个编程练习。可以选择使用数组或链表来实现该列表，但公有接口不应依赖于所做的选择。也就是说，公有接口不应有数组索引、节点指针等。应使用通用概念来表达创建列表、在列表中添加数据项等操作。对于访问数据项以及执行操作，通常应使用将函数指针作为参数的函数来处理：
+
+```
+void visit(void (*pf)(Item &));
+```
+
+其中，pf指向一个将Item引用作为参数的函数（不是成员函数），Item是列表中数据项的类型。visit( )函数将该函数用于列表中的每个数据项。
+
+
+
+### 运算符重载
+
+
+
+
 
 
 ## 附录

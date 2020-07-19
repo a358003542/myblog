@@ -1,4 +1,5 @@
 Category: chemistry
+slug: smile
 
 [TOC]
 

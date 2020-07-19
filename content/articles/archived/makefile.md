@@ -1,4 +1,5 @@
 Category: archived
+Slug: makefile
 Date: 2019
 
 [TOC]

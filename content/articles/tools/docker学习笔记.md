@@ -463,17 +463,19 @@ USER $UNAME
 
 ## docker镜像存储地配置
 
-本小节参考了 [这个网页](<https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.2/installing/docker_dir.html>) ，值得一提的是这个方法如果服务器重启有需要重新配置的，好处就是这个配置很简单：
+本小节参考了 [这个网页](<https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.2/installing/docker_dir.html>) ，值得一提的是这个方法如果服务器重启有需要重新配置的，好处就是这个配置很简单 ：
 
 ```
 sudo docker rm -f $(docker ps -aq); docker rmi -f $(docker images -q)
 sudo systemctl stop docker
-sudo rm -rf /var/lib/docker
+sudo mv /var/lib/docker /var/lib/docker_bak
 sudo mkdir /var/lib/docker
 sudo mkdir /mnt/docker
 sudo mount --rbind /mnt/docker /var/lib/docker
 sudo systemctl start docker
 ```
+
+
 
 ## docker对系统hosts的配置
 
@@ -493,6 +495,12 @@ RUN  unlink /etc/localtime && ln -s /usr/share/zoneinfo/Asia/Hong_Kong /etc/loca
 ```
 
 
+
+## docker的备份和还原
+
+docker可以使用save和load来进行备份和还原操作。
+
+**NOTICE: 这个save操作说是对image，实际上对容器也可以进行备份，而export和import只能对容器进行操作，此外export是不会保存历史数据的。**
 
 
 
