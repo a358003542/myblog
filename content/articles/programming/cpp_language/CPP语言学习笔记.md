@@ -2808,7 +2808,156 @@ int main() {
 
 3．重做前面`xiti_c9_1` 编程，但要用正确的golf类声明替换那里的代码。用带合适参数的构造函数替换 `setgolf（golf &, const char *, int）`，以提供初始值。保留 `setgolf( )` 的交互版本，但要用构造函数来实现它（例如，setgolf( )的代码应该获得数据，将数据传递给构造函数来创建一个临时对象，并将其赋给调用对象，即 `*this` ）。
 
-4．重做前面的 `xiti_c9_4`  编程，但将Sales结构及相关的函数转换为一个类及其方法。用构造函数替换`setSales（sales &，double [ ]，int）`函数。用构造函数实现 `setSales（Sales &）`方法的交互版本。将类保留在名称空间SALES中。
+在golf.h那里新增Golf类的声明：
+
+```c++
+class Golf {
+private:
+    static const int Len = 40;
+    char fullname[Len];
+    int handicap;
+public:
+    Golf();
+    Golf(const char* name, int hc);
+    void showgolf();
+    void set_handicap(int hc);
+};
+```
+
+在Golf.cpp那里新增Golf类的定义：
+
+```c++
+
+Golf::Golf() {
+	using std::cout;
+	using std::cin;
+
+	cout << "please input name: ";
+	cin.getline(this->fullname, Len);
+
+	if (strlen(this->fullname) != 0) {
+		cout << "please input handicap: ";
+		(cin >> this->handicap).get();
+	}
+}
+
+Golf::Golf(const char* name, int hc) {
+	strcpy_s(this->fullname, name);
+	this->handicap = hc;
+}
+
+void Golf::showgolf() {
+	using std::cout;
+	using std::endl;
+
+	if (strlen(this->fullname) > 0) {
+		cout << this->fullname << "'s handicap is: " << this->handicap << endl;
+	}
+}
+
+void Golf::set_handicap(int hc) {
+	this->handicap = hc;
+}
+```
+
+xiti_c10_3.cpp
+
+```c++
+#include <iostream>
+#include "golf.h"
+
+
+int main() {
+	Golf golf1 = Golf("bob sam", 10);
+	golf1.showgolf();
+
+	Golf golf2 = Golf();
+	std::cout << "test handicap function....\n";
+	golf2.showgolf();
+	golf2.set_handicap(18);
+	golf2.showgolf();
+
+	return 0;
+}
+```
+
+本例也算是对结构体和类之间转换的一种思考，结构内的访问属性默认是public，而类里面的变量默认访问属性是private。C++程序员该使用类就会使用类，而结构体只是某种纯粹的数据表达。
+
+6．下面是一个类的声明：
+
+```c++
+class Move{
+private:
+    double x;
+    double y;
+public:
+    Move(double a = 0, double b = 0); // set x,y to a,b
+    void showmove() const; //show current x,y values
+    Move add(const Move & m) const; 
+    // this function adds x of m to x of invoking object to get new x,
+    // add y of m to y of invoking object to get new y, create a new
+    // move object initialized to new x,y values and returns it.
+    void reset(double a = 0, double b = 0); //reset x,y to a,b
+};
+```
+
+请编写该类的成员函数定义和具体测试该类的程序。
+
+move.cpp内容如下：
+
+```c++
+#include "move.h"
+#include <iostream>
+
+
+Move::Move(double a, double b) {
+	this->x = a;
+	this->y = b;
+}
+
+void Move::showmove() const {
+	using std::cout;
+	cout << "<Move x=" << this->x << " y=" << this->y << ">\n";
+}
+
+Move Move::add(const Move& m) const {
+	double new_x = this->x + m.x;
+	double new_y = this->y + m.y;
+	return Move(new_x, new_y);
+}
+
+void Move::reset(double a, double b) {
+	this->x = a;
+	this->y = b;
+}
+```
+
+xiti_c10_6.cpp
+
+```c++
+#include <iostream>
+#include "move.h"
+
+
+int main() {
+	//int main48() {
+
+	Move m1 = Move();
+	m1.showmove();
+
+	Move m2 = Move(3, 5);
+	Move m3 = Move(2.2, 5.0);
+	Move m4 = m3.add(m2);
+	m4.showmove();
+
+	m4.reset(9.8, 0);
+	m4.showmove();
+
+	return 0;
+}
+```
+
+
 
 8．可以将简单列表描述成下面这样：
 
@@ -2826,14 +2975,132 @@ int main() {
 该列表的规范很简单，这主要旨在简化这个编程练习。可以选择使用数组或链表来实现该列表，但公有接口不应依赖于所做的选择。也就是说，公有接口不应有数组索引、节点指针等。应使用通用概念来表达创建列表、在列表中添加数据项等操作。对于访问数据项以及执行操作，通常应使用将函数指针作为参数的函数来处理：
 
 ```
-void visit(void (*pf)(Item &));
+void visit(Item (*pf)(Item &));
 ```
 
 其中，pf指向一个将Item引用作为参数的函数（不是成员函数），Item是列表中数据项的类型。visit( )函数将该函数用于列表中的每个数据项。
 
+list.h 内容如下：
 
+```c++
+#pragma once
+
+#ifndef LIST_H_
+#define LIST_H_
+
+#define ItemType double
+typedef ItemType(*func_type)(ItemType&);
+
+class List {
+private:
+	enum { MAX = 10 };
+	ItemType items[MAX];
+	int num;
+public:
+	List(); // default empty list
+	bool is_full() const;
+	bool is_empty() const;
+	void show_list()const;
+	void append(ItemType item);
+	void visit(func_type pf);
+};
+
+
+#endif // !LIST_H_
+
+```
+
+list.cpp 
+
+```c++
+#include "list.h"
+#include <iostream>
+
+
+List::List() {
+	num = 0;
+}
+
+bool List::is_full() const {
+	if (num == MAX) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool List::is_empty() const {
+	if (num == 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void List::show_list() const {
+	using std::cout;
+	cout << "[";
+	for (int i = 0; i < num; i++) {
+		cout << items[i] << ", ";
+	}
+	cout << "]\n";
+}
+
+void List::append(ItemType item) {
+	using std::cout;
+	if (!is_full()) {
+		items[num++] = item;
+	}
+	else {
+		cout << "list is full.";
+	}
+}
+
+void List::visit(func_type pf) {
+	for (int i = 0; i < num; i++) {
+		items[i] = (*pf)(items[i]);
+	}
+}
+```
+
+xiti_c10_8.cpp
+
+```c++
+#include <iostream>
+#include "list.h"
+
+
+ItemType multiply2(ItemType& item) {
+	return item * 2;
+}
+
+int main() {
+	List list1 = List();
+
+	list1.show_list();
+
+	list1.append(10);
+	list1.append(20);
+
+	list1.show_list();
+
+	list1.visit(multiply2);
+
+	list1.show_list();
+
+	return 0;
+}
+```
+
+本例只要求实现一个简单的列表，其中函数作为参数部分也算是一个温习。
 
 ### 运算符重载
+
+类相应的运算符重载在python那边是在类里面重新定义 `__add__` 之类的方法，而在C++这边是重新定义 `operator+` 之类的这样的成员函数，然后就重载了对应的运算符操作。具体这块细节后面有时间再慢慢熟悉，本文也是接触到什么运算符就提到相关知识点，不会面面俱到的，在这块学习上是没必要要求面面俱到的。
+
+
 
 
 
