@@ -3100,6 +3100,457 @@ int main() {
 
 类相应的运算符重载在python那边是在类里面重新定义 `__add__` 之类的方法，而在C++这边是重新定义 `operator+` 之类的这样的成员函数，然后就重载了对应的运算符操作。具体这块细节后面有时间再慢慢熟悉，本文也是接触到什么运算符就提到相关知识点，不会面面俱到的，在这块学习上是没必要要求面面俱到的。
 
+请看下面的例子：
+
+mytime.h
+
+```c++
+#pragma once
+
+#ifndef MYTIME_H_
+#define MYTIME_H_
+#include <iostream>
+
+class MyTime {
+private:
+	int hours;
+	int minutes;
+public:
+	MyTime();
+	MyTime(int h, int m = 0);
+	void AddMin(int m);
+	void AddHr(int h);
+	void Reset(int h = 0, int m = 0);
+	MyTime operator+(const MyTime & t) const;
+	MyTime operator-(const MyTime& t) const;
+	MyTime operator*(double mult) const;
+	friend MyTime operator*(double m, const MyTime& t) { return t * m; };
+	friend std::ostream & operator<<(std::ostream& os, const MyTime& t);
+	void Show()const;
+};
+
+#endif // !MYTIME_H_
+
+```
+mytime.cpp
+
+```c++
+#include "mytime.h"
+#include <iostream>
+
+
+MyTime::MyTime() {
+	hours = 0;
+	minutes = 0;
+}
+
+
+MyTime::MyTime(int h, int m) {
+	hours = h;
+	minutes = m;
+}
+
+void MyTime::AddMin(int m) {
+	minutes += m;
+	hours += minutes / 60;
+	minutes %= 60;
+}
+
+void MyTime::AddHr(int h) {
+	hours += h;
+}
+
+void MyTime::Reset(int h, int m) {
+	hours = h;
+	minutes = m;
+}
+
+MyTime MyTime::operator+(const MyTime& t) const {
+	MyTime sum;
+	sum.minutes = minutes + t.minutes;
+	sum.hours = hours + t.hours + sum.minutes / 60;
+	sum.minutes %= 60;
+	return sum;
+}
+
+MyTime MyTime::operator-(const MyTime& t) const {
+	MyTime diff;
+	int tot1, tot2;
+	tot1 = t.minutes + 60 * t.hours;
+	tot2 = minutes + 60 * hours;
+	diff.minutes = (tot2 - tot1) % 60;
+	diff.hours = (tot2 - tot1) / 60;
+
+	return diff;
+}
+
+MyTime MyTime::operator*(double mult) const {
+	MyTime result;
+	long total = hours * mult * 60 + minutes * mult;
+
+	result.minutes = total % 60;
+	result.hours = total / 60;
+	return result;
+}
+
+std::ostream& operator<<(std::ostream& os, const MyTime& t) {
+	os << t.hours << " hours, " << t.minutes << " minutes";
+	return os;
+}
+
+void MyTime::Show()const {
+	std::cout << hours << " hours, " << minutes << " minutes";
+}
+```
+
+
+
+test_mytime.cpp
+
+```c++
+#include <iostream>
+#include "mytime.h"
+
+
+int main() {
+	//int main50(){
+	using std::cout;
+	using std::endl;
+
+	MyTime planning;
+	MyTime coding(4, 35);
+	MyTime fixing(2, 55);
+	MyTime total;
+	MyTime diff;
+	MyTime adjusted;
+	MyTime adjusted2;
+
+	cout << "planning time = ";
+	planning.Show();
+	cout << endl;
+
+	cout << "coding time = ";
+	coding.Show();
+	cout << endl;
+
+	cout << "fixing time = ";
+	fixing.Show();
+	cout << endl;
+
+	total = coding + fixing;
+	cout << "coding + fixing = ";
+	total.Show();
+	cout << endl;
+
+	diff = coding - fixing;
+	cout << "coding - fixing = ";
+	diff.Show();
+	cout << endl;
+
+	adjusted = coding * 1.5;
+	cout << "coding * 1.5 = ";
+	adjusted.Show();
+	cout << endl;
+
+	adjusted2 = 1.5 * coding ;
+	cout << "1.5 * coding = ";
+	cout << adjusted2 <<  endl;
+
+	return 0;
+}
+```
+
+这个例子演示了重载目标MyTime类的加法减法和乘法，然后具体时间刻度计算了解下即可。倒是这里面代码中的这一行：
+
+```c++
+MyTime sum;
+sum.minutes = minutes + t.minutes;
+```
+
+让我困惑，然后我认识到之前对于 `private` 个人理解是有所偏差的。如果是类的成员函数，调用自身私有变量，在同一个类的作用域中，可以直接调用这是可以理解的。而这里是另外新建了一个MyTime对象可以直接调用私有变量这是我没有想到的。如果是其他类的对象，当然是不能直接调用私有变量的，否则这个私有变量设定就没有意义了，这里显然是本类的对象，在本类的成员函数定义里面，是可以直接调用私有变量的。
+
+### 友元函数
+
+在上面的例子中，对象乘以1.5这样的操作直接重载 `operator*` 即可，但是如果是 `1.5 * coding` 这样的形式，这个时候需要重载一般意义上的乘法，但如果只是一般重载乘法传过来的该类对象的私有变量是不可以直接访问的，而这个时候就需要使用友元函数，具体声明形式如下：
+
+```c++
+friend MyTime operator*(double m, const MyTime& t);
+```
+
+其实际上并不是类的成员函数，但也是写在类的声明里面的，前面要加上 `friend` 关键字，然后其对于MyTime也就是本类的访问权限和成员函数是一样的。上面完整的形式是：
+
+```c++
+friend MyTime operator*(double m, const MyTime& t) { return t * m; };
+```
+
+也就是一个内联函数，再利用原有的 `operator*` 即可。
+
+同样类似的下面还重载了 `<<` 运算符，好让该对象支持cout直接输出：
+
+```c++
+friend std::ostream & operator<<(std::ostream& os, const MyTime& t);
+```
+
+具体实现：
+
+```c++
+std::ostream& operator<<(std::ostream& os, const MyTime& t) {
+	os << t.hours << " hours, " << t.minutes << " minutes";
+	return os;
+}
+```
+
+注意返回了原`ostream` 对象，为的是支持 `cout << a << b` 这样的形式。
+
+ 下面继续下一个例子，模拟物理上的矢量运算：
+
+vector.h
+
+```c++
+#pragma once
+
+#ifndef VECTOR_H_
+#define VECTOR_H_
+#include <iostream>
+
+namespace VECTOR {
+	class Vector {
+	public:
+		enum Mode{RECT, POL};
+		// RECT rectangular mode POL polar mode
+
+	private:
+		double x;
+		double y;
+		double mag;
+		double ang; // unit is radian
+		Mode mode;
+		void set_mag();
+		void set_ang();
+		void set_x();
+		void set_y();
+	public:
+		Vector();
+		Vector(double n1, double n2, Mode form = RECT);
+		void reset(double n1, double n2, Mode form = RECT);
+		~Vector();
+		double xval() const { return x; };
+		double yval() const { return y; };
+		double magval() const { return mag; };
+		double angval() const { return ang; };
+		void polar_mode();
+		void rect_mode();
+
+		//operator overloading
+		Vector operator+(const Vector& b) const;
+		Vector operator-(const Vector& b) const;
+		Vector operator-()const;
+		Vector operator*(double n)const;
+
+		//friends
+		friend Vector operator*(double n, const Vector& a);
+		friend std::ostream& operator<<(std::ostream& os, const Vector& v);
+	};
+}
+
+#endif // !VECTOR_H_
+
+```
+
+vector.cpp
+
+```c++
+#include <cmath>
+#include "vector.h"
+
+
+using std::sqrt;
+using std::sin;
+using std::cos;
+using std::atan;
+using std::atan2;
+using std::cout;
+
+
+namespace VECTOR {
+	const double Rad_to_deg = 45/atan(1);
+
+	void Vector::set_mag() {
+		mag = sqrt(x * x + y * y);
+	}
+	void Vector::set_ang() {
+		if (x == 0.0 && y == 0.0) {
+			ang = 0.0;
+		}
+		else {
+			ang = atan2(y, x);
+		}
+	}
+
+	void Vector::set_x() {
+		x = mag * cos(ang);
+	}
+	void Vector::set_y() {
+		y = mag * sin(ang);
+	}
+
+	Vector::Vector() {
+		x = y = mag = ang = 0;
+		mode = RECT;
+	}
+
+	Vector::Vector(double n1, double n2, Mode form) {
+		mode = form;
+		if (mode == RECT) {
+			x = n1;
+			y = n2;
+			set_mag();
+			set_ang();
+		}
+		else if (form == POL) {
+			mag = n1;
+			ang = n2 / Rad_to_deg; // input n2 is degree
+			set_x();
+			set_y();
+		}
+		else {
+			cout << "Incorrect 3rd argument to Vector() -- ";
+			cout << "vector set to 0\n";
+			x = y = mag = ang = 0;
+			mode = RECT;
+		}
+	}
+
+	void Vector::reset(double n1, double n2, Mode form) {
+		mode = form;
+		if (mode == RECT) {
+			x = n1;
+			y = n2;
+			set_mag();
+			set_ang();
+		}
+		else if (form == POL) {
+			mag = n1;
+			ang = n2 / Rad_to_deg;
+			set_x();
+			set_y();
+		}
+		else {
+			cout << "Incorrect 3rd argument to Vector() -- ";
+			cout << "vector set to 0\n";
+			x = y = mag = ang = 0;
+			mode = RECT;
+		}
+	}
+
+	Vector::~Vector() {
+
+	}
+
+
+	void Vector::polar_mode() {
+		mode = POL;
+	}
+	void Vector::rect_mode() {
+		mode = RECT;
+	}
+	Vector Vector::operator+(const Vector& b)const {
+		return Vector(x + b.x, y + b.y);
+	}
+	Vector Vector::operator-(const Vector& b)const {
+		return Vector(x - b.x, y - b.y);
+	}
+
+	Vector Vector::operator*(double n)const {
+		return Vector(n * x, n * y);
+	}
+
+	Vector operator*(double n, const Vector& a) {
+		return a * n;
+	}
+
+	Vector Vector::operator-() const{
+		return Vector(-x, -y);
+	}
+
+	std::ostream& operator<<(std::ostream& os, const Vector& v) {
+		if (v.mode == Vector::RECT) {
+			os << "(x,y) = (" << v.x << ", " << v.y << ")";
+		}
+		else if (v.mode == Vector::POL) {
+			os << "(m,a) = (" << v.mag << ", " << v.ang * Rad_to_deg << ")";
+		}
+		else {
+			os << "Vector object mode is invalid.";
+		}
+		return os;
+	}
+
+}
+
+
+```
+
+test_vector.cpp
+
+```c++
+#include <iostream>
+#include "vector.h"
+
+int main() {
+	//int main51(){
+	using std::cout;
+	using std::endl;
+	using VECTOR::Vector;
+
+	Vector v1;
+	Vector v2(4, 3);
+	Vector v3(2, 5);
+
+	Vector v4;
+	Vector v5;
+	Vector v6;
+	Vector v7;
+	Vector v8;
+
+	cout << "v1 = " << v1 << endl;
+
+	v4 = v2 + v3;
+	cout << "v4 = " << v4 << endl;
+
+	v4.reset(9, 8);
+	cout << "v4 = " << v4 << endl;
+
+	v5 = -v4;
+	cout << "v5 = " << v5 << endl;
+
+	v6.reset(10, 45, VECTOR::Vector::POL);
+	cout << "v6 = " << v6 << endl;
+	v6.rect_mode();
+	cout << "v6 = " << v6 << endl;
+
+	v7 = 2 * v5 ;
+	cout << "v7 = " << v7 << endl;
+	
+	v8 = v7 - v6;
+	cout << "v8 = " << v8 << endl;
+
+	return 0;
+}
+```
+
+
+
+1. 弧度的换算是根据  $atan(1) = \frac{\pi}{4}$ ，从而得到常见的换算公式1弧度等于 $\frac{180}{\pi}$ 。
+2.  ang默认单位是radian
+3. 构造函数和reset方法都好理解，然后坐标为极坐标是第二个参数输入角度单位是度。
+4. 对于加减乘运算的重载，其写法很优雅地利用了构造函数，从而根据构造函数默认的xy坐标很方便进行一些运算并自动计算得到极坐标的相关数据。
+5. cout的输出方法并不是很难理解，倒是这个 `if (v.mode == Vector::RECT) {` 不可以直接使用RECT值得引起我们的注意，这是一个友元函数，其和该类的成员函数具有相同的访问权限，但只是访问权限，这里是作用域问题。这是因为： **友元函数不在类作用域中**。之所以没有加上 VECTOR是因为该友元函数在namespace VECTOR里面，但是不可以直接使用 RECT。
+
+参考资料的随机漫步那个例子就不列出来，这不是这里讨论的重点。
+
+### 类的类型转换
+
 
 
 

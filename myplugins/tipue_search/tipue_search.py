@@ -15,6 +15,7 @@ updated by cdwanze 2019-03-08 for chinese
 
 from __future__ import unicode_literals
 
+import logging
 import os.path
 import json
 from bs4 import BeautifulSoup
@@ -109,13 +110,24 @@ class Tipue_Search_JSON_Generator(object):
             self.create_tpage_node(srclink)
 
         all_pages = len(pages)
+        excluded_url = [
+            'about.html',
+            '404.html',
+            'articles/du-qu-shu-ju.html',
+            'articles/shu-ju-hui-tu.html'
+        ]
+        excluded_url += [f'{self.siteurl}/{url}' for url in excluded_url]
         count = 0
         for page in pages:
+            if page.url in excluded_url:
+                logging.debug(f'{page.url} skipped for tipue search process.')
+                continue
+
             self.create_json_node(page)
             count += 1
 
             if count % 10 == 0:
-                print('tipue search processed {percent} %'.format(percent=(count / all_pages) * 100))
+                logging.debug('tipue search processed {percent} %'.format(percent=(count / all_pages) * 100))
 
         root_node = {'pages': self.json_nodes}
 
