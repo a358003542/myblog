@@ -1,8 +1,4 @@
-Title: pipenv模块
 Slug: pipenv-module
-Date: 2018-02-14 11:45
-Modified:  2018-03-13 11:45
-Tags: virtualenv
 Status: draft
 [TOC]
 

@@ -1,5 +1,4 @@
 Category: python_companion
-Status: draft
 
 [TOC]
 

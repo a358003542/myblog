@@ -1,4 +1,3 @@
-Status: draft
 Slug: selenium-module
 Tags:  crawler
 

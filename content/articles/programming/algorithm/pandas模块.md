@@ -1,5 +1,3 @@
-Status: draft
-
 
 [TOC]
 

@@ -1,7 +1,4 @@
 Title: powershell入门
-Slug: powershell-tutorial
-Date: 2018-01-20 12:56
-Modified: 2018-01-20 12:56
 Tags: powershell,
 Status: draft
 [TOC]
