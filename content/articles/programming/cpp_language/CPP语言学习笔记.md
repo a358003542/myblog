@@ -2675,7 +2675,7 @@ public:
 
 ### 类内定义的数组长度是常量的情况
 
-如下类里面定义一个数组，其长度是一个常量，下面的写法是**错误的**。
+如下类里面定义一个数组，其长度是一个常量，下面的写法是**错误的** 【参考资料1提到类里面定义常量都要使用enum或者static const形式我是存有疑问的，因为个人实践一般const设置的常量只要不是数组情况也是可以正常使用的。】。
 
 ```c++
 class Stack{
@@ -3551,7 +3551,751 @@ int main() {
 
 ### 类的类型转换
 
+#### 将其他类型数据转成本类
 
+将其他类型数据转成本类利用的就是本类的构造函数。其中有隐式转换和显示转换两种。个人不太喜欢类的类型的隐式转换，不太推荐编程的时候使用太多这种类型隐式转换，会让你的程序晦涩难懂并可能失控。具体隐式转换是如下面写法：
+
+```c++
+Stonewt myCat;
+myCat = 19.6;
+```
+
+C++会试着查找Stonewt类的构造函数，然后发现构造函数有：
+
+```c++
+Stonewt(double lbs);
+```
+
+这个特征参数匹配，就会试着调用 `Stonewt(19.6)` 来进行隐式类型转换。个人不太喜欢这种写法，而实际上C++也不推荐这种写法，并引入了 `explicit` 关键词：
+
+```c++
+explicit Stonewt(double lbs);
+```
+
+这个构造函数引入explicit关键词之后就不能用于隐式类型转换了，如果需要类型转换，则必须采用如下明确的形式：
+
+```c++
+Stonewt myCat;
+myCat = Stonewt(19.6);
+```
+
+这种写法也更明确易懂。
+
+#### 将本类转成其他类型数据
+
+下面只讲明确的显示类型转换情况，具体就是本类需要编写类似`operator int()` 这样的成员函数。
+
+比如：
+
+```c++
+Stonewt::operator int()const{
+    return int(pounds + 0.5);
+}
+```
+
+然后实际使用就是这种 `(int) what`  形式即返回目标类型数据。再一次，一般转换函数推荐加上 `explicit` 关键词：
+
+```
+class Stonewt{
+    explicit operator int () const;
+}
+```
+
+这样禁用掉隐式转换，推荐写代码时都写成显示转换的形式，这样代码也更明确易懂一些。
+
+1．请参考下面的randwalk.cpp 代码，对其进行修改，使之将一系列连续的随机漫步者位置写入到文件中。对于每个位置，用步号进行标示。另外，让该程序将初始条件（目标距离和步长）以及结果小结写入到该文件中。该文件的内容与下面类似：
+
+![img]({static}/images/2020/xiti_c11_1.png)
+
+randwalk.cpp
+
+```c++
+#include <iostream>
+#include <cstdlib> // rand srand 
+#include <ctime> //time
+#include "vector.h"
+
+int main() {
+	using namespace std;
+	using VECTOR::Vector;
+
+	srand(time(0)); // time(0) the current time, srand reset random seed.
+	double direction;
+	Vector step;
+	Vector result(0.0, 0.0);
+	unsigned long steps = 0;
+	double target;
+	double dstep;
+	
+	cout << "Enter target distance (q to quit): ";
+	while (cin >> target) {
+		cout << "Enter step length: ";
+		if (!(cin >> dstep)) break;
+
+		while (result.magval() < target) {
+			direction = rand() % 360; //generate 0-359 random number
+			step.reset(dstep, direction, Vector::POL);
+			result = result + step;
+			steps++;
+		}
+		cout << "After " << steps << " steps, the subject has the following location:\n";
+		cout << result << endl;
+		result.polar_mode();
+		cout << " or\n" << result << endl;
+		cout << "Average outward distance per step = "
+			<< result.magval() / steps << endl;
+		steps = 0;
+		result.reset(0.0, 0.0);
+		cout << "Enter target distance (q to quit): ";
+	}
+	cout << "Bye!\n";
+	cin.clear();
+	while (cin.get() != '\n') continue;
+	return 0;
+}
+```
+
+xiti_c11_1.cpp
+
+```c++
+#include <iostream>
+#include <fstream>
+#include <cstdlib> // rand srand 
+#include <ctime> //time
+#include "vector.h"
+
+
+int main() {
+	using namespace std;
+	using VECTOR::Vector;
+
+	srand(time(0)); // time(0) the current time, srand reset random seed.
+	double direction;
+	Vector step;
+	Vector result(0.0, 0.0);
+	unsigned long steps = 0;
+	double target;
+	double dstep;
+	ofstream outFile;
+	outFile.open("randwalk.txt");
+
+	cout << "Enter target distance (q to quit): ";
+	while (cin >> target) {
+		cout << "Enter step length: ";
+		if (!(cin >> dstep)) break;
+
+		outFile << "Target Distance: " << target << ", Step Size: " << dstep << endl;
+		outFile << steps << ": " << result << endl;
+
+		while (result.magval() < target) {
+			direction = rand() % 360; //generate 0-359 random number
+			step.reset(dstep, direction, Vector::POL);
+			result = result + step;
+			steps++;
+			
+			outFile << steps << ": " << result << endl;
+		}
+		cout << "After " << steps << " steps, the subject has the following location:\n";
+		outFile << "After " << steps << " steps, the subject has the following location:\n";
+
+		cout << result << endl;
+		outFile << result << endl;
+
+		result.polar_mode();
+
+		cout << " or\n" << result << endl;
+		outFile << " or\n" << result << endl;
+
+		cout << "Average outward distance per step = "
+			<< result.magval() / steps << endl;
+		outFile << "Average outward distance per step = "
+			<< result.magval() / steps << endl;
+
+		steps = 0;
+		result.reset(0.0, 0.0);
+		cout << "Enter target distance (q to quit): ";
+	}
+	cout << "Bye!\n";
+	cin.clear();
+	while (cin.get() != '\n') continue;
+
+	outFile.close();
+	return 0;
+}
+```
+
+这个习题重温了下ofstream文件输出流的用法，其他没啥好说的，算是对Vector类的另外一个测试使用例子。
+
+5．Stonewt类如下所示，现在需要重新编写它，使它有一个状态成员，由该成员控制对象应转换为英石格式、整数磅格式还是浮点磅格式。重载<<运算符，使用它来替换show_stn( )和show_lbs( )方法。重载加法、减法和乘法运算符，以便可以对Stonewt值进行加、减、乘运算。编写一个使用所有类方法和友元的小程序，来测试这个类。
+
+6．重载全部6个关系运算符。运算符对pounds成员进行比较，并返回一个bool值。编写一个程序，它声明一个包含6个Stonewt对象的数组，并在数组声明中初始化前3个对象。然后使用循环来读取用于设置剩余3个数组元素的值。接着报告最小的元素、最大的元素以及大于或等于11英石的元素的数量（最简单的方法是创建一个Stonewt对象，并将其初始化为11英石，然后将其同其他对象进行比较）。
+
+stonewt.h
+
+```c++
+#pragma once
+
+#ifndef STONEWT_H_
+#define STONEWT_H_
+
+class Stonewt {
+private:
+	const int Lbs_per_stn = 14;
+	int stone;
+	double pds_left;
+	double pounds;
+public:
+	Stonewt(double lbs); // input pounds
+	Stonewt(int stn, double lbs); // input how many stone and how many pounds lefted
+	Stonewt();
+	~Stonewt();
+	void show_lbs() const; // show in pound format
+	void show_stn() const; // show in stone format
+
+	//conversion function
+	operator int() const;
+	operator double() const;
+};
+
+#endif // !STONEWT_H_
+
+```
+
+stonewt.cpp
+
+```c++
+#include <iostream>
+#include <cmath>
+#include "stonewt.h"
+
+using std::cout;
+
+
+Stonewt::Stonewt(double lbs) {
+	stone = int(lbs) / Lbs_per_stn;
+	pds_left = int(lbs) % Lbs_per_stn + lbs - int(lbs);
+	pounds = lbs;
+}
+
+Stonewt::Stonewt(int stn, double lbs) {
+	stone = stn;
+	pds_left = lbs;
+	pounds = stn * Lbs_per_stn + lbs;
+}
+
+Stonewt::Stonewt() {
+	stone = pds_left = pounds = 0;
+}
+
+Stonewt::~Stonewt() {
+
+}
+
+void Stonewt::show_stn()const {
+	cout << stone << " stone, " << pds_left << " pounds\n";
+}
+
+void Stonewt::show_lbs()const {
+	cout << pounds << " pounds\n";
+}
+
+Stonewt::operator int()const {
+	return round(pounds);
+}
+Stonewt::operator double()const {
+	return pounds;
+}
+```
+
+上面利用了cmath的round函数来达到四舍五入的效果，int取整的话只是截断。然后用英石表达的话该类会存储pds_left作为剩余的那一点pound，第二个构造函数 `Stonewt::Stonewt(int stn, double lbs)` 输入的就是多少英石然后还剩下多少磅的格式。
+
+stonewt.h
+
+```c++
+#pragma once
+
+#ifndef STONEWT_H_
+#define STONEWT_H_
+
+class Stonewt {
+public:
+	enum Mode { STONE, POUND, INT_POUND};
+
+private:
+	const int Lbs_per_stn = 14;
+	int stone;
+	Mode state;
+	double pds_left;
+	double pounds;
+public:
+	Stonewt(double d, Mode mode=POUND); // mode pound
+	Stonewt(int s, double lbs=0, Mode mode = STONE); // mode stone or int_pound
+	Stonewt();
+	~Stonewt();
+	void stone_mode();
+	void pound_mode();
+	void int_pound_mode();
+
+	//conversion function
+	explicit operator int() const;
+	explicit operator double() const;
+
+	//operator overloading
+	Stonewt operator+(const Stonewt& b) const;
+	Stonewt operator-(const Stonewt& b) const;
+	Stonewt operator*(double n)const;
+
+	void operator=(const Stonewt& b);
+
+	// operator compare
+	bool operator<(const Stonewt& b) const;
+	bool operator>(const Stonewt& b) const;
+	bool operator>=(const Stonewt& b) const;
+	bool operator<=(const Stonewt& b) const;
+	bool operator==(const Stonewt& b) const;
+	bool operator!=(const Stonewt& b) const;
+
+	//friends
+	friend Stonewt operator*(double n, const Stonewt& a);
+	friend std::ostream& operator<<(std::ostream& os, const Stonewt& v);
+};
+
+
+
+#endif // !STONEWT_H_
+
+```
+
+stonewt.cpp
+
+```c++
+#include <iostream>
+#include <cmath>
+#include "stonewt.h"
+
+using std::cout;
+
+
+Stonewt::Stonewt(double d, Mode mode) {
+	if (mode != POUND) {
+		cout << "error: POUND mode only, init it with default empty constructor.";
+		stone = pds_left = pounds = 0;
+		state = POUND;
+	}
+	else {
+		stone = int(d) / Lbs_per_stn;
+		pds_left = int(d) % Lbs_per_stn + d - int(d) ; 
+		pounds = d ;
+		state = mode;
+	}
+}
+Stonewt::Stonewt(int s, double lbs, Mode mode) {
+	if (mode == INT_POUND) {
+		stone = s / Lbs_per_stn;
+		pds_left = s % Lbs_per_stn;
+		pounds = s;
+		state = mode;
+	}
+	else if (mode == STONE) {
+		stone = s;
+		pds_left = lbs;
+		pounds = s * Lbs_per_stn + lbs;
+		state = mode;
+	}
+	else {
+		cout << "error: INT_POUND or STONE mode only, init it with default empty constructor.";
+		stone = pds_left = pounds = 0;
+		state = POUND;
+	}
+}
+
+
+Stonewt::Stonewt() {
+	stone = pds_left = pounds = 0;
+	state = POUND;
+}
+
+Stonewt::~Stonewt() {
+
+}
+
+void Stonewt::stone_mode() {
+	state = STONE;
+}
+void Stonewt::pound_mode() {
+	state = POUND;
+}
+void Stonewt::int_pound_mode() {
+	state = INT_POUND;
+}
+
+Stonewt::operator int()const {
+	if (state == STONE) {
+		return stone;
+	}
+	else if (state == INT_POUND|| state == POUND) {
+		return round(pounds);
+	}else {
+		cout << "invalid mode!";
+	}
+}
+Stonewt::operator double()const {
+	if (state == STONE) {
+		return double(stone);
+	}
+	else if (state == INT_POUND || state == POUND) {
+		return pounds;
+	}
+	else {
+		cout << "invalid mode!";
+	}
+}
+
+void Stonewt::operator=(const Stonewt& b) {
+	stone = b.stone;
+	pds_left = b.pds_left;
+	pounds = b.pounds;
+	state = b.state;
+}
+
+Stonewt Stonewt::operator+(const Stonewt& b)const {
+	return Stonewt(pounds + b.pounds);
+}
+Stonewt Stonewt::operator-(const Stonewt& b)const {
+	return Stonewt(pounds - b.pounds);
+}
+
+Stonewt Stonewt::operator*(double n)const {
+	return Stonewt(n * pounds);
+}
+
+Stonewt operator*(double n, const Stonewt& a) {
+	return a * n;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const Stonewt& v) {
+	if (v.state == Stonewt::POUND) {
+		os << v.pounds << " pounds\n";
+	}
+	else if (v.state == Stonewt::INT_POUND) {
+		os << round(v.pounds) << " pounds\n";
+	}
+	else if (v.state == Stonewt::STONE) {
+		os << v.stone << " stone, " << v.pds_left << " pounds\n";
+	}
+	else {
+		os << "Stonewt object mode is invalid.";
+	}
+	return os;
+}
+
+bool Stonewt::operator<(const Stonewt& b) const {
+	if (state == STONE) {
+		return pounds < b.pounds;
+	}
+	else if (state == INT_POUND) {
+		return round(pounds) < round(b.pounds);
+	}
+	else if (state == POUND) {
+		return pounds < b.pounds;
+	}
+	else {
+		cout << "invalid mode!";
+	}	
+}
+bool Stonewt::operator>(const Stonewt& b) const {
+	if (state == STONE) {
+		return pounds > b.pounds;
+	}
+	else if (state == INT_POUND) {
+		return round(pounds) > round(b.pounds);
+	}
+	else if (state == POUND) {
+		return pounds > b.pounds;
+	}
+	else {
+		cout << "invalid mode!";
+	}
+}
+bool Stonewt::operator<=(const Stonewt& b) const {
+	if (state == STONE) {
+		return pounds <= b.pounds;
+	}
+	else if (state == INT_POUND) {
+		return round(pounds) <= round(b.pounds);
+	}
+	else if (state == POUND) {
+		return pounds <= b.pounds;
+	}
+	else {
+		cout << "invalid mode!";
+	}
+}
+bool Stonewt::operator>=(const Stonewt& b) const {
+	if (state == STONE) {
+		return pounds >= b.pounds;
+	}
+	else if (state == INT_POUND) {
+		return round(pounds) >= round(b.pounds);
+	}
+	else if (state == POUND) {
+		return pounds >= b.pounds;
+	}
+	else {
+		cout << "invalid mode!";
+	}
+}
+bool Stonewt::operator==(const Stonewt& b) const {
+	if (state == STONE) {
+		return pounds == b.pounds;
+	}
+	else if (state == INT_POUND) {
+		return round(pounds) == round(b.pounds);
+	}
+	else if (state == POUND) {
+		return pounds == b.pounds;
+	}
+	else {
+		cout << "invalid mode!";
+	}
+}
+bool Stonewt::operator!=(const Stonewt& b) const {
+	if (state == STONE) {
+		return pounds != b.pounds;
+	}
+	else if (state == INT_POUND) {
+		return round(pounds) != round(b.pounds);
+	}
+	else if (state == POUND) {
+		return pounds != b.pounds;
+	}
+	else {
+		cout << "invalid mode!";
+	}
+}
+```
+
+
+
+xiti_c11_5.cpp
+
+```c++
+#include <iostream>
+#include "stonewt.h"
+
+
+int main() {
+	using namespace std;
+	
+	Stonewt stonewt_array[6] = {
+		{9,2.8,Stonewt::STONE},
+		{11,0,Stonewt::STONE},
+		{6.3},
+	};
+
+	for (int x = 3; x < 6; x++) {
+		cout << "Please input object weight in pounds: ";
+		double pounds;
+		cin >> pounds;
+		stonewt_array[x] = Stonewt(pounds);
+	}
+
+	Stonewt *max = stonewt_array;
+	Stonewt *min = stonewt_array;
+	int count = 0;
+
+	for (int i = 0; i < 6; i++) {
+		cout << stonewt_array[i];
+	}
+
+	cout << "----------------------\n";
+
+	for (int i=0; i < 6; i++) {
+		if (stonewt_array[i] < *min) {
+			min = &stonewt_array[i];
+		}
+
+		if (stonewt_array[i] > *max) {
+			max = &stonewt_array[i];
+		}
+
+		if (stonewt_array[i] == Stonewt(11, 0, Stonewt::STONE)) {
+			count++;
+		}
+	}
+	cout << "equal 11 stone elements number is: " << count << endl;
+	cout << "max = " << *max;
+	cout << "min = " << *min;
+	cout << "max - min = " << *max - *min;
+	cout << "2 * max = " << 2 * *max;
+
+
+	return 0;
+}
+```
+
+本例子新的知识点倒没有，但里面东西还是挺多的，基本上是对本章节大部分内容的一个整理和总结，需要读者细细阅读体会。
+
+7．复数有两个部分组成：实数部分和虚数部分。复数的一种书写方式是：（3.0，4.0），其中，3.0是实数部分，4.0是虚数部分。假设a = (A, Bi)，c = (C, Di)，则下面是一些复数运算。
+
+- 加法：`a + c = (A+C, (B+D)i)`。
+- 减法：`a – c = (A−C, (B−D)i)`。
+- 乘法：`a * c = (A*C−B*D, (A*D + B*C)i)`。
+- 乘法: `x*c = (x * C, x *Di)`，其中x为实数。
+
+请定义一个复数类，以便下面的程序可以使用它来获得正确的结果。
+
+xiti_c11_7.cpp
+
+```c++
+#include <iostream>
+#include "complex0.h"
+
+
+int main() {
+//int main54() {
+
+	using namespace std;
+	complex a(3.0, 4.0);
+	complex c;
+
+	cout << "Enter a complex number (q to quit): \n";
+	while (cin >> c) {
+		cout << "c is " << c << endl;
+		cout << "complex conjugate is " << ~c << endl;
+		cout << "a is " << a << endl;
+
+		cout << "a + c is " << a + c << endl;
+		cout << "a - c is " << a - c << endl;
+		cout << "a * c is " << a * c << endl;
+		cout << "2 * c is " << 2 * c << endl;
+
+		cout << "Enter a complex number (q to quit): \n";
+	}
+    cout << "Done!\n";
+	return 0;
+}
+```
+
+注意，必须重载运算符<<和>>。标准C++使用头文件complex提供了比这个示例更广泛的复数支持，因此应将自定义的头文件命名为complex0.h，以免发生冲突。应尽可能使用const。
+
+下面是该程序的运行情况。
+
+![img]({static}/images/2020/xiti_c11_7.png)
+
+请注意，经过重载后，cin >>c将提示用户输入实数和虚数部分。
+
+complex0.h
+
+```c++
+#pragma once
+
+
+#ifndef COMPLEX0_H_
+#define COMPLEX0_H_
+#include <iostream>
+
+
+class complex {
+private:
+	double real; //real
+	double img; // img
+public:
+	complex();
+	complex(double a, double b);
+	~complex();
+
+	//operator overloading
+	complex operator+(const complex& b) const;
+	complex operator-(const complex& b) const;
+	complex operator-()const;
+	complex operator*(double n)const;
+	complex operator*(complex& b)const;
+	complex operator~()const;
+
+	//friends
+	friend complex operator*(double n, const complex& a);
+	friend std::ostream& operator<<(std::ostream& os, const complex& v);
+	friend std::istream& operator>>(std::istream& os, complex& v);
+};
+
+
+#endif // 
+```
+
+complex0.cpp
+
+```c++
+#include "complex0.h"
+
+
+complex::complex() {
+	real = 0;
+	img = 0;
+}
+complex::complex(double a, double b) {
+	real = a;
+	img = b;
+}
+
+complex::~complex() {
+
+}
+
+complex complex::operator+(const complex& b) const {
+	return complex(real + b.real, img + b.img);
+}
+complex complex::operator-(const complex& b) const {
+	return complex(real - b.real, img - b.img);
+}
+complex complex::operator-()const {
+	return complex(-real, -img);
+}
+complex complex::operator*(complex& b)const {
+	return complex((real * b.real - img * b.img), (real * b.img + img * b.real));
+}
+
+complex complex::operator*(double n)const {
+	return complex(n * real, n * img);
+}
+complex complex::operator~()const {
+	return complex(real, -img);
+}
+
+
+complex operator*(double n, const complex& a) {
+	return a * n;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const complex& v) {
+	os << "(" << v.real << "," << v.img << "i)";
+	return os;
+}
+
+std::istream& operator>>(std::istream& os, complex& v) {
+	using std::cout;
+	double a;
+	double b;
+
+	cout << "real: ";
+	os >> v.real;
+	os.get();
+
+	cout << "imaginary: ";
+	os >> v.img;
+	os.get();
+
+	return os;
+}
+```
+
+
+
+
+
+### 类和动态内存分配
 
 
 
