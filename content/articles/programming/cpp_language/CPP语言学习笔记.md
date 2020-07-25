@@ -4293,9 +4293,177 @@ std::istream& operator>>(std::istream& os, complex& v) {
 
 
 
-
-
 ### 类和动态内存分配
+
+本小节主要分析讨论了官方内置的string类是如何实现不定长度字符串功能支持的，前面在介绍动态内存分配new和delete的时候提到过其内部就是利用的new和delete来实现了内部字符数组长度的可定制，但具体到实现层面，里面还有很多细节和问题需要讨论。
+
+首先看一下参考资料1列出的StringBad这个带有一些bug的实现版本，该版本写法很直观，我想没有学习本小节的内容的读者一开始应该都会写出这样的最初实现版本：
+
+stringbad.h
+
+```c++
+#include <iostream>
+#ifndef STRINGBAD_H_
+#define STRINGBAD_H_
+
+class StringBad{
+private:
+    char * str;
+    int len;
+public:
+    StringBad(const char * s);
+    StringBad();
+    ~StringBad();
+    friend std::ostream & operator<<(std::ostream & os, const StringBad & st);
+};
+
+#endif
+```
+
+
+
+stringbad.cpp
+
+```c++
+#include <cstring>
+#include "stringbad.h"
+
+using std::cout;
+
+
+StringBad::StringBad(const char * s){
+    len = std::strlen(s);
+    str = new char[len+1];
+    std::strcpy(str,s);
+}
+
+StringBad::StringBad(){
+    len = 0;
+    str = new char[1];
+    str[0] = '\0';
+}
+
+StringBad::~StringBad(){
+    delete [] str;
+}
+
+std::ostream & operator<<(std::ostream & os, const StringBad & st){
+    os << st.str;
+    return os
+}
+```
+
+StringBad类里面只保留了字符数组的指针，具体字符数组是存储在动态数组里面的。上面的实现有以下两大缺陷，一是没有正确应对复制构造函数的情况；二是没有正确应对赋值运算符的情况。
+
+首先我们来分析第一个情况，参考资料callme2为什么会出现bug。因为callme2函数采用的是将类对象按值传递的形式，那么将调用该类的复制构造函数来完成这个动作，具体到这里可以理解为默认执行了 `StringBad sb = StringBad(headline2)` 。
+
+因为上面的类实现并没有定义这个复制构造函数，那么将调用类的默认复制构造函数，具体就是非静态私有成员的值赋值，大概执行类似下面的语句：
+
+```c++
+StringBad sb;
+sb.str = headline.str;
+sb.len = headline.len;
+```
+
+除了函数的按值传递情况外，下面的语句也是明确的在调用复制构造函数：
+
+```c++
+StringBad ditto(motto);
+StringBad metto = motto;
+StringBad also = StringBad(motto);
+StringBad * pstringBad = new StringBad(motto);
+```
+
+这其中 `StringBad metto = motto;` 可能在具体实现上会有点差异，如果写成下面这种形式：
+
+```
+StringBad metto;
+metto = motto;
+```
+
+那么肯定上一句是调用默认的构造函数，第二句是调用的赋值运算符。但如果写成一句：`StringBad metto = motto;` 则有的可能就是只调用了复制构造函数，有的可能是先用复制构造函数创建一个临时对象，然后又再调用了赋值运算符。
+
+继续到具体这个例子的讨论上，callme2按值传递内部形参sb，出了函数就将调用sb的析构函数，又因为sb的str指针就是headline2的str指针，所以sb的析构函数将会把该字符数组在动态内存里面的内容删除掉，从而造成了后面显示headline2的bug。
+
+定义一个显式的复制构造函数可以解决这个问题【这种深究类里面成员的指针拷贝问题的叫做深度复制】：
+
+```c++
+StringBad::StringBad(const StringBad & st){
+    len = st.len;
+    str = new char[len+1];
+    std::strcpy(str, st.str);
+}
+```
+
+上面例子的第二个bug是没有正确应对赋值运算符的情况，也就是这种情况：
+
+```
+StringBad metto;
+metto = motto;
+```
+
+同样类也有默认的 `operator=` 成员函数，其行为和复制构造函数类似，也是对类的非静态成员逐个复制。要解决这个问题，重载赋值运算符`=` 即可：
+
+```c++
+StringBad & StringBad::operator=(const StringBad & st){
+    if (this == &st){
+    	return *this;
+    }
+    delete [] str;
+    len = str.len;
+    str = new char[len+1];
+    std::strcpy(str, st.str);
+    return *this;
+}
+```
+
+上面的代码可能读者会对 `this == &st` 有点困惑，这里一定要记住引用变量从定义的时候就绑定了某个变量，后面提到它实际上就是提到那个变量，后面不要去谈论引用变量的地址或者引用变量存储的值之类的概念，比如上面的st，你问st的值是多少，它的值就是引用的StringBad那个对象，`&st`  ，st的取址是多少，st的地址就是StringBad那个对象的取地址操作。
+
+还有其他一下便捷的方法和运算符重载好让该类更好用，但在这里不是讨论的重点了，除了上面的赋值运算符还需要支持 `metto = "abc"` 这种形式，具体就是重载赋值运算符：
+
+```c++
+StringBad & StringBad::operator=(const char * s){
+    delete [] str;
+    len = std::strlen(s);
+    str = new char[len+1];
+    std::strcpy(str, s);
+    return *this;
+}
+```
+
+下面是参考资料1的一个例子，队列模拟，请读者详细阅读理解之，后面我会跟上一些觉得需要说明的知识点。关于队列的知识点这里预先假设读者已经知道了。
+
+queue.h
+
+```
+
+```
+
+
+
+1．对于下面的类声明：
+
+```
+
+```
+
+给这个类提供实现，并编写一个使用所有成员函数的小程序。
+
+
+
+4．请参看下面的Stack类的头文件：
+
+
+
+正如私有成员表明的，这个类使用动态分配的数组来保存栈项。请重新编写方法，以适应这种新的表示法，并编写一个程序来演示所有的方法，包括复制构造函数和赋值运算符。
+
+
+
+5．Heather银行进行的研究表明，ATM客户不希望排队时间不超过1分钟。使用本小节上面提到的对于队列的模拟，找出要使平均等候时间为1分钟，每小时到达的客户数应为多少（试验时间不短于100小时）？
+
+
+
+### 类继承
 
 
 
