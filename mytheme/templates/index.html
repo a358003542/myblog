@@ -2,105 +2,106 @@
 
 
 {% block meta_tags_in_head %}
-    {{ super() }}
-    <meta property="og:title" content="{{ SITENAME|striptags|e }}"/>
-    <meta name="twitter:title" content="{{ SITENAME|striptags|e }}">
+{{ super() }}
+<meta property="og:title" content="{{ SITENAME|striptags|e }}" />
+<meta name="twitter:title" content="{{ SITENAME|striptags|e }}">
 
-    <meta property="og:url" content="{{ SITEURL }}"/>
-    {% from '_includes/_defaults.html' import SITE_DESCRIPTION with context %}
-    {% if SITE_DESCRIPTION %}
-        <meta property="og:description" content="{{ SITE_DESCRIPTION|e }}"/>
-        <meta name="twitter:description" content="{{ SITE_DESCRIPTION|e }}">
-    {% endif %}
-    <meta property="og:site_name" content="{{ SITENAME|striptags|e }}"/>
-    <meta property="og:article:author" content="{{ AUTHOR }}"/>
-    {% from '_includes/_defaults.html' import FEATURED_IMAGE with context %}
-    {% if FEATURED_IMAGE %}
-        <meta property="og:image" content="{{ FEATURED_IMAGE }}"/>
-        <meta name="twitter:image" content="{{ FEATURED_IMAGE }}">
-    {% endif %}
+<meta property="og:url" content="{{ SITEURL }}" />
+{% from '_includes/_defaults.html' import SITE_DESCRIPTION with context %}
+{% if SITE_DESCRIPTION %}
+<meta property="og:description" content="{{ SITE_DESCRIPTION|e }}" />
+<meta name="twitter:description" content="{{ SITE_DESCRIPTION|e }}">
+{% endif %}
+<meta property="og:site_name" content="{{ SITENAME|striptags|e }}" />
+<meta property="og:article:author" content="{{ AUTHOR }}" />
+{% from '_includes/_defaults.html' import FEATURED_IMAGE with context %}
+{% if FEATURED_IMAGE %}
+<meta property="og:image" content="{{ FEATURED_IMAGE }}" />
+<meta name="twitter:image" content="{{ FEATURED_IMAGE }}">
+{% endif %}
 {% endblock meta_tags_in_head %}
 
 
 {% block content %}
-    {% if articles %}
-        {% for article in articles_page.object_list %}
-            {% if article.title == 'index' %}
-                <article>
-                    <div class="row">
-                        <header class="page-header col-md-10 col-md-offset-2">
-                            <h1> {{ SITENAME|striptags|e }} </h1>
-                        </header>
-                    </div>
+<style>
+.jumbotron{
+    background-color: tomato;
+}
+.thumbnail{
+    background-color: mediumaquamarine;
+}
+</style>
 
-                    <div class="row">
-                        {% if article.toc %}
-                            <div class="col-md-2 table-of-content">
-                                <nav>
-                                    <h4>目录</h4>
-                                    {{ article.toc }}
-                                </nav>
-                            </div>
-                            <div class="col-md-8 article-content">
-                        {% else %}
-                            <div class="col-md-8 col-md-offset-2 article-content">
-                        {% endif %}
+<div class="jumbotron">
+    <h1>欢迎光临</h1>
+</div>
 
-                        {{ article.content }}
+<div class="page-header"><h2>我的Github项目</h2></div>
+<div class="row">
+    <div class="col-sm-6 col-md-4">
+        <div class="thumbnail">
+            <div class="caption">
+                <h3>人类知识体系纲要</h3>
+                <p>我写作的一本书籍，试图将人类知识体系进行大综合大整理，从而方便人们学习和查阅。</p>
+                <p><a href="" class="btn btn-primary" role="button">github</a></p>
+            </div>
+        </div>
+    </div>
 
-                        </div>
-                </article>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
+    <div class="col-sm-6 col-md-4">
+        <div class="thumbnail">
+            <div class="caption">
+                <h3>Xelatex指南</h3>
+                <p>我写作的一本书籍，具体是关于如何利用xelatex排版pdf的。</p>
+                <p><a href="https://github.com/a358003542/xelatex-guide-book" class="btn btn-primary" role="button">github</a></p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
 {% endblock content %}
 
+
 {% block script %}
-    {{ super() }}
-    <script>
-        (function ($) {
-            // custom css expression for a case-insensitive contains()
-            jQuery.expr[':'].Contains = function (a, i, m) {
-                return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
-            };
+{{ super() }}
+<script>
+    (function ($) {
+        // custom css expression for a case-insensitive contains()
+        jQuery.expr[':'].Contains = function (a, i, m) {
+            return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
+        };
 
-            function listFilter() {
+        function listFilter() {
 
-                $('#findtag')
-                    .change(function () {
-                        var filter = $(this).val();
-                        if (filter) {
-                            // this finds all links in a list that contain the input,
-                            // and hide the ones not containing the input while showing the ones that do
-                            $('.list-of-tags').find("a:not(:Contains(" + filter + "))").parent().hide();
-                            $('.list-of-tags').find("a:Contains(" + filter + ")").parent().show();
-                        } else {
-                            $('.list-of-tags').find("li").show();
-                        }
-                        return false;
-                    })
-                    .keyup(function () {
-                        // fire the above change event after every letter
-                        $(this).change();
-                    });
-            }
+            $('#findtag')
+                .change(function () {
+                    var filter = $(this).val();
+                    if (filter) {
+                        // this finds all links in a list that contain the input,
+                        // and hide the ones not containing the input while showing the ones that do
+                        $('.list-of-tags').find("a:not(:Contains(" + filter + "))").parent().hide();
+                        $('.list-of-tags').find("a:Contains(" + filter + ")").parent().show();
+                    } else {
+                        $('.list-of-tags').find("li").show();
+                    }
+                    return false;
+                })
+                .keyup(function () {
+                    // fire the above change event after every letter
+                    $(this).change();
+                });
+        }
 
-            //ondomready
-            $(function () {
-                listFilter($());
-            });
-        }(jQuery));
+        //ondomready
+        $(function () {
+            listFilter($());
+        });
+    }(jQuery));
 
-    </script>
-
-
-    <script>
-        $('.page-header').hover(function () {
-            $(this).css("color", '#3875d7')
-        }, function () {
-            $(this).css('color', '#8B0000')
-        })
-    </script>
+</script>
 
 
 {% endblock script %}
