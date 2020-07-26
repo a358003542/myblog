@@ -4435,9 +4435,263 @@ StringBad & StringBad::operator=(const char * s){
 
 queue.h
 
-```
+```c++
+#pragma once
+
+#ifndef QUEUE_H_
+#define QUEUE_H_
+
+class Customer {
+private:
+	long arrive;
+	int processtime;
+public:
+	Customer() { arrive = processtime = 0; };
+	void set(long when);
+	long when()const { return arrive; }
+	int ptime()const { return processtime; }
+};
+
+typedef Customer Item;
+
+class Queue {
+private:
+	struct Node {
+		Item item;
+		struct Node* next;
+	};
+	enum {Q_SIZE=10};
+	Node* front;
+	Node* rear;
+	int items;
+	const int qsize;
+	Queue(const Queue & q):qsize(0){}
+	Queue& operator=(const Queue& q) { return *this; }
+public:
+	Queue(int qs = Q_SIZE);
+	~Queue();
+	bool isempty()const;
+	bool isfull()const;
+	int queuecount()const;
+	bool enqueue(const Item& item);
+	bool dequeue(Item& item);
+};
+
+
+#endif // !QUEUE_H_
 
 ```
+
+#### 成员初始化列表
+
+这里有一行代码会比较费解：
+
+```c++
+Queue(const Queue & q):qsize(0){}
+```
+
+这个写法只能用于类的构造函数，即在类的构造函数后面可以跟上冒号，然后后面跟上一些该类成员初始化时候的默认值。具体叫做成员初始化列表，构造函数待默认参数是可以直接写上的，为什么还要加上这种形式。这种形式写法里面的成员的初始值是类里面成员刚刚初始化的时候就可以进行复制的，比如说上面的qsize前面已经加上了`const` 关键词，也是可以通过这种方式来进行该常量的初始化动作的。就上面这个例子而言将qsize初始化0似乎不是那么重要，可以选择直接声明的时候赋值为0吗。但如下面的形式就是无可取代的写法了：
+
+```c++
+Classy(int n);
+    
+Classy::Classy(int n): mem1(n){
+    //...
+}
+```
+
+上面还演示了成员初始化列表只在具体定义中写上，声明的时候可以不写。
+
+queue.cpp
+
+```c++
+#include <cstdlib>
+#include "queue.h"
+
+Queue::Queue(int qs) :qsize(qs) {
+	front = rear = NULL;
+	items = 0;
+}
+
+Queue::~Queue() {
+	Node* temp;
+	while (front !=NULL){
+		temp = front;
+		front = front->next;
+		delete temp;
+	}
+}
+
+bool Queue::isempty()const {
+	return items == 0;
+}
+
+bool Queue::isfull()const {
+	return items == qsize;
+}
+
+int Queue::queuecount()const {
+	return items;
+}
+
+bool Queue::enqueue(const Item& item) {
+	if (isfull) {
+		return false;
+	}
+	Node* add = new Node;
+	add->item = item;
+	add->next = NULL;
+	items++;
+	if (front == NULL) {
+		front = add;
+	}
+	else {
+		rear->next = add;
+	}
+	rear = add;
+	return true;
+}
+
+bool Queue::dequeue(Item& item) {
+	if (front == NULL) {
+		return false;
+	}
+	item = front->item;
+	items--;
+	Node* temp = front;
+	front = front->next;
+	delete temp;
+	if (items == 0) {
+		rear = NULL;
+	}
+	return true;
+}
+
+void Customer::set(long when) {
+	processtime = std::rand() % 3 + 1; 
+	arrive = when;
+}
+```
+
+#### NULL空指针
+
+你可以声明一个指针，然后让这个指针为空。通常是用NULL或者0赋值给这个指针变量：
+
+```c++
+int * ptr;
+ptr = NULL;
+```
+
+当然推荐使用C++11新引入的关键字 `nullptr` ：
+
+```c++
+int * ptr;
+ptr = nullptr;
+```
+
+在本例子中该Queue类里面的每个Node节点都是new出来的，除了dequeue动作将最前面的Node挤出，需要delete该节点外，整个类的析构函数也需要对Queue类里面的所有节点进行全部delete动作。
+
+上面实现中enqueue和dequeue这两个成员函数需要细细看下，其中dequeue接受的参数是为了记录好挤出的那个Node的数据值。除此之外dequeue动作和析构函数的动作还是很接近的。enqueue里面这一句 `rear->next = add;` 是为了队列倒数第二个元素能够指向倒数第一个元素。
+
+bank.cpp
+
+```c++
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include "queue.h"
+
+const int MIN_PER_HR = 60;
+bool newcustomer(double x);
+
+bool newcustomer(double x) {
+	return (std::rand() * x / RAND_MAX < 1);
+}
+
+int main() {
+	using std::cin;
+	using std::cout;
+	using std::endl;
+	using std::ios_base;
+	std::srand(std::time(0));
+
+	cout << "Case Study: Bank of Heather Automatic Teller\n";
+	cout << "Enter maximum size of queue: ";
+	int qs;
+	cin >> qs;
+	Queue line(qs);
+
+	cout << "Enter the number of simulation hours: ";
+	int hours;
+	cin >> hours;
+	long cyclelimit = MIN_PER_HR * hours;
+
+	cout << "Enter the average number of customers per hour: ";
+	double perhour;
+	cin >> perhour;
+	double min_per_cust;
+	min_per_cust = MIN_PER_HR / perhour;
+
+	Item temp;
+	long turnaways = 0;
+	long customers = 0;
+	long served = 0;
+	long sum_line = 0;
+	int wait_time = 0;
+	long line_wait = 0;
+
+	for (int cycle = 0; cycle < cyclelimit; cycle++) {
+		if (newcustomer(min_per_cust)) {
+			if (line.isfull()) {
+				turnaways++;
+			}else {
+				customers++;
+				temp.set(cycle);
+				line.enqueue(temp);
+			}
+		}
+		if (wait_time <= 0 && !line.isempty()) {
+			line.dequeue(temp);
+			wait_time = temp.ptime();
+			line_wait += cycle - temp.when();
+			served++;
+		}
+
+		if (wait_time > 0) {
+			wait_time--;
+		}
+
+		sum_line += line.queuecount();
+	}
+
+	if (customers > 0) {
+		cout << "customers accepted: " << customers << endl;
+		cout << "customers served: " << served << endl;
+		cout << "          turnaways: " << turnaways << endl;
+		cout << "average queue size: ";
+		cout.precision(2);
+		cout.setf(ios_base::fixed, ios_base::floatfield);
+
+		cout << (double)sum_line / cyclelimit << endl;
+		cout << "average wait time: "
+			<< (double)line_wait / served << "minutes\n";
+	}
+	else {
+		cout << "No customers!\n";
+	}
+	cout << "Done!\n";
+
+	return 0;
+}
+```
+
+这个例子最重要的是跟上作者如何试着用编程来模拟现实世界问题的思路，具体编程上的细节问题前面都已经说过了。下面我会多说一点。
+
+这里的cycle下面的循环语句相当于这个世界的心跳，每分钟会执行下面的动作。第一个是来看是否有新顾客，如果有新顾客会如何；第二个if和第三个if是看最前面的那个顾客业务处理完了没，通过`wait_time` 来衡量，其小于0就认为该顾客业务处理完了。
+
+首先来看新顾客的模拟，`(std::rand() * x / RAND_MAX < 1)`  代码的这里会比较难懂一点，我们知道 rand会生成从0到最大整数的随机整数，所以 `std::rand() * x / RAND_MAX` 会生成0到x之间的随机整数，而x的含义是每个顾客平均几分钟。我们假设一条时间线，那么在这条时间线上平均x分钟画一条刻度，该刻度意思就是来了一个新顾客。因为随机数0到x概率分布均匀，所以可以认为上面运算公式得到bool为真的概率为1/x 。或者说该概率公式运行x个必然会得到一个刻度，而这和最开始定义的该时间线每x分钟画一个刻度表示来一个新用户是一致的，简单来说这个随机数函数返回true意思是一个新顾客来了。
+
+新顾客来了会记录自身到达的时间，然后分配给一个1-3的业务处理时间属性。然后我们继续往下看，队列开始挤出最开头的那个顾客，意思是那个顾客开始处理自己的业务了，获取该顾客的业务处理时间，后面是一些统计信息处理。下一分钟会判断该顾客业务处理完了没有，没完则等待时间减去一，完了也就是等待时间wait_time<=0了那么继续处理下一个顾客。【这个模拟顾客业务处理时间和心跳时间还可以细一点，不过这不是重点。】在后面是一些统计数据的计算，都是简单。
 
 
 
