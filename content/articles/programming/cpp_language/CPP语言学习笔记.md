@@ -4518,8 +4518,7 @@ Queue::~Queue() {
 	while (front !=NULL){
 		temp = front;
 		front = front->next;
-		delete temp;
-	}
+		delete temp
 }
 
 bool Queue::isempty()const {
@@ -4691,29 +4690,392 @@ int main() {
 
 首先来看新顾客的模拟，`(std::rand() * x / RAND_MAX < 1)`  代码的这里会比较难懂一点，我们知道 rand会生成从0到最大整数的随机整数，所以 `std::rand() * x / RAND_MAX` 会生成0到x之间的随机整数，而x的含义是每个顾客平均几分钟。我们假设一条时间线，那么在这条时间线上平均x分钟画一条刻度，该刻度意思就是来了一个新顾客。因为随机数0到x概率分布均匀，所以可以认为上面运算公式得到bool为真的概率为1/x 。或者说该概率公式运行x个必然会得到一个刻度，而这和最开始定义的该时间线每x分钟画一个刻度表示来一个新用户是一致的，简单来说这个随机数函数返回true意思是一个新顾客来了。
 
-新顾客来了会记录自身到达的时间，然后分配给一个1-3的业务处理时间属性。然后我们继续往下看，队列开始挤出最开头的那个顾客，意思是那个顾客开始处理自己的业务了，获取该顾客的业务处理时间，后面是一些统计信息处理。下一分钟会判断该顾客业务处理完了没有，没完则等待时间减去一，完了也就是等待时间wait_time<=0了那么继续处理下一个顾客。【这个模拟顾客业务处理时间和心跳时间还可以细一点，不过这不是重点。】在后面是一些统计数据的计算，都是简单。
+新顾客来了会记录自身到达的时间，然后分配给一个1-3的业务处理时间属性。然后我们继续往下看，队列开始挤出最开头的那个顾客，意思是那个顾客开始处理自己的业务了，获取该顾客的业务处理时间，后面是一些统计信息处理。下一分钟会判断该顾客业务处理完了没有，没完则等待时间减去一，完了也就是等待时间wait_time<=0了那么继续处理下一个顾客。【这个模拟顾客业务处理时间和心跳时间还可以细一点，不过这不是重点。】在后面是一些统计数据的计算，都很简单。
 
 
 
 1．对于下面的类声明：
 
-```
-
+```c++
+class Cow{
+    char name[20];
+    char * hobby;
+    double weight;
+public:
+    Cow();
+    Cow(const char * nm, const char * ho, double wt);
+    Cow(const Cow & c);
+    ~Cow();
+    Cow & operator=(const Cow & c);
+    void ShowCow() const;
+};
 ```
 
 给这个类提供实现，并编写一个使用所有成员函数的小程序。
 
+xiti_c12_1.cpp
 
+```c++
+#include <iostream>
+#include <cstring>
+
+using std::cout;
+using std::endl;
+
+class Cow {
+    char name[20];
+    char* hobby;
+    double weight;
+public:
+    Cow();
+    Cow(const char* nm, const char* ho, double wt);
+    Cow(const Cow& c);
+    ~Cow();
+    Cow& operator=(const Cow& c);
+    void ShowCow() const;
+};
+
+Cow::Cow() {
+    name[0] = '\0';
+    hobby = new char[1];
+    hobby[0] = '\0';
+    weight = 0;
+}
+
+Cow::Cow(const char* nm, const char* ho, double wt) {
+    strcpy_s(name, nm);
+    
+    int len = strlen(ho);
+    hobby = new char[len+1];
+    strcpy_s(hobby, len+1,ho);
+    weight = wt;
+}
+
+Cow::Cow(const Cow& c) {
+    strcpy_s(name, c.name);
+
+    int len = strlen(c.hobby);
+    hobby = new char[len + 1];
+    strcpy_s(hobby, len+1,c.hobby);
+    weight = c.weight;
+}
+
+Cow::~Cow() {
+    delete[] hobby;
+}
+
+Cow& Cow::operator=(const Cow& c) {
+    if (this == &c) return *this;
+
+    strcpy_s(name, c.name);
+    
+    int len = strlen(c.hobby);
+    delete[] hobby;
+    hobby = new char[len + 1];
+    strcpy_s(hobby, len+1,c.hobby);
+    weight = c.weight;
+    return *this;
+}
+
+void Cow::ShowCow()const {
+    cout << "Cow " << name << " hobby is" << hobby << " and it's weight is " << weight << endl;
+}
+
+
+int main() {
+
+    Cow cow1;
+    Cow cow2 = Cow("sucy", "reading", 18.9);
+
+    cow1.ShowCow();
+    cow2.ShowCow();
+
+    cow1 = cow2;
+    cow1.ShowCow();
+    cow2.ShowCow();
+
+    Cow cow3 = cow2;
+    cow1.ShowCow();
+    cow2.ShowCow();
+    cow3.ShowCow();
+
+    return 0;
+}
+```
+
+本例也在告诉我们这样一个事实，那就是类里面如果有某个成员是指针变量，那么通常是要通过动态内存分配来重新实现复制构造函数和赋值运算符和析构函数的。 赋值运算和复制构造函数的区别在于赋值运算该类对象已经初始化了，也就是已经分配动态内存了，再次赋值需要将原来分配的内存里面的值释放掉。
 
 4．请参看下面的Stack类的头文件：
 
+```c++
+typedef unsigned long Item;
 
+class Stack {
+private:
+	enum { MAX = 10 };
+	Item * pitems;
+	int size;
+	int top;
+public:
+	Stack(int n = MAX);
+	Stack(const Stack& st);
+	~Stack();
+
+	bool isempty()const;
+	bool isfull() const;
+	
+	bool push(const Item& item);
+	bool pop(Item& item);
+	Stack& operator=(const Stack& st);
+};
+```
 
 正如私有成员表明的，这个类使用动态分配的数组来保存栈项。请重新编写方法，以适应这种新的表示法，并编写一个程序来演示所有的方法，包括复制构造函数和赋值运算符。
+
+xiti_c12_4.cpp
+
+```c++
+#include <iostream>
+#include <cctype>
+
+typedef unsigned long Item;
+
+class Stack2 {
+private:
+	enum { MAX = 10 };
+	Item * pitems;
+	int size;
+	int top;
+public:
+	Stack2(int n = MAX);
+	Stack2(const Stack2& st);
+	~Stack2();
+
+	bool isempty()const;
+	bool isfull() const;
+	
+	bool push(const Item& item);
+	bool pop(Item& item);
+	Stack2& operator=(const Stack2& st);
+	friend std::ostream& operator<<(std::ostream& os, const Stack2& s);
+};
+
+
+Stack2::Stack2(int n) {
+	size = n;
+	top = 0;
+	pitems = new Item[size];
+}
+
+std::ostream& operator<<(std::ostream& os, const Stack2& s) {
+	using std::endl;
+	os << "Stack2 size: " << s.size << endl 
+		<< "Stack2 top: " << s.top << endl;
+
+	for (int i = 0; i < s.top; i++) {
+		os << "Stack values " << i << ": " << s.pitems[i] << endl;
+	}
+	return os;
+}
+
+Stack2::Stack2(const Stack2& st) {
+	size = st.size;
+	top = st.top;
+
+	pitems = new Item[size];
+
+	for (int i = 0; i < st.top; i++) {
+		pitems[i] = st.pitems[i];
+	}
+}
+
+Stack2& Stack2::operator=(const Stack2& st) {
+	if (this == &st) return *this;
+
+	size = st.size;
+	top = st.top;
+
+	delete[] pitems;
+	pitems = new Item[size];
+
+	for (int i = 0; i < st.top; i++) {
+		pitems[i] = st.pitems[i];
+	}
+	return *this;
+}
+
+Stack2::~Stack2() {
+	delete[] pitems;
+}
+
+bool Stack2::isempty() const {
+	return top == 0;
+}
+
+bool Stack2::isfull() const {
+	return top == size;
+}
+
+bool Stack2::push(const Item& item) {
+	if (top < size) {
+		pitems[top++] = item;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool Stack2::pop(Item& item) {
+	if (top > 0) {
+		item = pitems[--top];
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
+int main() {
+	using namespace std;
+
+	Stack2 st1(3);
+	Stack2 st2;
+	Item tmp;
+	st1.push(1);
+	cout << "st1-----------\n";
+	cout << st1;
+
+	st2 = st1;
+	cout << "st2------------\n";
+	cout << st2;
+
+	st2.pop(tmp);
+	st2.push(3);
+	st2.push(4);
+	cout << "st2-------------\n";
+	cout << st2;
+
+	Stack2 st3 = st2;
+
+	cout << "st3-------------\n";
+	cout << st3;
+
+	return 0;
+}
+```
+
+本例子是在之前Stack类的基础上继续讨论的，唯一的改动就是之前的items是一个固定长度的数组，现在变成动态内存分配的了。
+
+这里top是堆栈的顶端索引，当top等于0表示该堆栈没有元素，当top=1表示该堆栈有1个元素，但你要取值是取index=0的值。然后top++的含义是返回top之后再执行自增操作；而++top的含义是先自增再返回top的值。
 
 
 
 5．Heather银行进行的研究表明，ATM客户不希望排队时间不超过1分钟。使用本小节上面提到的对于队列的模拟，找出要使平均等候时间为1分钟，每小时到达的客户数应为多少（试验时间不短于100小时）？
+
+xiti_c12_5.cpp
+
+```c++
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include "queue.h"
+
+const int MIN_PER_HR = 60;
+
+extern bool newcustomer(double x);
+
+
+int main() {
+	using std::cin;
+	using std::cout;
+	using std::endl;
+	using std::ios_base;
+	std::srand(std::time(0));
+
+	cout << "Case Study: Bank of Heather Automatic Teller\n";
+	cout << "Enter maximum size of queue: ";
+	int qs;
+	cin >> qs;
+	Queue line(qs);
+
+	cout << "Enter the number of simulation hours: ";
+	int hours;
+	cin >> hours;
+	long cyclelimit = MIN_PER_HR * hours;
+
+	//cout << "Enter the average number of customers per hour: ";
+	//double perhour;
+	//cin >> perhour;
+
+	for (double perhour = 1; perhour < 100; perhour=perhour+0.1) {
+		double min_per_cust;
+		min_per_cust = MIN_PER_HR / perhour;
+
+		Item temp;
+		long turnaways = 0;
+		long customers = 0;
+		long served = 0;
+		long sum_line = 0;
+		int wait_time = 0;
+		long line_wait = 0;
+
+		for (int cycle = 0; cycle < cyclelimit; cycle++) {
+			if (newcustomer(min_per_cust)) {
+				if (line.isfull()) {
+					turnaways++;
+				}
+				else {
+					customers++;
+					temp.set(cycle);
+					line.enqueue(temp);
+				}
+			}
+			if (wait_time <= 0 && !line.isempty()) {
+				line.dequeue(temp);
+				wait_time = temp.ptime();
+				line_wait += cycle - temp.when();
+				served++;
+			}
+
+			if (wait_time > 0) {
+				wait_time--;
+			}
+
+			sum_line += line.queuecount();
+		}
+
+		if (customers > 0) {
+			cout << "customers accepted: " << customers << endl;
+			cout << "customers served: " << served << endl;
+			cout << "          turnaways: " << turnaways << endl;
+			cout << "average queue size: ";
+			cout.precision(2);
+			cout.setf(ios_base::fixed, ios_base::floatfield);
+
+			cout << (double)sum_line / cyclelimit << endl;
+			cout << "average wait time: "
+				<< (double)line_wait / served << "minutes\n";
+		}
+		else {
+			cout << "No customers!\n";
+		}
+
+		if ((double)line_wait / served > 1) {
+			cout << "average wait time is larger than 1 minutes\n";
+			cout << "the largest perhour parameter is: " << perhour << endl;
+			break;
+		}
+	}
+
+	cout << "Done!\n";
+
+	return 0;
+}
+```
+
+本习题在之前讨论的基础上稍作修改，主要还是对前面讨论的ATM排队问题理解透彻即可。
 
 
 
