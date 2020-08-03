@@ -7,7 +7,7 @@ Slug: cpp-language-learning-notes
 
 本教程参考 [这个github样例项目](https://github.com/a358003542/cpp_practice) 阅读更方便。
 
-本文假定读者已经学会C语言了，如果没有请先学习C语言，这不冲突的。读者可以参看笔者写的 [C语言学习笔记一文]({filename}../c_language/C语言学习笔记.md) 。
+本文假定读者已经学会C语言了，如果没有请先学习C语言，这不冲突的。读者可以参看笔者写的 [C语言学习笔记一文]({filename}./C语言学习笔记.md) 。
 
 
 
@@ -5080,6 +5080,16 @@ int main() {
 
 
 ### 类继承
+
+下面通过下面这个例子来学习类的继承相关知识点吧。
+
+test_inherit.cpp
+
+```c++
+
+```
+
+
 
 
 

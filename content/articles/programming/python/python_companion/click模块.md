@@ -94,44 +94,19 @@ def touch(f):
 import click
 
 from click.testing import CliRunner
+from your_module.__main__ import main
 
-def test_inout():
-    @click.command()
-    @click.argument('input', type=click.File('rb'))
-    @click.argument('output', type=click.File('wb'))
-    def inout(input, output):
-        while True:
-            chunk = input.read(1024)
-            if not chunk:
-                break
-            output.write(chunk)
-
-    runner = CliRunner()
-
-    with runner.isolated_filesystem():
-        string = 'Hello World!'
-        with open('hello.txt', 'w') as f:
-            f.write(string)
-
-        result = runner.invoke(inout, ['hello.txt','hello2.txt'])
-
-        assert result.exit_code == 0
-        with open('hello2.txt','r') as f:
-            s = f.read()
-            assert s == string
-
-
-if __name__ == '__main__':
-    test_inout()
+def test_your_command():
+    result = runner.invoke(main, ['--version'])
+    assert result.exit_code == 0
+    print(result.output)
 ```
 
 具体是新建一个 `CliRunner` 对象，然后调用其 `invoke` 方法来具体执行某个命令，然后的 `Result` 对象有 `exit_code` 和 `output` 等属性。其中 `result.output` 一般为屏幕回显的文字。
 
-然后我们看到上面的runner调用了 `isolated_filesystem()` 方法，通过暂停程序我们会发现这样在 `/tmp` 文件夹里面会出现一个临时文件夹，然后一切文件操作都在里面进行，完了就会被删除。
-
 ## 标准输入和标准输出
 
-值得一提的是标准输入和标准输出可以用 '-' 简单表示。比如上面的例子:
+值得一提的是标准输入和标准输出可以用 `-` 简单表示。比如上面的例子:
 ```
     bash>>> python3 test4.py - output.txt
     test test
@@ -305,9 +280,16 @@ click.pause()
 
 
 
-## 命令行选项控制其他动作
+## callback
 
-如下所示，通过 `is_eager=True` 来让该选项优先级高于其他选项。然后 `expose_value=False` 意思是如果没有输入这个选项，则不影响原命令的执行流。然后 `callback` 就是具体要跳转到的那个函数上。
+callback是很有用的一个特性，命令行有一些主流程之外的动作，比如打印软件版本号或者其他一些和软件处理主流程无关小动作，把这些小动作执行完就需要退出程序。这些小动作推荐如下处理：
+
+1. 加入 `is_eager=True` 让该参数在其他参数的处理之前
+2. 加入 `callback` 参数处理完了就会调用这个函数。调用函数写法如下演示。
+
+ `expose_value=False` 的意思是这个参数不会传递给下面的这个hello函数了，否则的话按照click的默认写法你是需要下面跟上`version` 这个参数的。
+
+callback函数里面ctx是当前上下文，param是该参数选项的一些值，然后value是具体这个参数的值，比如下面这个value是 `True` 。
 
 ```python
 def print_version(ctx, param, value):
@@ -322,8 +304,14 @@ def print_version(ctx, param, value):
 def hello():
     click.echo('Hello World!')
 ```
+这里上下文 `resilient_parsing` 的意思是click将尽可能地确保不造成失败并且默认值将忽略，这里 `return` 回调函数将把流程继续传递click处理，而`ctx.exit()` 就是退出程序了。简单来说，加上这句话，如果你指定了这个选项，则执行回调函数，如果你没有这个选项，则完全不会干扰原函数流程。
 
-这里最关键性的问题是理解 `ctx` `param` 和 `value` 这几个参数。
+```
+    if not value or ctx.resilient_parsing:
+        return
+```
+
+
 
 ## 带颜色的终端回显
 
