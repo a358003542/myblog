@@ -1,4 +1,4 @@
-Category: archived
+Category: editor
 Slug: emacs-orgmode-learning-notes
 Tags: emacs
 Date: 2018

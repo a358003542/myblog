@@ -1,7 +1,8 @@
 Title: python2和python3的兼容性
-Slog: python2-python3
+Slug: python2-python3
 Category: python_language
 Tags: python
+Date: 2019
 
 [TOC]
 

@@ -71,8 +71,7 @@ AUTHOR_SAVE_AS = ''
 # disable parse html
 READERS = {'html': None}
 
-MARKUP = ('md', 'ipynb')
-IGNORE_FILES = ['.ipynb_checkpoints']
+
 
 ######################### MARKDOWN CONFIG #################
 MARKDOWN = {
@@ -104,8 +103,13 @@ TEMPLATE_PAGES = {'404.html': '404.html'}
 ################################### plugin #################
 PLUGIN_PATHS = ['myplugins']
 
-PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search',
-           'render_math','sitemap']
+# ipynb
+MARKUP = ("md", "ipynb")
+from pelican_jupyter import markup as nb_markup
+PLUGINS = [nb_markup]
+IGNORE_FILES = [".ipynb_checkpoints"]
+
+PLUGINS = ['pelican_javascript', 'extract_toc', 'tipue_search', 'render_math','sitemap']
 
 MATH_JAX = {'tex_extensions': ['mhchem.js']}
 

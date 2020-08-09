@@ -1,5 +1,5 @@
 Slug: odoo-learning-notes
-Category: archived
+Category: software
 Date: 2018
 
 [TOC]

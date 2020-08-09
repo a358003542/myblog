@@ -1,4 +1,4 @@
-Category: archived
+Category: linux
 Slug: makefile
 Date: 2019
 
