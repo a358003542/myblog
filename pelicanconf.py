@@ -16,7 +16,7 @@ USE_FOLDER_AS_CATEGORY = False
 # show the pages
 DISPLAY_PAGES_ON_MENU = True
 
-SITENAME = "wanze的博文"
+SITENAME = "万泽的博客"
 SITEURL = ''
 
 PATH = 'content'

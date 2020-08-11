@@ -79,7 +79,7 @@ def process_settings(pelicanobj):
 
     # Source for MathJax
     # mathjax_settings['source'] = "'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML'"
-    mathjax_settings['source'] = "'/theme/js/mathjax/MathJax.js'"
+    mathjax_settings['source'] = "'/MathJax-2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML'"
 
     # Get the user specified settings
     try:

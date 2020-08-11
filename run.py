@@ -29,13 +29,25 @@ def main():
     pass
 
 
+def copy_mathjax(dest):
+    mathjax_foldername = 'MathJax-2.7.7'
+    dest_folder = os.path.join(dest, mathjax_foldername)
+    if os.path.exists(dest_folder):
+        click.echo(f'{mathjax_foldername} already exists.')
+    else:
+        shutil.copytree(mathjax_foldername, dest_folder)
+        click.echo(f'{mathjax_foldername} copyed.')
+
+
 @main.command()
 def devserve():
     """
     devbuild your pelican project
     """
     click.echo("start devbuild your pelican project...")
-
+    
+    copy_mathjax(OUTPUTDIR)
+    
     def devbuild():
         cmd = "pelican -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}".format(
             INPUTDIR=INPUTDIR,
@@ -78,7 +90,8 @@ def build():
     build your pelican project
     """
     click.echo("start build your pelican project...")
-
+    copy_mathjax(PUBLISHDIR)
+    
     cmd = "pelican {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
         INPUTDIR=INPUTDIR,
         PUBLISHCONF=PUBLISHCONF,
@@ -89,6 +102,8 @@ def build():
     ret = subprocess.call(cmd, shell=True)
 
     click.echo('running result is:{0}'.format(ret))
+
+    
 
 
 @main.command()
