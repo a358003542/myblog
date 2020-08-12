@@ -1,4 +1,6 @@
 Category: SQL 
+Slug: postgresql-database
+Date: 2020
 
 [TOC]
 

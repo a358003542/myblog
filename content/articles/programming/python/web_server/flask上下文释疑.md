@@ -75,7 +75,7 @@ _app_ctx_stack = LocalStack()
 
 后面代码使用的 请求环境栈和应用环境栈都是这里定义的，这个LocalStack 参考了 [这片文章](https://cizixs.com/2017/01/13/flask-insight-context/) 的讨论，借鉴了python threading 模块的 local，其是一个线程本地变量，简单来说就是其是一个字典按照线程不同id的索引，不同的id各自取各自的值，互不干扰。
 
-所以flask在多线程下，请求环境栈和应用环境栈你可以将其看做各自不同的堆栈，互补干扰。
+所以flask在多线程下，请求环境栈和应用环境栈你可以将其看做各自不同的堆栈，互不干扰。
 
 ### 问题三 flask如何应对多协程
 

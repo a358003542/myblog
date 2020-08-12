@@ -218,34 +218,34 @@ flash消息方便让用户知道一些必要的信息。flash函数可以实现�
 
 3. 使用蓝图（Blueprint）
 
-   -  蓝图模块写法如下：
+蓝图模块写法如下：
 
-   ```python
-   from flask import Blueprint
-   
-   main = Blueprint('main', __name__)
-   
-   from . import views, errors
-   ```
+```python
+from flask import Blueprint
 
-   因为views errors模块那边还需要使用蓝图对象main，所以应该放在它的的后面引入进来。
+main = Blueprint('main', __name__)
 
-   - 蓝图在应用中注册写法如下：
+from . import views, errors
+```
 
-   ```python
-       from .main import main as main_blueprint
-       app.register_blueprint(main_blueprint)
-   ```
+因为views errors模块那边还需要使用蓝图对象main，所以应该放在它的的后面引入进来。
 
-   - 蓝图的错误页面需要使用 `app_errorhandler` 要注册为全局的错误处理，如果是 `errorhandler` 则只负责本蓝图内的错误。
+蓝图在应用中注册写法如下：
 
-   ```python
-   @main.app_errorhandler(404)
-   def page_not_found(e):
-       return render_template('404.html'), 404
-   ```
+```python
+from .main import main as main_blueprint
+app.register_blueprint(main_blueprint)
+```
 
-   - 蓝图内注册的视图函数，用 `url_for` 来获取的是 `main.index` 这种形式，即蓝图名加上视图函数名。
+蓝图的错误页面需要使用 `app_errorhandler` 要注册为全局的错误处理，如果是 `errorhandler` 则只负责本蓝图内的错误。
+
+```python
+@main.app_errorhandler(404)
+def page_not_found(e):
+return render_template('404.html'), 404
+```
+
+蓝图内注册的视图函数，用 `url_for` 来获取的是 `main.index` 这种形式，即蓝图名加上视图函数名。
 
 
 

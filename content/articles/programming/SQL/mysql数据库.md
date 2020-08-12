@@ -1,4 +1,6 @@
 Category: SQL 
+Date: 2019
+Slug: mysql-database
 
 [TOC]
 

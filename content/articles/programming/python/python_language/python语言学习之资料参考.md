@@ -20,15 +20,9 @@ Date: 2019
 
 - A Guide to Python's Magic Methods，作者：Rafe Kettler ,版本：2014-01-04，[Github 地址](https://github.com/RafeKettler/magicmethods) .
 
-- Foundations of Python Network Programming ，python网络编程基础，[美] John Goerzen 著，莫迟等译 。
-
-这是 [中文在线阅读网页](http://likebeta.gitbooks.io/twisted-intro-cn/content/zh/index.html) ，这是 [english version](http://krondo.com/?page_id=1327) 。
+- Foundations of Python Network Programming ，python网络编程基础，[美] John Goerzen 著，莫迟等译 。这是 [中文在线阅读网页](http://likebeta.gitbooks.io/twisted-intro-cn/content/zh/index.html) ，这是 [english version](http://krondo.com/?page_id=1327) 。
 
 - Unix网络编程卷1: 套接字联网API , Author: W. R. Stevens , Bill Fenner 等著 , version: 第三版 
-
-- [python 3 cookbook](http://python3-cookbook.readthedocs.io/)
-
-- Effective Python 编写高质量Python代码的59个有效方法，[美] Brett Slatkin 著， 爱飞翔译。
 
 - 计算机网络自顶向下方法 , Author: James F. Kurose , Keith W. Ross ,陈鸣译 。这本书作为入门了解有关计算机网络相关知识还是很不错的。
 
