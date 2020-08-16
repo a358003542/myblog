@@ -1,5 +1,6 @@
 Category: python_companion
 Tags: python
+Date: 2020
 
 [TOC]
 
@@ -64,7 +65,7 @@ $\pi$ 值具体到小数点4位是3.1416。上面这些方法后面还可以额�
 
 ## pytest模块
 
-pytest模块是站在unittest基础上的，你之前通过 unittest 写的测试案例，全部都不用更改照样有用，接下来你要写一个新的测试，不需要再新建一个 `unittest.TestCase` 类了（如果你希望多个测试在一个类里面，就新建一个类即可，这个类不需要继承自任何类了。），直接如下写测试函数就是了，然后也不确认就是最简单的 `assert` 确认返回为 True 即可。
+pytest模块是站在unittest基础上的，你之前通过 unittest 写的测试案例，全部都不用更改照样有用，接下来你要写一个新的测试，不需要再新建一个 `unittest.TestCase` 类了（如果你希望多个测试在一个类里面，就新建一个类即可，这个类不需要继承自任何类了。），直接如下写测试函数就是了，也不需要很多确认方法，就是最简单的 `assert` 确认返回为 True 即可。
 
 ```python
 def test_prime():
@@ -178,6 +179,8 @@ python setup.py test
 
 
 
+
+
 ## 自动发现测试文件
 
 pytest是支持自动发现测试文件的，所有的 `test_*.py` 和 `*_test.py` 文件都被认为是测试文件。
@@ -191,8 +194,38 @@ testpaths = tests
 
 这样pytest就只处理这个tests文件夹下的测试文件了。
 
-可能有某些情况你希望你的测试文件和代码文件在一起【请确定你必须这样做，毕竟将测试代码和模块源码放在一起很不美观】，没问题，写上就是了，pytest会自动发现它的。记得将上面的那个 `pytest.ini` 文件的 `testpaths` 配置删除掉算了。
 
+
+## doctest集成
+
+doctest在python源码那边能够立刻起到大概说明这个函数在做什么事情，还是很方便的。这里假设读者已经初步了解了doctest的基本用法了，如果没有请参看官方文档doctest相关部分，接下来的讨论是在这个基础之上，传统写法是不需要做什么改变的。
+
+使用pytest来集成doctest有以下好处，一是python模块文件后面不需要跟上：
+
+```
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+```
+
+二是pytest可以自动搜索目标python文件来实现批量doctest，最后就是pytest的原有传统unittest过程不受影响。
+
+你在自动发现测试文件的配置上需要进行做一些调整了：
+
+```
+[pytest]
+testpaths = tests my_python_module
+```
+
+也就是将你的原tests文件夹和你的python模块文件夹都加入搜索目录。
+
+然后你还需要加上这个选项：
+
+```
+addopts = --doctest-modules --doctest-continue-on-failure
+```
+
+其中 `--doctest-modules` 是开启pytest的doctest，然后 `--doctest-continue-on-failure` 是另外一个选项了，个人推荐加上。
 
 
 
@@ -218,3 +251,4 @@ testpaths = tests
 如何理解上面的代码？当这段测试代码运行的时候，它的变量名字空间被patch给污染了，比如上面的 `users.views.WXAPPAPI.jscode2session` 这个函数，被污染成为一个 Mock 对象了，这个Mock对象传递给了这个函数的第二个参数（额外的的这个参数哪怕你后面不用也必须写上） `mock_jscode2session` 。
 
 然后代码在运行的时候遇到`jscode2session` 总会返回上面给出的值，这样你就不用考虑数据库啊，网络情况之类的问题了。上面还有一些小技巧和django框架相关，比如 `self.client.get(reverse('mini-login'), data)` 是直接利用自己django，然后自己请求自己的url获得什么响应，这个和django相关，在这里就不多说了。
+

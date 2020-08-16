@@ -1,10 +1,13 @@
-Title: python2和python3的兼容性
 Slug: python2-python3
 Category: python_language
 Tags: python
 Date: 2019
 
 [TOC]
+
+## WARNING
+
+**警告，本文已经归档，年久失修，可能内容已过于陈旧，放在这里权做读者参考。【2019】**
 
 ## 2to3内置模块
 

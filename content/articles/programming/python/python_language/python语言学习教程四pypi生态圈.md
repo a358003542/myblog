@@ -5,15 +5,13 @@ Date: 2019
 
 [TOC]
 
-
-
 ## setup.py配置
 
-在上面模块那一章里对python模块包的知识还有python相关生态圈的知识几乎没有谈及，这里一并在本章中说明了。本章知识是我们理解前人编写的各个有用的模块包的基础，也是编写自己的模块包的基础。
+本章知识是我们理解前人编写的各个有用的模块包的基础，也是编写自己的模块包的基础。
 
 请结合Github上的 [pyskeleton项目](https://github.com/a358003542/pyskeleton) 来阅读本章。
 
-虽然官方内置distutils模块也能实现类似的功能，不过现在人们更常用的是第三方模块setuptools，其相当于distutils模块的加强版，初学者推荐就使用setuptools模块。更多内容请参看setuptools模块的 [官方文档](https://pythonhosted.org/setuptools/index.html) 。
+虽然官方内置distutils模块也能实现类似的功能，不过现在人们更常用的是第三方模块setuptools，其相当于distutils模块的加强版，初学者推荐就使用setuptools模块。更多内容请参看setuptools模块的 [官方文档](https://setuptools.readthedocs.io/en/latest/) 。
 
 安装就是先安装pip3：
 
@@ -121,13 +119,8 @@ entry_points = {
 
 其中zwc是你的shell调用的名字，然后zwc是你的模块，另外一个zwc是你的主模块的子模块，然后main是其中的main函数。这就是你的shell调用程序的接口了。类似的还有gui_script可以控制你调用GUI图形的命令入口。
 
-
 install_requires
 : 接受字符串的列表值，将你依赖的可以通过pip安装的模块名放入进去，然后你的软件安装会自动检测并安装这些依赖模块。
-
-setup_requires
-
-: 和 `install_requires` 类似，所不同的是这个更加侧重于本 `setup.py` 所需要的依赖。然后注意 `setup_requires` 只是把依赖模块下载下来，还没有具体安装，因为 `setup.py` 具体还在执行。如果你希望某个依赖模块之于 `setup.py` 就可用，则需要将该依赖模块加入到 `install_requires` 和 `setup_requires` 中。
 
 package_data
 
@@ -138,11 +131,12 @@ include_package_data
 : 这个一般设置为True
 
 
+
 其他不常用的属性值列在下面：
 
 - scripts 不推荐使用，推荐通过entry_point来生成脚本。
+- setup_requires 不推荐使用，基于PEP-518 。
 - py_modules 不推荐使用，推荐使用packages来管理模块。
-
 - data_files 前面的package_data是只能在你的模块文件夹里面的其他数据文件等，然后可能还有一些数据文件你需要包含的，用data_files来控制，具体后面跟着的参数格式如下面例子所示：
 
 ```text
@@ -165,8 +159,6 @@ data_files已经不推荐使用了，推荐用package_data来管理，可以方�
 其对应于 `pip install -e .` 这个命令，或者直接安装本地文件夹不是develop模式 `python install .` 。
 
 pipenv的 `pipenv install -e .` 也是这个develop模式，你修改的代码会实时生效。
-
-
 
 ## pkg_resources模块来管理读取资源文件
 
