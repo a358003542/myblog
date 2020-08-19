@@ -1,3 +1,8 @@
+Category: python_companion
+Slug: loguru-module
+Tags:  python, 
+Date: 2019
+
 [TOC]
 
 ## 前言

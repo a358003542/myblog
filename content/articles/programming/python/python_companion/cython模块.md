@@ -1,3 +1,9 @@
+Category: python_companion
+Slug: cython-module
+Tags:  python, 
+
+
+
 [TOC]
 
 ## 找到性能瓶颈所在

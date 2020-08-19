@@ -19,8 +19,7 @@ python中的类就好像树叶，所有的类就构成了一棵树，而python�
 
 python首先搜索self有没有这个属性或者方法，如果没有，就向上搜索。比如说实例l1没有，就向上搜索C1，C1没有就向上搜索C2或C3等。
 
-实例继承了创造他的类的属性，创造他的类上面可能还有更上层的超类，类似的概念还有子类，表示这个
-类在树形层次中比较低。
+实例继承了创造它的类的属性，创造它的类上面可能还有更上层的超类，类似的概念还有子类，表示这个类在树形层次中比较低。
 
 well，简单来说类的结构和搜索机制就是这样的，很好地模拟了真实世界知识的树形层次结构。
 
@@ -34,9 +33,9 @@ well，简单来说类的结构和搜索机制就是这样的，很好地模拟�
 
 其中class语句是创造类，而C1继承自C2和C3，这是多重继承，从左到右是内部的搜索顺序（会影响重载）。l1和l2是根据类C1创造的两个实例。
 
-对于初次接触类这个概念的读者并不指望他们马上就弄懂类这个概念，这个概念倒并一定要涉及很多哲学的纯思考的东西，也可以看作一种编程经验或技术的总结。多接触也许对类的学习更重要，而不是纯哲学抽象概念的讨论，毕竟类这个东西创造出来就是为了更好地描述现实世界的。
+对于初次接触类这个概念的读者并不指望他们马上就弄懂类这个概念，这个概念倒并一定要涉及很多哲学的纯思考的东西，也可以看作一种编程经验或技术的总结。多接触对类的学习更重要，而不是纯哲学抽象概念的讨论，毕竟类这个东西创造出来就是为了更好地描述现实世界的。
 
-最后别人编写的很多模块就是一堆类，你就是要根据这些类来根据自己的情况情况编写自己的子类，为了更好地利用前人的成果，或者你的成果更好地让别人快速使用和上手，那么你需要好好掌握类这个工具。
+最后别人编写的很多模块就是一堆类，你就是要根据这些类来根据自己的情况来编写自己的子类，从而实现对原有类对象的改造。为了更好地利用前人的成果，或者你的成果更好地让别人快速使用和上手，那么你需要好好掌握类这个工具。
 
 ## 类的最基础知识
 
@@ -91,8 +90,7 @@ well，简单来说类的结构和搜索机制就是这样的，很好地模拟�
     >>> myclass001.name
     'myclassmyclass'
 
-这里需要说明的是在类的定义结构里面，self代表着类自身（更多self意义细节请参看[12.4.2](#sec:self含义){reference-type="ref"
-reference="sec:self含义"}），self.name代表着对自身name属性的引用。然后实例在调用自身的这个方法时用的是myclass001.double()这样的结构，这里double函数实际上接受的第一个参数就是自身，也就是myclass001，而不是无参数函数。所以类里面的方法有一个参数self。
+这里需要说明的是在类的定义结构里面，self代表着类自身（更多self意义细节请参看下面的self意味着什么一小节），self.name代表着对自身name属性的引用。然后实例在调用自身的这个方法时用的是 `myclass001.double()` 这样的结构，这里double函数实际上接受的第一个参数就是自身，也就是myclass001，而不是无参数函数。所以类里面的方法有一个参数self。
 
 ## 类的继承
 
@@ -163,8 +161,7 @@ reference="sec:self含义"}），self.name代表着对自身name属性的引用�
 
 ## self意味着什么 
 
-self在类中是一个很重要的概念，当类的结构层次较简单时还容易看出来，
-当类的层次结构很复杂之后，你可能会弄糊涂。。比如你现在通过调用某个实例的某个方法，这个方法可能是一个远在天边的某个类给出的定义，就算如此，那个定义里面的self还是指调用这个方法的那个实例，这一点要牢记于心。
+self在类中是一个很重要的概念，当类的结构层次较简单时还容易看出来，当类的层次结构很复杂之后，你可能会弄糊涂。比如你现在通过调用某个实例的某个方法，这个方法可能是一个远在天边的某个类给出的定义，就算如此，那个定义里面的self还是指调用这个方法的那个实例，这一点要牢记于心。
 
 比如下面这个例子：
 
@@ -269,13 +266,13 @@ self在类中是一个很重要的概念，当类的结构层次较简单时还�
 
 现在就这个例子相对于第二版所作的改动，也就是核心知识点说明之。其中函数参量列表中这样表述`color='blue'`表示blue是color变量的备选值，也就是color成了可选参量了。
 
-## 构造函数的继承和重载
+### 构造函数的继承和重载
 
 上面例子很核心的一个概念就是`__init__`构造函数的继承和重载。比如我们看到garen001实例的创建，其中就引用了Hero的构造函数，特别强调的是，比如这里 `Hero.__init__(self,1,455,56,color)` 就是调用了Hero类的构造函数，这个时候需要把self写上，因为self就是最终创建的实例garen001，而不是Hero，而且调用Hero类的构造函数就必须按照它的参量列表形式来。这个概念需要弄清楚！
 
 理解了这一点，在类的继承关系中的构造函数的继承和重载就好看了。比如这里Hero类的构造函数又是继承自Unit类的构造函数，Hero类额外有一个参量level接下来也要开辟存储空间配置好。
 
-## \_\_str\_\_函数的继承和重载
+### \_\_str\_\_函数的继承和重载
 
 第二个修改是这里重定义了一些类的`__str__`函数，通过重新定义它可以改变默认print某个类对象是的输出。默认只是一段什么什么类并无具体内容信息。具体就是return一段你想要的字符串样式即可。
 
@@ -301,9 +298,9 @@ self在类中是一个很重要的概念，当类的结构层次较简单时还�
 
 5.  特定属性访问时行为定制
 
-6.  类实例创建时行为定制------类装饰器
+6.  类实例创建时行为定制——类装饰器
 
-7.  类对象创建时行为定制------metaclass
+7.  类对象创建时行为定制——metaclass
 
 ## \_\_dict\_\_
 
@@ -397,46 +394,45 @@ i accpeted: a
 
 一般减法
 
-:   X - other , `__sub__(self,other)`
-​    。同上面情况一样类似的还有rsub和isub。
+:   X - other , `__sub__(self,other)`。同上面情况一样类似的还有rsub和isub。
 
-*
+`*`
 
 :   乘法，`__mul__(self,other)`，下面的类似的都有右侧运算和增强运算，不再赘述了。
 
-//
+`//`
 
 :   整除，`__floordiv__`，下面类似的参数都是self和other，不再赘述了。
 
-/
+`/`
 
 :   除法 ，`__div__`
 
-%
+`%`
 
 :   取余，`__mod__`
 
-\*\*
+`**`
 
 :   开方，`__pow__`
 
-\<\<
+`<<`
 
 :   左移运算，`__lshift__`
 
-\>\>
+`>>`
 
 :   右移运算，`__rshift__`
 
-&
+`&`
 
 :   位与，`__and__`
 
-\|
+`|`
 
 :   位或，`__or__`
 
-^
+`^`
 
 :   位异或，`__xor__`
 
@@ -482,13 +478,13 @@ def __eq__(self,other):
 
 -   X != Y ，行为由`__ne__(self,other)`定义。
 
--   X \>= Y ，行为由`__ge__(self,other)`定义。
+-   X >= Y ，行为由`__ge__(self,other)`定义。
 
--   X \<= Y ，行为由`__le__(self,other)`定义。
+-   X <= Y ，行为由`__le__(self,other)`定义。
 
--   X \> Y ，行为由`__gt__(self,other)`定义。
+-   X > Y ，行为由`__gt__(self,other)`定义。
 
--   X \< Y ，行为由`__lt__(self,other)`定义。
+-   X < Y ，行为由`__lt__(self,other)`定义。
 
 ## in语句
 
@@ -902,7 +898,7 @@ d
 
 迭代语句中for语句运算效率最低，然后是map函数（不尽然），然后是列表解析。所以我们在处理问题的时候最pythonic的风格，运算效率最高的就是列表解析了，如果一个问题能够用列表解析解决那么就用列表解析解决，因为python的设计者的很多优化工作都是针对迭代操作进行的，然后python3进一步深化了迭代思想，最后python中的迭代是用c语言来实现的。
 
-可是让我们反思一下为什么列表解析在问题处理的时候如此通用？比如说range函数或者文件对象或者列表字符串等等，他们都可以称之为可迭代对象。可迭代对象有内置方法`__next__`这个我们之前有所谈及，可迭代对象最大的特色就是有一系列的元素，然后这一系列的元素可以通过上面的内置方法逐个调出来，而列表解析就是对这些调出来的元素进行了某个表达式操作，然后将其收集起来。这是什么？我们看下面这张图片：
+可是让我们反思一下为什么列表解析在问题处理的时候如此通用？比如说range函数或者文件对象或者列表字符串等等，他们都可以称之为可迭代对象。可迭代对象最大的特色就是有一系列的元素，然后这一系列的元素可以逐个调出来，而列表解析就是对这些调出来的元素进行了某个表达式操作，然后将其收集起来。这是什么？我们看下面这张图片：
 
 ![img]({static}/images/python/lie-biao-jie-xi.png)
 
@@ -979,7 +975,7 @@ filter函数的基本逻辑是只有 `return True`（用lambda表达式就是这
 {'c': 3, 'b': 2, 'a': 1}
 ```
 
-## 字典到列表
+## 列表到字典
 
 这个例子似乎使用价值不大，只是说明zip函数接受任意数目参数的情况。y.items()解包之后是4个参数传递给zip函数，而zip函数的封装逻辑就是如果有人问我，我就把你们这些迭代对象每个取出一个元素，然后用元组包装之后返回。
 
@@ -1374,11 +1370,11 @@ D(B(E F) A(F G)) → D B E A F G
 D(B(F E) A(F G)) → D B A F E G
 ```
 
-就是这样的，总之这是很冷门的领域了。。简单的理解就是深度搜索，类似flatten函数处理过，然后如果遇到某个子元在下一个平行级别的子元中也含有，那么本子元会被略过，做个记号，分叉跳过去跑到A那里，执行完那个子元之后，又会重新调到之前的操作点上。python怎么弄这么古怪的逻辑。。
+就是这样的，总之这是很冷门的领域了。。简单的理解就是深度搜索，类似flatten函数处理过，然后如果遇到某个子元在下一个平行级别的子元中也含有，那么本子元会被略过，做个记号，分叉跳过去跑到A那里，执行完那个子元之后，又会重新调到之前的操作点上。
 
 ## super如何面对菱形难题
 
-第一种情况是如果是单继承的类的系统，super()这种形式就直接表示父类的意思。然后用super().什么什么的来引用父类的某个变量或方法。
+第一种情况是如果是单继承的类的系统，`super()`这种形式就直接表示父类的意思。然后用 `super().` 什么什么的来引用父类的某个变量或方法。
 
 第二种情况是多重继承的，搜索顺序和多重继承的搜索顺序相同，也就是从左到右。请注意调试下面的例子，如果调用c.d就会返回错误，说明调用的是类A的构造函数。
 
@@ -1418,8 +1414,7 @@ fun3
 3 2
 ```
 
-其中A类定义的fun函数在写的函数上通常有个self参数，而*super()*这种调用形式在意义上表示其的父类，同时默认第一个参数就是self。使用super()在类的编写中引用本类的父类的属性和方法是很便捷的，
-。比如上面的例子中fun3能被调用是因为多重继承的机制在这里，所以它会逐个找父类。然后c.d会出错，因为这里初始化是用的A类的构造函数。
+其中A类定义的fun函数在写的函数上通常有个self参数，而`super()`这种调用形式在意义上表示其的父类，同时默认第一个参数就是self。使用super()在类的编写中引用本类的父类的属性和方法是很便捷的。比如上面的例子中fun3能被调用是因为多重继承的机制在这里，所以它会逐个找父类。然后c.d会出错，因为这里初始化是用的A类的构造函数。
 
 
 
@@ -1574,7 +1569,7 @@ type实际调用的是自身的 `__call__` 方法，这个方法将运行type的
     class Test(Super, metaclass=Meta):
         pass
 
-元类理解起来并不难，关键是如何把握在合适的时候合适的使用。
+元类这里暂时还不深究，就一般的python程序员来说理解元类即可，实在不需要使用元类的。
 
 # 进程和线程
 
@@ -1585,24 +1580,25 @@ type实际调用的是自身的 `__call__` 方法，这个方法将运行type的
 
 ## 进程fork
 
-进程fork简单来说就类似于git某个项目的fork，进行了一些基本代码信息和其他配置以及其他相关信息的复制或注册。这就相当于在当前代码环境下，你有两个分别单独运行的程序实例了。
+进程fork进行了一些基本代码信息和其他配置以及其他相关信息的复制或注册。这就相当于在当前代码环境下，你有两个分别单独运行的程序实例了。
 
-下面是一个非常简单的小例子，你可以把os.fork()语句移到print('before
-fork')之前来看看变化。
+下面是一个非常简单的小例子，你可以把 `os.fork()`语句移到 `print('before fork')`之前来看看变化。
 
-    import os, time
-    
-    print('before fork ')
-    os.fork()
-    
-    print('say hello from', os.getpid())
-    
-    time.sleep(1)
-    
-    print('after fork')
+```python
+import os, time
 
-对于这个程序简单的理解就是，本py文件编译成字节码进入内存经过某些成为一个程序实例了（其中还包含其他一些信息），然后程序具体运行的时候会通过os.fork来调用系统的fork函数，然后复制本程序实例（以本程序实例目前已经所处的状态），因为print('before
-fork')已经执行了，所以子进程就不会执行这一行代码了，而是继续os.fork()下面的代码继续执行。此时就相当于有两个程序在运行了，至于后面的打印顺序那是说不准的。
+print('before fork ')
+os.fork()
+
+print('say hello from', os.getpid())
+
+time.sleep(1)
+
+print('after fork')
+```
+
+对于这个程序简单的理解就是，本py文件编译成字节码进入内存经过某些成为一个程序实例了（其中还包含其他一些信息），然后程序具体运行的时候会通过os.fork来调用系统的fork函数，然后复制本程序实例（以本程序实例目前已经所处的状态），因为 `print('before
+fork')`已经执行了，所以子进程就不会执行这一行代码了，而是继续os.fork()下面的代码继续执行。此时就相当于有两个程序在运行了，至于后面的打印顺序那是说不准的。
 
 关于操作系统具体如何fork的我们可以暂时不考虑，这两个程序实例里面的变量和运行环境基本上是一模一样的，除了运行的状态有所不同之外。fork可以做出一种程序多任务处理方案吧，不过os模块的fork方法目前只支持unix环境。
 
@@ -1610,20 +1606,22 @@ fork')已经执行了，所以子进程就不会执行这一行代码了，而�
 
 请看下面的代码:
 
-    import os, time
-    
-    print('before fork ')
-    pid = os.fork()
-    if pid:
-        print(pid)
-        print('say hello from parent', os.getpid())
-    else:
-        print(pid)
-        print('say hello from child', os.getpid())
-    
-    time.sleep(1)
-    
-    print('after fork')
+```python
+import os, time
+
+print('before fork ')
+pid = os.fork()
+if pid:
+    print(pid)
+    print('say hello from parent', os.getpid())
+else:
+    print(pid)
+    print('say hello from child', os.getpid())
+
+time.sleep(1)
+
+print('after fork')
+```
 
 其运行结果大致如下:
 
@@ -1640,7 +1638,7 @@ pid 那一块是父进程的，else那一块是子进程的。
 
 ## 线程入门
 
-线程的内部实施细节其实比进程要更加复杂，一般通俗的说法就是线程是轻量级进程，这里不深入讨论具体线程的细节。
+线程的内部实施细节其实比进程要更加复杂，可以看做是对于进程fork动作的更加轻量化实现解决方案。对于操作系统来说那怕是同一程序而来的不同的进程从程序员的角度来说可以看做完全不同的两个程序都是没有问题的，但是同一进程下的不同线程则不能这么看，首先是操作系统层面各个线程是共享进程的大部分资源，也就是这些线程对于系统资源的使用是彼此竞争关系；其次从程序员的角度来看各个线程之间也可能存在某些公有变量是各个线程之间共享的。
 
 python操作线程的主要模块是**threading**模块，简单的使用就是新建一个线程对象(Thread)，然后调用**start**方法来启动它，具体线程要做些什么由本线程对象的**run**确定，你可以重定义它，如果是默认的就是调用本线程Thread类新建是输入的**target**参数，这个target参数具体指向某个函数。下面是一个简单的例子:
 
@@ -1670,26 +1668,26 @@ python操作线程的主要模块是**threading**模块，简单的使用就是�
     thread: 7
     22972371
 
-*注意:* 控制参数后面那个逗号必须加上。
+**注意: 控制参数后面那个逗号必须加上。**
 
-我不太喜欢这种风格，因为线程对接的那个函数实际上并不能return
-什么值，而且其保存的值也依赖于前面的定义，并不能称之为真正意义上的函数（一个定义很好的函数必须复用特性很强）。所以线程还是如下类的风格编写。下面代码参考了
-[这个网页](http://www.ibm.com/developerworks/aix/library/au-threadingpython/index.html)。
+我不太喜欢这种风格，因为线程对接的那个函数实际上并不能return什么值，而且其保存的值也依赖于前面的定义，并不能称之为真正意义上的函数（一个定义很好的函数必须复用特性很强）。所以线程还是如下类的风格编写。下面代码参考了[这个网页](http://www.ibm.com/developerworks/aix/library/au-threadingpython/index.html)。
 
-    import random, threading
-    
-    threads = []
-    
-    class MyThread(threading.Thread):
-        def __init__(self):
-            threading.Thread.__init__(self)
-            self.result = ''
-        def run(self):
-            number_list = list(range(48,58))
-            coden = random.choice(number_list)
-            self.result = chr(coden)
-        def getvalue(self):
-            return self.result
+```python
+import random, threading
+
+threads = []
+
+class MyThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.result = ''
+    def run(self):
+        number_list = list(range(48,58))
+        coden = random.choice(number_list)
+        self.result = chr(coden)
+    def getvalue(self):
+        return self.result
+```
 
 
     for i in range(8):
@@ -1706,8 +1704,7 @@ python操作线程的主要模块是**threading**模块，简单的使用就是�
     05649040
     >>> 
 
-上面调用线程对象的 **join**
-方法是确保该线程执行完了，其也可能返回异常。上面的做法不太标准，更标准的做法是单独写一行t.join代码:
+上面调用线程对象的 **join**方法是确保该线程执行完了，其也可能返回异常。上面的做法不太标准，更标准的做法是单独写一行 `t.join` 代码:
 
     for t in threads:
         t.join()
@@ -1720,28 +1717,29 @@ python操作线程的主要模块是**threading**模块，简单的使用就是�
 
 下面的函数实现了一个后台警报线程，不会阻塞主程序。
 
-    def beep(a,b):
-        '''make a sound , 
-        ref: http://stackoverflow.com/questions/16573051/
-            python-sound-alarm-when-code-finishes
-        you need install  ``apt-get install sox``
-    
-        :param a: frenquency
-        :param b: duration
-    
-        create a background thread,so this function does not block
-        '''
-        def _beep(a,b):
-            import os
-            os.system('play --no-show-progress --null --channels 1 \
-                synth %s sine %f' % (b,a))
-        from threading import Thread
-        thread = Thread(target=_beep,args=(a,b))
-        thread.daemon = True
-        thread.start()
+```python
+def beep(a,b):
+    '''make a sound , 
+    ref: http://stackoverflow.com/questions/16573051/
+        python-sound-alarm-when-code-finishes
+    you need install  ``apt-get install sox``
 
-如上所示，原beep函数调用系统的play命令制造一个声音，其中b是声音持续的时间，所以其是阻塞的。我们将其作为一个线程调用之后，然后其就没有阻塞主程序了。这里的
-`daemon` 的意思是让这个线程成为一个后台线程，请参看 [这个网页](http://stackoverflow.com/questions/190010/daemon-threads-explanation) ，其说道后台线程可以不用管了，后面会随着主程序自动关闭。
+    :param a: frenquency
+    :param b: duration
+
+    create a background thread,so this function does not block
+    '''
+    def _beep(a,b):
+        import os
+        os.system('play --no-show-progress --null --channels 1 \
+            synth %s sine %f' % (b,a))
+    from threading import Thread
+    thread = Thread(target=_beep,args=(a,b))
+    thread.daemon = True
+    thread.start()
+```
+
+如上所示，原beep函数调用系统的play命令制造一个声音，其中b是声音持续的时间，所以其是阻塞的。我们将其作为一个线程调用之后，然后其就没有阻塞主程序了。这里的`daemon` 的意思是让这个线程成为一个后台线程，请参看 [这个网页](http://stackoverflow.com/questions/190010/daemon-threads-explanation) ，其说道后台线程可以不用管了，后面会随着主程序自动关闭。
 
 ## 多线程: 一个定时器
 
@@ -1793,21 +1791,16 @@ timer.start()
 
 本小节参考了 [这个网页](http://stackoverflow.com/questions/13973188/requests-with-multiple-connections) 和 [这个网页](http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py) 。
 
-下面的 `get_content_tofile`
-函数在目标内容大小大于1M的时候将启动多线程下载方法。其中
-`guess_url_filename`
+下面的 `get_content_tofile`函数在目标内容大小大于1M的时候将启动多线程下载方法。其中`guess_url_filename`
 函数是根据url来猜测可能的目标下载文件名字，还只是一个尝试版本。
 
-注意下面使用requests.get函数的时候加上了
-`stream=True`参数，这样连接目标url的时候只是获得头文件信息而不会进一步下载content内容。这方便我们早期根据headers里面的信息做出一些判断。
+注意下面使用requests.get函数的时候加上了`stream=True`参数，这样连接目标url的时候只是获得头文件信息而不会进一步下载content内容。这方便我们早期根据headers里面的信息做出一些判断。
 
-接下来根据HTTP头文件的 `content-length`
-来判断要下载内容的大小，如果没有这个属性，那么目标url是没有content内容的，本函数将不会对这一情况做出反应，这通常是单网页url，使用requests的get方法获取网页文本内容即可。
+接下来根据HTTP头文件的 `content-length`来判断要下载内容的大小，如果没有这个属性，那么目标url是没有content内容的，本函数将不会对这一情况做出反应，这通常是单网页url，使用requests的get方法获取网页文本内容即可。
 
 然后如果目标长度小于1M，那么就直接打开文件，使用requests模块里response对象的`iter_content`方法来不断迭代完content内容。
 
-如果目标长度大于1M，则采用一种多线程下载方法。首先是`get_content_partly`这个函数，接受url和index，这个index是一个简单的索引，具体多少bytes后面还需要计算。关于多线程操作和具体多少bytes的计算细节这里略过讨论了。唯一值得一提的就是HTTP协议的Range属性，begin-end，对应具体的范围0-1024，还包括1024位，所以实际上有1025个bytes，为了获得和我们python中一致的体验，我们让其end为begin+1024-1。这样就有1024个bytes位，然后定位是(0,
-1024)，即和python中的一样，不包括1024位。
+如果目标长度大于1M，则采用一种多线程下载方法。首先是`get_content_partly`这个函数，接受url和index，这个index是一个简单的索引，具体多少bytes后面还需要计算。关于多线程操作和具体多少bytes的计算细节这里略过讨论了。唯一值得一提的就是HTTP协议的Range属性，begin-end，对应具体的范围0-1024，还包括1024位，所以实际上有1025个bytes，为了获得和我们python中一致的体验，我们让其end为begin+1024-1。这样就有1024个bytes位，然后定位是(0,1024)，即和python中的一样，不包括1024位。
 
 然后还有一个小信息是，HTTP协议返回的头文件中的**content-range**属性，如果你请求Range越界了，那么将不会有这个属性。那么begin没有越界，end越界的请求如何呢？HTTP协议处理得很好，这种跨界情况都只返回最后那点content内容。
 

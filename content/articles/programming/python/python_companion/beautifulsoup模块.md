@@ -1,6 +1,7 @@
 Category: python_companion
 Slug: beautifulsoup-module
 Tags: python,
+Date: 2019
 
 [TOC]
 

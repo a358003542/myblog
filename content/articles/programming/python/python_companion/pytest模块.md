@@ -1,5 +1,6 @@
 Category: python_companion
 Tags: python
+Slug: pytest-module
 Date: 2020
 
 [TOC]

@@ -1,7 +1,6 @@
 Category: SQL
 Slug: sql-basic
 Tags: basic
-Date: 2019
 
 
 [TOC]

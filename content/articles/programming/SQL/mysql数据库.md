@@ -1,5 +1,4 @@
 Category: SQL 
-Date: 2019
 Slug: mysql-database
 
 [TOC]
@@ -541,8 +540,7 @@ max_allowed_packet = 16M
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
-
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara">参考了[这个网页](http://www.w3schools.com/sql/sql_insert_into_select.asp)。</div></div>
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara">参考了<a href="http://www.w3schools.com/sql/sql_insert_into_select.asp">这个网页</a>。</div></div>
 
 
 </div>

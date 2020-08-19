@@ -205,18 +205,19 @@ IPPROTO\_SCTP
 
 常规的所谓同步(synchronous)编程就是大家平时编程一般使用的模型，顺序结构，阻塞式，多个函数逐个执行，一个执行完才能执行下一个，如下图所示:
 
-tong-bu-bian-cheng-mo-xing
+![img]({static}/images/python/tong-bu-bian-cheng-mo-xing.png)
+
 
 此外还有一种线程并发模型:
 
-xian-cheng-bing-fa-mo-xing
+![img]({static}/images/python/xian-cheng-bing-fa-mo-xing.png)
 
 python有所谓的GIL概念，很多人对其有指责，而实际上那些支持多线程并发的语言，怕因为这个便利而带来的是更多的困扰吧。想一想我们人脑思考问题同一时间也只能做一件事，也许python的GIL限制并不是一种限制。实际上如果要用多线程并发，人们需要建立好模型，比如最终多个分支线路互不干扰，然后结果平行放入一个列表中等等约束，然后才能放心的使用多线程并发。而在这个约束模型下，python的
 **multiprocess** 模块似乎也能很好地胜任这种类型的工作。
 
 继续讨论异步编程模型:
+![img]({static}/images/python/yi-bu-bian-cheng-mo-xing.png)
 
-yi-bu-bian-cheng-mo-xing
 
 *异步编程*还有一个名字叫做*非阻塞编程*，我们看到上面主程序建立事件循环之后，主事件循环过程并没有阻塞其他的程序过程，而是允许其插入其中来执行。实际上这有点类似于我们看到的GUI程序的主设计理念------事件驱动循环机制，所以异步编程还有一个名字叫做*事件驱动编程*。
 

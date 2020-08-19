@@ -172,7 +172,7 @@ sys.version\_info\[0\]
 subprocess模块
 --------------
 
-我想大家都注意到了现在的计算机都是多任务的，这种多任务的实现机制就是所谓的多个进程同时运行，因为计算机只有一个CPU（现在多核的越来越普及了。）所有计算机一次只能处理一个进程，而这种多进程的实现有点类似你人脑（当然不排除某些极个别现象），你不能一边看电影一边写作业，但是可以写一会作业然后再看一会电影（当然不推荐这么做、），计算机的多进程实现机制也和这个类似，就是一会干这个进程，一会儿做那个进程。
+我想大家都注意到了现在的计算机都是多任务的，这种多任务的实现机制就是所谓的多个进程同时运行，因为计算机只有一个CPU（现在多核的越来越普及了。）所有计算机一次只能处理一个进程，而这种多进程的实现有点类似你人脑（当然不排除某些极个别现象），你不能一边看电影一边写作业，但是可以写一会作业然后再看一会电影（当然不推荐这么做），计算机的多进程实现机制也和这个类似，就是一会干这个进程，一会儿做那个进程。
 
 计算机的一个进程里面还可以分为很多个线程，这个较为复杂，就不谈了。比如你编写的一个脚本程序，系统就会给它分配一个进程号之类的，然后cpu有时就会转过头来执行它一下（计算机各个进程之间的切换很快的，所以才会给我们一种多任务的错觉。）而你的脚本程序里面还可以再开出其他的子进程出来，
 python的subprocess模块主要负责这方面的工作。
@@ -354,34 +354,36 @@ filenames），其中dirpath和filenames可以合并出本目录下所有文件�
 根据这个os.walk函数我写了一个`gen_file`
 函数，其是一个生成器函数，会遍历目录树，并返回本目录下的文件信息。具体代码如下所示:
 
-    def gen_file(startpath='.',filetype=""):
-        '''利用os.walk 遍历某个目录，收集其内的文件，返回
-        (文件路径列表, 本路径下的文件列表)
-        比如:
-        (['shortly'], ['shortly.py'])
-    (['shortly', 'templates'], ['shortly.py'])
-    (['shortly', 'static'], ['shortly.py'])
-    
-        第一个可选参数 startpath  默认值 '.'
-        第二个参数  filetype  正则表达式模板 默认值是"" 其作用是只选择某些文件
-        如果是空值，则所有的文件都将被选中。比如 "html$|pdf$" 将只选中 html和pdf文件。
-        '''
-        for root, dirs, files in os.walk(startpath):
-            filelist = []
-            for f in files:
-                fileName,fileExt = os.path.splitext(f)
-                if filetype:
-                    if re.search(filetype,fileExt):
-                        filelist.append(f)
-                else:
-                    filelist = files
-            if filelist:#空文件夹不加入
-                dirlist = root.split(os.path.sep)
-                dirlist = dirlist[1:]
-                if dirlist:
-                    yield (dirlist, filelist)
-                else:
-                    yield (['.'], filelist)
+```python
+def gen_file(startpath='.',filetype=""):
+    '''利用os.walk 遍历某个目录，收集其内的文件，返回
+    (文件路径列表, 本路径下的文件列表)
+    比如:
+    (['shortly'], ['shortly.py'])
+(['shortly', 'templates'], ['shortly.py'])
+(['shortly', 'static'], ['shortly.py'])
+
+    第一个可选参数 startpath  默认值 '.'
+    第二个参数  filetype  正则表达式模板 默认值是"" 其作用是只选择某些文件
+    如果是空值，则所有的文件都将被选中。比如 "html$|pdf$" 将只选中 html和pdf文件。
+    '''
+    for root, dirs, files in os.walk(startpath):
+        filelist = []
+        for f in files:
+            fileName,fileExt = os.path.splitext(f)
+            if filetype:
+                if re.search(filetype,fileExt):
+                    filelist.append(f)
+            else:
+                filelist = files
+        if filelist:#空文件夹不加入
+            dirlist = root.split(os.path.sep)
+            dirlist = dirlist[1:]
+            if dirlist:
+                yield (dirlist, filelist)
+            else:
+                yield (['.'], filelist)
+```
 
 这个函数可以帮助你管理本目录下（可以通过正则表达式过滤）你感兴趣的文件，都刷一边。然后继续必要的操作，比如查找等等之类的。
 
@@ -455,13 +457,9 @@ os.getpid函数，返回当前运行的进程的pid。
 
     os.kill(pid, signal.SIGCONT)
 
-是继续某个进程。
-然后**killpg**函数能够对某个进程包括其子进程发送某个信号，参考了[这个网页](http://kernelcheck.blogspot.com/2009/07/pausestop-process-in-python.html)。
+是继续某个进程。然后**killpg**函数能够对某个进程包括其子进程发送某个信号，参考了[这个网页](http://kernelcheck.blogspot.com/2009/07/pausestop-process-in-python.html)。
 
-除此之外还有 **SIGINT** （正常终止进程信号）和 **SIGKILL**
-（强制终止进程信号）
-等等，更多信号请参看关于unix信号那块，比如[这个wiki页面](http://en.wikipedia.org/wiki/Unix_signal)
-。
+除此之外还有 **SIGINT** （正常终止进程信号）和 **SIGKILL**（强制终止进程信号）等等，更多信号请参看关于unix信号那块，比如[这个wiki页面](http://en.wikipedia.org/wiki/Unix_signal)。
 
 更多os模块内容请参见[官方文档](https://docs.python.org/3.4/library/os.html)。
 
@@ -579,15 +577,15 @@ os.path.isfile(path)：接受一个字符串路径变量，如果是文件那么
 
 ### samefile函数
 
-os.path.samefile(path1,path2)：如果两个文件或路径相同则返回True\
-，否则返回False。
+`os.path.samefile(path1,path2)`
+
+如果两个文件或路径相同则返回True，否则返回False。
 
 ### getmtime函数
 
-os.path.getmtime(path)
+`os.path.getmtime(path)`
 
-返回文件的最后修改时间，返回值是多少多少秒，可用time模块的ctime或localtime函数将其转换成time.struct\_time
-对象，然后使用strftime来进行更好的格式输出。
+返回文件的最后修改时间，返回值是多少多少秒，可用time模块的ctime或localtime函数将其转换成 `time.struct_time` 对象，然后使用strftime来进行更好的格式输出。
 
 ### getctime函数
 
@@ -598,30 +596,12 @@ os.path.getmtime(path)
 
 
 
-现在让我们进入模块基础知识的学习吧，建立编写自己的模块，这样不断积累自己的知识，不断变得更强。
-
-实际上之前我们已经接触过很多python自身的标准模块或者其他作者写的第三方模块，而import和from语句就是加载模块用的。
-
-from语句和import语句内部作用机制很类似，只是在变量名的处理方式上有点差异（from会把变量名复制过来）。这里重点就import的工作方式说明如下：
-
-1.  首先需要找到模块文件。
-
-2.  然后将模块文件编译成位码（需要时，根据文件的时间戳。），你会看到新多出来一个`__pycache__`文件夹。
-
-3.  执行编译出来的位码，创建该py文件定义的对象。
-
-这三个步骤是第一次import的时候会执行的，第二次import的时候会跳过去，而直接引用内存中已加载的对象。
-
-
-
-
 
 
 shelve模块
 ----------
 
-shelve模块是基于pickle模块的，也就是只有pickle模块支持的对象它才支持。
-之前提及pickle模块只能针对一个对象，如果你有多个对象要处理，可以考虑使用shelve模块，而shelve模块就好像是自动将这些对象用字典的形式包装起来了。除此之外shelve模块的使用更加简便了。
+shelve模块是基于pickle模块的，也就是只有pickle模块支持的对象它才支持。之前提及pickle模块只能针对一个对象，如果你有多个对象要处理，可以考虑使用shelve模块，而shelve模块就好像是自动将这些对象用字典的形式包装起来了。除此之外shelve模块的使用更加简便了。
 
 ### 存入多个对象
 
@@ -656,8 +636,6 @@ shelve模块是基于pickle模块的，也就是只有pickle模块支持的对�
 我们看到就作为简单的程序或者原型程序的数据库，shelve模块已经很好用而且够用了。
 
 更多内容请参见[官方文档](https://docs.python.org/3/library/shelve.html)。
-
-
 
 
 
@@ -1066,12 +1044,11 @@ starmap函数具体定义如下所示：
 inspect模块
 -----------
 
-更多信息请参看 [官方文档\](](https://docs.python.org/3.4/library/inspect.html) 。
+更多信息请参看 [官方文档](https://docs.python.org/3.4/library/inspect.html) 。
 
 ### getfile函数
 
-传入python
-object，返回定义该object具体是在那个文件中的。可以如下获取该文件的系统绝对路径地址:
+传入python object，返回定义该object具体是在那个文件中的。可以如下获取该文件的系统绝对路径地址:
 
     os.path.abspath(inspect.getfile(func))
 
@@ -1079,7 +1056,7 @@ object，返回定义该object具体是在那个文件中的。可以如下获�
 
     /usr/local/lib/python3.4/dist-packages/infome-15.10.30-py3.4.egg/infome/web/youdao.py
 
-。
+
 
 ### getcallargs函数
 
@@ -1154,16 +1131,10 @@ a'和b=4，后面我们可以看到这个p1的参数都加进去了。然后执�
 
 
 
-
-
-
-
 datetime模块
 ------------
 
-简单的日期时间操作用time模块里面的一些函数即可，datetime模块是用类的方式来处理的，适合大量处理日期时间的任务。然后值得一提的是mongodb的python接口
-*pymongo* 里面（连接mongodb的python第三方模块），日期时间的输入输出都是
-datetime 对象的，这很是方便。
+简单的日期时间操作用time模块里面的一些函数即可，datetime模块是用类的方式来处理的，适合大量处理日期时间的任务。然后值得一提的是mongodb的python接口 `pymongo` 里面（连接mongodb的python第三方模块），日期时间的输入输出都是datetime 对象的，这很是方便。
 
 下面简要介绍之，更多内容请参看 [官方文档](https://docs.python.org/3.4/library/datetime.html) 。
 
@@ -1205,18 +1176,14 @@ datetime对象有 `now` 和 `utcnow`
 
 ##### 查看pytz的所有时区
 
-参看
-[这个网页](http://stackoverflow.com/questions/13866926/python-pytz-list-of-timezones)
-。
+参看[这个网页](http://stackoverflow.com/questions/13866926/python-pytz-list-of-timezones)。
 
     >>> pytz.all_timezones
     ['Africa/Abidjan', 'Africa/Accra', 'Africa/Addis_Ababa', 'Africa/Algiers', ......
 
 ##### 具体给now方法指定一个时区
 
-参看
-[这个网页](http://stackoverflow.com/questions/2331592/datetime-datetime-utcnow-why-no-tzinfo)
-。
+参看[这个网页](http://stackoverflow.com/questions/2331592/datetime-datetime-utcnow-why-no-tzinfo)。
 
     import pytz
     datetime.datetime.now(tz = pytz.timezone("Asia/Hong_Kong"))
@@ -1228,9 +1195,7 @@ datetime对象有 `now` 和 `utcnow`
     >>> datetime.now(tz = pytz.timezone("UTC")),datetime.utcnow()
     (datetime.datetime(2015, 7, 11, 9, 25, 20, 266863, tzinfo=<UTC>), datetime.datetime(2015, 7, 11, 9, 25, 20, 266888))
 
-如果我们给now方法指定默认的时区是\"UTC\"，那么我们看到其返回的datetime对象和utcnow返回的datetime对象基本上没什么区别，后面的微秒（
-$10^{-6}$
-秒）有点区别完全可以理解。然后我们再看now方法如果不加任何参数会如何:
+如果我们给now方法指定默认的时区是\"UTC\"，那么我们看到其返回的datetime对象和utcnow返回的datetime对象基本上没什么区别，后面的微秒（$10^{-6}$秒）有点区别完全可以理解。然后我们再看now方法如果不加任何参数会如何:
 
     >>> now
     datetime.datetime(2015, 7, 11, 16, 34, 43, 144018)
@@ -1374,8 +1339,7 @@ datetime对象可以如下调用 `strftime` 方法或者 `__format__`
 
 ### struct\_time 对象转化成为 datetime 对象
 
-参看
-[这个网页](http://stackoverflow.com/questions/1697815/how-do-you-convert-a-python-time-struct-time-object-into-a-datetime-object)
+参看[这个网页](http://stackoverflow.com/questions/1697815/how-do-you-convert-a-python-time-struct-time-object-into-a-datetime-object)
 
     from time import mktime
 
@@ -1395,12 +1359,12 @@ mktime函数接受time模块的 `struct_time` object，其可以来自time模块
 
 参考了 [这个网页](http://stackoverflow.com/questions/8022161/python-converting-from-datetime-datetime-to-time-time)
 
-        >>> t = datetime.datetime.now()
-        >>> t
-        datetime.datetime(2011, 11, 5, 11, 26, 15, 37496)
-        
-        >>> time.mktime(t.timetuple()) + t.microsecond / 1E6
-        1320517575.037496
+    >>> t = datetime.datetime.now()
+    >>> t
+    datetime.datetime(2011, 11, 5, 11, 26, 15, 37496)
+    
+    >>> time.mktime(t.timetuple()) + t.microsecond / 1E6
+    1320517575.037496
 
 
 
@@ -1414,49 +1378,47 @@ re模块提供了python对于正则表达式的支持，对于字符串操作，
 
 ### re模块中的元字符集
 
-*.*
+`.`
 
 :   表示一行内的任意字符，如果如果通过re.compile指定**re.DOTALL**，则表示多行内的任意字符，即包括了换行符。此外还可以通过字符串模板在它的前面加上**(?s)**来获得同样的效果。
 
-*\**
+`*`
 
 :   对之前的字符匹配或者多次。
 
-*+*
+`+`
 
 :   对之前的字符匹配或者多次。
 
-*?*
+`?`
 
 :   对之前的字符匹配或者。
 
-*{m}*
+`{m}`
 
 :   对之前的字符匹配()m次。
 
-*{m,n}*
+`{m,n}`
 
 :   对之前的字符匹配m次到n次，其中n次可能省略，视作默认值是无穷大。
 
-*\^*
+`^`
 
 :   表示字符串的开始，如果加上**re.MULTILINE**选项，则表示行首。此外字符串模板加上**(?m)**可以获得同样的效果。
 
-*\$*
+`$`
 
-:   表示字符串的结束，同\^类似，如果加上**re.MULTILINE**选项，则表示行尾，可以简单理解为`\n`换行符。此外字符串模板加上**(?m)**可以获得同样的效果。
+:   表示字符串的结束，同`^`类似，如果加上**re.MULTILINE**选项，则表示行尾，可以简单理解为`\n`换行符。此外字符串模板加上**(?m)**可以获得同样的效果。`$`符号在re.sub函数中可以被替换为另外一个字符串，其具体效果就是原字符串尾加上了这个字符串，类似的`^`被替换成某个字符串，其具体效果就是原字符串头加上了这个字符串。这里显然`^`和`$`在字符串中都不是真实存在的字符，而没有这个所谓的标记，所以这种替换总给人怪怪的感觉。
 
-    \$符号在re.sub函数中可以被替换为另外一个字符串，其具体效果就是原字符串尾加上了这个字符串，类似的\^被替换成某个字符串，其具体效果就是原字符串头加上了这个字符串。这里显然\^和\$在字符串中都不是真实存在的字符，而没有这个所谓的标记，所以这种替换总给人怪怪的感觉。
-
-*\[\]*
+`[]`
 
 :   \[abc\]字符组匹配一个字符，这个字符是a或者b或者c。类似的\[a-z\]匹配所有的小写字母，`[\w]`匹配任意的字母或数字，具体请看下面的特殊字符类。
 
-*\|*
+`|`
 
 :   相当于正则表达式内的匹配或逻辑。
 
-*()*
+`()`
 
 :   圆括号包围的部分将会记忆起来，方便后面调用。这个后面在谈及。
 
@@ -1471,21 +1433,19 @@ re模块提供了python对于正则表达式的支持，对于字符串操作，
     匹配中文:[\u4e00-\u9fa5]
     \b  文档说严格的定义是\w 和\W 之间的边界，反之亦然。粗略的理解可以看作是英文单词头或者尾。
 
-其中\^在方括号\[\]里面，只有在最前面，才表示排除型字符组的意思。
+其中`^`在方括号\[\]里面，只有在最前面，才表示排除型字符组的意思。
 
 ### 转义问题
 
-正则表达式的转义问题有时会比较纠结。一个简单的原则是以上谈及的有特殊作用的字符有转义问题，如果python中的字符都写成`r''`这种形式，也就是所谓的raw
-string形式，这样`\n`在里面就可以直接写成`\n`，而`\section`可以简单写为`\\section`即可，也就是`\`字符需要转义一次。
+正则表达式的转义问题有时会比较纠结。一个简单的原则是以上谈及的有特殊作用的字符有转义问题，如果python中的字符都写成`r''`这种形式，也就是所谓的raw string形式，这样`\n`在里面就可以直接写成`\n`，而`\section`可以简单写为`\\section`即可，也就是`\`字符需要转义一次。
 
 然后字符组的方括号内\[\]有些字符有时是不需要转义的，这个实在不确定就转义吧，要不就用正则表达式工具测试一下。
 
 ### re模块的使用
 
-compile方法生成regular expression
-object这一条线这里略过了，接下来的讨论全部基于（原始的）字符串模板。
+compile方法生成regular expression object这一条线这里略过了，接下来的讨论全部基于（原始的）字符串模板。
 
-字符串模板前面提及(?m)和(?s)的用法了，然后**(?i)**表示忽略大小写。
+字符串模板前面提及`(?m)`和`(?s)`的用法了，然后`**(?i)**`表示忽略大小写。
 
 #### 匹配和查找
 
@@ -1527,7 +1487,7 @@ object在逻辑上就是真值的意思。match对字符串的匹配是必须从
 
 re模块的split函数可以看作字符串的split方法的升级版本，对于所描述的任何正则表达式，匹配成功之后都将成为一个分隔符，从而将原输入字符串分割开来。
 
-下面是我写的zwc小脚本的最核心的部分，用途是统计中英文文档的具体英文单词和中文字符的个数。其中最核心的部分就是用的re的split函数进行正则表达式分割，如果不用那个圆括号的话，那么分隔符是不会包含进去的，这里就是具体匹配的中文字和各个标点符号等等。用了圆括号，那么圆括号匹配的内容也会进去列表。这里就是具体的各个分隔符。
+请参看下面的例子并理解其做了什么工作。
 
     import re
     
@@ -1546,9 +1506,7 @@ re模块的split函数可以看作字符串的split方法的升级版本，对�
         同謂之玄，玄之又玄，眾妙之門。 '''
         zwc(string)
 
-字符分割之后后面做了一个小修正，将匹配到的空白字符和中英文标点符号等都删除了，这些是不应该统计入字数的。
 
-具体这个github项目链接在这里：[zwc项目](https://github.com/a358003542/zwc)。
 
 #### 替换操作
 
@@ -1661,8 +1619,7 @@ argparse模块
     {'config': 'config.cfg'}
 
 上面代码稍作修改，在长名字可选参数前面还可以加上短名字可选参数支持，然后我们看到
-`parse_args` 方法经过 `vars`
-处理之后返回的是字典值。该字典的key默认对应的是长名字可选参数。你还可以自己设置目标参数名:
+`parse_args` 方法经过 `vars`处理之后返回的是字典值。该字典的key默认对应的是长名字可选参数。你还可以自己设置目标参数名:
 
 ### 添加参数的其他选项设置
 
@@ -1718,21 +1675,17 @@ nargs设置之后该参数在脚本中具体对应的变量将是一个列表。
 
 此外还有:
 
-nargs='\*'
+`nargs='*'`
 
 :   这通常是对可选参数进行设置，当然也可以作用于必填参数，但这让必填参数失去意义了。其将收集任意多的输入参数值，而如果多个可选参数之间这样使用星号是可以的，具体请参看官方文档。
 
-nargs='+'
+`nargs='+'`
 
 :   这通常作用于必填参数，其意义有点类似于正则表达式里面的'+'号，和上面的'\*'号比起来其必须有一个输入值，否则将报错。
 
-nargs='?'
+`nargs='?'`
 
-:   这个'?'号具体使用情况挺复杂的，我不太喜欢，而且其和nargs其他的一些设置比较起来显得有点格格不入。首先其对应的变量值不是列表而是单个值！其次其改变了默认值的行为。如果该参数不输入，比如
-​    `--foo`
-​    这个东西完全不输入在命令行里面，那么foo默认取default的值，如果加入了
-​    `--foo` 这个东西但是后面又不跟值，则foo取 **const**
-​    选项赋的值。不太喜欢这个东西。
+:   这个'?'号具体使用情况挺复杂的，我不太喜欢，而且其和nargs其他的一些设置比较起来显得有点格格不入。首先其对应的变量值不是列表而是单个值！其次其改变了默认值的行为。如果该参数不输入，比如`--foo` 这个东西完全不输入在命令行里面，那么foo默认取default的值，如果加入了​  `--foo` 这个东西但是后面又不跟值，则foo取 **const** 选项赋的值。不太喜欢这个东西。
 
 下面给出一个完整的例子:
 
