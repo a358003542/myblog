@@ -66,7 +66,9 @@ $\pi$ 值具体到小数点4位是3.1416。上面这些方法后面还可以额�
 
 ## pytest模块
 
-pytest模块是站在unittest基础上的，你之前通过 unittest 写的测试案例，全部都不用更改照样有用，接下来你要写一个新的测试，不需要再新建一个 `unittest.TestCase` 类了（如果你希望多个测试在一个类里面，就新建一个类即可，这个类不需要继承自任何类了。），直接如下写测试函数就是了，也不需要很多确认方法，就是最简单的 `assert` 确认返回为 True 即可。
+pytest模块是站在unittest基础上的，你之前通过 unittest 写的测试案例，全部都不用更改照样有用，接下来你要写一个新的测试，不需要再新建一个 `unittest.TestCase` 类了（如果你希望多个测试在一个类里面，就新建一个类即可，这个类不需要继承自任何类了。）。
+
+具体使用如下简单的写测试函数即可，也不需要类似unittest那种很多assert方法，就是最简单的 `assert` 确认返回为 True 即可。
 
 ```python
 def test_prime():
@@ -75,48 +77,6 @@ def test_prime():
 
 这样确实简单方便了不少。下面继续讨论编写单元测试代码中的知识。
 
-
-
-## mock
-
-在写单元测试时，涉及到网络，套接字等编程问题，必然有这个需求，那就是你希望伪造一些数据，拦截某些函数或类的返回值，从而将整个测试从大型软件框架中抽离出来，这个时候就必须要了解mock模块了。mock模块是unittest模块的子模块，即使是使用上pytest，这个mock子模块也是很有用的。
-
-```
-from unittest import mock
-```
-
-使用mock模块最关键性的问题是理解mock在做什么。mock模块里面最核心的概念是 `Mock` 类 ，我们看到官方文档的这个例子：
-
-```
-from unittest import mock
-class Test(): pass
-t = Test()
-t.method = Mock(return_value=3)
-t.method = mock.Mock(return_value=3)
-t.method()
-3
-t.method(1,2,3)
-3
-```
-
-简单来啊就是伪造一个python对象，然后通过定制某些特别的属性和方法来实现你的单元测试代码中你想要的那个python对象。在实践中推荐使用 `MagicMock` ，MagicMock继承自Mock，然后实现了很多python对象的magic method【也就是那一大堆`__what__` 的方法】。
-
-## fixture
-
-上面的mock类只是模拟python对象，但有的时候你也需要一些仿真的数据，你也希望这些仿真的数据能够作为参数进入你的测试函数中。
-
-```python
-import pytest
-
-@pytest.fixture
-def sample_config():
-    return {'a': 1}
-
-def test_config_read(sample_config):
-    assert sample_config['a'] == 1
-```
-
-如果你在 `tests` 文件夹下面新建一个 `conftest.py` 文件，你在里面定义的pytest的fixture是全局共享的。
 
 ## 确认抛出某个异常
 
@@ -134,6 +94,60 @@ def test_mytest():
 
 
 
+## fixture
+
+pytest提出了一个fixture概念，这个fixture非常的有用。最简单的一个使用如下所示：
+
+```python
+import pytest
+
+@pytest.fixture
+def sample_config():
+    return {'a': 1}
+
+def test_config_read(sample_config):
+    assert sample_config['a'] == 1
+```
+
+也就是你的测试函数里面可以带上那个经过fixture装饰的函数名字，其实一个参数，这个参数的值就是之前fixture装饰的那个函数的返回值，然后这个参数你在测试函数里面是可以直接使用的。
+
+你可以如上将fixture和测试函数写在一起，但更加推荐的做法是：在 `tests` 文件夹下面新建一个 `conftest.py` 文件，你在里面定义的pytest的fixture是全局可共用的。
+
+## setup和teardown怎么实现
+
+结合上面的fixture你可以实现一种全局setup配置和teardown的配置。比如说我的测试用例需要生成一个临时的文件夹，在这个临时文件夹下面做一些操作，然后测试完之后希望删除这个临时文件夹。可以编写如下fixture：
+
+```python
+
+import pytest
+import os
+import tempfile
+import shutil
+
+
+@pytest.fixture
+def tempfolder():
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+
+    shutil.copytree(os.path.join(cwd, 'tests/test_images'),
+                    os.path.join(t, 'test_images'))
+
+    os.chdir(t)
+    try:
+        print(f'pytest auto-create tempfolder {t}')
+        yield t
+    finally:
+        os.chdir(cwd)
+        try:
+            shutil.rmtree(t)
+        except (OSError, IOError):  # noqa: B014
+            pass
+
+```
+
+这里面的一个核心概念是fixture `yield` 后面的动作都属于teardown动作，如果是return的话则没有这个概念。其他测试函数可以直接调用哪个临时测试文件夹参数 `tempfolder` ，然后上面的一个额外动作是将一些文件复制到临时的测试文件夹，方便在临时的测试文件夹下做一些动作。最后teardown的动作就是删除临时文件夹。
+
 ## 测试过一次下次不测试了
 
 如果你希望测试函数之前测试过一次了，然后后面就不用测试了，那么就在这个函数上面加上如下装饰器。
@@ -141,7 +155,6 @@ def test_mytest():
 ```
 @pytest.mark.skip(reason="i have test it")
 ```
-
 
 
 ## 自己写的python模块和pytest集成
@@ -177,8 +190,6 @@ addopts = --verbose
 python setup.py test
 ```
 然后专心一边测试一边写代码吧。
-
-
 
 
 
@@ -227,6 +238,36 @@ addopts = --doctest-modules --doctest-continue-on-failure
 ```
 
 其中 `--doctest-modules` 是开启pytest的doctest，然后 `--doctest-continue-on-failure` 是另外一个选项了，个人推荐加上。
+
+
+## mock
+
+在写单元测试时，涉及到网络，套接字等编程问题，必然有这个需求，那就是你希望伪造一些数据，拦截某些函数或类的返回值，从而将整个测试从大型软件框架中抽离出来，这个时候就必须要了解mock模块了。mock模块是unittest模块的子模块，即使是使用上pytest，这个mock子模块也是很有用的。
+
+```
+from unittest import mock
+```
+
+使用mock模块最关键性的问题是理解mock在做什么。mock模块里面最核心的概念是 `Mock` 类 ，我们看到官方文档的这个例子：
+
+```
+from unittest import mock
+class Test(): pass
+t = Test()
+t.method = Mock(return_value=3)
+t.method = mock.Mock(return_value=3)
+t.method()
+3
+t.method(1,2,3)
+3
+```
+
+简单来啊就是伪造一个python对象，然后通过定制某些特别的属性和方法来实现你的单元测试代码中你想要的那个python对象。在实践中推荐使用 `MagicMock` ，MagicMock继承自Mock，然后实现了很多python对象的magic method【也就是那一大堆`__what__` 的方法】。
+
+
+
+
+
 
 
 

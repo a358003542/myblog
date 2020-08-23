@@ -719,14 +719,14 @@ class Position():
 
 ## \_\_new\_\_
 
-一个类创造出一个实例出来首先是调用 `__new__` 方法，然后才是调用`__init__`方法。其一个应用就是所谓的单例模式，也就是一个类只能创造一个实例，请参看 [这篇文章](https://segmentfault.com/a/1190000008141049) 。
+一个类创造出一个实例出来首先是调用 `__new__` 方法，然后才是调用`__init__`方法。其一个应用就是所谓的单例模式，也就是一个类只能创造一个实例，请参看 [这篇文章](https://segmentfault.com/a/1190000008141049) 。【下面代码做了一些修改，python3之后除了`super()` 写法可以简化之外，object的`__new__` 方法是不带参数的。然后python的`__new__` 和 `__init__` 是协作关系，似乎要求参数存在某种一致性，暂时还不太清楚。TODO】
 
 ```python
 class Singleton(object):
     _instance = None
-    def __new__(cls, *args, **kw):
+    def __new__(cls):
         if not cls._instance:
-            cls._instance = super(Singleton, cls).__new__(cls, *args, **kw)  
+            cls._instance = super().__new__(cls)  
         return cls._instance  
 
 class MyClass(Singleton):  
