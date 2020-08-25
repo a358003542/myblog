@@ -1140,6 +1140,27 @@ settings.engGroup()
 
 
 
+## QWebEngine
+
+之前Qt的QtWebkit现在都改名叫做QWebEngine了，这次迁移的详细信息请参看 [这个网页](https://doc.qt.io/qt-5/qtwebenginewidgets-qtwebkitportingguide.html) 。利用QWebEngine相关技术我们可以在Qt桌面程序上使用html5相关编程，其等于是一个内嵌的Chromium浏览器核心，具体细节不详，但大体是这个意思。
+
+一个简单的使用如下所示：
+
+```python
+        self.webview = QWebEngineView()
+        self.webpage = QWebEnginePage()
+        self.webview.setPage(self.webpage)
+        url = QUrl.fromLocalFile(
+            resource_filename("yaogua", "html_resource/zhou_yi_yao_gua.html"))
+        self.webview.load(url)
+```
+
+其中QWebEngineView继承自QWidget，然后QWebEnginePage可以对页面进行一些额外的操作。上面的代码片段是QWebEngineView加载load了某个html文件。
+
+更详细的使用请查看相关官方API文档，此外我编写的这个 [github项目](https://github.com/a358003542/yaogua) 也可以作为参考。
+
+
+
 -------------
 
 
