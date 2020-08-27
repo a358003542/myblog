@@ -1,5 +1,6 @@
 Slug: html5-tutorial-html
 Category: html5_tutorial
+Date: 2019
 
 
 [TOC]
@@ -105,9 +106,9 @@ html5新加入了很多关于文档结构的标签，这些标签并没有任何
 -   **aside:** 和网页主体信息不太相关的其他信息。
 -   **footer:** 一般是关于作者，版权或者其他比如脚注等信息。
 
-这些都可以通过div然后class或者id写法来取代，在实际使用中如果上面的默认标签能够满足需求，那么就应该使用html5的这些默认标签。
+这些都可以通过div来取代，在实际使用中如果上面的默认标签能够满足需求，那么就应该使用html5的这些默认标签。
 
-上面的例子已经出现了一些标签，然后还有一些很常用的标签，下面承接上面所将的继续补充写一个常用html标签清单。
+上面的例子已经出现了一些标签，然后还有一些很常用的标签，下面承接上面所讲的继续补充说明一些常用html标签清单。
 
 ## 常用html标签清单
 
@@ -217,7 +218,7 @@ div标签更确切的表达是块状区块，可以看作其display属性是 `bl
 
 ## inline css
 
-最基本的css属性可以通过inline css模式直接在html标签中通过 **style** 属性来加上。
+最基本的css属性可以通过inline css模式直接在html标签中通过 **style** 属性来加上。具体如下所示：
 
 ### font-size
 
@@ -265,9 +266,11 @@ div标签更确切的表达是块状区块，可以看作其display属性是 `bl
 ```
 
 ## 外部css
-有一种说法，是将放在html <head> 标签里面的css和具体外部的css文件引用区分开来，在我看来区别不大吧。然后网络上还有一种说法认为html <head> 标签里面应该多用id的css定义，而外部css文件应该只用class定义好做到普适性，在我看来也有点削足适履了。额，目前的国内网络环境大家都懂的，所以我喜欢少用css文件引用，尽量将一些css定义都放在 <head> 标签里面，就是为了加载快一点，至于其他，倒没什么特别好讲究的。不过在使用css定义前应该用class，只有觉得某些元素需要个别处理的时候才用id属性控制，我想这是没有问题的。
+有一种说法，是将放在html `<head>` 标签里面的css和具体外部的css文件引用区分开来，在我看来区别不大吧。然后网络上还有一种说法认为html `<head>` 标签里面应该多用id的css定义，而外部css文件应该只用class定义好做到普适性，在我看来也有点削足适履了。
 
-放在<head>标签里面的css大致如下格式引入进来:
+在具体使用的时候一个总的原则是一般推荐使用class，只有觉得某些元素需要个别处理的时候才用id属性控制。
+
+放在`<head>` 标签里面的css大致如下格式引入进来:
 
 ```html
 <style>
@@ -281,13 +284,11 @@ div标签更确切的表达是块状区块，可以看作其display属性是 `bl
 <link rel="stylesheet"  href="main.css" >
 ```
 
-然后在外部css文件里面你还可以如下进一步引用其他的css文件:
+然后在外部css文件里面你还可以如下进一步引用其他的css文件【参考了 [这个网页](http://stackoverflow.com/questions/147500/is-it-possible-to-include-one-css-file-in-another) 。】:
 
 ```css
 @import url("http://getbootstrap.com/dist/css/bootstrap.min.css");
 ```
-
-这种引用语句后面的分号不太清楚是不是必须的，不太关心这个，没事就加上吧。参考了 [这个网页](http://stackoverflow.com/questions/147500/is-it-possible-to-include-one-css-file-in-another) 。
 
 
 
@@ -405,26 +406,20 @@ z-index:1;
 多行文本输入使用 `textarea` 标签生成的，现在先简单了解下即可。
 
 ```html
-<p>:before</p>
-
 <textarea rows="5">
 the textarea you say something
 </textarea>
-
-<p>:after</p>
 ```
 
-<p>:before</p>
 <textarea rows="5">
 the textarea you say something
 </textarea>
 
-<p>:after</p>
 ### 加上action
 
 也就是表单form标签上加上action属性，然后表单内定义submit的按钮或者input元素，点击之后将会将数据发送给action那边去，具体方法由method属性定义，默认是GET。
 
-```
+```html
 <form action="/where" method="POST">
   <input type="text">
   <button type="submit">submit</button>
@@ -435,7 +430,7 @@ the textarea you say something
 
 加上requird属性，该字段必须填上值。
 
-```
+```html
 <input type="text" required>
 ```
 
@@ -443,7 +438,7 @@ the textarea you say something
 
 预显示的文字
 
-```
+```html
 <input type="text" placeholder="input your name" required>
 ```
 

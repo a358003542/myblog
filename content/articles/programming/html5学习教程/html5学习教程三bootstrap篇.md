@@ -1,5 +1,6 @@
 Category: html5_tutorial
 Slug: html5-tutorial-bootstrap
+Date: 2019
 
 [TOC]
 
@@ -49,9 +50,6 @@ Slug: html5-tutorial-bootstrap
 <div class="container" style="background:#FFF0F5">
 我在container类里面。
 </div>
-
-此外还有一个 `container-fluid` class，区别就是container类会根据当前设备的尺寸来自动调整自身大小。一般推荐页面的某部分都应该被包围在container盒子里面。
-
 ## 栅格系统
 
 栅格系统是bootstrap框架里面很有用的一个特性了，其基本思路如下:
@@ -207,12 +205,14 @@ kbd标签用来显示按键组合: <kbd>Ctrl+X</kbd>
 
 ## 如何制作一个 `Bootstrap` 风格的带链接的按钮
 
-参看 [这个网页](http://stackoverflow.com/questions/19981949/how-to-make-a-button-in-bootstrap-look-like-a-normal-link-in-nav-tabs) 。
+bootstrap用默认的button来制作标签，如果你需要点击动作的还需要额外的onclick去定制，如果你需要的动作仅仅只是打开某个网页，那么使用a标签会更合适一些，只是我们还需要这个a标签看上去像一个按钮，这样会好看一些，参看 [这个网页](http://stackoverflow.com/questions/19981949/how-to-make-a-button-in-bootstrap-look-like-a-normal-link-in-nav-tabs) ，具体代码如下所示：
 
-我更喜欢这种写法:
 ```
-<a href="{{ message["body"] }}" target="_blank" role="button" class="btn btn-success btn-large">Click here!</a>
+<a href="https://www.bing.com" target="_blank" role="button" class="btn btn-success btn-large">Click here!</a>
 ```
+<a href="https://www.bing.com" target="_blank" role="button" class="btn btn-success btn-large">Click here!</a>
+
+
 
 <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 

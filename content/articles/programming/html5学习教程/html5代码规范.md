@@ -1,13 +1,14 @@
 Category: html5_tutorial
 Slug: html5-style-guide
+Date: 2019
 
 [TOC]
 
 # html5代码规范
 
-本文参考了 [这篇文章](http://codeguide.bootcss.com) 和 [这篇文章](http://alloyteam.github.io/CodeGuide/) 还有 [aribnb的javascript规范](https://github.com/airbnb/javascript) 。
+本文参考了 [这篇文章](http://codeguide.bootcss.com) 和 [这篇文章](http://alloyteam.github.io/CodeGuide/)  。
 
-需要指出的是这些都是一些代码建议，其中有一些还有点大头开蛋还是小头开蛋的意思，比如到底是空四个空格还是两个空格，这些有分歧的我就不写出来了，读者自行决定吧。
+需要指出的是这些都是一些代码建议，其中有一些有点大头开蛋还是小头开蛋的意思，比如到底是空四个空格还是两个空格，这些有分歧的我就不写出来了，读者自行决定吧。
 
 
 
@@ -89,8 +90,4 @@ Slug: html5-style-guide
 css代码规范有兴趣的请参看前面提到过的参考文章，这个我不太感兴趣，老实说css本来就可读性偏低吧，当然了基本的代码规范可以做一下。
 
 
-
-## javascript
-
-javascript也有好几种代码风格的写法规范，推荐读者安装相应 `eslint` 插件，我决定主要学习一下 aribnb 的javascript规范，然后接下来的javascript基础篇内容决定按此修订重写之。
 
