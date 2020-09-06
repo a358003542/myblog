@@ -1,4 +1,6 @@
 Category: algorithm
+Date: 2019
+Slug: mindmaptree
 
 [TOC]
 

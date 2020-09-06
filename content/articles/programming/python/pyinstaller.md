@@ -1,5 +1,5 @@
 Slug: pyinstaller
-Date: 2020
+Date: 20200830
 Category: python
 
 [TOC]

@@ -1,5 +1,7 @@
 Category: SQL
 Tags: sql, database
+Date: 2021
+Slug: sql-database-cookbook
 
 
 [TOC]

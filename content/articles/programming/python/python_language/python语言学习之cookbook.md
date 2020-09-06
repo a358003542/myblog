@@ -1,6 +1,7 @@
 Category: python_language
 Slug: python-cookbook
 Tags: python
+Date: 2021
 
 [TOC]
 

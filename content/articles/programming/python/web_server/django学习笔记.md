@@ -1,6 +1,7 @@
 Category: web_server
 Slug: django-learning-notes
 Tags: django
+Date: 20200405
 
 [TOC]
 

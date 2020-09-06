@@ -1,5 +1,7 @@
 Category: editor
 Tags: editor
+Slug: pycharm-editor
+Date: 2021
 
 [TOC]
 

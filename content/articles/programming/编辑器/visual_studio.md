@@ -1,5 +1,7 @@
 Category: editor
 Tags: editor
+Date: 2021
+Slug: visual-studio-editor
 
 [TOC]
 

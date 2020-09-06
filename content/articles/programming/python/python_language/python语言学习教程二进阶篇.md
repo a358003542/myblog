@@ -488,15 +488,7 @@ def __eq__(self,other):
 
 ## in语句
 
-如下所示：
-
-```python
-    def __in__(self,other):
-        for key in self.__dict__.keys():
-            if not self.__dict__.get(key) == other.__dict__.get(key):
-                return False
-        return True
-```
+**NOTICE**：不知道是以前记错了还是python3改动了，现在in语句应该用 `__contains__` 来重载。
 
 提供了`what in X` 语句的支持，上面的例子是基于类其内字典的内容而做出的判断。
 

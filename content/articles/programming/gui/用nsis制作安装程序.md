@@ -1,6 +1,6 @@
 Slug: nsis
-Date: 2020
-Category: software
+Date: 20200830
+Category: gui
 
 [TOC]
 

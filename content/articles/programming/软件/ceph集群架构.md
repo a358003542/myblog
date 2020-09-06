@@ -1,6 +1,6 @@
-Category: archived
+Category: software
 Slug: cephji-qun-jia-gou
-Date: 2020
+Date: 20200830
 Summary: 本文试着用人类易懂的语言将ceph集群架构相关的知识点连贯地说出来，从而让读者对ceph分布式存储有一个高屋建瓴般的认识。
 
 

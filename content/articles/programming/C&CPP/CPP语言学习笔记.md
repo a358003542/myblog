@@ -1,4 +1,4 @@
-Category: cpp_language
+Category: c_and_cpp
 Slug: cpp-language-learning-notes
 
 [TOC]

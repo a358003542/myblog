@@ -1,5 +1,6 @@
-Category: c_language
+Category: c_and_cpp
 Slug: c-language-learning-notes
+Date: 20200405
 
 [TOC]
 
