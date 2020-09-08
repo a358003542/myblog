@@ -26,8 +26,6 @@ pyinstaller you_entry_point.py
 pyinstaller yaogua\gui.py
 ```
 
-
-
 如果一切顺利，到 `dist` 文件夹下运行你的目标程序exe运行正常，一切都OK，那么恭喜你了。没必要继续往下看了。如果出问题了，那么请钻研官方文档吧，下面也会做出一些补充说明。
 
 首先你不能依靠自动生成的 `.spec` 文件了，接下来讨论了很多定制都是基于对这个 `.spec` 文件的修改。修改好了之后你后面要运行pyinstaller需要如下运行了：
@@ -35,6 +33,20 @@ pyinstaller yaogua\gui.py
 ```text
 pyinstaller you_entry_point.spec
 ```
+
+
+
+## 输出单个exe文件
+
+一般桌面端程序和较大型的项目是不推荐输出单个exe文件的，而对于一些小型的项目或者命令行工具，输出单个exe文件有时是很便捷的。然后在某些情况下你可能会遇到找不到python3.*.dll之类的错误，那么这个时候是一定要采用输出单个exe文件的方案的。
+
+对于输出单个exe文件方案的spec文件，你先如下生成最基本的spec文件：
+
+```
+pyinstaller -F you_entry_point.py
+```
+
+然后接下来就是对该spec文件进行一些定制工作了。
 
 
 
@@ -84,3 +96,4 @@ from pkg_resources import resource_filename
 ```
 
 上面是把yaogua模块的html_resource下的所有文件内容都复制到dist文件夹下的对应软件名的yaogua的html_resource那里，这样使用 `resource_filename` 引用路径仍是可行的可用的。
+
