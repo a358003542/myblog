@@ -1,7 +1,7 @@
 Category: python_companion
 Tags: python
 Slug: pytest-module
-Date: 2020
+Date: 20200909
 
 [TOC]
 
@@ -92,7 +92,14 @@ def test_mytest():
         f()
 ```
 
+## 确认两个数字大约近似
 
+```
+assert i == pytest.approx(j, rel=0.1)
+assert i == pytest.approx(j, abs=10)
+```
+
+默认采用的是rel相对偏差小于 $1e^{-6}$ 。abs是绝对偏差。
 
 ## fixture
 
