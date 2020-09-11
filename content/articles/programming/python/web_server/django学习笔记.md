@@ -1,9 +1,14 @@
 Category: web_server
 Slug: django-learning-notes
 Tags: django
-Date: 20200405
+Date: 20190405
 
 [TOC]
+
+
+## WARNING
+
+**警告，因为笔者决定专注于flask模块，所以本文已经归档，缺少新的内容，旧的内容也可能存在错误。【2019】** 。
 
 ## Beginning
 

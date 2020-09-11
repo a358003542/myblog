@@ -1,6 +1,6 @@
 Slug: nsis
 Date: 20200830
-Category: gui
+Category: application_development
 
 [TOC]
 

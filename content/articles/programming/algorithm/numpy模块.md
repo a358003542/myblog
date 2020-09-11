@@ -1,8 +1,5 @@
 Category: algorithm
 Slug: numpy-module
-Date: 2019
-
-
 
 [TOC]
 

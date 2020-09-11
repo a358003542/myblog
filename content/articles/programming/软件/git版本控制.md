@@ -1,4 +1,4 @@
-Category: tools
+Category: software
 Slug: git
 Tags: git
 Date: 2019

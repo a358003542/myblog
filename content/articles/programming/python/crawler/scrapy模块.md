@@ -1,7 +1,5 @@
 Category: crawler
 Slug: scrapy-module
-Date: 2019
-Tags: python, 
 
 [TOC]
 

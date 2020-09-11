@@ -1,7 +1,7 @@
 Category: editor
 Tags: editor
 Slug: vi-editor
-Date: 2019
+Date: 20190911
 
 
 [TOC]

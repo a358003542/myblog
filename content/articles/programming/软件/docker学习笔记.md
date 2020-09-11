@@ -1,4 +1,5 @@
-Category: tools
+Category: software
+Slug: docker-learning-notes
 
 
 [TOC]

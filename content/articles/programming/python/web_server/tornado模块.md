@@ -1,11 +1,13 @@
 Category: web_server
 Slug: tornado-module
 Summary: 本文对tornado模块进行了入门级别的介绍和相关知识点的讨论。
-Date: 20200405
+Date: 20190405
 
 [TOC]
 
+## WARNING
 
+**警告，因为笔者决定专注于flask模块，本文已经归档，缺少新的内容，旧的内容也可能存在错误。【2019】** 。
 
 ## 简介
 

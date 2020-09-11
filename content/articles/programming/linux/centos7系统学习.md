@@ -1,7 +1,6 @@
 Category: linux
 Tags: centos7
 Slug: centos7
-Date: 2019
 
 [TOC]
 

@@ -1,11 +1,9 @@
 Category: python_companion
 Slug: loguru-module
 Tags:  python, 
-Date: 2019
+Date: 20190911
 
-[TOC]
 
-## 前言
 
 keep it simple , keep it stupid . loguru模块大概是符合这一精神的，其让你把精力从一些日志的调配的琐碎事情上抽离出来，好让你有更多的精力去解决核心问题。基本上使用过之后，就好像使用了python的新特性 `f-string` 一样，you just can not stop to use it. 你会忍不住想要使用它。
 

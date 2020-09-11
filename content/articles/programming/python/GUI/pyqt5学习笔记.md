@@ -1,6 +1,6 @@
 Slug: pyqt5-learning-notes
 Category: gui
-Tags: gui
+Tags: gui, python
 Date: 2019
 
 

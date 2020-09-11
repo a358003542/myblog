@@ -1,8 +1,12 @@
 Slug: airflow-module
+Date: 20190911
+Category: linux
 
 [TOC]
 
+## WARNING
 
+**警告，笔者因个人原因应该是不会使用airflow了，本文放在这里权作参考，缺少新的内容，旧的内容也可能存在错误。【2019】**
 
 ## 前言
 

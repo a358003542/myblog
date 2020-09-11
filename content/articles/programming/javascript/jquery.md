@@ -1,3 +1,7 @@
+Category: javascript
+Slug: jquery
+Date: 20200910
+
 ## jquery基本语法
 
 jquery的基本语法就是:
