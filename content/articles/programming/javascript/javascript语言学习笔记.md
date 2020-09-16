@@ -10,7 +10,7 @@ Date: 20200910
 
 javascript就历史起源来说似乎并不是一个主角命，更像是编程语言世界里面一个注定跑跑龙套的。1995年某个公司开发了某个浏览器，然后该公司需要为这个浏览器开发一个脚本语言，就把这个任务丢给了 Brendan Eich ，Brendan Eich很不情愿地接受了这个不喜欢的任务，大概花了10天时间仓促完成了Javascript的设计，而且javascript最开始名字不叫javascript，叫livescript，就连javascript这个名字后面改也有点蹭Java语言的热度的嫌疑。
 
-后面javascript的流行和大热可能是其创始人也料想不到的，实际上就是javascript后面刚发展起来的那几年，大家也只是觉得其主要作为一个前端脚本语言，对其仍然是一种轻视的态度，觉得这个语言也就写写浏览器界面的动态效果之类的。随着nodejs的出现和相关生态圈的日益成熟壮大，人们才惊讶地发现javascript已经是编程世界里面最大热的几门语言之一了，继而近几年，随着javascript生态的不断成熟和壮大，再也没有人去质疑javascript作为当今编程世界里面的编程语言的主角地位了，最多只是碎碎念说几句javascript这个语言的一些问题。
+后面javascript的流行和大热可能是其创始人也料想不到的，实际上就是javascript后面刚发展起来的那几年，大家也只是觉得其主要作为一个前端脚本语言，对其仍然是一种轻视的态度，觉得这个语言也就写写浏览器界面的动态效果之类的。随着node.js的出现和相关生态圈的日益成熟壮大，人们才惊讶地发现javascript已经是编程世界里面最大热的几门语言之一了，继而近几年，随着javascript生态的不断成熟和壮大，再也没有人去质疑javascript作为当今编程世界里面的编程语言的主角地位了，最多只是碎碎念说几句javascript这个语言的一些问题。
 
 ## 注释
 
@@ -55,7 +55,9 @@ your awesome javascript code
 <script src="where"></script>
 ```
 
+## javascript代码REPL环境
 
+你可以在浏览器的debug控制台上运行javascript代码，或者安装node环境之后进入node命令下的REPL环境。
 
 ## 程序中的操作对象
 
@@ -65,7 +67,13 @@ javascirpt的数据类型分为两类，一类是原始类型：数值、字符�
 
 ### 声明常量和变量
 
-javascript可以利用关键词 `var` ， `const` 和 `let` 来声明变量，其中const是声明常量的，var和let是声明变量的，其中var声明变量是大家在javascript中常用的声明变量关键词。其声明的变量的作用域很不同于其他编程语言，叫做 **函数作用域** 。即你在函数区块内声明的变量整个函数体都是可以使用的，包括哪些花括号结构或任意的嵌套函数。因为程序员对于变量的作用域习惯了块作用域，所有airbnb提出不推荐使用 `var` ，而是推荐使用 `let`，因为 `const` 和 `let` 都是块作用域（block-scoped）。对于此我持保留意见，因为javascript本身就是一个很宽松的语言，是否一定要遵从程序员那些习以为常的惯例，然后当作教条我决定大可不必。
+javascript的变量是区分大小写的。
+
+javascript可以利用关键词 `var` ， `const` 和 `let` 来声明变量或常量，其中const是声明常量的，var和let是声明变量的。var声明变量是大家在javascript中常用的声明变量关键词，其声明的变量的作用域很不同于其他编程语言，叫做 **函数作用域** 。即你在函数区块内声明的变量整个函数体都是可以使用的，包括哪些花括号结构或任意的嵌套函数。因为程序员对于变量的作用域习惯了块作用域，所以airbnb规范提出不推荐使用 `var` ，而是推荐使用 `let`，因为 `const` 和 `let` 都是块作用域（block-scoped）。
+
+参考mozilla上的相关讨论，变量作用域显得另类是一方面，更糟糕的是因为这个作用域会让变量声明语句可以随意放置，这会造成代码变得混乱和难以理解。**现代javascript编码推荐使用let，最好不用var**。
+
+我们可能会看到某些javascript代码直接写上 `x=1` ，前面没有写上关键词，严格意义上来说这不叫声明变量，而是在全局对象上挂载了x这个属性，从编码规范来说是应该抵制这种写法的。
 
 ### 全局变量
 
@@ -76,49 +84,42 @@ javascript可以利用关键词 `var` ， `const` 和 `let` 来声明变量，�
 **javascript不区分整数值和浮点数值**，javascript中所有数字都用浮点数值表示，这是javascript和其他编程语言的很大不同。然后数值型那些运算，比如加减乘除之类的就不用多说了。其中 `%` 和python一样也是求余操作。在python3中有 `5//2` 是求商的概念，javascript没有这个概念，我们需要如下来获得类似的效果。
 
 ```
-console.log(parseInt(5/2))
+parseInt(5/2)
 ```
 
 #### parseInt()
 
-将字符串转成整数型，否则返回NaN。
+将字符串转成整数型。
 
 ```js
-parseInt('123', 10); // 123
-parseInt('11', 2); // 3
+> parseInt('2.5')
+2
 ```
 
-#### parseFloat()
+### NaN
 
-将字符串转成浮点型，否则返回NaN。
-
-```js
-parseFloat('3.14') 
-3.14
-```
-
-NaN也属于number型，判断是否是NaN，airbnb推荐的风格是：
+如果我们执行 `parseInt('abc')` ，那么将返回 `NaN` ，判断是否是NaN如下所示：
 
 ```js
-Number.isNaN('a')
+> Number.isNaN('a')
 false
-Number.isNaN(1)
+> Number.isNaN(1)
 false
-Number.isNaN(NaN)
+> Number.isNaN(NaN)
 true
 ```
 
-
+**注意：** javascript还有一个全局函数`isNaN` ，其和Number.isNaN行为不太一样，一般推荐使用 `Number.isNaN` 。Number.isNaN意思很明显就是判断是否是NaN这个值，而全局的isNaN更像是在说输入的这个东西是不是一个数值或者能不能转成一个数值，true则不能，false则能。
 
 ### 字符串(string)
 
-javascript同python一样单引号和双引号都是可以的，airbnb规范是推荐使用 **单引号** 。
+javascript同python一样单引号和双引号都是可以的。
 
 ```javascript
 const name = 'Capt. Janeway';
 ```
 
-你可以通过 `+` 来实现一些简单的字符串拼接工作，然后aribnb规范提出字符串的程序性拼接推荐使用模块语言，也就是 `${variable}` ，这是很好的（注意必须用**`**符号）。
+你可以通过 `+` 来实现一些简单的字符串拼接工作，也可以如下进行字符串模板操作。
 
 ```javascript
 `How are you, ${name}?`
@@ -127,11 +128,13 @@ const name = 'Capt. Janeway';
 javascript的字符串类型和python非常类似，比如 `string[0]` 是支持的。然后不可以这样用string[0:2]，幸运的是javascript提供了类似python中的那种切片概念，就是使用 `slice` 方法
 
 ```
-console.log("hello".slice(0,2))
-console.log([1,3,4,5].slice(0,2))
+> "hello".slice(0,2)
+'he'
+> [1,3,4,5].slice(0,2)
+[ 1, 3 ]
 ```
 
-不过javascript的slice方法和python的切片操作还是有点区别的，其只有 `(start,end)` 两个参数，然后其也有负数从末尾算起的概念，不过其不会倒着来，都是从左到右的那种顺序。具体请参看 [这里](http://www.w3school.com.cn/jsref/jsref_slice_string.asp) 。
+不过javascript的slice方法和python的切片操作还是有点区别的，其只有 `(start,end)` 两个参数，然后其也有负数从末尾算起的概念，具体请参看 [这里](http://www.w3school.com.cn/jsref/jsref_slice_string.asp) 。
 
 
 
@@ -178,7 +181,7 @@ boolean值的判断遵循以下规则：
 2.  其他都被视作true
 
 ```js
-Boolean({})
+> Boolean({})
 true
 ```
 
@@ -192,13 +195,13 @@ ECMA-262 规定：
 null == undefined; -> return true
 ```
 
-按照airbnb的推荐风格，比较操作的时候一律推荐使用 `===`  和 `!==`  ，而不要使用 `==` 和 `!=` 。
+比较操作的时候一律推荐使用 `===`  和 `!==`  ，而不要使用 `==` 和 `!=` 。
 
 
 
 ### typeof操作符
 
-查看某个对象的对象类型，typeof操作符只可能返回以下六种结果，比如说前面提到的数组是属于object的；null也是属于object的。
+查看某个对象的对象类型，typeof操作符只可能返回以下六种结果：
 
 -   number
 -   string
@@ -225,7 +228,7 @@ typeof 1
 
 javascript的数组（array）在数据结构概念上大体类似于python的列表。
 
-### 构建一个数组
+#### 构建一个数组
 
 ```js
 var array1 = [];
@@ -235,7 +238,7 @@ const items = [1, 2, 3.14, 'Hello', null, true];
 
 其索引index编号法则也和python一致。
 
-### 数组的一些方法
+#### 数组的一些方法
 
 - **length:** 数组长度
 - **indexOf:** 返回数组某个子元素的索引位置
@@ -245,6 +248,7 @@ const items = [1, 2, 3.14, 'Hello', null, true];
 - **unshift:** 数组头部添加一个或多个元素，返回新数组的长度
 - **shift:** 数组头部删除一个元素
 - **sort:** 排序，破坏型。值得一提的是对于数字排序并不是按照从大到小的顺序来的，不太清楚为何:
+
 ```
 > var lst = [1,5,2,3,51,4,45,545,541,48,77]
 > undefined
@@ -261,7 +265,9 @@ const items = [1, 2, 3.14, 'Hello', null, true];
 > 545,
 > 77 ]
 ```
+
 在python中最多说字符串就这样，但这里是number类型啊。然后要正常排序，我们需要如下操作（参看 [这个网页](http://www.w3school.com.cn/jsref/jsref_sort.asp) ）:
+
 ```js
 var lst = [1,5,2,3,51,4,45,545,541,48,77]
 function sortNumber(a,b){
@@ -270,10 +276,12 @@ return a - b
 lst.sort(sortNumber)
 alert(lst)
 ```
+
 这里sort方法接受一个函数参数，这个函数接受两个参量，用来判断a和b的值大小，如果返回值小于0，则a放在前面。如果返回值大于0，则a放在后面。这种排序方法也支持数字字符串的情况。javascript在处理这种 `字符串 - 字符串` 的情况是会尝试做转换成number类型的才做。
 
 - **reverse:** 反转，破坏型。
 - **splice:** 从指定的索引删除某些元素，然后在此处添加某些元素，相当于update更新了。
+
 ```js
 > var arr = ['Microsoft', 'Apple', 'Yahoo', 'AOL', 'Excite', 'Oracle'];
 > undefined
@@ -282,16 +290,20 @@ alert(lst)
 > arr
 > ["Microsoft", "Apple", "Google", "Facebook", "Oracle"]
 ```
+
 参数意思是从索引2开始删除3个元素，然后添加后面的元素。从上面的例子可以看出splice方法是破坏型的方法，然后其返回的是删除了的那是那个元素。
 
 splice方法也可以用于只删除不添加也就是纯删除操作，或只添加不删除的纯添加操作。
+
 ```
 // 只删除,不添加:
 arr.splice(2, 2);
 // 只添加,不删除:
 arr.splice(2, 0, 'Google', 'Facebook');
 ```
+
 - **concat:** 连接两个数组，非破坏型。
+
 ```
 > var lst1 = [1,2,3]
 > undefined
@@ -300,36 +312,17 @@ arr.splice(2, 0, 'Google', 'Facebook');
 > lst1.concat(lst2)
 > [1, 2, 3, "a", "b", "c"]
 ```
+
 - **join:** 类似于python字符串的join方法，如下所示:
+
 ```
 var arr = ['A', 'B', 'C', 1, 2, 3];
 arr.join('-'); // 'A-B-C-1-2-3'
 ```
+
 -   **fill:** 数组用某个值来填充
 
-### 比较两个数组是否相同
-
-参考了 [这个网页](http://stackoverflow.com/questions/3115982/how-to-check-if-two-arrays-are-equal-with-javascript) 。
-
-```js
-function arraysEqual(a, b) {
-if (a === b) return true;
-if (a == null || b == null) return false;
-if (a.length != b.length) return false;
-
-// If you don't care about the order of the elements inside
-// the array, you should sort both arrays here.
-
-for (var i = 0; i < a.length; ++i) {
-if (a[i] !== b[i]) return false;
-}
-  return true;
-}
-```
-
-
-
-### for遍历数组
+#### for遍历数组
 
 ```js
 for (let value of array) {
@@ -351,7 +344,7 @@ for (let value of array) {
 
 这大体实现了类似于python的 `enumerate` 写法。
 
-### 判断某个元素是否在数组中
+#### 判断某个元素是否在数组中
 
 ```
 ['a','b'].indexOf('a')
@@ -375,7 +368,7 @@ function is_in_array(array, element){
 
 ### object
 
-javascript的object其大体可以看作python中的字典类型。
+和python这样的动态语言一样，javascript的object对象概念是很核心的一个概念。
 
 创建空的object推荐如下写法：
 
@@ -394,6 +387,7 @@ const person = {
   zipcode: null
 };
 ```
+
 aribnb提出属性名直接写上就是了，包括函数也是如此：
 
 ```javascript
@@ -430,6 +424,7 @@ const obj = {
 
 
 #### in语句
+
 ```js
 'name' in xiaoming;
 
@@ -444,8 +439,11 @@ true
 > 1 in [1,2,3]
 true
 ```
+
 #### delete语句
+
 其对应的就是python的del语句。然后我们看到javascript的 `delete` 语句删除不存在键也不会报错。
+
 ```js
 > d
 Object {a: 1}
@@ -458,9 +456,11 @@ true
 > d
 Object {}
 ```
+
 #### hasOwnProperty方法
 
 对应于python2的has\_key方法，不过python2已经移除了，推荐用in语句。
+
 ```javascript
 d = {'a':1}
 d.hasOwnProperty('a')
@@ -485,16 +485,21 @@ const copy = { ...original, c: 3 }; // copy => { a: 1, b: 2, c: 3 }
 
 
 
+
+
+
+
 ## 函数
 
-一个简单的函数定义和使用如下所示（下面这种写法是airbnb规范推荐的风格）:
+函数正如前面所说也是一个对象，一个简单的函数对象定义如下所示：
+
 ```javascript
 let greeting = function(name){
 	console.log(name);
 }
 greeting('hello')
 ```
-我们看到javascript明确将函数名作为一个变量，这是唯一要值得注意的，不过你也可以采用这种写法，这样更加为我们所熟悉了:
+不过你也可以采用这种写法，这样更加为我们所熟悉了:
 
 ```js
 function abs(x){
@@ -533,7 +538,7 @@ rest是表示除了a和b之外的所有其余参量。注意前面三个点号: 
 
 ### 箭头函数
 
-简单来说箭头函数就是 lambda 表达式的更简洁写法，只是说在javascript语境里面其区别一般function的特点有：<u>其没有this绑定</u>。
+简单来说箭头函数就是 lambda 表达式的更简洁写法，也就是匿名函数，只是说在javascript语境下其和一般function的区别是：<u>其没有this绑定</u>。
 
 ```js
 (param1, param2, …, paramN) => { statements }
@@ -542,6 +547,8 @@ rest是表示除了a和b之外的所有其余参量。注意前面三个点号: 
 
 
 ## 逻辑
+
+这一块如果读者熟悉一门编程语言的话，粗略地了解下扫一遍基本上就掌握了javascript相关语句知识。下面本小节也不会过多地讨论，只是就某些应用上常见的知识点做出一些说明。
 
 ### 条件判断结构
 
@@ -570,6 +577,35 @@ console.log('teenager')
 ```
 
 javascript有switch语句，作为我们pythoner你懂的，用多个else if语句也是可以的。
+
+### switch语句
+
+```javascript
+function set_choice() {
+  choice = 'second'
+  switch (choice) {
+    case 'first':
+      console.log('first');
+      break;
+    case 'second':
+      console.log('second');
+      break;
+    default:
+      console.log('default');
+  }
+}
+```
+
+
+
+###  三元运算符
+
+```
+> let b = null
+undefined
+> b = b ? b : 2
+2
+```
 
 ### for循环
 
@@ -637,8 +673,6 @@ for (;;){
 }
 ```
 
-
-
 ### while语句
 
 while语句简单了解下吧。
@@ -678,11 +712,11 @@ try {
 
 
 
-## this关键词
+## 类
+
+### this
 
 这个有点类似于python中的self，在javascript里面，object里面定义的方法， `this` 指向的就是本对象的实例。
-
-
 
 面向对象传统写法
 
@@ -744,9 +778,9 @@ var s2 = new Set([1, 2, 3]); // 含1, 2, 3
 
 
 
-##  三元运算符
 
-```
-test ? expression1 : expression2
-```
 
+## 参考资料
+
+1. Javascript权威指南 David Flanagan著.
+2. [mozilla docs](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)

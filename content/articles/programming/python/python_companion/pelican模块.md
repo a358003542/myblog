@@ -308,9 +308,6 @@ TAG_SAVE_AS = TAG_URL
 - `ARTICLE_URL` 定义了文章的URL显示，其中slug你可以在文件头属性那边自定义。
 - `ARTICLE_SAVE_AS` 定义了该文件在output文件夹那边如何的存储路径
 - 后面类似的有控制 CATEGORY TAG PAGE 页面的URL和具体网页在output文件夹里面的存储路径。
-- 
-
-
 
 
 
@@ -327,7 +324,16 @@ THEME = 'your_theme_name'
 
 theme内部static文件夹下的内容会copy到output文件夹下，比如 `static/css` 到 `theme/css` 。
 
-然后templates文件夹里面都是一些jinja2模板文件，后面讨论的theme相关主要就是关于这些jinja2模板的定制知识。
+然后templates文件夹里面都是一些jinja2模板文件，具体jinja2模块引擎相关的知识就不在这里讨论了，读者可以参看 [这篇文章]({filename}./jinja2模板引擎.md)。
+
+### 模板文件可以使用的变量
+
+1. 配置文件里面的变量直接可以使用，比如你在配置文件里面定义了`SITEURL="WHAT"` ，那么在模板文件里面可以这样引用 `{{ SITEURL}}` 。注意这些配置名按照规范是应该全部大写字母的。
+2. 比如在article模板下你定义的那些metadata都是可以引用的，如`article.tags` 。
+
+具体那些模板文件可以使用那些变量内容更多，请读者参看官方文档5.6 Creating themes的Templates and variables 一小节。
+
+
 
 ## Markdown相关
 
@@ -464,8 +470,6 @@ js和css也是静态资源，但和上面的处理有有所不同，前面也提
 PLUGIN_PATHS = ['pelican-plugins']
 PLUGINS = ['pelican_javascript', 'tipue_search', 'extract_toc']
 ```
-
-
 
 
 

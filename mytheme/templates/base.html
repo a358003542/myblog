@@ -4,8 +4,13 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625"/>
 
+    {% if SITEURL %}
+    <meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625"/>
+    <meta name="google-site-verification" content="r5HyVvY-ZSgf7ctpcpK1aWIaEfKJ0dvAE3E9kW3vXgI" />
+    <script data-ad-client="ca-pub-5644206261254049" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    {% endif %}
+    
     {% if article and article.author %}
         <meta name="author" content="{{ article.author }}"/>
         <meta name="copyright" content="{{ article.author }}"/>

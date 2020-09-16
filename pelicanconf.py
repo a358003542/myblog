@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
 
+from pelican_jupyter import markup as nb_markup
 import sys
 
 # set the author metadata
@@ -54,6 +55,7 @@ STATIC_PATHS = ['images',
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'},
     'extra/CNAME': {'path': 'CNAME'},
+    'extra/ads.txt': {'path': 'ads.txt'},
 }
 
 ARTICLE_URL = 'articles/{slug}.html'  # articles 里面的内容
@@ -70,7 +72,6 @@ AUTHOR_URL = 'author/{slug}.html'
 AUTHOR_SAVE_AS = ''
 # disable parse html
 READERS = {'html': None}
-
 
 
 ######################### MARKDOWN CONFIG #################
@@ -105,11 +106,11 @@ PLUGIN_PATHS = ['myplugins']
 
 # ipynb
 MARKUP = ("md", "ipynb")
-from pelican_jupyter import markup as nb_markup
 PLUGINS = [nb_markup]
 IGNORE_FILES = [".ipynb_checkpoints"]
 
-PLUGINS = ['pelican_javascript', 'extract_toc', 'tipue_search', 'render_math','sitemap']
+PLUGINS = ['pelican_javascript', 'extract_toc',
+           'tipue_search', 'render_math', 'sitemap']
 
 MATH_JAX = {'tex_extensions': ['mhchem.js']}
 
