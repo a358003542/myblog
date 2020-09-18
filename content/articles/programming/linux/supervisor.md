@@ -1,4 +1,6 @@
-
+Category: linux
+Slug: supervisor
+Date: 20190918
 
 [TOC]
 

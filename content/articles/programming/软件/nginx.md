@@ -1,5 +1,7 @@
-Title: nginx
 Slug: nginx
+Category: web_server
+Date: 20190918
+
 
 [TOC]
 ## 前言

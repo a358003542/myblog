@@ -2,6 +2,14 @@ Category: javascript
 Slug: jquery
 Date: 20200910
 
+
+
+## 前言
+
+如果你的前端开发使用了像react，vue之类的前端框架进行DOM操作，那么jquery的使用就是一个可选项了，一般也不推荐使用了。在某些情况下jquery还是很好用的，但随着html5相关标准的进步，很多新增特性引入进来是的以前觉得jquery很好用的那些点，现在用原生的javascript其实也是可行的。
+
+本文一方面就jquery一些基本知识做出一些简介，然后就可能的原生javascript方法做出说明。
+
 ## jquery基本语法
 
 jquery的基本语法就是:
@@ -12,7 +20,7 @@ $(selector).action()
 
 如果单 `$(selector)` 将返回找到的对象的数组，而进行某个action的时候是对所有找到的对象都进行如此动作。
 
-## 文档初始化之后执行的动作
+### 文档初始化之后执行的动作
 
 ```js
 $(document).ready(function(){
@@ -36,7 +44,7 @@ $(function(){});
 
 
 
-## 获取屏幕的宽度和高度
+### 获取屏幕的宽度和高度
 
 ```js
 var width = $(window).width()
@@ -45,7 +53,7 @@ var height = $(window).height()
 
 这两个方法更确切的描述是返回所选元素的宽度或高度。此外还有 `innerWidth` 和 `innerHeight` 方法（包含内边距）， `outerWidth` 和 `outerHeight` 包含内边距和边框。
 
-## hide方法
+### hide方法
 
 实际上就是css设置 `display:none` 。
 
@@ -57,9 +65,9 @@ $('#test').hide()
 
 
 
-## 获取文本和修改文本
+### 获取文本和修改文本
 
-### text()
+#### text()
 
 ```
 $('div').text()  # 获取文本
@@ -68,35 +76,35 @@ $('div').text('new text') # 修改文本
 
 此外还有 `html()` 方法，其可以写上html标签。
 
-## 获取表单value值或修改
+### 获取表单value值或修改
 
-### val方法
+#### val方法
 
 ```
 $('input').val()  # 获取值
 $('input').val('new value') # 修改值
 ```
 
-## css操作
+### css操作
 
-### 添加class
+#### 添加class
 
 ```
 div.addClass('highlight'); // 添加highlight这个class
 ```
 
-### 删除class
+#### 删除class
 
 ```
 div.removeClass('highlight'); // 删除highlight这个class
 ```
 
-### 修改css
+#### 修改css
 
     $('div').css('background-color', '#ffd351');
 
 
-## 让按钮变为不可选
+### 让按钮变为不可选
 
 prop方法设置或返回被选元素的属性。
 
@@ -106,15 +114,15 @@ $("button").prop('disabled', true)
 
 
 
-## 移除所选元素
+### 移除所选元素
 
-### remove方法
+#### remove方法
 
 ```
 $('#target4').remove();
 ```
 
-## 移动所选元素
+#### 移动所选元素
 
 将选中的元素移动到目标元素中。
 
@@ -122,7 +130,7 @@ $('#target4').remove();
 $('#target2').appendTo('#right-well');
 ```
 
-## 复制所选元素
+### 复制所选元素
 
 ```
 $('#target5').clone().appendTo('#left-well');
@@ -130,19 +138,19 @@ $('#target5').clone().appendTo('#left-well');
 
 
 
-## 选中父元素
+### 选中父元素
 
 ```
 $('#target1').parent().css('background-color','red');
 ```
 
-## 选中子元素
+### 选中子元素
 
 ```
 $('#right-well').children().css('color','orange');
 ```
 
-## 选中元素的第几个
+### 选中元素的第几个
 
 ```
 $('.target:nth-child(2)').addClass('animated bounce');
@@ -154,7 +162,7 @@ $('.target:even').addClass('animated shake');  # 选中元素的偶数个，0 2 
 
 
 
-## 事件绑定动作
+### 事件绑定动作
 
 ```
 $(selector).click(function)
@@ -162,7 +170,7 @@ $(selector).click(function)
 
 
 
-### 鼠标事件
+#### 鼠标事件
 
 -   **click:** 鼠标单击时触发；
 -   **dblclick:** 鼠标双击时触发；
@@ -171,7 +179,7 @@ $(selector).click(function)
 -   **mousemove:** 鼠标在DOM内部移动时触发 （接受e ，e.pageX是鼠标x值，e.pageY是鼠标Y值）
 -   **hover:** 鼠标进入和退出时触发两个函数，相当于mouseenter加上mouseleave。
 
-### 键盘事件
+#### 键盘事件
 
 键盘事件仅作用在当前焦点的DOM上，通常是 `<input>` 和 `<textarea>` 。
 
@@ -181,7 +189,7 @@ $(selector).click(function)
 
 
 
-### 取消某个事件绑定
+#### 取消某个事件绑定
 
 ```
 a.off('click', hello);
@@ -189,9 +197,9 @@ a.off('click', hello);
 
 
 
-## jquery 动画效果
+### jquery 动画效果
 
-### 面板展开和隐藏
+#### 面板展开和隐藏
 
 ```html
 <script> 
@@ -216,9 +224,6 @@ $(document).ready(function(){
   });
 });
 </script>
-
-### 页内导航慢慢移动
-
 
 
 
@@ -293,7 +298,9 @@ header('Access-Control-Allow-Methods:POST,GET');
 
 
 
-## 先网络加载jquery或者本地加载
+## 其他
+
+### 先网络加载jquery或者本地加载
 
 这里代码的意思应该是先网络加载jquery，如果没有则本地找找看。
 
@@ -306,24 +313,11 @@ header('Access-Control-Allow-Methods:POST,GET');
 
 
 
-## `$.fn`
-
-`$.fn` 是jquery定义的一个命名空间，后面每个jquery实例都可以引用在这个命名空间中定义的方法。
 
 
 
-## `$.extend`
 
-`$.extend({},{})` 相当于多个字典合并，若key重复，则以后面的字典的value为准。
+## 参考资料
 
-
-
-## `$.trim`
-
-去掉字符串首尾空格
-
-
-
-## `$().each()`
-
-`$().each()`  将迭代jquery选中的各个实例。
+1. Javascript权威指南 David Flanagan著.
+2. [you donot need jquery](https://github.com/nefe/You-Dont-Need-jQuery/blob/master/README.zh-CN.md)

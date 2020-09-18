@@ -1,6 +1,7 @@
-
-
-
+Category: python_companion
+Slug: faker-module
+Tags:  python, 
+Date: 2019
 
 [TOC]
 

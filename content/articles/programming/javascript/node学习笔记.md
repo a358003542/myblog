@@ -82,27 +82,7 @@ npm install 命令还可以使用 `i` 或者 `add` 这两个别名，此外insta
 - 符号 `^` 表示之后的版本都可以
 - 符号 `~` 表示是允许小版本内的升级
 
-### 发行你自己的npm包
 
-首先你需要在 `npmjs.com` 上申请个用户名：
-
-```
-npm adduser
-```
-
-或者以前adduser过了那么：
-
-```
-npm login
-```
-
-然后：
-
-```
-npm publish
-```
-
-默认发送公开的模块，npm付费用户可以发布私有模块： `"private": false`。
 
 
 
@@ -124,38 +104,58 @@ yarn在windows下也提供了安装包，去 [官网](https://classic.yarnpkg.co
 
 ## 模块简介
 
-前面谈了一些关于模块的东西，那么什么是模块，简单来说一个js文件就是一个模块，和随便写个js文件不同，上面谈论的npm模块都通过npm良好地管理起来了。
+前面谈了一些关于模块的东西，本小节将进一步介绍node的模块。
 
-在定义一个模块的时候你可以如下写：
-
-```
-exports.fun1 = function(){
-    return 'aaa';
-};
-```
-
-也可以这样写：
+首先我们新建一个文件夹mymodule，然后里面新建一个 `index.js` 文件。在`index.js` 文件里面定义一个简单的函数：
 
 ```
-modules.exports = {
-    fun1 : function(){
-        return 'aaa';
-    }
-};
+function add2(a,b){
+  return a + b;
+}
 ```
 
-这个exports和 `modules.exports` 实际是一个东西，其都是一个对象。
-
-然后在其他文件中使用模块：
+然后导出这个函数
 
 ```
-var test = require('./your.js')
+exports.add2 = add2
 ```
 
-这个test变量获得的值就是之前模块定义的那个exports对象。所以你可以如下使用了现在 `test.fun1` 。那个test名字是随便取的，不过最好取模块的名字。
+然后我们在外面新建一个 `test_mymodule.js` 来实际使用mymoudle模块：
+
+```
+var mymodule = require('./mymodule')
+
+console.log(mymodule.add2(1,2))
+```
+
+### 补充说明
+
+前面简单的模块创建例子中默认的  `index.js` 入口你可以通过新建 `package.json` 文件然后通过设置 `main` 字段属性来指定其他入口js文件。
+
+如果你的模块很大型了，那么可能 `exports.` 这种写法不太合适了，你可以通过设置 `module.exports` 为其他对象来改进之。
 
 
+### 发行你自己的npm包
 
+首先你需要在 `npmjs.com` 上申请个用户名：
+
+```
+npm adduser
+```
+
+或者以前adduser过了那么：
+
+```
+npm login
+```
+
+然后：
+
+```
+npm publish
+```
+
+默认发送公开的模块，npm付费用户可以发布私有模块： `"private": false`。
 
 
 

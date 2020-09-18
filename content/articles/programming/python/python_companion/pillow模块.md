@@ -1,4 +1,7 @@
-
+Category: python_companion
+Slug: pillow-module
+Tags:  python, 
+Date: 2019
 
 [TOC]
 

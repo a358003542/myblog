@@ -1,7 +1,14 @@
 Slug: apache
+Category: web_server
+Date: 20190918
 
 [TOC]
 
+## WARNING
+
+**警告，本文档已经归档，年久失修，可能内容已过于陈旧，放在这里权做读者参考。【2019】**
+
+## 前言
 
 关于apache2 web server的简要介绍请参看 [apache http server wiki](https://zh.wikipedia.org/wiki/Apache_HTTP_Server) 。目前推荐使用apache2.4，这是它的 [apache官方文档](http://httpd.apache.org/docs/2.4/) 。
 

@@ -362,68 +362,50 @@ function is_in_array(array, element){
 }
 ```
 
+### 对象
 
-
-
-
-### object
-
-和python这样的动态语言一样，javascript的object对象概念是很核心的一个概念。
-
-创建空的object推荐如下写法：
+对象是一个整合了数据和函数的集合。
 
 ```javascript
-const item = {};
+> let x = {}
+undefined
+> x = {'a':1}
+{ a: 1 }
 ```
 
-或者：
+下面演示了对象如何整合函数（或者叫做方法）的例子：
 
 ```javascript
-const person = {
-  name: 'Bob',
-  age: 20,
-  tags: ['js', 'web', 'mobile'],
-  city: 'Beijing',
-  zipcode: null
-};
+let x= {
+  'data': [1,2,3,4],
+  'length': function(){return this.data.length}
+}
+
+console.log(x.length())
 ```
 
-aribnb提出属性名直接写上就是了，包括函数也是如此：
+我们大概能够猜测出一些javascript底层如何实现的细节，但这对于目前阶段学习和使用这个编程语言来说是没有裨益的。前面在介绍typeof的时候提到数组，函数都是对象。
+
+新建一个数组的完整写法是： `new Array()` ；新建一个对象的完整写法是：`new Object()` 。新建一个类的写法如下所示：
 
 ```javascript
-const lukeSkywalker = 'Luke Skywalker';
-const obj = {
-  lukeSkywalker,
-};
+class Rectangle {
+  constructor(height, width) {
+    this.height = height;
+    this.width = width;
+  }
+}
+
+let p = new Rectangle();
 ```
 
-然后函数可以先通过function声明，或者直接写进去：
-
-```javascript
-const atom = {
-  value: 1,
-
-  addValue(value) {
-    return atom.value + value;
-  },
-};
-```
-
-然后还有一些属性名在javascript里面是非法的，那么当然只好用单引号包围起来了。
-
-#### 动态生成对象属性名
-
-```js
-const obj = {
-  id: 5,
-  name: 'San Francisco',
-  [getKey('enabled')]: true,
-};
-```
+因为后面有class这样的概念，我是推荐将这些出现的对象看作类似python中字典的概念，一个键值对映射集合。从编程概念上讲也是需要这样一个数据类型的。然后数组，这里的对象，函数，用户自定义的类等用typeof去查看都是object，他们都属于object。这个object是否就是这里的Object，从实现层面上我还不大确切，但这不是重点，就算是，从编程概念上来说也是应该有所区分的。一个是实用的数据类型，一个是很抽象的面向对象编程概念上的底层表述。
 
 
 
 #### in语句
+
+判断某个对象时候有某个键。
 
 ```js
 'name' in xiaoming;
@@ -474,8 +456,6 @@ aribnb提出相关的一些建议，我持保留意见，可能是python出身�
 console.log(Object.prototype.hasOwnProperty.call(object, key));
 ```
 
-
-
 #### shallow copy
 
 ```js
@@ -483,9 +463,14 @@ const original = { a: 1, b: 2 };
 const copy = { ...original, c: 3 }; // copy => { a: 1, b: 2, c: 3 }
 ```
 
+### 集合
 
+javascript中的集合Set大体也和python中的集合概念相近。
 
+var s1 = new Set(); // 空Set
+var s2 = new Set([1, 2, 3]); // 含1, 2, 3
 
+然后其也有 `add` 方法用于添加一个元素。用 `delete` 方法来删除某个元素。
 
 
 
@@ -499,7 +484,7 @@ let greeting = function(name){
 }
 greeting('hello')
 ```
-不过你也可以采用这种写法，这样更加为我们所熟悉了:
+上面的写法主要介绍了匿名函数的写法，某些情况下会用到，一般定义函数最好采用如下写法：
 
 ```js
 function abs(x){
@@ -538,7 +523,7 @@ rest是表示除了a和b之外的所有其余参量。注意前面三个点号: 
 
 ### 箭头函数
 
-简单来说箭头函数就是 lambda 表达式的更简洁写法，也就是匿名函数，只是说在javascript语境下其和一般function的区别是：<u>其没有this绑定</u>。
+简单来说箭头函数就是 lambda 表达式的更简洁写法，只是说在javascript语境下其和一般function的区别是：<u>其没有this绑定</u>。
 
 ```js
 (param1, param2, …, paramN) => { statements }
@@ -546,7 +531,7 @@ rest是表示除了a和b之外的所有其余参量。注意前面三个点号: 
 
 
 
-## 逻辑
+## 程序中的逻辑
 
 这一块如果读者熟悉一门编程语言的话，粗略地了解下扫一遍基本上就掌握了javascript相关语句知识。下面本小节也不会过多地讨论，只是就某些应用上常见的知识点做出一些说明。
 
@@ -712,29 +697,11 @@ try {
 
 
 
-## 类
+## 面向对象编程
 
-### this
+现代javascript推荐使用class来定义类：
 
-这个有点类似于python中的self，在javascript里面，object里面定义的方法， `this` 指向的就是本对象的实例。
-
-面向对象传统写法
-
-```js
-function Point(x, y) {
-  this.x = x;
-  this.y = y;
-}
-
-Point.prototype.toString = function () {
-  return '(' + this.x + ', ' + this.y + ')';
-};
-
-var p = new Point(1, 2);
-```
-
-新式写法
-```js
+```javascript
 //定义类
 class Point {
   constructor(x, y) {
@@ -748,7 +715,26 @@ class Point {
 }
 ```
 
+以前老式的写法如下所示，可以了解下：
 
+```javascript
+function Point(x, y) {
+  this.x = x;
+  this.y = y;
+}
+
+Point.prototype.toString = function () {
+  return '(' + this.x + ', ' + this.y + ')';
+};
+
+var p = new Point(1, 2);
+```
+
+
+
+### this
+
+在javascript里面，object里面定义的方法， `this` 指向的就是本对象的实例。
 
 如果 this 在函数里面，如：
 
@@ -762,19 +748,59 @@ function (){
 
 比如说某个函数将这样被调用： `jquery对象.what` 那么这个函数里面的this就是指定的那个jquery实例，通常也就是网页里面的某个标签元素。
 
+### constructor方法
 
+面向对象编程里面常见的概念，即该对象的构造方法，在新建实例化该对象时被调用。
 
+### 属性的get和set
 
+面向对象编程里面这个是自定义对象重要的一个设计点，javascript采用如下`get name()` 这样的写法： 
 
+```javascript
+class User {
+  constructor(name) {
+    this._name = name;
+  }
 
-## 集合
+  get name() {
+    return this._name;
+  }
 
-javascript中的集合Set大体也和python中的集合概念相近。
+  set name(value) {
+    if (value.length < 4) {
+      console.log("Name is too short.");
+      return;
+    }
+    this._name = value;
+  }
+}
 
-var s1 = new Set(); // 空Set
-var s2 = new Set([1, 2, 3]); // 含1, 2, 3
+let user = new User("John");
+console.log(user.name);
 
-然后其也有 `add` 方法用于添加一个元素。用 `delete` 方法来删除某个元素。
+```
+
+### 类的继承
+
+关于面向对象的继承概念这里就不赘述了。
+
+```javascript
+class Dog extends Animal{
+   //
+}
+```
+
+### super
+
+类似python语言里面的super概念，引用父类。
+
+### instanceof
+
+类似于python语言中的isinstance函数。
+
+```
+obj instanceof Class
+```
 
 
 
@@ -784,3 +810,4 @@ var s2 = new Set([1, 2, 3]); // 含1, 2, 3
 
 1. Javascript权威指南 David Flanagan著.
 2. [mozilla docs](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)
+3. [现代javascript教程](https://zh.javascript.info/)
