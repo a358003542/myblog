@@ -1,14 +1,12 @@
 Category: javascript
 Slug: jquery
-Date: 20200910
+Date: 20190910
 
 
 
-## 前言
+## WARNING
 
-如果你的前端开发使用了像react，vue之类的前端框架进行DOM操作，那么jquery的使用就是一个可选项了，一般也不推荐使用了。在某些情况下jquery还是很好用的，但随着html5相关标准的进步，很多新增特性引入进来是的以前觉得jquery很好用的那些点，现在用原生的javascript其实也是可行的。
-
-本文一方面就jquery一些基本知识做出一些简介，然后就可能的原生javascript方法做出说明。
+**本文已经归档，现代前端编程推荐使用前端框架进行复杂的DOM操作，同时一些简单的DOM操作和其他jquery功能随着javascirpt语言的完善，使用jquery显得并不怎么合适了。现代javascript编程不推荐使用jquery了，更多信息请参见 [javascript学习笔记的no-jquery一小节]({filename}./javascript语言学习笔记.md) 。**
 
 ## jquery基本语法
 
@@ -320,4 +318,4 @@ header('Access-Control-Allow-Methods:POST,GET');
 ## 参考资料
 
 1. Javascript权威指南 David Flanagan著.
-2. [you donot need jquery](https://github.com/nefe/You-Dont-Need-jQuery/blob/master/README.zh-CN.md)
+2. 

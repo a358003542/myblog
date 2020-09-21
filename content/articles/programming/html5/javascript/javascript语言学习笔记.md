@@ -804,10 +804,31 @@ obj instanceof Class
 
 
 
+## no-jquery
 
+
+
+### ajax
+
+更多信息请查看mozilla关于 [fetch函数的介绍](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API) 。
+
+```javascript
+fetch("http://localhost:8080").then(
+  function(response) {
+    console.log("请求状态: " + response.status);
+    return response.text();
+  }
+).then(function(text){
+  console.log("返回文本：" + text);
+})
+
+```
+
+fetch将请求一个URL，然后调用后面的函数。其中`response.text()` 返回的是一个Promise对象，什么是Promise对象，可以类比作python异步编程里面的协程，继续调用then才能获得内容。
 
 ## 参考资料
 
 1. Javascript权威指南 David Flanagan著.
 2. [mozilla docs](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)
 3. [现代javascript教程](https://zh.javascript.info/)
+4. [you donot need jquery](https://github.com/nefe/You-Dont-Need-jQuery/blob/master/README.zh-CN.md)
