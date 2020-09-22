@@ -1,6 +1,14 @@
 Category: blender
+Slug: blender-first-tutorial
+Date: 2020
 
 
+
+[TOC]
+
+## 前言
+
+本文基于blender版本 **2.8** 。
 
 ## 视图导航
 

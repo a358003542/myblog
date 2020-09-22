@@ -1,7 +1,7 @@
 Slug: electron-learning-notes
 Date: 2020
 Category: gui
-Tags: gui, javascript
+Tags: gui, javascript, electron
 
 [TOC]
 
@@ -30,7 +30,100 @@ yarn add electron --dev
 
 入门例子推荐看官方文档的这个 [样例项目](https://www.electronjs.org/docs/tutorial/first-app) ，这里就不赘述了，下面就其他问题做一些讨论。
 
+## 加载本地文件
 
+加载本地文件或者URL都推荐统一采用 `loadURL` 方法：
+
+```
+mainWindow.loadURL(path.join('file://', __dirname, 'index.html'))
+```
+
+这里的 `__dirname` 就是你当前执行js脚本所在的目录位置，上面加上 `file://` ，这样就可以实现加载本地文件。
+
+
+
+## 自定义菜单栏
+
+如果你设置mainWindow的frame属性为false：
+
+```
+  mainWindow = new BrowserWindow({
+    width: 800, height: 700, backgroundColor: '#fff',
+    frame: false
+  })
+```
+
+则你会看到一个无框的窗体，当然菜单栏也不存在了，不知道这是不是你要的。
+
+或者你也可以设置：
+
+```
+mainWindow.autoHideMenuBar = true
+```
+
+这样菜单栏会自动隐藏，这可能就是你想要的效果。
+
+或者你想彻底删除菜单栏：
+
+```
+mainWindow.removeMenu()
+```
+
+那么我们怎么定义自己的菜单栏呢，在createWindow函数下加入如下动作：
+
+```javascript
+  const template =
+    [
+      {
+        label: 'View',
+        submenu: [
+          { role: 'reload' },
+          { role: 'forcereload' },
+          { role: 'toggledevtools' },
+          { type: 'separator' },
+          { role: 'resetzoom' },
+          { role: 'zoomin' },
+          { role: 'zoomout' }
+        ]
+      },
+      {
+        role: 'window',
+        submenu: [
+          { role: 'minimize' },
+          { role: 'close' }
+        ]
+      }
+    ]
+
+  let menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+```
+
+注意上面的Menu需要前面引入进来：
+
+```
+const {app, BrowserWindow, Menu} = require('electron')
+```
+
+如果你设置：
+
+```
+Menu.setApplicationMenu(null);
+```
+
+也可以实现一种无菜单效果。上面的 `role` 开头的菜单是内置的，然后 `{ type: 'separator' }` 是加上一个分隔符，你也可以如下定义自己的菜单和动作：
+
+```javascript
+        {
+          label: 'Hello',
+          accelerator: 'Shift+CmdOrCtrl+H',
+          click() {
+              console.log('Oh, hi there!')
+          }
+        }
+```
+
+label是显示的文字，accelerator是快捷键，第三个是关联的函数对象。
 
 ## 项目结构推荐
 

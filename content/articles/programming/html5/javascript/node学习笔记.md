@@ -1,6 +1,7 @@
 Category: javascript
 Slug: node-learning-notes
-Date: 20200910
+Date: 2020
+Tags: javascript, node, npm, yarn
 
 [TOC]
 
@@ -94,7 +95,7 @@ yarn在windows下也提供了安装包，去 [官网](https://classic.yarnpkg.co
 
 ### yarn的基本使用
 
-- `yarn init` 对应于 `npm init`
+- `yarn init` 对应于 `npm init` ，适用于初始化一个新项目的，如果你的项目已经有`package.json` 这个文件了，那么你应该使用 `yarn install` 。
 - `yarn add` 对应于 `npm install` ，yarn add 不加上选项将安装到dependencies哪里， 然后 `--dev` 对应npm的 `--save-dev`  ，`--optional` 对应npm的 `--save-optional` 。此外yarn还多了一个 `--peer` 选项，其控制的字段是 `peerDependencies` ，这是一种特殊的依赖，叫做同伴依赖，在发布包的时候需要。
 - `yarn upgrade` 升级包
 - `yarn remove` 移除包
@@ -163,8 +164,8 @@ npm publish
 ## 参考资料
 
 其他官方文档就不赘述了。
-1. node.js实战 图灵设计丛书 Node.js in action
-1. [阮一峰的npm文章](http://javascript.ruanyifeng.com/nodejs/npm.html) 
-2. [理解exports这篇文章](https://www.sitepoint.com/understanding-module-exports-exports-node-js/) 
-3. [npx使用教程](https://www.ruanyifeng.com/blog/2019/02/npx.html)
 
+1. node.js实战 图灵设计丛书 Node.js in action
+2. [阮一峰的npm文章](http://javascript.ruanyifeng.com/nodejs/npm.html) 
+3. [理解exports这篇文章](https://www.sitepoint.com/understanding-module-exports-exports-node-js/) 
+4. [npx使用教程](https://www.ruanyifeng.com/blog/2019/02/npx.html)

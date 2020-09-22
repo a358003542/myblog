@@ -1,6 +1,7 @@
 Category: python_language
 Slug: python-pypi
 Date: 2019
+Tags: python, pypi
 
 
 [TOC]
