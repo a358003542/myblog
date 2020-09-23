@@ -101,7 +101,7 @@ sudo usermod -aG docker $USER
 
 下面的内容参考了这个视频：
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/YFl2mCHdv24" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe class="iframe-media" src="https://www.youtube.com/embed/YFl2mCHdv24" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 这个项目我们将新建一个自己的docker 镜像或者说image。
 
 1. 首先新建一个文件夹，开始编写Dockerfile
