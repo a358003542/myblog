@@ -1307,13 +1307,13 @@ print(test.x)
 
 ![多重继承示意图]({static}/images/python/duo-chong-ji-cheng.png)
 
-你可以测试一下上面这个例子，首先当然结果是D自己的x被先查找，然后返回*'D'*，如果你把类D的x定义语句换成pass，结果就是*'B'*。这说明这里程序的逻辑是如果test实例找不到x，那么再找D，D找不到再接下来找D继承自的父类，首先是B，到目前为止，没什么新鲜事发生。
+你可以测试一下上面这个例子，首先当然结果是D自己的x被先查找，然后返回D ，如果你把类D的x定义语句换成pass，结果就是B。这说明这里程序的逻辑是如果test实例找不到x，那么再找D，D找不到再接下来找D继承自的父类，首先是B，到目前为止，没什么新鲜事发生。
 
-然后我们再把B的x赋值语句换成pass，这时的结果是*'B1'*，也没什么好惊讶的。然后类似的一致操作下去，我们会发现python的值的查找顺序在这里是：D，B，B1，B2，B3，A，A1，A2。
+然后我们再把B的x赋值语句换成pass，这时的结果是B1，也没什么好惊讶的。然后类似的一致操作下去，我们会发现python的值的查找顺序在这里是：D，B，B1，B2，B3，A，A1，A2。
 
-于是我们可以总结道：恩，类的多重继承就是深度优先法则，先把子类或者子类的子类都查找完，确认没有值之后再继续从左到右的查找。
+于是我们可以总结道：恩，类的多重继承就是 **深度优先法则** ，先把子类或者子类的子类都查找完，确认没有值之后再继续从左到右的查找。
 
-一般情况来说这么理解是没有问题的，但是在编程界多重继承中有个有名的问题------菱形难题。
+一般情况来说这么理解是没有问题的，但是在编程界多重继承中有个有名的问题——菱形难题。
 
 ## 菱形难题
 
@@ -1324,91 +1324,76 @@ print(test.x)
 菱形难题即在如上的类的继承中，如果C和A都有同名属性x，那么D会调用谁的呢？读者测试下面的例子：
 
 ```
-class E():x='E'
-class F():x='F'
-class G():x='G'
-class A(F,G):x='A'
-class B(E,F):x='B'
-class D(B,A):pass
-test=D()
+class A():
+    x = 'A'
+
+class B(A):
+    x = 'B'
+
+class C(A):
+    x = 'C'
+
+class D(B, C):
+    x = 'D'
+
+
+test = D()
 print(test.x)
 ```
 
-此时运行结果到DBE都没有什么出奇的，
-接下来要某是DBEF[^15]，要某是DBEA，这里程序的结果是*'A'*。这里的情况确实比较纠结，如果没有这个F作为菱形难题的交叉点，似前面的层次分明，那么简单的理解为深度优先即可，这里python3的选择是*'A'*，不清楚为什么要这么选择。
+然后我们会发现python的查找顺序是D，B，C，A。
 
-我们再来看这个例子：
+实际上这个查找顺序python2和python3都是存在差异的，请参考 Guido 写的 [这篇文章](http://python-history.blogspot.com/2010/06/method-resolution-order.html) 。结论就是现在python3的MRO算法过程如下：
 
-```
-class E():x='E'
-class F():x='F'
-class G():x='G'
-class A(F,G):x='A'
-class B(F,E):pass
-class D(B,A):pass
-test=D()
-print(test.x)
-```
+1. 搜索树会被预计算
+2. 之前我们观察的深度优先算法大体是正确的，不同的是重复出现的类的处理逻辑是 **只保留最后的那个**。【因此上面的例子首先是D，B，A，C，A然后规约为了D，B，C，A】
 
-此时结果是*'A'*，连E都被跳过去了，变成了彻底的横向优先原则。
 
-程序出现菱形难题之后，情况变得不可琢磨了。上面的三个情况
-
-```
-D(B(B1 B2 B3) A(A1 A2)) → D B B1 B2 B3 A A1 A2
-
-D(B(E F) A(F G)) → D B E A F G
-
-D(B(F E) A(F G)) → D B A F E G
-```
-
-就是这样的，总之这是很冷门的领域了。。简单的理解就是深度搜索，类似flatten函数处理过，然后如果遇到某个子元在下一个平行级别的子元中也含有，那么本子元会被略过，做个记号，分叉跳过去跑到A那里，执行完那个子元之后，又会重新调到之前的操作点上。
 
 ## super如何面对菱形难题
 
-第一种情况是如果是单继承的类的系统，`super()`这种形式就直接表示父类的意思。然后用 `super().` 什么什么的来引用父类的某个变量或方法。
+super是引用父类动作，简单的情况就不说了，接下来请看下面这个例子：
 
-第二种情况是多重继承的，搜索顺序和多重继承的搜索顺序相同，也就是从左到右。请注意调试下面的例子，如果调用c.d就会返回错误，说明调用的是类A的构造函数。
+```python
+class Base():
+    def __init__(self):
+        print('Base')
+
+
+class A(Base):
+    def __init__(self):
+        super().__init__()
+        print('A')
+
+
+class B(Base):
+    def __init__(self):
+        super().__init__()
+        print('B')
+
+
+class C(B, A):
+    def __init__(self):
+        super().__init__()
+        print('C')
+
+
+t = C()
 
 ```
-class A():
-    def __init__(self,a):
-        self.a=a
 
-    def fun(self):
-        print('fun')
+这里例子刁钻就刁钻在其还多次调用了super这个函数，我一开始也以为类B那里引用super会指向Base。首先说一下这个例子的输出把：
 
-    def fun2(self,what):
-        print('fun',what)
-
-class B():
-    def __init__(self):
-        self.d=5
-    b=2
-    def fun3(self):
-        print('fun3')
-
-class C(A,B):
-    def __init__(self):
-        super().__init__(3)
-        super().fun()
-        super().fun2('what')
-        super().fun3()
-        print(super().b)
-
-c=C()
-print(c.a,c.b)
-
-fun
-fun what
-fun3
-2
-3 2
+```
+Base
+A
+B
+C
 ```
 
-其中A类定义的fun函数在写的函数上通常有个self参数，而`super()`这种调用形式在意义上表示其的父类，同时默认第一个参数就是self。使用super()在类的编写中引用本类的父类的属性和方法是很便捷的。比如上面的例子中fun3能被调用是因为多重继承的机制在这里，所以它会逐个找父类。然后c.d会出错，因为这里初始化是用的A类的构造函数。
+C那里的super引用B这没问题，B那里的super引用的是A这是我没想到的。具体原因是这个super引用逻辑还是调用的前面提到的MRO算法的预处理树，其搜索树为：C，B，A，Base。第二次调用会引用A。然后A那里super再引用Base。
 
-
+最后我们的初始化动作就上面的例子来说是各个类的`__init__` 都执行了一遍。
 
 # 描述器
 
