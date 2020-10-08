@@ -373,7 +373,15 @@ i accpeted: a
 => 1
 ```
 
-类初步测试不支持这种 Test\['x'\] 的写法。 然后 `__setitem__(self, key, value)` 方法 对应 `t['x']=3` 这样的赋值形式；还有 `__delitem(self, key)__` 方法对应这样的运算符号表示： `del t['x']`。
+**默认一般的类是不支持这种 Test['x'] 这种写法。**  然后 `__setitem__(self, key, value)` 方法 对应 `t['x']=3` 这样的赋值形式；还有 `__delitem(self, key)__` 方法对应这样的运算符号表示： `del t['x']`。
+
+按照python官方文档的介绍：在实现这个方法的时候，有几个异常规范：
+
+- TypeError 当key是不恰当类型抛出
+- IndexError 如果给定的值超出了序列的索引范围则应该抛出这个异常
+- KeyError 如果没有这个key则应该抛出这个异常。
+
+
 
 ## 数学运算符号重载
 
@@ -742,10 +750,22 @@ True
 
 ## \_\_getattr\_\_
 
-如果某个属性不在对象的 `__dict__` 里面，然后python会调用`__getattr__(self,name)` 方法（参考了
-[这篇文章](http://www.cnblogs.com/vamei/archive/2012/12/11/2772448.html)）。如果没定义这个方法那么将抛出 AttributeError 。
+如果某个属性不在对象的 `__dict__` 里面，然后python会调用`__getattr__(self,name)` 方法（参考了[这篇文章](http://www.cnblogs.com/vamei/archive/2012/12/11/2772448.html) ）。如果没定义这个方法那么将抛出 AttributeError 。
 
-然后还有 `__setattr__(self,name,value)` 和 `__delattr__(self,name)`，这两个方法不管原属性在不在都会对其进行操作，谨慎使用！
+因为python语言内部是行为是可能发生变化的，这里更确切的表述参考python官方文档是，如果python默认属性查找没有找到，那么将试着调用该对象的 `__getattr__` 方法来查找，还找不到则抛出 `AttributeError` 异常。官方文档还强调，如果按照python默认的属性查找动作，找到目标属性了，也就是之前我们讨论的那些和类继承相关的属性找到等等。那么 `__getattr__` 方法是不会被调用的。所以我们要实现 `__getattr__` 方法加上额外的查找动作代码如下：
+
+```python
+    def __getattr__(self, item):
+        if self.ref_element:
+            if hasattr(self.ref_element, item):
+                return getattr(self.ref_element, item)
+
+        raise AttributeError(f'no such attribute in this object')
+```
+
+
+
+然后还有 `__setattr__(self,name,value)` 和 `__delattr__(self,name)`，这两个方法不管原属性在不在都会对其进行操作，谨慎使用！相关的`__getattribute__` 方法一般不推荐使用，这会干扰python默认的属性查找行为，这是一种很不好的编程实践。
 
 # 迭代器和生成器
 

@@ -82,6 +82,8 @@ const element = <Welcome name="Sara" />;
 
 上面的Welcome是一个react组件，其也可以直接写入到JSX里面。
 
+在JSX中原html属性名字class需要写为 `className` 。
+
 
 
 

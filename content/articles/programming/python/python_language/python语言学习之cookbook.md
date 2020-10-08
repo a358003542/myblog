@@ -97,7 +97,7 @@ loop = loop if loop is not None else get_event_loop()
 
 hasattr，setattr，getattr，delattr，这些函数都属于关于python中各个对象的属性管理函数，其都是内置函数。
 
-其中hasattr(object, name)检测某个对象有没有某个属性。
+其中hasattr(object, name)检测某个对象有没有某个属性。其实际调用的还是getattr方法，然后稍作封装。
 
 setattr(object, name, value)用于设置某个对象的某个属性为某个值，`setattr(x,a,3)` 对应 `x.a = 3` 这样的语法。
 
