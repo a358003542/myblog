@@ -1,6 +1,6 @@
 Slug: pyside2-learning-notes
 Category: gui
-Date: 2020
+Date: 20201018
 Tags: gui,python
 
 

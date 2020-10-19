@@ -1,6 +1,6 @@
 Category: SQL 
 Slug: postgresql-database
-Date: 2020
+Date: 20201018
 
 [TOC]
 

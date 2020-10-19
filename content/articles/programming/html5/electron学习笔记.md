@@ -1,5 +1,5 @@
 Slug: electron-learning-notes
-Date: 2020
+Date: 20201018
 Category: gui
 Tags: gui, javascript, electron
 

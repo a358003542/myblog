@@ -1,6 +1,6 @@
 Category: javascript
 Slug: javascript-language-learning-advanced
-Date: 2020
+Date: 2021
 
 [TOC]
 

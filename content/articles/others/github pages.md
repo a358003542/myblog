@@ -1,6 +1,6 @@
 Slug: github-pages
 Tags: blog, github
-Date: 2019
+Date: 20191018
 
 [TOC]
 

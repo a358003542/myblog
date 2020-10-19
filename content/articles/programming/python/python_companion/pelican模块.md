@@ -1,6 +1,6 @@
 Category: python_companion
 Slug: pelican-module
-Date: 2019
+Date: 20191018
 Tags: pelican, python, blog
 
 [TOC]

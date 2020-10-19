@@ -1,7 +1,7 @@
 Category: linux
 Slug: bash-learning-notes
 Tags: bash,
-Date: 2019
+Date: 20191018
 
 [TOC]
 

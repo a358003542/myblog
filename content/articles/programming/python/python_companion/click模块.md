@@ -1,7 +1,7 @@
 Category: python_companion
 Slug: click-module
 Tags:  python, 
-Date: 2019
+Date: 20191018
 
 [TOC]
 

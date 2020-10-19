@@ -1,7 +1,7 @@
 Category: software
 Slug: git
 Tags: git
-Date: 2019
+Date: 20191018
 
 [TOC]
 

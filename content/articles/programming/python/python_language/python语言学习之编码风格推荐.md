@@ -1,6 +1,6 @@
 Slug: python-style-guide
 Category: python_language
-Date: 2019
+Date: 20191018
 Tags: python
 
 

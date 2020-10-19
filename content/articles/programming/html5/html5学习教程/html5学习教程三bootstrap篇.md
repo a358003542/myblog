@@ -1,10 +1,10 @@
 Category: html5_tutorial
 Slug: html5-tutorial-bootstrap
-Date: 2019
+Date: 20191018
 
 [TOC]
 
-# bootstrap
+## bootstrap
 
 本文点到为止讲解一下，读者简单了解即可，具体还是要自己练手来学习。
 

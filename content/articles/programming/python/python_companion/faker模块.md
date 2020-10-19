@@ -1,12 +1,12 @@
 Category: python_companion
 Slug: faker-module
 Tags:  python, 
-Date: 2019
+Date: 20191018
 
 [TOC]
 
 
-# 简介
+## 简介
 
 faker模块是一个很有特色的模块，所以其在github上得到的star也较多。其可以用来生成一些伪数据，比如用来做测试用途等等。其github项目地址在 [这里](https://github.com/joke2k/faker) 。
 
@@ -36,7 +36,7 @@ for i in range(100):
     print(faker.name())
 ```
 
-# faker所含方法清单
+## faker所含方法清单
 
 -   **address():** 地址
 -   **text():** 显示一段随机文本，没有中文化。
@@ -149,7 +149,7 @@ for i in range(100):
     fake.word()                        # voluptas
     fake.words()                       # ['optio', 'et', 'voluptatem']
 
-# 设置随机种子
+## 设置随机种子
 
     from faker import Faker
     fake = Faker()
@@ -157,7 +157,7 @@ for i in range(100):
     
     print fake.name()   # Margaret Boehm
 
-# 语言locale代码
+## 语言locale代码
 
     bg_BG - Bulgarian
     cs_CZ - Czech

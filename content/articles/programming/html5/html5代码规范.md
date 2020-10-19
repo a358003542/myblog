@@ -1,10 +1,10 @@
 Category: html5_tutorial
 Slug: html5-style-guide
-Date: 2019
+Date: 20191018
 
 [TOC]
 
-# html5代码规范
+## html5代码规范
 
 本文参考了 [这篇文章](http://codeguide.bootcss.com) 和 [这篇文章](http://alloyteam.github.io/CodeGuide/)  。
 

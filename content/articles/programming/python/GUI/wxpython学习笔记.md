@@ -1,18 +1,18 @@
 Slug: wxpython-learning-notes
 Category: gui
 Tags: gui, python
-Date: 2019
+Date: 20191018
 
 
 [TOC]
 
-# WARNING
+## WARNING
 **警告，本文档已经归档，缺少新的内容，旧的内容也可能存在错误，现在推荐使用pyside2来进行GUI编程。关于GUI编程请参看 [pyside2学习笔记]({filename}./pyside2学习笔记.md) 【2019】** 。
 
 
 
 
-# wxpython
+## wxpython基础
 
 本文假设读者已经熟悉某一种桌面图形开发了，比如说PyQt之类的，也就是基本的图形桌面开发概念读者是熟悉了，下面将言简意赅地就wxpython相关的特色核心概念说明之，然后后面就针对某些专门的问题专门讨论了。
 
@@ -20,13 +20,13 @@ Date: 2019
 
 
 
-## Sizer.Add参数详解
+### Sizer.Add参数详解
 
 - `Sizer.Add(item, 0 , wx.ALIGN_RIGHT, 0)`    右对齐布局，第一个参数proportion详细讨论在后面，第三个参数是设置border的宽度的。
 - Sizer.Add(item, 0, wx.ALIGN_CENTER, 0)  居中布局
 - Sizer.Add(item, 0, wx.EXPAND, 0) 扩展布局，（在vertical sizer里面水平扩展；在horizontal sizer里面垂直扩展）
 
-### proportion参数
+#### proportion参数
 
 默认是0，0表示不缩放，我估计这样设置之后父窗体Layout，而子窗体将不会自动Layout。然后设置其他整数则是某种缩放比的意思。参考资料谈了一些缩放比的问题，暂时不是很关心这个。下面是讨论的原文：
 
@@ -34,11 +34,11 @@ Date: 2019
 
 一般的0表示不缩放，1表示随着父窗体缩放而缩放。
 
-### Flag参数
+#### Flag参数
 
 这块东西经常遇到，虽然Flag较多，还是建议沉下心来学一下，这些后面会频繁用到的：
 
-####  控制那边有border
+#####  控制那边有border
 ```
 wx.TOP
 wx.BOTTOM
@@ -47,14 +47,14 @@ wx.RIGHT
 wx.ALL
 ```
 
-#### 扩展
+##### 扩展
 
 ```
 wx.EXPAND  周围有空间就扩展
 wx.SHAPED  扩展同时保持宽高比
 ```
 
-#### 对齐
+##### 对齐
 
 ```
 wx.ALIGN_CENTER or wx.ALIGN_CENTRE
@@ -81,7 +81,7 @@ wx.ALIGN_CENTER_HORIZONTAL or wx.ALIGN_CENTRE_HORIZONTAL
 wx.EXPAND | wx.ALL 有空间就扩展，上下左右border都有
 ```
 
-## Frame样式
+#### Frame样式
 - `wx.FRAME_NO_TASKBAR` 没有任务栏
 
 - `wx.FRAME_SHAPED` 非矩形框架
@@ -95,11 +95,11 @@ wx.EXPAND | wx.ALL 有空间就扩展，上下左右border都有
 - `wx.SIMPLE_BORDER` 没有装饰的边框
 
 
-## 布局的太布局的
+### 布局的太布局的
 
 一般手写布局代码的话，肯定是使用各个Sizer，其中BoxSizer最常用，对于不是特别复杂的布局BoxSizer，横竖拼接加上Add的参数调配，基本上都是调出来的。以至于每个panel类里面我现在都写上了一个 `self.box` 成为惯例了，虽然后面某些情况下会使用到其他Sizer，比如GridSizer等，但GridSizer是可以放在BoxSizer里面的，所以问题不大。这样形成惯例之后，后面引用该面板，想到主Sizer，就直接panel.box即可，这是题外话了。
 
-### FlexGridSizer
+#### FlexGridSizer
 
 FlexGridSizer布局将页面分成二维的表格，各个表格元素高度一定是一样的，但宽度可以不一样（GridSizer则要求一定一样）。
 
@@ -116,13 +116,11 @@ wx.FlexGridSizer(int rows=1, int cols=0, int vgap=0, int hgap=0)
 
 
 
-## wxpython里面的ID
-
-
+### wxpython里面的ID
 
 window identifiers 是一些整数 决定了窗体在系统中的唯一性，wxpython中可以如下定义窗体的ID：
 
-### 窗体ID的定义
+#### 窗体ID的定义
 - 明确赋值一个正整数，不推荐
 - 使用wx.NewID()
 - 传递wx.ID_ANY 或 -1 给窗体构造器
@@ -135,11 +133,11 @@ id = frame.GetId()
 
 然后笔者强烈推荐读者使用名字来定义和定位窗体，这样你的代码具有更具有良好的可读性。
 
-### 标准ID
+#### 标准ID
 
 [官方文档标准ID列表](https://wxpython.org/Phoenix/docs/html/wx.StandardID.enumeration.html) 
 
-### 根据ID来查找窗体
+#### 根据ID来查找窗体
 1、wx.FindWindowById(id, parent=None)
 2、wx.FindWindowByName(name, parent=None)
 3、wx.FindWindowByLabel(label, parent=None)
@@ -148,7 +146,7 @@ id = frame.GetId()
 
 
 
-## 根据名字来查找窗体
+### 根据名字来查找窗体
 
 笔者强烈推荐读者在写大型GUI程序的时候给几个核心窗体都定义好唯一的名字（具体大部分窗体都可以接受一个name可选参数的），然后如下来查找之。这对于你后面的编程会带来很大的便利。
 
@@ -179,7 +177,7 @@ def is_the_window_name(window, name):
 
 
 
-## 深入理解wxpython中的事件
+### 深入理解wxpython中的事件
 
 ```
 Bind(event, handler, source=None, id=wx.ID_ANY, id2=wx.ID_ANY)
@@ -190,7 +188,7 @@ Bind(event, handler, source=None, id=wx.ID_ANY, id2=wx.ID_ANY)
 - source 一般不需要指定，如果父窗口多个相同的触发源，比如说多个按钮，那么就需要指定下。
 - id 根据id定义事件触发源，在某些情况下根据id来会更方便些，然后id2同id可以确定一串连续的窗体。
 
-### wxpython事件处理过程
+#### wxpython事件处理过程
 
 
 
@@ -203,7 +201,7 @@ Bind(event, handler, source=None, id=wx.ID_ANY, id2=wx.ID_ANY)
 3. `event.Skip()` 这个方法之前我以为是该事件的处理跳过了，理解错误了，更准确的说法是 **本事件处理完成** 了。 也就是如果在事件触发链中，没有看到这个方法，那么事件将会继续传播，否则事件处理终止。
 4. 如果目标事件允许 传播propagate ， 那么还会继续向上去触发父容器的事件，直到App，也就是最顶层结束传播。【默认情况，只有wx.CommandEvent及其子类的实例向上展开至容器级。其它的所有事件都不传播。】【Button单击属于CommandEvent，鼠标移动和浮动在上和离开都是MouseEvent】
 
-#### 习题1
+##### 习题1
 
 请读者解释为什么是下面的写法，鼠标浮动在上和离开事件为什么只能定向self.button。
 
@@ -219,7 +217,7 @@ self.button.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeaveWindow)     #3 绑定鼠标离
 
 大体是这样的，如果读者还有不明白了，请阅读 wxpython in action 这本书的第三章，关于这部分问题，这本书讲的很好。
 
-#### 习题2
+##### 习题2
 
 如何一个按钮的点击事件会触发两个动作。
 
@@ -227,7 +225,7 @@ self.button.Bind(wx.EVT_LEAVE_WINDOW, self.OnLeaveWindow)     #3 绑定鼠标离
 
 
 
-### 手动触发某个事件
+#### 手动触发某个事件
 
 有时直接手动触发一个事件会省下很多代码。
 
@@ -237,7 +235,7 @@ self.Close(True)
 
 
 
-### 获取当前事件的触发对象
+#### 获取当前事件的触发对象
 
 ```
 button = event.GetEventObject()
@@ -246,7 +244,7 @@ print(button.GetName())
 
 
 
-### 常见的wx.Event子类
+#### 常见的wx.Event子类
 
 - wx.CloseEvent frame框架关闭时触发
 - wx.CommandEvent 按钮单击 菜单选择 等
@@ -258,7 +256,7 @@ print(button.GetName())
 
 
 
-### 按钮三事件
+#### 按钮三事件
 
 按钮在GUI设计中是使用频率非常高的一个组件，其绑定的最常用的三个事件有：
 
@@ -270,7 +268,7 @@ print(button.GetName())
 
 
 
-## 什么时候调用Layout方法
+### 什么时候调用Layout方法
 
 动态调整GUI的各个元素，我们会看到网上各个例子经常会看到调用了 Layout方法，然后有的时候我发现不调用似乎影响不大，有的时候发现不调用页面会变形，那么到底什么时候应该调用Layout方法呢。请参看 [这篇文章](https://wiki.wxpython.org/WhenAndHowToCallLayout) 。
 
@@ -288,7 +286,7 @@ print(button.GetName())
 3. Layout之后还不对劲，这通常不是布局的问题了，某些情况下你更改了一些数据，可能需要Refresh
 4.  TODO Layout 和 Refresh 的区别是什么 目前我已经遇到一个问题，只有Refresh之后才有正常的行为，那就是重画的透明组件再设置标签之后，似乎只有Refresh之后才会再次进行重画动作，这值得引起读者的注意。然后有的时候我们看到子面板Layout之后会自动Refresh。
 
-### ScrolledPanel
+#### ScrolledPanel
 
 这里特别值得一提的是 `ScrolledPanel` 里面的内容在发生变动的时候，除了Layout之外还需要加上：
 
@@ -298,13 +296,13 @@ self.SetupScrolling()
 
 实践发现是内容变动之后都需要加上这句，否则侧边滚动条会丢失，下面的内容也会被隐藏。
 
-## 设置背景颜色和字体颜色
+### 设置背景颜色和字体颜色
 
 wxpython的任何窗体对象（是的这两个方法是挂在wx.Window上的），可以用 `SetBackgroundColour` 来设置其背景颜色，用 `SetForegroundColour`来设置前景颜色，前景颜色一般就是所谓的字体颜色吧。
 
 如果你需要动态调成某个面板的背景颜色，那么记得调用Refresh方法来激活重画事件。
 
-## 将图片转成python编码
+### 将图片转成python编码
 
 首先是编写这样一个python脚本：
 
@@ -355,7 +353,7 @@ if __name__ == "__main__":
 
 最常用的是 `GetBitmap` 直接获取Bitmap图片对象。
 
-## 后台任务
+### 后台任务
 
 wxpython的后台任务推荐用 `wx.CallAfter` 或者 `wx.CallLater` 来调用。用python内置的多线程可能会让你的界面有时出现一些奇怪的问题。
 
@@ -363,7 +361,7 @@ wxpython的后台任务推荐用 `wx.CallAfter` 或者 `wx.CallLater` 来调用�
 wx.CallAfter(callable, *args, **kwargs)
 ```
 
-## Timer
+### Timer
 
 wxpython里面的计时器某些任务挂上去还是很方便的。
 
@@ -375,13 +373,13 @@ wxpython里面的计时器某些任务挂上去还是很方便的。
 
 
 
-## 动态多组件切换
+### 动态多组件切换
 
 用boxsizer来挂载一些面板，然后隐藏一些面板，并显示初始你想要显示的那个panel。Add, Show Hide 等方法来操作，最后注意Layout一下，这是基本功了。
 
 这里值得一提的是，如果你只是本panel基本的Layout，那么多个panel切换父panel给那些子panel的size都是一致的，因为你的子panel各个size大小不同，如果你动态切换需要更好的效果，那么应该调用父panel的Layout。
 
-### 某个子Panel的重写
+#### 某个子Panel的重写
 
 一些参数的变化，你的子panel需要重写，这个时候推荐使用box的Replace方法：
 
@@ -414,7 +412,7 @@ wxpython里面的计时器某些任务挂上去还是很方便的。
 
 
 
-## 全局捕捉异常
+### 全局捕捉异常
 
 ```python
 import sys
@@ -477,7 +475,7 @@ if __name__ == '__main__':
 
 
 
-## 验证器
+### 验证器
 
 验证器最开始是对于对话框的某些数据格式有限定要求，但后面发现验证器非常的有用，之前对话框管理 `self.data` 做的一些工作可以交给验证器来做，所以验证器这一块最好早接触。
 
@@ -601,7 +599,7 @@ class CategorySPAddValidator(wx.Validator):
 
 上面的代码只是一个演示功能，读者具体自己写代码还是不要寄托这些神奇的魔法，应该更加明晰的指定数据从哪里来，到哪里去。
 
-## wxpython和asyncio的集成
+### wxpython和asyncio的集成
 
 本小节主要参考了 [这个代码文件](https://github.com/BrendanSimon/micropython_experiments/blob/master/keypad_lcd/wx_asyncio_test_1.py) 。我看了一下，空闲事件和Timer事件都彼此触发，重复得很明显，就选择一个Timer触发即可。
 
@@ -623,7 +621,7 @@ class CategorySPAddValidator(wx.Validator):
 
 
 
-## 利用进程间通信来实现多次启动应用只有一个应用
+### 利用进程间通信来实现多次启动应用只有一个应用
 
 前面已经讲了wxpython如何实现确保只有一个程序实例在运行，就是利用 `wx.SingleInstanceChecker` 这个类，具体使用很简单。
 
@@ -677,7 +675,7 @@ async def handle_local_socket_client(message, loop):
 
 
 
-## 程序触发事件
+### 程序触发事件
 
 wxpython里面如何通过程序来触发某个事件呢，如下所示：
 
@@ -707,7 +705,7 @@ event.GetEventObject()
 
 
 
-## TextCtrl用代码改变文本
+### TextCtrl用代码改变文本
 
 TextCtrl用代码直接改变文本的方法有：
 
@@ -720,9 +718,9 @@ TextCtrl用代码直接改变文本的方法有：
 - Remove 删除指定范围文本
 - Replace 替换指定范围文本
 
-## 对接系统的剪贴板
+### 对接系统的剪贴板
 
-### 将文本放入剪贴板
+#### 将文本放入剪贴板
 
 ```python
 data = wx.TextDataObject()
@@ -735,7 +733,7 @@ else:
 	print('剪贴板打不开..')
 ```
 
-### 从剪贴板中取内容
+#### 从剪贴板中取内容
 
 ```python
 data = wx.TextDataObject()
@@ -750,11 +748,11 @@ if success:
 
 
 
-## ScrolledPanel
+### ScrolledPanel
 
 带滚动条的面板，下面是一些值得额外一提的东西：
 
-### SetupScrolling
+#### SetupScrolling
 
 ```python
 SetupScrolling(self, scroll_x=True, scroll_y=True, rate_x=20, rate_y=20,
@@ -777,7 +775,7 @@ SetupScrolling(self, scroll_x=True, scroll_y=True, rate_x=20, rate_y=20,
 
 
 
-## wxpython里面的鼠标图案
+### wxpython里面的鼠标图案
 
 一般面板，也就是继承自Window的类都有 `SetCursor` 方法来设置当前的鼠标图形
 
@@ -805,7 +803,7 @@ self.SetCursor(wx.Cursor(wx.CURSOR_HAND))
 
 
 
-## ComboBox内容的修改
+### ComboBox内容的修改
 
 参考了 [这个问题](https://stackoverflow.com/questions/682923/dynamically-change-the-choices-in-a-wx-combobox) 。
 
@@ -819,7 +817,7 @@ ComboBox的官方手册上找不到相关方法，原来ComboBox继承自 `ItemC
 
 
 
-## 自定义对话框
+### 自定义对话框
 
 某些情况下直接继承自 `SizedDialog`  会很方便：
 
@@ -854,7 +852,7 @@ if val == wx.ID_DELETE ...
 
 
 
-## 列表控件
+### 列表控件
 
 列表控件支持三种模式：
 
@@ -867,29 +865,25 @@ if val == wx.ID_DELETE ...
 
 
 
-## 网格控件
+### 网格控件
 
 网格控件 `wx.grid.Grid` 感觉比列表控件更加复杂，具体涉及到的方法很多，建议根据需要查阅文档之。
 
 
 
-## 树型控件
+### 树型控件
 
 TreeCtrl 显示复杂的层次数据，比如目录结构时可以用到。
 
-## HTMLWindow
+### HTMLWindow
 
 对于某些复杂的文本显示需求，可以使用HTMLWindow用一种类html标记语言来渲染而成，其底层并不是用的浏览器渲染，而是wxpython自己完成了的渲染，简单来说这只是wxpython通过一种类html标记语言完成的一种快速定义文本显示界面的功能。
 
 此外wxpython还提供了html2包，其是利用浏览器底层渲染，然后显示的，这样更接近浏览器显示效果。
 
-## wxpython的打印支持
-
-这一块暂时略过
 
 
-
-## DateTime和python的datetime对象互转
+### DateTime和python的datetime对象互转
 
 这一节参考了 python cook book 的 #12 recipe。这里记录下，后面有时候应该会用到的：
 
@@ -915,9 +909,9 @@ def wxdate2pydate(date):
 
 
 
-## boxsizer两个值得注意的方法
+### boxsizer两个值得注意的方法
 
-### AddSpacer
+#### AddSpacer
 
 作用就是增加一段固定的空白距离，boxsizer覆写了sizer的AddSpacer方法，横向竖向不能混淆的。
 
@@ -950,13 +944,13 @@ def add_hspace(box, size):
 
 
 
-### AddStretchSpacer
+#### AddStretchSpacer
 
 这个方法是sizer里面的，boxsizer也可以调用，一开始我还没注意到。这个方法和上面方法的区别就是增加了一段可缩放的空白距离，其在Qt里面就是一段弹簧样的东西。利用这个缩放器很方便实现某个空间的居中或者某个比例的位置调整。
 
 
 
-# wxpython编码风格推荐
+## wxpython编码风格推荐
 
 1. 使用
 
@@ -982,7 +976,7 @@ import wx
 
 
 
-## 代码重构：思考如何视图操作分离
+### 代码重构：思考如何视图操作分离
 
 首先说一下整个编程世界公认的一些理念，比如DRY原则。
 
@@ -1001,7 +995,7 @@ import wx
 
 
 
-### 视图层
+#### 视图层
 
 你之前写的GUI程序一开始就放在视图层，你的视图层的panel类等，本面板的子控件，主要是那些可变元素，挂在本面板上可以直接调用，后面根据你的业务和GUI显示需求，你需要些更好针对本面板的子控件的组合行为。
 
@@ -1009,7 +1003,7 @@ import wx
 
 然后视图层还有常数信息，按照前面讨论的编码风格推荐，也应该慢慢抽离出来，用某个const常数模块来统一管理之，一句话，努力做到数据和代码分离。
 
-### 控制层
+#### 控制层
 
 控制层的任务有如下：
 
@@ -1019,7 +1013,7 @@ import wx
 
 
 
-### 模型层
+#### 模型层
 
 模型层不和视图层直接进行交互，如前面所说的，只负责管理好本地的数据和发送相应的信号，实际上模型层也没有引入控制层，其只是一个单纯简单的管理本地数据的接口罢了。
 
@@ -1027,7 +1021,7 @@ import wx
 
 
 
-## 二次思考MVC架构
+### 二次思考MVC架构
 
 流行的web框架是以一种非常成熟的MVC架构风格，很多东西并没有引起我们太大的注意，加之GUI编程相对于web应用视图层和控制层不太好分离。随着GUI程序越来越复杂，我也确实感觉到有些东西有点杂乱，思路不够清晰，一会这里数据变动了，视图层忘记跟着变动，一会儿那边数据变动了，信号又忘记发送了。
 
@@ -1047,17 +1041,17 @@ GUI层自身还有一些事件处理。
 
 ![img](C:/Users/a3580/Desktop/wxpython/{static}/images/wxpython/MVC.png)
 
-### 常量，模型层变量，全局变量分离
+#### 常量，模型层变量，全局变量分离
 
 程序涉及到的常量，模型层变量，全局变量分离，早期觉得都汇入全局变量挺方便的，但随着全局变量规模变得庞大，需要分离来减轻程序员头脑负担。
 
-### 模型层和视图层分离
+#### 模型层和视图层分离
 
 1. 模型层里面不应该有视图层的东西，也就是面板之类的。
 2. 视图层里面不应该有模型层的东西，部分全局变量可以进入视图层（但主要要控制好这部分的量），除此之外的变量应该进入模型层。【视图层有时需要使用模型层的数据，推荐通过某个接口统一管理】
 3. 模型层不要向视图层发送的消息（name_changing）而只发送（name_changed），控制层直接修改模型层数据。视图层只负责监听 (name_changed) 的消息。控制层只监听(name_changing) 。
 
-### 模型层信号规范
+#### 模型层信号规范
 
 1. 模型层是数据层，不管是业务逻辑也好还是视图层数据显示也好，只要其是数据依赖的，或者说数据驱动的，那么控制层或视图层就应该监听对应的数据模型。
 
@@ -1070,7 +1064,7 @@ GUI层自身还有一些事件处理。
    5. name_clearing name_cleared 某些情况下需要数据清空还原默认值操作
    6. 传递过去的value就是当前的数据值，除了append模式只传递附加的部分。
 
-### 代码重构后感
+#### 代码重构后感
 
 按照上面的思路，模型层建立了一些通用模型，进行了代码重构，发现MVC架构在项目早期实际上还增加了很多额外的代码量，不过后期应该是会降低代码量的。
 
@@ -1086,7 +1080,7 @@ TODO： pypubsub模块需要深入地学习如何debug，如何查看阅读那�
 
 
 
-## 三次思考MVC架构【PLUS】
+### 三次思考MVC架构【PLUS】
 
 前面二次思考MVC架构的内容基本是正确的，除了changing信号具体实现细节还有一些要补充的：
 
@@ -1098,7 +1092,7 @@ TODO： pypubsub模块需要深入地学习如何debug，如何查看阅读那�
 
 
 
-## 注意事项
+### 注意事项
 
 目前pypubsub 4.0版本已经确认如果有两个面板同时监听某个topic，那么各个面板对应的函数，参数格式应该一致。比如 
 
@@ -1116,7 +1110,7 @@ def on_topic_test(self, value=None)
 
 则pypubsub会抛异常，但如果两个都写作一样的，无论哪种形式，都没问题。
 
-### 类变量和实例变量
+#### 类变量和实例变量
 
 这个算是python里面的基础知识了，在使用你自己写的可复用面板的时候，千万要记得：
 
@@ -1133,19 +1127,19 @@ class ...
 
 
 
-# wxpython自定义窗体
+## wxpython自定义窗体
 
 本文重点讨论wxpython较为底层的绘图知识和利用这些知识来建立自定义的一些窗体。
 
 
 
-## GDI
+### GDI
 
 wxpython底层绘图有个GDI（Graphics Device Interface）的概念，可以理解为通用绘图接口，利用这个通用绘图接口，一套绘图方法，就可以向显示器，打印机等绘图。这样程序员可以不用考虑硬件底层来进行绘图编程了。
 
 这个GDI具体来说就是一些绘图的类和方法。
 
-## DC
+### DC
 
 在开始绘图前，你需要创建一个设备上下文DC（device context），这个DC具体来说就是wx.DC类。实际使用中不应该使用wx.DC类，而应该选择更具体的设备向的DC子类。这些子类具体分为三类：
 
@@ -1153,21 +1147,21 @@ wxpython底层绘图有个GDI（Graphics Device Interface）的概念，可以�
 - 用于绘制到另外地方而非屏幕
 - 用于缓冲一个设备上下文
 
-### 用于绘制到屏幕
+#### 用于绘制到屏幕
 
 - wx.ClientDC 
 - wx.PaintDC 如果你是在EVT_PAINT事件中，那么你应该使用这个设备上下文，其他时候必须使用wx.ClientDC 。
 - wx.WindowDC 如果你不光希望在客户区绘制，窗体的边框，标题栏等你都想绘制，那么就使用这个。
 - wx.ScreenDC 如果你希望在整个屏幕上绘制，那么就使用这个。
 
-### 非屏幕设备上下文
+#### 非屏幕设备上下文
 
 - wx.MemoryDC 用于内存中的位图bitmap上绘制
 - wx.MetafileDC 这个只在windows下有效，将绘制并写入到文件中
 - wx.PostScriptDC 这个是跨平台的，将写入eps文件中
 - wx.PrinterDC 这个只在windows下有效，将写入打印机中
 
-### 缓冲设备上下文
+#### 缓冲设备上下文
 
 - wx.BufferedDC 
 - wx.BufferedPaintDC 缓冲一个设备上下文，当你做几个重绘的时候，防止屏幕闪烁，缓冲是个选择。复杂的绘制防止屏幕闪烁，推荐使用 `dc = wx.BufferedPaintDC(self)`
@@ -1176,7 +1170,7 @@ wxpython底层绘图有个GDI（Graphics Device Interface）的概念，可以�
 
 
 
-## 带颜色的线条
+### 带颜色的线条
 
 wxpython里的StaticLine是不可以定制颜色的，请看下面这个类实现了一个可以定义颜色的线条功能。这个例子基本演示了如何自定义窗体，具体就是在OnPaint上画上窗体图形，然后Bind好你想要的事件和动作。
 
@@ -1230,9 +1224,9 @@ class ColorStaticLine(wx.Panel):
 
 TODO ： 一个问题，为什么这里要继承自 wx.Panel 才行，这其中的道理暂时还没想明白。
 
-## 基本形状绘制
+### 基本形状绘制
 
-### 带颜色的方块
+#### 带颜色的方块
 
 ```
 dc.SetBrush(wx.Brush('#1ac500'))
@@ -1241,7 +1235,7 @@ dc.DrawRectangle(130, 15, 90, 60)
 
 设置画刷，然后画一个矩形。
 
-### 绘制圆弧
+#### 绘制圆弧
 
 ```
 DrawArc(x1, y1, x2, y2, xc, yc)
@@ -1249,7 +1243,7 @@ DrawArc(x1, y1, x2, y2, xc, yc)
 
 绘制一个圆弧，起点 x1 y1 终点 x2 y2 中心点 xc yc 弧线逆时针绘制，如果设置了画刷，而会填充圆弧区域。
 
-### 画一个圆
+#### 画一个圆
 
 ```
 DrawCircle(x, y, radius)
@@ -1257,7 +1251,7 @@ DrawCircle(x, y, radius)
 
 以x y 为中心， radius为半径，画一个圆。
 
-### 画一直线
+#### 画一直线
 
 ```
 DrawLine(x1, y1, x2, y2)
@@ -1265,7 +1259,7 @@ DrawLine(x1, y1, x2, y2)
 
 起点 x1 y1 终点 x2 y2 画一直线
 
-### 画多边形
+#### 画多边形
 
 ```
 DrawPolygon(points)
@@ -1273,7 +1267,7 @@ DrawPolygon(points)
 
 定义一系列的点，画一多边形，起点和终点自动相连
 
-### 画圆角矩形
+#### 画圆角矩形
 
 ```
 DrawRoundedRectangle(x, y, width, height, radius)
@@ -1283,7 +1277,7 @@ radius控制曲率
 
 
 
-### 绘制文本
+#### 绘制文本
 
 ```
 DrawText(text, x, y)
@@ -1300,7 +1294,7 @@ DrawText(text, x, y)
 
 
 
-### 绘图图片
+#### 绘制图片
 
 ```
 DrawBitmap
@@ -1308,7 +1302,7 @@ DrawIcon
 
 ```
 
-## 设置画笔
+### 设置画笔
 
 上面提到的一些基本形状的绘制，填充区域由画刷控制，而那些形状的线条颜色，则是由画笔控制的。
 
@@ -1322,7 +1316,7 @@ wx.Pen(wx.Colour, width=1, style=wx.PENSTYLE_SOLID)
 
 ```
 
-### 画笔的样式
+#### 画笔的样式
 
 - wx.PENSTYLE_SOLID 默认的实线就是这个
 - wx.PENSTYLE_DOT 小点
@@ -1338,7 +1332,7 @@ wx.Pen(wx.Colour, width=1, style=wx.PENSTYLE_SOLID)
 - wx.PENSTYLE_HORIZONTAL_HATCH 水平线
 - wx.PENSTYLE_VERTICAL_HATCH 垂直线
 
-## 设置画刷
+### 设置画刷
 
 ```
 SetBrush()
@@ -1350,7 +1344,7 @@ wx.Brush(colour, style=wx.SOLID)
 
 ```
 
-### 画刷的样式
+#### 画刷的样式
 
 画刷的样式下面列举如下：
 
@@ -1366,7 +1360,7 @@ wx.Brush(colour, style=wx.SOLID)
 - wx.BRUSHSTYLE_HORIZONTAL_HATCH 水平线
 - wx.BRUSHSTYLE_VERTICAL_HATCH 垂直线
 
-### 自定义画刷图案
+#### 自定义画刷图案
 
 ```
 brush1 = wx.Brush(wx.Bitmap('pattern1.png'))
@@ -1377,14 +1371,14 @@ dc.DrawRectangle(10, 15, 90, 60)
 
 画刷可以指定某个图片来作为其刷出来的图案。
 
-## 获取绘图区域尺寸
+### 获取绘图区域尺寸
 
 ```
 width, height = self.GetClientSize()
 
 ```
 
-## 获取某个窗体的尺寸
+### 获取某个窗体的尺寸
 
 wxpython内的窗体（继承自Window）都有 GetSize 这个方法，这样你可以得到某个窗体的尺寸：
 
@@ -1395,7 +1389,7 @@ width, height = self.GetSize()
 
 
 
-## 获取文本的宽度和高度
+### 获取文本的宽度和高度
 
 ```
 w, h = self.GetTextExtent(line)
@@ -1409,7 +1403,7 @@ w, h = self.GetTextExtent('M')
 
 ```
 
-## 居中的定义
+### 居中的定义
 
 获取绘图区域的width，然后计算好你想要居中的对象的width（w），然后居中绘制起点x是：
 
@@ -1420,7 +1414,7 @@ start_x = (width - w)/2
 
 
 
-## 居右的定义
+### 居右的定义
 
 获取绘图区域的width，然后计算好你想要居右的对象的window（w）,然后居右的绘制起点x是：
 
@@ -1429,7 +1423,7 @@ start_x = width -w
 
 ```
 
-## dc.Clear
+### dc.Clear
 
 TODO 我对这个理解还不是很深，只知道这个可以用来清空背景画刷。
 
@@ -1440,7 +1434,7 @@ dc.Clear()
 
 ```
 
-## style管理
+### style管理
 
 一般常数状态不用多说，下面说下wxpython的style是如何管理的，其首先定义一些常数，比如说
 
@@ -1456,7 +1450,7 @@ C = 0b100
 
 
 
-## 只有一个程序实例在运行
+### 只有一个程序实例在运行
 
 利用 `wx.SingleInstanceChecker` 很方便就可以做到这点，更多信息请参看文档的 [这里](https://wxpython.org/Phoenix/docs/html/wx.SingleInstanceChecker.html) 。下面的做法是确保了操作系统某个用户只有一个程序实例在运行。
 
@@ -1487,7 +1481,7 @@ app.MainLoop()
 
 
 
-## 欢迎页面
+### 欢迎页面
 
 利用wx.adv.SplashScreen 就可以很方便地制作出一个欢迎页面，读者还可以看一下demo各个案例中提到的 `wx.lib.agw.advancedsplash as AS`  ，和 SplashScreen 类比起来又多了一些可定制的选项。
 
@@ -1521,7 +1515,7 @@ app.MainLoop()
 
 ```
 
-## 程序最小化到托盘
+### 程序最小化到托盘
 
 主界面那边关闭事件是：
 
@@ -1591,7 +1585,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
 
 
 
-## 图片重画
+### 图片重画
 
 一个抹去事件被发送，当窗体背景需要重画的时候。
 An erase event is sent when a window’s background needs to be repainted.
@@ -1640,7 +1634,7 @@ if __name__ == '__main__':
 
 
 
-## 让窗体可以拖动
+### 让窗体可以拖动
 
 你想要的那部分窗体可以拖动，就将事件绑定一下，但拖动事件实际执行方法应该在主窗体上，然后主窗体应该也进行一次绑定。具体原因还不是很明白。
 
@@ -1675,7 +1669,7 @@ if __name__ == '__main__':
 
 
 
-## 扩充你的颜色定义
+### 扩充你的颜色定义
 
 wxpython有自己内部一套颜色定义库，然后你还可以利用进一步扩充自己的颜色定义库：
 
@@ -1737,7 +1731,7 @@ def updateColourDB():
 
 
 
-# wxpython项目骨架
+## wxpython项目骨架
 
 笔者钻研wxpython桌面编程有一段时间了，一些样例请参见 [这个项目](https://github.com/a358003542/wxpython_examples) 。
 
@@ -1802,7 +1796,7 @@ import global_var as g_var
 
 
 
-# 参考资料
+## 参考资料
 
 1. [zetcode 的wxpython教程](http://zetcode.com/wxpython)
 2. [wxpython官方参考文档](https://docs.wxpython.org/)

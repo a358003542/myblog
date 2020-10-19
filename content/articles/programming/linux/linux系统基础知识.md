@@ -1,7 +1,7 @@
 Slug: linux-system-basic
 Category: linux
 Tags: linux
-Date: 2019
+Date: 20191018
 [TOC]
 
 

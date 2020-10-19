@@ -1,7 +1,7 @@
 Category: chemistry
 Slug: how-to-represent-physics-quantity
 Tags:  python, xchemistry, pint
-Date: 2020
+Date: 20201018
 
 [TOC]
 

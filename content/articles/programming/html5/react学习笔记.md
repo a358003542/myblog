@@ -1,5 +1,5 @@
 Slug: react-learning-notes
-Date: 2020
+Date: 2021
 Category: html5
 Tags: react
 

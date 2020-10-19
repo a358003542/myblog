@@ -1,7 +1,7 @@
 Slug: python-web-programming
 Category: python_language
 Tags: python,
-Date: 2019
+Date: 20191018
 
 [TOC]
 

@@ -1,7 +1,7 @@
 Category: python_companion
 Slug: sqlalchemy-module
 Tags:  orm, database
-Date: 2020
+Date: 20201018
 
 [TOC]
 

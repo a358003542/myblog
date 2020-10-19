@@ -1,7 +1,7 @@
 Category: linux
 Slug: ansible
 Tags: ansible
-Date: 2019
+Date: 20191018
 
 [TOC]
 

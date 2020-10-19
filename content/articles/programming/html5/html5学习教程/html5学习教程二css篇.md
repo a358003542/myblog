@@ -1,10 +1,10 @@
 Category: html5_tutorial
 Slug: html5-tutorial-css
-Date: 2019
+Date: 20191018
 
 [TOC]
 
-# css基础
+## 基本写法
 
 前面谈到的inline css因为肯定是作用于本标签，所以写法就简化了，style引入之后后面加入一些属性即可。然后前面谈到的外部css，其写法都是如下所示:
 

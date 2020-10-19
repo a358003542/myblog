@@ -1,6 +1,6 @@
 Category: blender
 Slug: blender-first-tutorial
-Date: 2020
+Date: 20201018
 
 
 
