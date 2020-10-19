@@ -6,7 +6,7 @@
 
 {% block head_description %}
 {% if page.summary %}
-{{ page.summary|striptags|e }}
+{{ page.summary|striptags|e |truncate(150, True)}}
 {% endif %}
 {% endblock head_description %}
 

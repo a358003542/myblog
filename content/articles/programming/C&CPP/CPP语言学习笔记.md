@@ -1,5 +1,6 @@
 Category: c_and_cpp
 Slug: cpp-language-learning-notes
+Date: 20201019
 
 [TOC]
 
@@ -4490,7 +4491,9 @@ public:
 Queue(const Queue & q):qsize(0){}
 ```
 
-这个写法只能用于类的构造函数，即在类的构造函数后面可以跟上冒号，然后后面跟上一些该类成员初始化时候的默认值。具体叫做成员初始化列表，构造函数待默认参数是可以直接写上的，为什么还要加上这种形式。这种形式写法里面的成员的初始值是类里面成员刚刚初始化的时候就可以进行复制的，比如说上面的qsize前面已经加上了`const` 关键词，也是可以通过这种方式来进行该常量的初始化动作的。就上面这个例子而言将qsize初始化0似乎不是那么重要，可以选择直接声明的时候赋值为0吗。但如下面的形式就是无可取代的写法了：
+这个写法只能用于类的构造函数，即在类的构造函数后面可以跟上冒号，然后后面跟上一些该类成员初始化时候的默认值。具体叫做成员初始化列表。
+
+上面语句的写法就是该类初始化之后还会执行 `qsize = 0` 这个动作，为什么不直接写上这个语句呢，因为qsize这个变量如果加上 `const` 关键词那么是不能再设置了，那么这个时候就必须采用这种成员初始化列表的写法：
 
 ```c++
 Classy(int n);
@@ -5081,15 +5084,107 @@ int main() {
 
 ### 类继承
 
-下面通过下面这个例子来学习类的继承相关知识点吧。
+C++类的继承就面向对象编程那些概念上和其他编程语言都是一样的，不过具体实现细节上和区别还是很大的。这其中最大的一个区别是在C++中派生类不可以使用基类的私有变量，而只能使用基类的公有方法，而且派生类的构造函数也必须使用基类的构造函数。也就是创建一个派生类对象，必须首先创建一个基类对象，如下所示：
+
+```c++
+RatedPlayer::RatedPlayer(unsigned int r, const string& fn, const string& ln, bool ht) : TableTennisPlayer(fn, ln,ht){
+	rating = r;
+}
+```
+
+按照成员初始化列表的定义，可见派生类是有其基类的定义的，而且其构造函数实现必须基于基类的构造函数。因为这是C++语言实现上的定义，所以你在定义派生类构造函数的时候没有使用上面的成员初始化列表来初始化基类构造函数，那么也将调用默认的基类构造函数。
+
+下面这个演示例子为了方便头文件就不分开了：
 
 test_inherit.cpp
 
 ```c++
+#include <string>
+#include <iostream>
 
+using std::string;
+
+
+class TableTennisPlayer {
+private:
+	string firstname;
+	string lastname;
+	bool hasTable;
+public:
+	TableTennisPlayer(const string& fn = "none", const string& ln = "none", bool ht = false);
+	void Name() const;
+	bool HasTable() const { return hasTable; };
+	void ResetTable(bool v) { hasTable = v; };
+};
+
+
+TableTennisPlayer::TableTennisPlayer(const string& fn, const string & ln, bool ht): firstname(fn),lastname(ln),hasTable(ht){}
+
+void TableTennisPlayer::Name() const {
+	std::cout << lastname << ", " << firstname;
+}
+
+class RatedPlayer : public TableTennisPlayer {
+private:
+	unsigned int rating;
+public:
+	RatedPlayer(unsigned int r = 0, const string& fn = "none", const string& ln = "none", bool ht = false);
+	RatedPlayer(unsigned int r, const TableTennisPlayer& tp);
+	unsigned int Rating()const { return rating; };
+	void ResetRating(unsigned int r) { rating = r; };
+};
+
+RatedPlayer::RatedPlayer(unsigned int r, const string& fn, const string& ln, bool ht) : TableTennisPlayer(fn, ln,ht){
+	rating = r;
+}
+
+RatedPlayer::RatedPlayer(unsigned int r, const TableTennisPlayer& tp) : TableTennisPlayer(tp) {
+	rating = r;
+}
+
+
+int main(void) {
+	using std::cout;
+	using std::endl;
+
+	TableTennisPlayer player1("Tara", "Boomdea", false);
+	RatedPlayer rplayer1(1140, "Mallory", "Duck", true);
+
+	rplayer1.Name();
+
+	if (rplayer1.HasTable()) {
+		cout << ": has a table.\n";
+	}
+	else {
+		cout << ": hasn't a table.\n";
+	}
+	player1.Name();
+	if (player1.HasTable()) {
+		cout << ": has a table.\n";
+	}
+	else {
+		cout << ": hasn't a table.\n";
+	}
+
+	cout << "Name: ";
+	rplayer1.Name();
+	cout << "; Rating: " << rplayer1.Rating() << endl;
+
+	RatedPlayer rplayer2(1212, player1);
+
+	cout << "Name: ";
+	rplayer2.Name();
+	cout << "; Rating: " << rplayer2.Rating() << endl;
+
+	return 0;
+}
 ```
 
+#### vitual
 
+
+
+#### protected
 
 
 

@@ -86,7 +86,114 @@ const element = <Welcome name="Sara" />;
 
 
 
+## 一个实时更新时钟的例子
 
+这个例子介绍了react很多核心概念，同时又不是特别复杂，作为继入门例子之后的第二个教学例子是很合适的。
+
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+
+  <title>Hello React!</title>
+
+  <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    class App extends React.Component {
+      constructor(props){
+        super(props);
+        this.state = {date:new Date()};
+      }
+
+      componentDidMount(){
+        this.timerId = setInterval(()=>this.tick(), 1000);
+      }
+
+      componentWillUnmount(){
+        clearInterval(this.timerId);
+      }
+
+      tick(){
+        this.setState({
+          date: new Date()
+        });
+      }
+
+      render() {
+        const element = (
+          <div>
+          <h1>Hello world!</h1>
+          <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+          </div>
+        )
+        return element
+      }
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+    </script>
+</body>
+
+</html>
+```
+
+### class组件
+
+如下使用ES6的class来定义了一个react里的组件。
+
+```
+    class App extends React.Component {
+      constructor(props){
+        super(props);
+        this.state = {date:new Date()};
+      }
+```
+
+其constructor构造函数必接受一个props参数，也就是该组件使用是后面跟着的一些属性值将传递进来。某些简单的情况你也可以利用javascript的函数来创建一个函数组件。
+
+上面的例子就是创建了这样一个class组件。
+
+### 函数组件
+
+```javascript
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+```
+
+和一般函数的区别是其接受的第一个参数必是props参数。
+
+在JAX中react会把小写字母开头的标签视作html原生标签，而将大写字母开头的视作react组件。
+
+### 组件里面的state
+
+组件里面的state似乎只是一个javascript对象，存储着一些值，这些值表示本组件的当前一些状态量。不过这个state值在react中会有一些特殊的用途。比如调用组件的 `setState` 方法来修改【注意只能通过setState方法才会有效】state的值，那么该组件是会重新渲染的。
+
+### componentDidMount
+
+这个方法里面的动作将会在组件已经渲染到DOM之后再执行。
+
+上面例子中做的是开启一个计时器动作。
+
+### componentWillUnmount
+
+这个方法里面的动作将会在组件即将卸载之前执行。
+
+上面例子中做的是将目标计时器移除。
+
+## AJAX请求
+
+使用fetch方法请求即可，需要注意的是请求动作应该挂在 `componentDidMount`  方法里面。获取数据之后要通过 `setState` 方法将数据更新到本组件的状态信息中去。
 
 ## 参考资料
 

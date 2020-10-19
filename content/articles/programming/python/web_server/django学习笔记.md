@@ -1,6 +1,7 @@
 Category: web_server
 Slug: django-learning-notes
 Tags: django
+Summary: 本文是个人学习django的学习笔记和经验总结。
 Date: 20190405
 
 [TOC]

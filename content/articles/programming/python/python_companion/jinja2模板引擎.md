@@ -1,6 +1,7 @@
 Slug: jinja2-template-engine
 Category: python_companion
 Tags: python, template-engine,
+Date: 20190405
 
 [TOC]
 

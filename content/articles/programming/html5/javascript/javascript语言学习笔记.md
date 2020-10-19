@@ -1,6 +1,6 @@
 Category: javascript
 Slug: javascript-language-learning-notes
-Date: 20200910
+Date: 20191016
 
 [TOC]
 
@@ -825,6 +825,20 @@ fetch("http://localhost:8080").then(
 ```
 
 fetch将请求一个URL，然后调用后面的函数。其中`response.text()` 返回的是一个Promise对象，什么是Promise对象，可以类比作python异步编程里面的协程，继续调用then才能获得内容。
+
+如果你请求的是JSON api接口，那么可以直接调用 response.json来处理返回结果：
+
+```javascript
+fetch("http://localhost:8080").then(
+  function(response) {
+    return response.json();
+  }
+).then(function(result){
+  console.log(result);
+})
+```
+
+
 
 ## 参考资料
 
