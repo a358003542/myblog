@@ -20,8 +20,7 @@ import os.path
 import json
 from bs4 import BeautifulSoup
 from codecs import open
-
-import jieba
+from fenci.segment import Segment
 
 try:
     from urlparse import urljoin
@@ -30,6 +29,7 @@ except ImportError:
 
 from pelican import signals
 
+seg = Segment()
 
 class Tipue_Search_JSON_Generator(object):
 
@@ -52,6 +52,11 @@ class Tipue_Search_JSON_Generator(object):
             replace('”', '"').replace('’', "'").replace('^', '&#94;')
 
         soup_text = BeautifulSoup(page.content, 'html.parser')
+
+        # remove pre code
+        for s in soup_text.find_all('pre'):
+            s.extract()
+
         page_text = soup_text.get_text(' ', strip=True).replace('“', '"'). \
             replace('”', '"').replace('’', "'").replace('¶', ' ').replace('^', '&#94;')
 
@@ -64,8 +69,8 @@ class Tipue_Search_JSON_Generator(object):
         # 分词加空格
         dict_path = os.path.join(os.path.dirname(__file__), 'blog_dict.txt')
 
-        jieba.load_userdict(dict_path)
-        words = jieba.lcut(page_text)
+        seg.load_userdict(dict_path)
+        words = seg.lcut(page_text)
 
         # 停用词去除
         from .chinese_stop_words import STOP_WORDS
