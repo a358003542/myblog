@@ -5,10 +5,10 @@
 {% endblock title %}
 
 {% block head_description %}
-{% if page.summary %}
+{%- if page.summary %}
 {{ page.summary|striptags|e |truncate(150, True)}}
 {% endif %}
-{% endblock head_description %}
+{%- endblock head_description %}
 
 {% block meta_tags_in_head %}
 {{ super() }}

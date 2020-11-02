@@ -5,11 +5,8 @@
 {% endblock title %}
 
 {% block head_description %}
-{% if article.summary %}
-{{ article.summary|striptags|e |truncate(150, True) }}
-{% endif %}
-{% endblock head_description %}
-
+{%- if article.summary %}{{ article.summary|striptags|e |truncate(150, True) }}{% endif %}
+{%- endblock head_description %}
 
 
 
