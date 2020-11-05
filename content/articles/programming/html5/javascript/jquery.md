@@ -318,4 +318,3 @@ header('Access-Control-Allow-Methods:POST,GET');
 ## 参考资料
 
 1. Javascript权威指南 David Flanagan著.
-2. 

@@ -806,6 +806,48 @@ obj instanceof Class
 
 ## no-jquery
 
+更多相关知识请参阅参考资料四，即 [这个Github项目](https://github.com/nefe/You-Dont-Need-jQuery/blob/master/README.zh-CN.md) 。下面就一些重点知识做出一些整理。
+
+### 选择
+
+jquery的选择是该库很核心的一个功能，现代JavaScript提供了 `document.querySelector()` 和 `document.querySelectorAll()` 来作为替代。然后原来的 `document.getElementById()`  ， `document.getElementByClassName()` 或 `document.getElementByTagName()` 性能更好。
+
+```
+// jQuery
+$('selector');
+
+// Native
+document.querySelectorAll('selector');
+```
+
+#### 选择class
+
+```
+// jQuery
+$('.class');
+
+// Native
+document.querySelectorAll('.class');
+
+// or
+document.getElementsByClassName('class');
+```
+
+#### 选择id
+
+```
+// jQuery
+$('#id');
+
+// Native
+document.querySelector('#id');
+
+// or
+document.getElementById('id');
+```
+
+
+
 
 
 ### ajax
@@ -846,3 +888,4 @@ fetch("http://localhost:8080").then(
 2. [mozilla docs](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)
 3. [现代javascript教程](https://zh.javascript.info/)
 4. [you donot need jquery](https://github.com/nefe/You-Dont-Need-jQuery/blob/master/README.zh-CN.md)
+
