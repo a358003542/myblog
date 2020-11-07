@@ -110,7 +110,19 @@ lunyu = Text(zh_gutenberg.words("lunyu.txt"))
 
 后面就对应上官方教材的叙述了。
 
-## 概览
+### 语料库接口
+
+如下调用语料库的原始文本，利用你之前设置好的word_tokenizer分词后的词语列表，利用你之前设置好的sent_tokenizer分句之后的句子列表。
+
+```
+zh_gutenberg.raw('xiyouji_s.txt')
+zh_gutenberg.words('xiyouji_s.txt')
+zh_gutenberg.sents('xiyouji_s.txt')
+```
+
+
+
+## Text接口
 
 ### concordance
 
@@ -144,44 +156,11 @@ text1.similar("monstrous")
 laozi.generate()
 ```
 
-### FreqDist
-
-很有用的一个类，其继承自Counter类，用于记数的一个字典。比如下面统计老子里面最常用的词语。
-
-```python
-from nltk import FreqDist
-from my_python_module.nlp.chinese_stop_words import STOP_WORDS
-from my_python_module.nlp.utils import is_empty_string
-
-t = FreqDist(
-    [i for i in laozi if (i not in STOP_WORDS and not is_empty_string(i))])
-```
-
- 上面进行了空字符的过滤和停用词的过滤。
-
-```
-t.most_common(25)
-[('天下', 56), ('不', 51), ('圣人', 32), ('道', 27), ('谓', 24), ('曰', 21), ('万物', 20), ('吾', 20), ('无', 18), ('欲', 14), ('无为', 13), ('亦', 10), ('章', 10), ('人', 9), ('天地', 8), ('不争', 8), ('下', 8), ('道者', 8), ('大', 8), ('夫', 8), ('无以', 8), ('贵', 7), ('不知', 7), ('知', 7), ('善人', 7)]
-```
-
-### bigrams
-
-自然语言处理研究中的n元语法模型中的二元语法：
-
-```
->>> from nltk.util import bigrams
->>> list(bigrams([1,2,3,4,5]))
-[(1, 2), (2, 3), (3, 4), (4, 5)]
-```
-
-
-
 ### collocations
 
 原nltk的Text类里面的这个方法只是专门针对英文的，如果重新写一个ChineseText类继承并重载这个方法：
 
 ```python
-
 class ChineseText(Text):
 
     def collocation_list(self, num=20, window_size=2):
@@ -226,7 +205,41 @@ class ChineseText(Text):
 
 具体里面评估二元语法组得分用的是 `bigram_measures.likelihood_ratio` 这个算法。有兴趣可以研究一下，这里暂时略过了。
 
-### ConditionalFreqDist
+
+
+## FreqDist
+
+很有用的一个类，其继承自Counter类，用于记数的一个字典。比如下面统计老子里面最常用的词语。
+
+```python
+from nltk import FreqDist
+from my_python_module.nlp.chinese_stop_words import STOP_WORDS
+from my_python_module.nlp.utils import is_empty_string
+
+t = FreqDist(
+    [i for i in laozi if (i not in STOP_WORDS and not is_empty_string(i))])
+```
+
+ 上面进行了空字符的过滤和停用词的过滤。
+
+```
+t.most_common(25)
+[('天下', 56), ('不', 51), ('圣人', 32), ('道', 27), ('谓', 24), ('曰', 21), ('万物', 20), ('吾', 20), ('无', 18), ('欲', 14), ('无为', 13), ('亦', 10), ('章', 10), ('人', 9), ('天地', 8), ('不争', 8), ('下', 8), ('道者', 8), ('大', 8), ('夫', 8), ('无以', 8), ('贵', 7), ('不知', 7), ('知', 7), ('善人', 7)]
+```
+
+## bigrams
+
+自然语言处理研究中的n元语法模型中的二元语法：
+
+```
+>>> from nltk.util import bigrams
+>>> list(bigrams([1,2,3,4,5]))
+[(1, 2), (2, 3), (3, 4), (4, 5)]
+```
+
+
+
+## ConditionalFreqDist
 
 其是一个字典套字典结构，第一个字典key是一些条件，具体再引用该条件`cfd[condition]` 返回的是一个FreqDist对象。更具体来说其用来存储某一条件下的FreqDist分布。
 
@@ -239,21 +252,23 @@ cfd['0']
 FreqDist({'a': 1})
 ```
 
-### 调用语料库
 
-如下调用语料库的原始文本，利用你之前设置好的word_tokenizer分词后的词语列表，利用你之前设置好的sent_tokenizer分句之后的句子列表。
+
+## 标注
+
+### str2tuple
+
+一般POS（part of speech）标注或者其他标注都可以采用 `word/tag` 这样的格式，然后可以利用 `str2tuple` 函数来拆分它们。
 
 ```
-zh_gutenberg.raw('xiyouji_s.txt')
-zh_gutenberg.words('xiyouji_s.txt')
-zh_gutenberg.sents('xiyouji_s.txt')
+import nltk
+tagged_token = nltk.tag.str2tuple('fly/NN')
+
+tagged_token
+('fly', 'NN')
 ```
 
-
-
-Universal Part-of-Speech Tagset
-
-
+### 通用POS标注集
 
 | Tag    | Meaning             | English Examples                         |
 | ------ | ------------------- | ---------------------------------------- |
@@ -270,4 +285,13 @@ Universal Part-of-Speech Tagset
 | `.`    | punctuation marks   | *. , ; !*                                |
 | `X`    | other               | *ersatz, esprit, dunno, gr8, univeristy* |
 
-### nltk.tokenize.ConditionalFreqDist()
+### Index类
+
+Index类是一个默认为列表的defaultdict类，可以用来构建多值字典。
+
+```
+index = nltk.Index([('a',1),('a',2),('b',3)])
+index
+Index(<class 'list'>, {'a': [1, 2], 'b': [3]})
+```
+
