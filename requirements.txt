@@ -5,3 +5,4 @@ nbconvert
 pelican>=3.6.4
 markdown==3.1.1
 pelican_jupyter
+my_python_module>=0.3.8

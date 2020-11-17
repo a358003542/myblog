@@ -4366,7 +4366,7 @@ sb.str = headline.str;
 sb.len = headline.len;
 ```
 
-除了函数的按值传递情况外，下面的语句也是明确的在调用复制构造函数：
+除了**函数的按值传递情况**外，下面的语句也是明确的在调用复制构造函数：
 
 ```c++
 StringBad ditto(motto);
@@ -4493,17 +4493,9 @@ Queue(const Queue & q):qsize(0){}
 
 这个写法只能用于类的构造函数，即在类的构造函数后面可以跟上冒号，然后后面跟上一些该类成员初始化时候的默认值。具体叫做成员初始化列表。
 
-上面语句的写法就是该类初始化之后还会执行 `qsize = 0` 这个动作，为什么不直接写上这个语句呢，因为qsize这个变量如果加上 `const` 关键词那么是不能再设置了，那么这个时候就必须采用这种成员初始化列表的写法：
+上面语句的写法就是该类初始化之后还会执行 `qsize = 0` 这个动作，为什么不直接写上这个语句呢，因为qsize这个变量如果加上 `const` 关键词那么是不能再设置了【看类的定义哪里 `const int qsize`】，那么这个时候就必须采用这种成员初始化列表的写法：
 
-```c++
-Classy(int n);
-    
-Classy::Classy(int n): mem1(n){
-    //...
-}
-```
-
-上面还演示了成员初始化列表只在具体定义中写上，声明的时候可以不写。
+然后成员初始化列表只在构造函数具体定义时写上，声明的时候可以不写。
 
 queue.cpp
 
@@ -5084,7 +5076,7 @@ int main() {
 
 ### 类继承
 
-C++类的继承就面向对象编程那些概念上和其他编程语言都是一样的，不过具体实现细节上和区别还是很大的。这其中最大的一个区别是在C++中派生类不可以使用基类的私有变量，而只能使用基类的公有方法，而且派生类的构造函数也必须使用基类的构造函数。也就是创建一个派生类对象，必须首先创建一个基类对象，如下所示：
+C++类的继承就面向对象编程那些概念上和其他编程语言都是一样的，不过具体实现细节上区别还是很大的。这其中最大的一个区别是在<u>C++中派生类不可以使用基类的私有变量，而只能使用基类的公有方法</u>，而且派生类的构造函数也必须使用基类的构造函数。也就是创建一个派生类对象，必须首先创建一个基类对象，如下所示：
 
 ```c++
 RatedPlayer::RatedPlayer(unsigned int r, const string& fn, const string& ln, bool ht) : TableTennisPlayer(fn, ln,ht){
@@ -5092,7 +5084,7 @@ RatedPlayer::RatedPlayer(unsigned int r, const string& fn, const string& ln, boo
 }
 ```
 
-按照成员初始化列表的定义，可见派生类是有其基类的定义的，而且其构造函数实现必须基于基类的构造函数。因为这是C++语言实现上的定义，所以你在定义派生类构造函数的时候没有使用上面的成员初始化列表来初始化基类构造函数，那么也将调用默认的基类构造函数。
+按照**成员初始化列表**的定义，可见派生类是有其基类的定义的，而且其构造函数实现必须基于基类的构造函数。因为这是C++语言实现上的定义，所以你在定义派生类构造函数的时候没有使用上面的成员初始化列表来初始化基类构造函数，那么也将调用默认的基类构造函数。
 
 下面这个演示例子为了方便头文件就不分开了：
 
@@ -5180,13 +5172,421 @@ int main(void) {
 }
 ```
 
-#### vitual
+上面例子中的这几行代码值得说一下：
+
+```
+RatedPlayer::RatedPlayer(unsigned int r, const TableTennisPlayer& tp) : TableTennisPlayer(tp) {
+	rating = r;
+}
+```
+
+TableTennisPlayer接受了一个同类对象，其将自动调用TableTennisPlayer的复制构造函数，上面是没有定义的，这里之所以行得通是因为默认的复制构造函数是可行的。
+
+继承类的析构函数执行顺序是先执行本类的析构函数，再调用基类的析构函数。
+
+在继承关系中，继承类可以使用基类指针或引用，不过基类不可以使用派生类指针或引用：
+
+```c++
+RatedPlayer rplayer1(1140, "Mallory", "Duck", true);
+TableTennisPlayer & rt = rplayer1;
+TableTennisPlayer * pt = &rplayer1;
+rt.Name();
+pt->Name();
+```
+
+如果采用上面这种继承类使用基类指针或引用的风格，则**只能调用基类的方法**。
+
+#### 虚方法
+
+在继承关系中，基类和派生类的某个方法有重载行为，如果你看到基类，一般也包括派生类的某个方法声明如下：
+
+```
+virtual void Name() const;
+```
+
+那么这个方法叫做**虚方法**。在前面提到了继承类使用基类指针或引用这种写法，在这种写法下，如果对应的方法不是虚方法，那么当调用 `rt.Name()` 的时候，调用的是 `TableTennisPlayer::Name()` ，如果对应的方法声明为虚方法了，那么程序会根据指针或引用对应的类型来选择方法，比如前面例子假设 `Name()` 已经声明为虚方法了，那么调用 `rt.Name()` 使用的是 `RatedPlayer::Name()` 。
+
+所以虚方法是很方便的，一般这种情况基类和派生类对应的方法都声明为虚方法。
+
+虚方法具体定义实现不需要再加上virtual关键字了。
+
+
+
+下面请读者阅读学习 `test_brass.cpp` 这个例子：
+
+```c++
+#include <string>
+#include <iostream>
+
+using std::string;
+using std::cout;
+using std::endl;
+
+// formatting stuff
+typedef std::ios_base::fmtflags format;
+typedef std::streamsize precis;
+format setFormat();
+void restore(format f, precis p);
+
+class Brass {
+private:
+	string fullName;
+	long acctNum;
+	double balance;
+public:
+	Brass(const string& s = "Nullbody", long an = -1, double bal = 0.0);
+	void Deposit(double amt);
+	virtual void Withdraw(double amt);
+	double Balance() const;
+	virtual void ViewAcct() const;
+	virtual ~Brass() {};
+};
+
+
+Brass::Brass(const string& s, long an, double bal) {
+	fullName = s;
+	acctNum = an;
+	balance = bal;
+}
+
+void Brass::Deposit(double amt) {
+	if (amt < 0) {
+		cout << "Negative deposit not allowed; "
+			<< "deposit is cancelled.\n";
+	}
+	else {
+		balance += amt;
+	}
+}
+
+void Brass::Withdraw(double amt) {
+	format initialState = setFormat();
+	precis prec = cout.precision(2);
+
+	if (amt < 0) {
+		cout << "Withdraw amout must be positive;"
+			<< "withdraw canceled.\n";
+	}else if (amt <= balance) {
+		balance -= amt;
+	}
+	else {
+		cout << "Withdraw amout of $" << amt << "exceeds your balance.\n"
+			<< "withdraw canceled.\n";
+	}
+	restore(initialState, prec);
+}
+
+double Brass::Balance()const {
+	return balance;
+}
+
+void Brass::ViewAcct()const {
+	format initialState = setFormat();
+	precis prec = cout.precision(2);
+
+	cout << "Client: " << fullName << endl;
+	cout << "Account Number: " << acctNum << endl;
+	cout << "Balance: $" << balance << endl;
+
+	restore(initialState, prec);
+}
+
+class BrassPlus : public Brass {
+private:
+	double maxLoan;
+	double rate;
+	double owesBank;
+public:
+	BrassPlus(const string& s = "Nullbody", long an = -1, double bal = 0.0, double ml = 500, double r= 0.11125);
+	BrassPlus(const Brass & ba, double ml = 500, double r=0.11125);
+	virtual void ViewAcct()const;
+	virtual void Withdraw(double amt);
+	void ResetMax(double m) { maxLoan = m; };
+	void ResetRate(double r) { rate = r; };
+	void ResetOwes() { owesBank = 0; };
+};
+
+BrassPlus::BrassPlus(const string& s , long an , double bal, double ml, double r) : Brass(s, an, bal) {
+	maxLoan = ml;
+	owesBank = 0.0;
+	rate = r;
+}
+
+BrassPlus::BrassPlus(const Brass& ba, double ml, double r) : Brass(ba) {
+	maxLoan = ml;
+	owesBank = 0.0;
+	rate = r;
+}
+
+void BrassPlus::ViewAcct()const {
+	format initialState = setFormat();
+	precis prec = cout.precision(2);
+
+	Brass::ViewAcct();
+
+	cout << "Maximum load: $" << maxLoan << endl;
+	cout << "Owed to bank: $" << owesBank << endl;
+	cout.precision(3);
+	cout << "Load Rate: " << 100 * rate << "%\n";
+
+	restore(initialState, prec);
+}
+
+
+void BrassPlus::Withdraw(double amt) {
+	format initialState = setFormat();
+	precis prec = cout.precision(2);
+
+	double bal = Balance();
+	if (amt <= bal) {
+		Brass::Withdraw(amt);
+	}
+	else if (amt <= bal + maxLoan -owesBank) {
+		double advance = amt - bal;
+		owesBank += advance * (1.0 + rate);
+		cout << "Band advance: $" << advance << endl;
+		cout << "Finance charge: $" << advance * rate << endl;
+		Deposit(advance);
+		Brass::Withdraw(amt);
+	}
+	else {
+		cout << "Credit limit exceeded. Transcation cancelled.\n";
+	}
+	restore(initialState, prec);
+}
+
+format setFormat() {
+	return cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+}
+
+void restore(format f, precis p) {
+	cout.setf(f, std::ios_base::floatfield);
+	cout.precision(p);
+}
+
+int main(void) {
+
+	Brass Piggy("Porcelot Pigg", 381299, 4000.0);
+	BrassPlus Hoggy("Horatio Hogg", 382288, 3000.0);
+
+	Piggy.ViewAcct();
+	cout << endl;
+
+	Hoggy.ViewAcct();
+	cout << endl;
+
+	cout << "Depositing $1000 into the Hogg Accout:\n";
+	Hoggy.Deposit(1000.0);
+	cout << "New balance: " << Hoggy.Balance() << endl;
+
+	cout << "Withdrawing $4200 from the Pigg Account" << endl;
+	Piggy.Withdraw(4200.0);
+	cout << "Pigg account balance: $" << Piggy.Balance() << endl;
+
+	cout << "Withdrawing $4200 from the Hoggy Accout:\n";
+	Hoggy.Withdraw(4200.0);
+	Hoggy.ViewAcct();
+
+	return 0;
+}
+```
 
 
 
 #### protected
 
+protected类似于public和private也是用于控制类成员的访问权限的。protected更类似于private，只有在继承关系中才有区别，区别就是派生类可以访问protected里面的成员，当然不能访问私有成员，这个前面提到过了，而对于外部世界，也就是不是在继承关系中的那些类来说，保护成员跟私有成员一样不可访问。
 
+
+
+习题13.1
+
+以下面的类声明为基础：
+
+```c++
+class Cd {
+private:
+	char performers[50];
+	char label[20];
+	int selections; // number of selections
+	double playtime; // playing time in minutes
+public:
+	Cd(char* s1, char* s2, int n, double x);
+	Cd(const Cd& d);
+	Cd();
+	~Cd();
+	void Report() const;
+	Cd& operator=(const Cd& d);
+};
+```
+
+派生出一个Classic类，并添加一组char成员，用于存储指出CD中主要作品的字符串。修改上述声明，使基类的所有函数都是虚的。如果上述定义声明的某个方法并不需要，则请删除它。使用下面的程序测试您的产品：
+
+```c++
+#include <iostream>
+#include "classic.h"
+
+using namespace std;
+
+void Bravo(const Cd& disk);
+
+void Bravo(const Cd& disk) {
+	disk.Report();
+}
+
+int main() {
+	Cd c1("Beatles","Capitol", 14, 35.5);
+	Classic c2 = Classic("Piano Sonata in B flat, Fantasia in C", "Alfred Brendel", "Philips", 2, 57.17);
+	Cd * pcd = &c1;
+
+	cout << "Using object directly:\n";
+	c1.Report(); // use Cd method
+	cout << endl;
+
+	c2.Report(); // use Classic method
+	cout << endl;
+
+	cout << "Using type cd * pointer to objects: \n";
+	pcd->Report(); // use Cd method
+	cout << endl;
+
+	pcd = &c2;
+	pcd->Report(); // use Classic method
+	cout << endl;
+
+	cout << "Calling a function with a Cd reference argument:\n";
+	Bravo(c1);
+	cout << endl;
+
+	Bravo(c2);
+	cout << endl;
+
+	cout << "Testing assignment: \n";
+	Classic copy;
+	copy = c2;
+	copy.Report();
+
+	return 0;
+}
+```
+
+classic.h内容如下：
+
+```c++
+#pragma once
+
+
+#ifndef CLASSIC_H_
+#define CLASSIC_H_
+
+class Cd {
+private:
+	char performers[50];
+	char label[20];
+	int selections; // number of selections
+	double playtime; // playing time in minutes
+public:
+	Cd(const char* s1, const char* s2, int n, double x);
+	Cd(const Cd& d);
+	Cd();
+	
+	virtual void Report() const;
+
+	Cd& operator=(const Cd& d);
+
+	virtual ~Cd() {};
+};
+
+class Classic : public Cd {
+private:
+	char works[1000];
+public:
+	Classic(const char* wks,const char* s1, const char* s2, int n, double x );
+	Classic(const char* wks,const Cd& c );
+	Classic();
+
+	virtual void Report() const;
+	Classic& operator=(const Classic& d);
+
+};
+
+
+#endif 
+```
+
+classic.cpp文件内容如下：
+
+```c++
+#include "classic.h"
+#include <cstring>
+#include <iostream>
+
+using std::cout;
+using std::endl;
+
+Cd::Cd(const char* s1, const char* s2, int n, double x) {
+	strcpy_s(performers, s1);
+	strcpy_s(label, s2);
+	selections = n;
+	playtime = x;
+}
+
+
+Cd::Cd(const Cd& d) {
+	strcpy_s(performers, d.performers);
+	strcpy_s(label, d.label);
+	selections = d.selections;
+	playtime = d.playtime;
+}
+
+Cd::Cd() {
+	performers[0] = '\0';
+	label[0] = '\0';
+	selections = 0;
+	playtime = 0;
+}
+
+Cd& Cd::operator=(const Cd& d) {
+	strcpy_s(performers, d.performers);
+	strcpy_s(label, d.label);
+	selections = d.selections;
+	playtime = d.playtime;
+	return *this;
+}
+
+void Cd::Report() const {
+	cout << "performers: " << this->performers << endl;
+	cout << "label: " << this->label << endl;
+	cout << "selections: " << this->selections << endl;
+	cout << "playtime: " << this->playtime << endl;
+}
+
+Classic::Classic(const char* wks, const char* s1, const char* s2, int n, double x) : Cd(s1, s2, n, x) {
+	strcpy_s(works, wks);
+}
+
+Classic::Classic(const char* wks, const Cd& c) : Cd(c) {
+	strcpy_s(works, wks);
+}
+
+Classic::Classic() : Cd() {
+	works[0] = '\0';
+}
+
+Classic& Classic::operator=(const Classic& d) {
+	Cd::operator=(d);
+	strcpy_s(works, d.works);
+	return *this;
+}
+
+void Classic::Report() const {
+	Cd::Report();
+	cout << "works: " << this->works << endl;
+}
+
+```
+
+上面对于赋值只考虑了相同类的赋值。
 
 
 

@@ -21,6 +21,7 @@ import json
 from bs4 import BeautifulSoup
 from codecs import open
 from fenci.segment import Segment
+from my_python_module.nlp.tokenize import SimpleTokenizer
 
 try:
     from urlparse import urljoin
@@ -30,6 +31,7 @@ except ImportError:
 from pelican import signals
 
 seg = Segment()
+MAX_SUMMARY = 8000
 
 class Tipue_Search_JSON_Generator(object):
 
@@ -70,10 +72,25 @@ class Tipue_Search_JSON_Generator(object):
         dict_path = os.path.join(os.path.dirname(__file__), 'blog_dict.txt')
 
         seg.load_userdict(dict_path)
-        words = seg.lcut(page_text)
+
+        # 长本文转摘要
+        from my_python_module.nlp.auto_summary import auto_summary
+
+        new_page_text = ''
+        if len(page_text) > MAX_SUMMARY:
+            page_text_list = auto_summary(page_text, word_tokenizer=seg, max_len=300)
+            for text in page_text_list:
+                new_page_text += text 
+                if len(new_page_text) > MAX_SUMMARY:
+                    break
+        else:
+            new_page_text = page_text
+            
+        # 分词方便搜索
+        words = seg.lcut(new_page_text)
 
         # 停用词去除
-        from .chinese_stop_words import STOP_WORDS
+        from my_python_module.nlp.chinese_stop_words import STOP_WORDS
         words = [word for word in words if word not in STOP_WORDS]
 
         page_text = ' '.join(words)
