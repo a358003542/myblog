@@ -21,6 +21,7 @@ SITENAME = "万泽的博客"
 SITEURL = ''
 
 PATH = 'content'
+ARTICLE_EXCLUDES= ['articles\\programming\\algorithm\\examples']
 
 TIMEZONE = 'Asia/Shanghai'
 
@@ -71,7 +72,7 @@ TAG_SAVE_AS = TAG_URL
 AUTHOR_URL = 'author/{slug}.html'
 AUTHOR_SAVE_AS = ''
 # disable parse html
-READERS = {'html': None}
+# READERS = {'html': None}
 
 
 ######################### MARKDOWN CONFIG #################

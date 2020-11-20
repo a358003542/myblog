@@ -311,6 +311,19 @@ TAG_SAVE_AS = TAG_URL
 
 
 
+### 某个文件夹下的文章内容不处理
+
+通过 `ARTICLE_EXCLUDES` 可以配置一系列的文件夹列表，来让这些文件夹是跳过处理的。
+
+1. 下面的路径表达是相对于PATH的相对路径表达。
+2. 注意windows下因为先版本pelican代码路径解析关系【4.2.0】，要采用如下写法，而不能用`/` 这种写法。
+
+```
+ARTICLE_EXCLUDES= ['articles\\programming\\algorithm\\examples']
+```
+
+
+
 
 ## theme相关
 
