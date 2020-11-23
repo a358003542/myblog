@@ -1,7 +1,7 @@
 Category: editor
 Tags: editor
 Slug: texmaker-editor
-Date: 2021
+Date: 20201120
 
 
 

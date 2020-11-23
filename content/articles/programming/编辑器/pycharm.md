@@ -1,7 +1,7 @@
 Category: editor
 Tags: editor
 Slug: pycharm-editor
-Date: 2021
+Date: 20201120
 
 [TOC]
 

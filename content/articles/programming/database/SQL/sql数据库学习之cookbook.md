@@ -1,6 +1,6 @@
 Category: SQL
 Tags: sql, database
-Date: 2021
+Date: 20201121
 Slug: sql-database-cookbook
 
 

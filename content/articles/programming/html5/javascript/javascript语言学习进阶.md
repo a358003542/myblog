@@ -1,6 +1,6 @@
 Category: javascript
 Slug: javascript-language-learning-advanced
-Date: 2021
+Date: 20201120
 
 [TOC]
 
@@ -10,7 +10,7 @@ Date: 2021
 
 
 
-## setInterval
+### setInterval
 
 ```
 setInterval(func, 1000)
@@ -41,7 +41,9 @@ undefined
 
 
 
+### 字符串的match方法
 
+字符串的match方法可以跟上RegExp 对象来继续正则表达式匹配操作。
 
 ## 参考资料
 

@@ -1,22 +1,10 @@
 Category: javascript
 Slug: jquery
-Date: 20190910
+Date: 20201123
 
 
 
-## WARNING
-
-**本文已经归档，现代前端编程推荐使用前端框架进行复杂的DOM操作，同时一些简单的DOM操作和其他jquery功能随着javascirpt语言的完善，使用jquery显得并不怎么合适了。现代javascript编程不推荐使用jquery了，更多信息请参见 [javascript学习笔记的no-jquery一小节]({filename}./javascript语言学习笔记.md) 。**
-
-## jquery基本语法
-
-jquery的基本语法就是:
-
-```js
-$(selector).action()
-```
-
-如果单 `$(selector)` 将返回找到的对象的数组，而进行某个action的时候是对所有找到的对象都进行如此动作。
+## jquery基本操作
 
 ### 文档初始化之后执行的动作
 
@@ -40,32 +28,77 @@ $(function(){});
 
 这是运行了一个匿名函数，其参数为(JQuery)，前面用 `$` 符号，是为了不与其他库冲突。（[参考这篇文章](https://blog.csdn.net/javazw123/article/details/6217988)）
 
-
-
-### 获取屏幕的宽度和高度
+jquery的基本语法就是:
 
 ```js
-var width = $(window).width()
-var height = $(window).height()
+$(selector).action()
 ```
 
-这两个方法更确切的描述是返回所选元素的宽度或高度。此外还有 `innerWidth` 和 `innerHeight` 方法（包含内边距）， `outerWidth` 和 `outerHeight` 包含内边距和边框。
+如果单 `$(selector)` 将返回找到的对象的数组，而进行某个action的时候是对所有找到的对象都进行如此动作。
 
-### hide方法
+### 选择元素
 
-实际上就是css设置 `display:none` 。
+一般按照css语法选择元素并没什么好讲的，很是直观，简单看下即可。
 
-```js
-$('#test').hide()
+#### 特殊符号的元素选择
+
+目前我遇到的情况是 `fn:1` 这个按照jquery是选择不了的，实际上这个用document.querySelect也选择不了，里面有个非法符号`:` ，不过 `document.getElementById` 可以正常选择。
+
+一定要使用jquery的话需要如下加上两个转义符号。
+
+```
+$('#fn\\:1')
 ```
 
-这样将隐藏所有id为test的元素。
+#### 选择多个元素之后迭代
 
+```
+$('.footnote-ref').each(function(){
 
+    // $(this)
+    
+}
+```
+
+在迭代过程里面的那个匿名函数里面调用 `$(this)` 就是目标元素。
+
+### 当前节点选择子元素
+
+```
+$('sup',this)
+```
+
+第二个参数写上 `this` 就是在当前节点下继续选择某个子元素。
+
+#### 选中父元素
+
+```
+$('#target1').parent().css('background-color','red');
+```
+
+即调用parent方法。
+
+#### 选中子元素
+
+```
+$('#right-well').children().css('color','orange');
+```
+
+即调用children方法。
+
+#### 选中元素的第几个
+
+```
+$('.target:nth-child(2)').addClass('animated bounce');
+```
+
+```
+$('.target:even').addClass('animated shake');  # 选中元素的偶数个，0 2 4...
+```
+
+这个语法实际上来自css的选择语法。
 
 ### 获取文本和修改文本
-
-#### text()
 
 ```
 $('div').text()  # 获取文本
@@ -74,16 +107,29 @@ $('div').text('new text') # 修改文本
 
 此外还有 `html()` 方法，其可以写上html标签。
 
-### 获取表单value值或修改
+如果使用JavaScript原生的document.querySelect之类的方法，获取到的元素想要看文本可以调用 `textContent` 属性。
 
-#### val方法
+### 删除某个元素
 
 ```
-$('input').val()  # 获取值
-$('input').val('new value') # 修改值
+$('sup',this).remove();
 ```
 
-### css操作
+即调用remove方法。
+
+### 修改元素的某个属性
+
+```
+$(this).attr('data-toggle','popover');
+```
+
+### 移除元素的某个属性
+
+```
+$(this).removeAttr('href');
+```
+
+### class属性修改
 
 #### 添加class
 
@@ -102,60 +148,22 @@ div.removeClass('highlight'); // 删除highlight这个class
     $('div').css('background-color', '#ffd351');
 
 
+
+### 获取表单value值或修改
+
+```
+$('input').val()  # 获取值
+$('input').val('new value') # 修改值
+```
+
+
+
 ### 让按钮变为不可选
 
 prop方法设置或返回被选元素的属性。
 
 ```
 $("button").prop('disabled', true)
-```
-
-
-
-### 移除所选元素
-
-#### remove方法
-
-```
-$('#target4').remove();
-```
-
-#### 移动所选元素
-
-将选中的元素移动到目标元素中。
-
-```
-$('#target2').appendTo('#right-well');
-```
-
-### 复制所选元素
-
-```
-$('#target5').clone().appendTo('#left-well');
-```
-
-
-
-### 选中父元素
-
-```
-$('#target1').parent().css('background-color','red');
-```
-
-### 选中子元素
-
-```
-$('#right-well').children().css('color','orange');
-```
-
-### 选中元素的第几个
-
-```
-$('.target:nth-child(2)').addClass('animated bounce');
-```
-
-```
-$('.target:even').addClass('animated shake');  # 选中元素的偶数个，0 2 4...
 ```
 
 
@@ -193,7 +201,24 @@ $(selector).click(function)
 a.off('click', hello);
 ```
 
+### 获取屏幕的宽度和高度
 
+```js
+var width = $(window).width()
+var height = $(window).height()
+```
+
+这两个方法更确切的描述是返回所选元素的宽度或高度。此外还有 `innerWidth` 和 `innerHeight` 方法（包含内边距）， `outerWidth` 和 `outerHeight` 包含内边距和边框。
+
+### hide方法
+
+实际上就是css设置 `display:none` 。
+
+```js
+$('#test').hide()
+```
+
+这样将隐藏所有id为test的元素。
 
 ### jquery 动画效果
 
