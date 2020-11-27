@@ -2,9 +2,21 @@ Category: javascript
 Slug: jquery
 Date: 20201123
 
-
+[TOC]
 
 ## jquery基本操作
+
+### 基本用法
+
+jquery的基本用法就是:
+
+```js
+$(selector).action()
+```
+
+ `$(selector)` 返回的是找到的对象的数组，而进行某个action的时候是对所有找到的对象都进行如此动作。
+
+
 
 ### 文档初始化之后执行的动作
 
@@ -14,27 +26,13 @@ $(document).ready(function(){
 });
 ```
 
-此外我们还常见一种简化的写法：
+此外我们还常见到一种简化的写法：
 
 ```
 $(function(){});
 ```
 
-然后有时你会看到这种写法：
 
-```
-(function($){…})(jQuery)
-```
-
-这是运行了一个匿名函数，其参数为(JQuery)，前面用 `$` 符号，是为了不与其他库冲突。（[参考这篇文章](https://blog.csdn.net/javazw123/article/details/6217988)）
-
-jquery的基本语法就是:
-
-```js
-$(selector).action()
-```
-
-如果单 `$(selector)` 将返回找到的对象的数组，而进行某个action的时候是对所有找到的对象都进行如此动作。
 
 ### 选择元素
 

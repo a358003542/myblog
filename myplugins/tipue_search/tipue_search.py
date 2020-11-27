@@ -31,7 +31,7 @@ except ImportError:
 from pelican import signals
 
 seg = Segment()
-MAX_SUMMARY = 8000
+MAX_SUMMARY = 6000
 
 class Tipue_Search_JSON_Generator(object):
 

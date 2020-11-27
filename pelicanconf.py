@@ -111,7 +111,7 @@ PLUGINS = [nb_markup]
 IGNORE_FILES = [".ipynb_checkpoints"]
 
 PLUGINS = ['pelican_javascript', 'extract_toc',
-           'tipue_search', 'render_math', 'sitemap']
+           'tipue_search', 'render_math', 'sitemap', 'pandoc_html']
 
 MATH_JAX = {'tex_extensions': ['mhchem.js']}
 
