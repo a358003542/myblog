@@ -342,7 +342,7 @@ for (let value of array) {
 > c 2
 ```
 
-这大体实现了类似于python的 `enumerate` 写法。
+这大体实现了类似于python的 `enumerate` 写法。上面的forEach方法后面跟着的函数也可以只接受一个value参数。
 
 #### 判断某个元素是否在数组中
 
@@ -361,6 +361,18 @@ function is_in_array(array, element){
     }
 }
 ```
+
+#### map和filter和reduce
+
+这三个函数是函数编程很重要的几个函数，在数组对象里面可以直接调用这些方法：
+
+```
+a.map(function)
+```
+
+
+
+
 
 ### 对象
 
@@ -400,6 +412,16 @@ let p = new Rectangle();
 ```
 
 因为后面有class这样的概念，我是推荐将这些出现的对象看作类似python中字典的概念，一个键值对映射集合。从编程概念上讲也是需要这样一个数据类型的。然后数组，这里的对象，函数，用户自定义的类等用typeof去查看都是object，他们都属于object。这个object是否就是这里的Object，从实现层面上我还不大确切，但这不是重点，就算是，从编程概念上来说也是应该有所区分的。一个是实用的数据类型，一个是很抽象的面向对象编程概念上的底层表述。
+
+#### 对象的原型
+
+JavaScript的对象大多有一个原型对象，其从原型继承属性。可以通过 `Object.prototype` 来引用该对象的原型对象。
+
+要检测一个对象是否是另外一个对象的原型可以使用 `isPrototypeOf` 方法：
+
+```
+p.isPrototypeOf(o) // if true then the p is the o's prototype.
+```
 
 
 
@@ -449,19 +471,24 @@ d.hasOwnProperty('a')
 true
 ```
 
-aribnb提出相关的一些建议，我持保留意见，可能是python出身，个人更喜欢in语句。
-
-```javascript
-// good
-console.log(Object.prototype.hasOwnProperty.call(object, key));
-```
-
 #### shallow copy
 
 ```js
 const original = { a: 1, b: 2 };
 const copy = { ...original, c: 3 }; // copy => { a: 1, b: 2, c: 3 }
 ```
+
+#### 遍历对象属性
+
+`Object.keys(obj)` 将返回该对象的keys组成的数组，然后后续可以利用数组的遍历动作来实现对对象keys的遍历。
+
+```
+Object.keys(obj)
+```
+
+
+
+
 
 ### 集合
 

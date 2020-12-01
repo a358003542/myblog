@@ -211,6 +211,32 @@ s = soup.find('sup')
 s.extract()
 ```
 
+## 标签的修改
+
+### 直接修改本标签
+
+你可以如下直接修改原标签，甚至原标签的tag名字等各个属性都可以修改：
+
+```
+tag.name = "blockquote"
+tag['class'] = 'verybold'
+tag['id'] = 1
+```
+
+### 新建一个标签
+
+你可以使用 `new_tag` 方法来新建一个标签，然后附加到原标签上。
+
+```
+soup = BeautifulSoup("<b></b>")
+original_tag = soup.b
+
+new_tag = soup.new_tag("a", href="http://www.example.com")
+original_tag.append(new_tag)
+original_tag
+# <b><a href="http://www.example.com"></a></b>
+```
+
 
 
 ## 解析部分文档来提升效率
