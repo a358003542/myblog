@@ -21,7 +21,7 @@ SITENAME = "万泽的博客"
 SITEURL = ''
 
 PATH = 'content'
-ARTICLE_EXCLUDES= ['articles\\programming\\algorithm\\examples']
+ARTICLE_EXCLUDES= ['articles\\python\\algorithm\\examples']
 
 TIMEZONE = 'Asia/Shanghai'
 
@@ -55,8 +55,6 @@ STATIC_PATHS = ['images',
 
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'},
-    'extra/CNAME': {'path': 'CNAME'},
-    'extra/ads.txt': {'path': 'ads.txt'},
 }
 
 ARTICLE_URL = 'articles/{slug}.html'  # articles 里面的内容
@@ -72,7 +70,7 @@ TAG_SAVE_AS = TAG_URL
 AUTHOR_URL = 'author/{slug}.html'
 AUTHOR_SAVE_AS = ''
 # disable parse html
-# READERS = {'html': None}
+READERS = {'html': None}
 
 
 ######################### MARKDOWN CONFIG #################

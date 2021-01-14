@@ -1,4 +1,4 @@
-Category: software
+Category: others
 Slug: git
 Tags: git
 Date: 20191018

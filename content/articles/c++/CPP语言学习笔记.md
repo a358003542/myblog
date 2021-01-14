@@ -1,4 +1,4 @@
-Category: c_and_cpp
+Category: c++
 Slug: cpp-language-learning-notes
 Date: 20201018
 
