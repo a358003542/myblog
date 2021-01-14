@@ -8,25 +8,8 @@
  {{ SITENAME|striptags|e }} 这里根据本网站文章的标签信息来提供展示和标签搜索定位功能，方便访问者快速查阅定位文章。
 {% endblock head_description %}
 
-{% block meta_tags_in_head %}
-{{ super() }}
-<meta property="og:title" content="All Tags · {{ SITENAME|striptags|e }}"/>
-<meta name="twitter:title" content="All Tags · {{ SITENAME|striptags|e }}">
-<meta property="og:url" content="{{ SITEURL }}/tags.html" />
-<meta property="og:description" content="All tags used in the {{ SITENAME|striptags|e }} blog" />
-<meta name="twitter:description" content="All tags used in the {{ SITENAME|striptags|e }} blog">
-<meta property="og:site_name" content="{{ SITENAME|striptags|e }}" />
-<meta property="og:article:author" content="{{ AUTHOR }}" />
-{% from '_includes/_defaults.html' import FEATURED_IMAGE with context %}
-{% if FEATURED_IMAGE %}
-<meta property="og:image" content="{{FEATURED_IMAGE}}" />
-<meta name="twitter:image" content="{{FEATURED_IMAGE}}" >
-{% endif %}
-{% endblock meta_tags_in_head %}
-
 
 {% block content %}
-
 <div class="row">
     <header class="page-header col-md-10 col-md-offset-2">
     <h1><a href="{{ SITEURL }}/tags.html">所有标签</a></h1>

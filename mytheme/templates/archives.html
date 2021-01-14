@@ -1,39 +1,29 @@
 {% extends 'base.html' %}
 
 {% block title %}
-所有博文 {{ super() }}
+存档博文 {{ super() }}
 {% endblock title %}
 
 {% block head_description %}
-{{ SITENAME|striptags|e }} 这里列出了是本网站所有的文章列表，按照文章的主要编写日期排序展出。
+{{ SITENAME|striptags|e }} 存档的博文作者因为精力优先，已经疏于照顾了，放在这里权做读者参考。
 {% endblock head_description %}
 
 {% block meta_tags_in_head %}
 {{ super() }}
-<meta property="og:title" content="All Posts · {{ SITENAME|striptags|e }}"/>
-<meta name="twitter:title" content="All Posts · {{ SITENAME|striptags|e }}">
-<meta property="og:url" content="{{ SITEURL }}/archives.html" />
-<meta property="og:description" content="Full archives of {{ SITENAME|striptags|e }} blog" />
-<meta name="twitter:description" content="Full archives of {{ SITENAME|striptags|e }} blog">
-<meta property="og:site_name" content="{{ SITENAME|striptags|e }}" />
-<meta property="og:article:author" content="{{ AUTHOR }}" />
-{% from '_includes/_defaults.html' import FEATURED_IMAGE with context %}
-{% if FEATURED_IMAGE %}
-<meta property="og:image" content="{{FEATURED_IMAGE}}" />
-<meta name="twitter:image" content="{{FEATURED_IMAGE}}" >
-{% endif %}
 {% endblock meta_tags_in_head %}
 
 {% block content %}
 <div class="row">
     <header class="page-header col-md-10 col-md-offset-2">
-    <h1><a href="{{ SITEURL }}/archives.html">所有博文</a></h1>
+    <h1><a href="{{ SITEURL }}/archives.html">存档博文</a></h1>
     </header>
 </div>
 <div class="row">
     <div class="col-md-8 col-md-offset-2">
         <div class="blog-archives">
             {% for article in dates %}
+            {% if article.category == "archived" %}
+
             {% set year = article.date.year %}
             {% set last_year = 0 %}
             {% set next_year = 0 %}
@@ -59,6 +49,8 @@
             <a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }} {%if article.subtitle %} <small> {{ article.subtitle }} </small> {% endif %} </a>
             <time pubdate="pubdate" datetime="{{ article.date.isoformat() }}">{{ article.locale_date }}</time>
             </article>
+            
+            {% endif %}
             {% endfor %}
         </div>
     </div>

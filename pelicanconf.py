@@ -11,7 +11,7 @@ AUTHOR = 'wanze'
 FILENAME_METADATA = '(?P<title>.*)'
 
 # set default category
-DEFAULT_CATEGORY = 'others'
+DEFAULT_CATEGORY = 'archived'
 # the sub folder name not decide the category name
 USE_FOLDER_AS_CATEGORY = False
 # show the pages
