@@ -1,4 +1,3 @@
-Category: SQL
 Tags: sql, database
 Date: 20201121
 Slug: sql-database-cookbook

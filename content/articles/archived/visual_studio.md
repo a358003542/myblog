@@ -1,4 +1,3 @@
-Category: editor
 Tags: editor
 Date: 20201120
 Slug: visual-studio-editor

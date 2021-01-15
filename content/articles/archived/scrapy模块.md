@@ -1,4 +1,3 @@
-Category: crawler
 Slug: scrapy-module
 Date: 20190911
 

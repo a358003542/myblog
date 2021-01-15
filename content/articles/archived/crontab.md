@@ -1,6 +1,5 @@
 Slug: crontab
 Date: 20190911
-Category: linux
 
 [TOC]
 

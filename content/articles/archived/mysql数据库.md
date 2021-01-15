@@ -1,4 +1,3 @@
-Category: SQL 
 Slug: mysql-database
 
 [TOC]

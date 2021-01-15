@@ -1,4 +1,4 @@
-Category: c_and_cpp
+Category: c++
 Slug: c-language-learning-notes
 Date: 20200405
 
@@ -1450,6 +1450,16 @@ int main(void) {
 ## 其他
 
 ### enum
+
+enum提供了一种枚举类型变量：
+
+```c++
+enum Color {red, green, blue};
+enum Color color;
+color = red;
+```
+
+比如上面的color就是一个枚举类型变量，其可以直接用red，green等这样的名字来赋值。具体red和green内部默认的是从0开始的整数。
 
 ### union
 

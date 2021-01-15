@@ -1,4 +1,3 @@
-Category: javascript
 Slug: javascript-language-learning-advanced
 Date: 20201125
 

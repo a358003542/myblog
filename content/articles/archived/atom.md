@@ -1,4 +1,3 @@
-Category: editor
 Tags: editor
 Slug: atom-editor
 Date: 20201120

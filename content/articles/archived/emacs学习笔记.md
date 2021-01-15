@@ -1,13 +1,9 @@
-Category: editor
 Slug: emacs-learning-notes
 Tags: emacs,
 Date: 2018
 
 [TOC]
 
-## WARNING
-
-**警告，因笔者已经不怎么使用emacs了，本文档已经归档，缺少新的内容，旧的内容也可能存在错误，放在这里权做参考。【2018】**
 
 ## 前言
 

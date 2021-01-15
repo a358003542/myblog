@@ -1,4 +1,3 @@
-Category: programming
 Date: 20201018
 
 

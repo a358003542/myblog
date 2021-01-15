@@ -1,4 +1,3 @@
-Category: blender
 Slug: blender-first-tutorial
 Date: 20201018
 

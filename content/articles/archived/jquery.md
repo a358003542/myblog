@@ -1,4 +1,3 @@
-Category: javascript
 Slug: jquery
 Date: 20201123
 

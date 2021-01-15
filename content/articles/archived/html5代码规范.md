@@ -1,4 +1,3 @@
-Category: html5_tutorial
 Slug: html5-style-guide
 Date: 20191018
 

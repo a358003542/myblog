@@ -1,4 +1,3 @@
-Category: software
 Slug: docker-learning-notes
 Date: 20200918
 Summary: 本文是我学习docker中整理汇集的一些知识要点，学习笔记。

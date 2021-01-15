@@ -1,6 +1,5 @@
 Slug: dask-module
 Date: 20190922
-Category: programming
 
 [TOC]
 

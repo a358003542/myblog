@@ -1,12 +1,8 @@
 Slug: elasticsearch
-Category: database
 Date: 20190918
 
 [TOC]
 
-## WARNING
-
-**警告，本文档已经归档，年久失修，可能内容已过于陈旧，放在这里权做读者参考。【2019】**
 
 ## 简介
 

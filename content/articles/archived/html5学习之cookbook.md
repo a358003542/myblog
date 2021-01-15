@@ -1,5 +1,4 @@
 Slug: html5-cookbook
-Category: html5_tutorial
 Tags: html5
 Date: 20201121
 

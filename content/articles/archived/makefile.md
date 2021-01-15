@@ -1,4 +1,3 @@
-Category: linux
 Slug: makefile
 Date: 20190918
 

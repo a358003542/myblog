@@ -1,4 +1,3 @@
-Category: SQL 
 Slug: postgresql-database
 Date: 20201018
 

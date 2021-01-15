@@ -1,4 +1,3 @@
-Category: editor
 Tags: editor
 Slug: vi-editor
 Date: 20190911

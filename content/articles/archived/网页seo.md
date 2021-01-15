@@ -1,6 +1,5 @@
 Slug: web-seo
 Date: 20190911
-Category: html5
 
 [TOC]
 

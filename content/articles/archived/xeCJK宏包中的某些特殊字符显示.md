@@ -1,4 +1,3 @@
-Category: latex
 Slug: xecjkhong-bao-zhong-de-mou-xie-te-shu-zi-fu-xian-shi
 Date: 20200830
 

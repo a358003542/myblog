@@ -1,5 +1,5 @@
 Category: c++
-Slug: cpp-language-learning-notes
+Slug: c++-language-learning-notes
 Date: 20201018
 
 [TOC]
@@ -1412,13 +1412,48 @@ void revalue(double r, double ar[], int n) {
 void estimate(int repeat, double(*pf)(int));
 ```
 
-声明的这个pf就是指针那个目标函数的指针，只是因为声明的时候要带上指向函数的类型声明，有的时候语句会很长。
+声明的这个pf就是指向那个目标函数的指针，只是因为声明的时候要带上指向函数的类型声明，有的时候语句会很长。具体书写规则就是原函数类型声明，比如 `double test_func(int)` 然后将函数名换成 `(*pf)` 。
 
-可以利用typedef进行简化：
+下面看一个例子：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+void estimate(int, double(*pf)(int));
+double test_func(int a);
+
+
+double test_func(int a) {
+	double b;
+	b = a * 3.14;
+
+	cout << a << " * 3.14 = " << b << endl;
+	return b;
+}
+
+void estimate(int repeat, double(*pf)(int)) {
+	for (int i = 0; i < repeat; i++) {
+		(*pf)(3);
+	}
+}
+
+int main() {
+	estimate(10, test_func);
+	return 0;
+}
+```
+
+
+
+然后这种情况可以利用typedef进行简化：
 
 ```
 typedef double(*test_func_type)(int);
 ```
+这样typedef声明之后 `test_func_type` 就是具体某个函数的类型声明符了。
+
 具体请看下面的样例来加深理解：
 
 ```cpp
@@ -5587,6 +5622,169 @@ void Classic::Report() const {
 ```
 
 上面对于赋值只考虑了相同类的赋值。
+
+## 拾遗
+
+### 类在namespace里面更简明的声明
+
+如下，只是简单告诉编译器该类在某个namespace里面，后面再详细写上声明。
+
+```c++
+namespace ns {
+    class A; // just tell the compiler to expect a class def
+}
+
+class ns::A {
+    // define here
+};
+```
+
+在Qt样例项目中有这样的代码：
+
+```c++
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private:
+    Ui::MainWindow *ui;
+};
+#endif // MAINWINDOW_H
+```
+
+初看上去两个MainWindow很让人迷惑，其实这两个说的是两个东西。在Ui命名空间里面的MainWindow类的具体声明是在mainwindow.ui自动生成的ui_mainwindow.h文件那里：
+
+```
+namespace Ui {
+    class MainWindow: public Ui_MainWindow {};
+} // namespace Ui
+```
+
+如果将样例项目改成这样会更清晰一点：
+
+```c++
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
+
+class MyMainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    MyMainWindow(QWidget *parent = nullptr);
+    ~MyMainWindow();
+
+private:
+    Ui::MainWindow *ui;
+};
+#endif // MAINWINDOW_H
+```
+
+
+
+### lambda函数写法
+
+```c++
+[](float a, float b) {
+            return (std::abs(a) < std::abs(b));
+} 
+```
+
+- 方括号里叫做capture clause
+- 圆括号里面是lambda函数的参数
+- 花括号里面是lambda函数的主体部分
+
+
+
+### 类的成员函数作为函数的参数
+
+具体看下面这个例子，是从tutorialspoint网站拷贝过来的，已经执行通过了。
+
+```c++
+#include <iostream>
+
+using namespace std;
+class AB {
+public:
+    int sub(int a, int b) {
+        return a - b;
+    }
+    int div(int a, int b) {
+        return a / b;
+    }
+};
+//using function pointer
+int res1(int m, int n, AB* obj, int(AB::* fp)(int, int)) {
+    return (obj->*fp)(m, n);
+}
+//using function pointer
+int res2(int m, int n, AB* obj, int(AB::* fp2)(int, int)) {
+    return (obj->*fp2)(m, n);
+}
+int main() {
+    AB ob;
+    cout << "Subtraction is = " << res1(8, 5, &ob, &AB::sub) << endl;
+    cout << "Division is = " << res2(4, 2, &ob, &AB::div) << endl;
+    return 0;
+}
+```
+
+我们看到成员函数的类型声明是需要将类的名字引用符加上的，然后实际调用 `*fp` 并不能直接调用，而需要通过对象obj来调用，因为`fp` 是函数指针，`*fp` 一般理解就是该函数地址或者该函数名。
+
+最后就是传递值，也不能简单将该函数名写上即可，需要这样 `&AB::sub` 取出该成员函数的内存地址或者说指针。
+
+### enum class
+
+C++的enum枚举类型和C语言的enum在使用上稍微有点差别，声明更简单了，其他都一样的。
+
+```
+enum Color {red, green, blue};
+Color color; // here
+color = red;
+```
+
+这个常规的枚举类型最大的问题就是变量名污染全局变量空间的问题，比如下面的写法：
+
+```
+enum {MAX=10};
+```
+
+后面你想要使用MAX其就是值10，但如果有多个枚举类型声明具有相同的名字的话就会出现冲突问题。为此C++提出了`enum class` 类作用域内的枚举类型变量。
+
+```
+enum class Color { red, green, blue };
+Color color = Color::blue;
+```
+
+### for range语句
+
+c++11开始支持如下的for range语句了：
+
+```c++
+int a[] = {0, 1, 2, 3, 4, 5};
+for (int n : a){
+    std::cout << n << ' ';
+}
+```
 
 
 

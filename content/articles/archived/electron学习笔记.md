@@ -1,6 +1,5 @@
 Slug: electron-learning-notes
 Date: 20201018
-Category: gui
 Tags: gui, javascript, electron
 
 [TOC]

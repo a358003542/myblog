@@ -1,4 +1,3 @@
-Category: javascript
 Slug: node-learning-notes
 Date: 20201121
 Tags: javascript, node, npm, yarn

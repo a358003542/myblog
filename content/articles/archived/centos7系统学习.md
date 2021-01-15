@@ -1,4 +1,3 @@
-Category: linux
 Tags: centos7
 Slug: centos7
 

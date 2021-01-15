@@ -1,5 +1,4 @@
 Slug: gunicorn
-Category: web_server
 Date: 20190918
 
 [TOC]

@@ -1,4 +1,3 @@
-Category: programming
 Slug: heroku
 Date: 20190911
 

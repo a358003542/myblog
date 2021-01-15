@@ -1,5 +1,4 @@
 Slug: nginx
-Category: web_server
 Date: 20190918
 
 

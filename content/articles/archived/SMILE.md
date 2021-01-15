@@ -1,4 +1,3 @@
-Category: chemistry
 slug: smile
 Date: 20191018
 
