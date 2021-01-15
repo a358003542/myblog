@@ -1,4 +1,3 @@
-Category: python_companion
 Slug: selenium-module
 Tags:  python, crawler
 

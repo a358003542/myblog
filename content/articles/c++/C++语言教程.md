@@ -1,5 +1,5 @@
 Category: c++
-Slug: c++-language-learning-notes
+Slug: c++-tutorial
 Date: 20201018
 
 [TOC]

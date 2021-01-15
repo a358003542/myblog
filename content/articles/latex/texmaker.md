@@ -1,4 +1,4 @@
-Category: editor
+Category: latex
 Tags: editor
 Slug: texmaker-editor
 Date: 20201120
