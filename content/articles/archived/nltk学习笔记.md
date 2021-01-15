@@ -1,4 +1,4 @@
-Category: nlp
+
 Slug: nltk-learning-notes
 
 
