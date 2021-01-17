@@ -1,4 +1,3 @@
-
 Slug: numpy-module
 Summary: 本文介绍了python在数据运算比如数据处理或机器学习等领域很常用的一个模块，numpy模块。
 

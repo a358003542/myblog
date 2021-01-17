@@ -1,4 +1,3 @@
-
 Tags: editor
 Slug: pycharm-editor
 Date: 20201120

@@ -1,4 +1,3 @@
-Category: programming
 Date: 20201130
 Slug: 500lines-blockcode-learning
 Tags: 500lines

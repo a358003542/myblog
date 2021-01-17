@@ -1,6 +1,5 @@
 Slug: diskcache-module
 Date: 20201018
-Category: python_companion
 
 [TOC]
 

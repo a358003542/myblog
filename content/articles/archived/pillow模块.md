@@ -1,4 +1,3 @@
-Category: python_companion
 Slug: pillow-module
 Tags:  python, 
 Date: 20191018

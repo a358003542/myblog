@@ -1,4 +1,3 @@
-Category: python_companion
 Slug: python-dateutil-module
 Tags:  python, 
 Date: 20190918

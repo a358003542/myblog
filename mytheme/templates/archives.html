@@ -24,28 +24,7 @@
             {% for article in dates %}
             {% if article.category == "archived" %}
 
-            {% set year = article.date.year %}
-            {% set last_year = 0 %}
-            {% set next_year = 0 %}
-            
-            {% if not loop.first %}
-            {% set last_year = dates[loop.index0 - 1].date.year %}
-            {% endif %}
-
-            {% if not loop.last %}
-            {% set next_year = dates[loop.index0 +1].date.year %}
-            {% endif %}
-
-            {% if last_year != year %}
-            <h2 id="{{ year }}"><a href="#{{year}}">{{ year }}</a></h2>
-            {% endif %}
-
-            {% if next_year != year %}
-            <article class="last-entry-of-year">
-            {% else %}
-            <article>
-            {% endif %}
-            
+            <article>            
             <a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }} {%if article.subtitle %} <small> {{ article.subtitle }} </small> {% endif %} </a>
             <time pubdate="pubdate" datetime="{{ article.date.isoformat() }}">{{ article.locale_date }}</time>
             </article>

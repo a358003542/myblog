@@ -1,6 +1,5 @@
 Slug: learning_nsis_script
 Date: 2021
-Category: application_development
 
 [TOC]
 

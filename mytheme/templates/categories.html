@@ -25,6 +25,7 @@
     <div class="col-md-8 col-md-offset-2">
         <div class="accordion" id="accordion2" >
             {% for category, articles in categories %}
+            {% if category != "archived" %}
             <div class="panel panel-default" >
                 <div class="panel-heading" >
                     <a role="button" class="accordion-toggle list-of-categories" data-toggle="collapse" data-parent="#accordion2" href="#{{ category.slug }}-ref">
@@ -54,6 +55,7 @@
 
             </script>
 
+            {% endif %}
             {% endfor %}
         </div>
     </div>

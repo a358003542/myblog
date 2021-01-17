@@ -1,4 +1,3 @@
-Category: python_companion
 Slug: lxml-module
 Tags:  python, 
 

@@ -1,4 +1,3 @@
-Category: programming
 Slug: 500lines-continuous-integration-system
 Date: 20201207
 Tags: 500lines

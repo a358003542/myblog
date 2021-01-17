@@ -133,7 +133,6 @@ class Tipue_Search_JSON_Generator(object):
 
         all_pages = len(pages)
         excluded_url = [
-            'about.html',
             '404.html',
             'articles/du-qu-shu-ju.html',
             'articles/shu-ju-hui-tu.html'

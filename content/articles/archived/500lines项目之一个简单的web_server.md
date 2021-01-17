@@ -1,4 +1,3 @@
-Category: web_server
 Slug: 500lines-simple-web-server
 Date: 20201205
 Tags: 500lines

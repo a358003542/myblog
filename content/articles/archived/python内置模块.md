@@ -1,5 +1,4 @@
 Slug: python-modules
-Category: python_language
 Tags: python,
 Date: 20191018
 
@@ -2030,3 +2029,336 @@ fill函数等于：
 "\n".join(wrap(text, ...))
 ```
 
+
+
+## 拾遗
+
+### 可迭代对象flatten操作
+
+```
+a_list = [[1, 2], [3, 4], [5, 6]]
+print(list(itertools.chain.from_iterable(a_list)))
+# Output: [1, 2, 3, 4, 5, 6]
+
+# or
+print(list(itertools.chain(*a_list)))
+# Output: [1, 2, 3, 4, 5, 6]
+```
+
+### 利用abc模块来实现抽象基类
+
+abc模块帮助你实现抽象基类，有点类似于java中抽象类的概念。
+
+具体实现如下所示：
+
+```python
+from abc import abstractmethod
+from abc import ABC 
+
+class Graph(ABC):
+    """
+    一般图
+    """
+    DIRECTED = None
+
+    @abstractmethod
+    def nodes(self):
+        """
+        :return:
+        """
+        raise NotImplementedError("Not Implement nodes methods")
+
+```
+
+抽象类不可实例化，实例化将会报错。继承于它的类，如果如上定义了抽象方法，那么继承它的类必须定义好对应方法的实现，否则将会报错。
+
+抽象类里面也可以定义不是抽象方法的其他实际动作的方法。
+
+抽象类里面还可以定义抽象属性。
+
+### 在logging中使用pprint
+
+参考了 [这个网页](https://stackoverflow.com/questions/11093236/use-logging-print-the-output-of-pprint) 。
+
+有的时候logging的输出我们希望调用pprint从而输出打印更加美观些，可以调用pformat函数来达到这个效果：
+
+```python
+from pprint import pprint, pformat
+ds = [{'hello': 'there'}]
+logging.debug(pformat(ds))
+```
+
+
+
+### 利用itertools模块的product函数来遍历组合
+
+product函数在 `itertools` 模块里面，按照官方文档的说明是product(A, B)返回值等价于((x,y) for x in A for y in B)，也就是各种可能的组合情况（类似于笛卡尔积的概念）:
+
+```
+>>> list(product(['a','b'],['c']))
+[('a', 'c'), ('b', 'c')]
+```
+
+
+此外单一迭代加上 `repeat` 参数也会生成一些很有意思的结果:
+
+```
+>>> list(product(['True','False'],repeat=len('abc')))
+[('True', 'True', 'True'), ('True', 'True', 'False'), ('True', 'False', 'True'), ('True', 'False', 'False'), ('False', 'True', 'True'), ('False', 'True', 'False'), ('False', 'False', 'True'), ('False', 'False', 'False')]
+```
+
+
+这可以看作:
+```
+>>> list(product(['True','False'],['True','False'],['True','False']))
+[('True', 'True', 'True'), ('True', 'True', 'False'), ('True', 'False', 'True'), ('True', 'False', 'False'), ('False', 'True', 'True'), ('False', 'True', 'False'), ('False', 'False', 'True'), ('False', 'False', 'False')]
+```
+
+
+
+
+### 利用collections模块的deque数据结构
+
+本小节主要参考了 [这个网页](http://python3-cookbook.readthedocs.io/zh_CN/latest/c01/p03_keep_last_n_items.html) 。
+
+我想读者可能已经接触过queue结构了吧，queue结构是一端进data，然后另一端出data，这样形成了先进先出的数据流。而deque结构两端都可以进两端都可以出，这看上有点古怪，如果你只使用一端的话，那么其好像一个堆栈结构，是先进后出的；而如果一端只是进，另一端只是出，其又好像一个queue结构。那么其有什么优势呢？deque结构最大的优势，也就是我们需要使用它的原因是: 其两端插入元素和删除元素的时间复杂度是O(1)，是一个常数级，而列表开头插入或删除元素的时间复杂度是O(N)，所以如果我们需要一个类似列表的数据存储结构，而这个数据结构中，开头的几个元素和末尾的几个元素都比较重要，经常被访问，那么就应该使用deque结构。
+
+上面的网页介绍了这么一个函数，用来返回一个文件最后的几行:
+
+```python
+from collections import deque
+def tail(filename, n=10):
+    'Return the last n lines of a file'
+    with open(filename) as f:
+        return deque(f, n)
+```
+
+
+其是利用了deque还有一个size定长的概念，输入的队列进入deque时较老的元素会被丢弃。我不太清楚这种做法效率如何，不过这种写法还是很优雅的。
+
+
+
+### 查找多个最大最小元素的情况
+
+如果只是想要获知某些数据的一个最大值或者一个最小值，那么当然用 `max` 或 `min` 方法就可以了。这里讨论的情况是如果你想要获知某些数据的多个最大值或多个最小值。一般想到的就是先对这些数据进行排序，然后进行切片操作。参考资料2的第一章第四节讨论的方法实际上是利用最小堆结构进行堆排序然后提出最大或最小的那个几个元素。
+
+大体过程就是:
+```
+lst = [1, 8, 2, 23, 7, -4, 18, 23, 42, 37, 2]
+import heapq
+heapq.heapify(lst)
+heapq.nlargest(3,lst)
+heapq.nsmallest(3,lst)
+```
+
+### 利用collections模块的Orderdict类
+
+字典一般没有排序的需求吧，就是有也可以输出的时候再排序，再说OrderedDict和一般字典比较起来存储开销大了一倍，能不用就不用吧。不过在某些情况下，用这个类确实能带来一些便利。我第一次遇到这种情况大体是在bilibili的api对接那里，其计算密钥需要将所有参数排序然后urlencode为字符串然后再基于这个字符串进行一些计算。
+
+```
+    params = OrderedDict(sorted(params.items(), key=lambda t: t[0]))
+    string = urlencode(params)
+```
+
+
+大体在某些情况下，总是要求某个字典值变量按照某个顺序输出，那么用OrderedDict还是很便利的。其顺序就是按照其插入顺序来的，所以进入之前我们还是要做字典排序工作，所以我们可以看作这是一个自动进行了某种操作的便捷对象吧。
+
+
+##Counter类
+
+Counter类是真有用，而且还不是一般的好用。下面的例子来自参考资料2，不多说，看看代码大体就了解了:
+
+```
+    words = [
+        'look', 'into', 'my', 'eyes', 'look', 'into', 'my', 'eyes',
+        'the', 'eyes', 'the', 'eyes', 'the', 'eyes', 'not', 'around', 'the',
+        'eyes', "don't", 'look', 'around', 'the', 'eyes', 'look', 'into',
+        'my', 'eyes', "you're", 'under'
+    ]
+    from collections import Counter
+    word_counts = Counter(words)
+    # 出现频率最高的3个单词
+    top_three = word_counts.most_common(3)
+    print(top_three)
+    # Outputs [('eyes', 8), ('the', 5), ('look', 4)]
+```
+
+
+Counter 对象是字典的子类，所以字典的一般方法它都有，下面就不赘述了。然后 `update` 方法我们应该理解为同key之间的加法， 此外还有 `subtract` 方法可以看作同key之间的减法。此外你还可以做:
+
+这种加减运算和上面提及的 update 方法和 subtract 方法还是有点区别的，加法大体类似，主要是减法将会自动去掉计数小于等于零的项，而 `subtract` 方法不会。
+
+```
+    >>> a = Counter(words)
+    >>> b = Counter(morewords)
+    >>> a
+    Counter({'eyes': 8, 'the': 5, 'look': 4, 'into': 3, 'my': 3, 'around': 2,
+    "you're": 1, "don't": 1, 'under': 1, 'not': 1})
+    >>> b
+    Counter({'eyes': 1, 'looking': 1, 'are': 1, 'in': 1, 'not': 1, 'you': 1,
+    'my': 1, 'why': 1})
+    >>> # Combine counts
+    >>> c = a + b
+    >>> c
+    Counter({'eyes': 9, 'the': 5, 'look': 4, 'my': 4, 'into': 3, 'not': 2,
+    'around': 2, "you're": 1, "don't": 1, 'in': 1, 'why': 1,
+    'looking': 1, 'are': 1, 'under': 1, 'you': 1})
+    >>> # Subtract counts
+    >>> d = a - b
+    >>> d
+    Counter({'eyes': 7, 'the': 5, 'look': 4, 'into': 3, 'my': 2, 'around': 2,
+    "you're": 1, "don't": 1, 'under': 1})
+    >>>
+```
+
+
+这个数据结构最为人们数值的统计频数了，通过调用 `most_common(n)` 方法，n是排行榜的前n名。
+
+### 利用collections模块的namedtuple
+
+collections模块里面的namedtuple函数将会产生一个有名字的数组的类（有名数组），通过这个类可以新建类似的实例。比如：
+
+    from collections import namedtuple
+    
+    Point3d=namedtuple('Point3d',['x','y','z'])
+    p1=Point3d(0,1,2)
+    print(p1)
+    print(p1[0],p1.z)
+    
+    Point3d(x=0, y=1, z=2)
+    0 2
+
+### 构建一个dataclass类
+
+python3.7新加入的dataclass类是一个很有用的特性，对于代码中的某些函数之间彼此传输的特定数据，可以如下构建一个dataclass类：
+
+```
+@dataclass
+class InventoryItem:
+    '''Class for keeping track of an item in inventory.'''
+    name: str
+    unit_price: float
+    quantity_on_hand: int = 0
+```
+
+其大致效果等于：
+
+```
+def __init__(self, name: str, unit_price: float, quantity_on_hand: int=0):
+    self.name = name
+    self.unit_price = unit_price
+    self.quantity_on_hand = quantity_on_hand
+```
+
+编写这样的dataclass类主要是让你的项目代码数据定义更加清晰化。
+
+
+
+### configparse处理特殊字符
+
+configparse对于某些特殊字符可能会报错，参考了 [这个问题](https://stackoverflow.com/questions/14340366/configparser-and-string-with) ，推荐使用 `RawConfigParser` ，这样就可以解决问题。
+
+### 利用collections模块的ChainMap定义搜索过程
+
+将多个字典组合成为一个map字典，想到的一个应用就是配置字典流，利用ChainMap定义搜索路径流，先搜索到的配置优先取用。
+
+```python
+from collections import ChainMap
+d1 = {'a':1,'b':2}
+d2 = {'a':2,'d':3}
+d3 = ChainMap(d1, d2)
+```
+
+
+
+### typing.NamedTuple
+
+这个类添加于python3.6，与 collections.namedtuple 非常类似。
+
+```python
+from typing import NamedTuple
+class Car(NamedTuple):
+    color: str
+    mileage: float
+    automatic: bool
+car1 = Car(color='red',mileage=3512.5, automatic=True)
+car1.color
+```
+
+总的说来我不赞同达恩·巴德尔的观点——推荐使用typing.NamedTuple ，因为namedtuple有比较优势和区分的是相对于字典，其有两个特点：一，key不可变；二，轻量级。在某些情况下使用namedtuple优于字典。但是如果采用类的写法，那么就换了一个情景了，我认为在这个情境下，NamedTuple和dict都不太合适，而类应该成为第一公民。
+
+### queue.PriorityQueue
+
+queue.PriorityQueue 内部实现是基于heapq堆排序的，只是额外做了一些处理，从而保证操作是线程安全的。一般来说如果要实现一个优先级队列，推荐使用 PriorityQueue：
+
+```python
+from queue import PriorityQueue
+q = PriorityQueue()
+q.put((2, 'code'))
+q.put((1, 'eat'))
+q.put((3, 'sleep')) 
+while not q.empty():
+    print(q.get())
+```
+
+```
+(1, 'eat')
+(2, 'code')
+(3, 'sleep')
+```
+
+### queue.Queue
+
+这个是线程安全的先进先出【队列操作】数据结构。
+
+```
+from queue import Queue
+q = Queue()
+q.put('a')
+q.put('c')
+print(q.get())
+print(q.get())
+```
+
+```
+a
+c
+```
+
+
+
+### queue.LifoQueue
+
+这个是线程安全的后进先出【栈操作】的数据结构。
+
+```
+from queue import LifoQueue
+q = LifoQueue()
+q.put('a')
+q.put('c')
+print(q.get())
+print(q.get())
+```
+
+```
+c
+a
+```
+
+### multiprocessing.Queue
+
+跨进程的先进先出队列数据结构：
+
+```
+from multiprocessing import Queue
+q = Queue()
+q.put('a')
+q.put('c')
+print(q.get())
+print(q.get())
+```
+
+```
+a
+c
+```
