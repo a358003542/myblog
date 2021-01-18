@@ -39,8 +39,7 @@
             {% endif %}
 
             {{ page.content }}
-            {% from '_includes/comments.html' import comments with context %}
-            {{ comments(page) }}
+
         </div>
     </div>
     </article>
@@ -48,6 +47,4 @@
 
     {% block script %}
     {{ super() }}
-    {% from '_includes/comments.html' import comments_script with context %}
-    {{ comments_script(page) }}
     {% endblock script %}
