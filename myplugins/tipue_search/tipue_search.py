@@ -31,7 +31,8 @@ except ImportError:
 from pelican import signals
 
 seg = Segment()
-MAX_SUMMARY = 6000
+MAX_SUMMARY = 8000
+AUTO_SUMMARY = False
 
 class Tipue_Search_JSON_Generator(object):
 
@@ -77,7 +78,7 @@ class Tipue_Search_JSON_Generator(object):
         from my_python_module.nlp.auto_summary import auto_summary
 
         new_page_text = ''
-        if len(page_text) > MAX_SUMMARY:
+        if AUTO_SUMMARY and len(page_text) > MAX_SUMMARY:
             page_text_list = auto_summary(page_text, word_tokenizer=seg, max_len=300)
             for text in page_text_list:
                 new_page_text += text 

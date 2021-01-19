@@ -106,15 +106,23 @@ python test.py
 
 
 
-### 安装python高级知识
+### 从源码编译python
 
-#### 从源码安装python
-从源码安装python，那么可能有其他一些依赖你需要预先安装。
+本部分算是偏高级点的知识，这里主要讨论如何在windows系统下从源码编译出python，linux系统下反而会略微直观简单点。
+
+这里笔者并不是闲的没事，从源码编译出python这个过程有助于我们更深入地学习python，而这也是阅读和学习python源码的必由之路。
+
+首先当然是下载CPython的源码，选择一个你喜欢的版本，这里以python3.7为例，那么应该进而下载visual studio 2017。
+
+visual studio2017安装桌面端C++开发环境和python开发环境，然后把python本地开发组件勾选上。
+
+用visual studio打开源码里面 `PCbuild` 里的 `pcbuild.sln` 。你可以使用 `.\build.bat  -p x64` 来编译出64位python，不带`-p` 参数默认编译出32位。一开始可以使用这个来测试下看看能不能编译成功，后面再使用visual studio编译，毕竟后面的重点还是利用visual studio来学习CPython的源码。
+
+`build.bat` 会自动调用 `get_externals.bat` 这个脚本来下载一些第三方组件，建议下执行下这个脚本看看，如果下载实在有问题可以参考 [这个Github项目](https://github.com/python/cpython-source-deps) 。
+
+这些依赖在linux下编译一样是需要的，如果报错什么 `ssl.h` 找不到或者 `_sqlite3` 找不到就是这些依赖的缺失问题。
 
 
-- zlib 和 zlib-devel 
-- opensll 和 openssl-devel ，如果遇到什么 ssl.h 文件找不到通常是缺少这个。
-- sqlite-devel 和你 `import sqlite3` 有关，否则将会提示找不到 `_sqlite3` ，你需要重新编译python。
 
 
 
@@ -621,36 +629,9 @@ sample(p,k)
 
 更多内容请参见[官方文档](http://docs.python.org/3/library/random.html)。
 
-#### statistics模块
+### 模块的深入学习
 
-这个模块python3.4才加入进来。
-
-上面的那个例子这里稍作修改，使之成为一个骰子模拟器。其中`i_list`这个列表收集多次实验中掷多少次骰子才遇到6的次数。
-
-    from random import *
-    i_list = []
-    while len(i_list) < 100:
-        i = 1
-        while True:#一次实验
-            x = randint(1,6)
-            if x == 6:
-                print('times:' , i)
-                break
-            else:
-                print(x)
-                i += 1
-        i_list.append(i)
-    
-    print(i_list)
-    from statistics import *
-    print(mean(i_list))#平均值
-    print(median(i_list))#中位数，去掉最高最低...
-
-statistics模块中的**mean**函数接受一组数值列表，然后返回这组数值的平均值。而**median**函数返回的是统计学上所谓的中位数，你可以简单看作一组数字不断的去掉一个最高和最低，然后剩下来的一个或者两个（两个要取平均值）的数值的值。
-
-更多内容请参见[官方文档](https://docs.python.org/3/library/statistics.html)。
-
-
+这里插一段高级的知识，在学习python的模块的时候，除了阅读其文档，还可以下载CPython的源码来阅读学习，而在CPython的源码中，有很多是C语言写的，如果可能，那么继续阅读C语言写的这些模块细节才是真正掌握了该模块某个函数实现的具体细节。这样就算以后你使用的是其他语言，在那个语言之下并没有你熟知的这些模块的那些函数，而你是知道这个问题如果使用那个函数就能很好地解决问题。那么这个时候深刻理解阅读该模块源码的具体实现细节，将非常有助于快速实现另外一个语言版本的目标函数。
 
 
 
@@ -5985,11 +5966,13 @@ python的列表解析（迭代）效率是很高的，我们应该多用列表�
 
 文件对象有一个readlines方法，能够一次性把整个文件的所有行字符串装入到一个列表中。然后我们再对这个列表进行解析操作就可以直接对整个文件的内容做出一些修改了。不过不推荐使用readlines方法了，这样将整个文件装入内存的方法具有内存爆炸风险，而迭代版本更好一点。
 
-## 附录
 
-### pypi生态圈
 
-## setup.py配置
+## pypi生态圈
+
+似乎讨论pypi生态圈超出了python语言的讨论范畴，但不讨论pypi的python语言教程是不完整的，因为pypi生态圈的丰富和强大正是python语言的一个很大的优势。
+
+### setup.py配置
 
 本章知识是我们理解前人编写的各个有用的模块包的基础，也是编写自己的模块包的基础。
 
@@ -6086,15 +6069,18 @@ keywords
 packages
 
 : 你的软件依赖的模块。一般如下使用： 
+
 ```text
 packages = find_packages()
 ```
+
 则文件夹下有 `__init__.py` 文件的，都将视作python模块包，其内的py文件都将加入进去。
 
 除此之外你也可以直接手工输入你的模块名字，具体就是字符串的列表。
 
 entry_point
 : 
+
 ```text
 entry_points = {
 'console_scripts' :[ 'zwc=zwc.zwc:main',],
@@ -6134,7 +6120,7 @@ data_files = [('',['skeleton.tar.gz'])],
 
 data_files已经不推荐使用了，推荐用package_data来管理，可以方便用pkg_resources里面的方法来引用其中的资源文件。具体说明请看后面。
 
-## pip的develop模式
+### pip的develop模式
 
 本小节参考了 [这个问题](https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install) 。
 
@@ -6144,9 +6130,10 @@ data_files已经不推荐使用了，推荐用package_data来管理，可以方�
 
 pipenv的 `pipenv install -e .` 也是这个develop模式，你修改的代码会实时生效。
 
-## pkg_resources模块来管理读取资源文件
+### pkg_resources模块来管理读取资源文件
 
 如下所示：
+
 ```
     from pkg_resources import resource_filename
     resource_stream('wise','icos/Folder-Documents.ico')
@@ -6158,9 +6145,9 @@ pipenv的 `pipenv install -e .` 也是这个develop模式，你修改的代码�
 上面的例子是resource_filename，返回的是引用的文件名。此外还有命令：resource_string，参数和resource_filename一样，除了它返回的是字节流。这个字节流可以赋值给某个变量从而直接使用，或者存储在某个文件里面。
 
 
-## 在pypi上传你的软件
+### 在pypi上传你的软件
 
-### 正确处理README文档
+#### 正确处理README文档
 
 现在pypi已经支持markdow文档格式了。推荐按照官方文档 [这里](<https://packaging.python.org/guides/making-a-pypi-friendly-readme/> ) 来处理：
 
@@ -6203,7 +6190,7 @@ twine check dist/*
 
 来确保你的文档格式没问题。
 
-### 推荐使用twine上传
+#### 推荐使用twine上传
 
 使用twine上传到pypi很简单：
 
@@ -6219,7 +6206,7 @@ keyring set https://upload.pypi.org/legacy/ your-username
 
 来本地安全保存你的用户名和密码。
 
-## pypi下载使用国内源
+### pypi下载使用国内源
 
 豆瓣的pypi源 `https://pypi.douban.com/simple`  或者 清华的pypi源 `https://pypi.tuna.tsinghua.edu.cn/simple` 都可以吧。
 
@@ -6238,7 +6225,7 @@ pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 
 
-## pypi只下载软件源文件
+### pypi只下载软件源文件
 
 下载pypi上的目标软件源文件而不是安装。参考了 [这个网页](http://stackoverflow.com/questions/7300321/how-to-use-pythons-pip-to-download-and-keep-the-zipped-files-for-a-package) 。
 
@@ -6248,9 +6235,9 @@ pip install --download="/pth/to/downloaded/files" package_name
 
 
 
+## 附录
 
-
-## python虚拟环境管理
+### python虚拟环境
 
 Virtualenv模块的主要作用就是建立一个封闭独立的python开发环境，因为一个python项目的开发通常会涉及到多个模块，而你激活virtualenv环境之后，通过pip命令安装的模块是安装在本项目文件夹内的，这样就建立了单独的固定某个模块版本的开发环境。通过python虚拟环境，一方面控制了python的版本，另一方面控制了python模块的版本，同时使得整个项目类似于绿色安装版具有可移植性。
 
@@ -6262,7 +6249,7 @@ sudo pip install virtualenv
 ```
 
 
-### 新建一个项目
+#### 新建一个项目
 新建一个项目就是使用virutalenv命令，然后后面跟一个文件夹名字，等下要新建的文件夹名字。
 
 ```text
@@ -6284,7 +6271,7 @@ lib/python3.5/no-global-site-packages.txt
 
 
 
-### 激活本地虚拟环境
+#### 激活本地虚拟环境
 
 运行下面的命令即进入本地虚拟环境：
 
@@ -6296,13 +6283,15 @@ source bin/activate
 激活虚拟环境之后，使用python是使用的虚拟环境设定的python解释器，然后使用pip安装模块也是安装在虚拟环境之下。
 
 
-### 退出本地虚拟环境
+#### 退出本地虚拟环境
 
 运行deactivate命令即可
 
 ```text
 deactivate
 ```
+
+
 
 ### 其他小技巧
 
@@ -6452,22 +6441,16 @@ it = (len(x) for x in open('/tmp/myfile.txt'))
 ### 参考资料
 
 - python入门教程，python官网上的tutorial。原作者：Guido van Rossum  Fred L. Drake ；中文翻译：刘鑫等；版本：2013-10-28；pdf下载链接：[python入门教程](https://drive.google.com/open?id=0ByWxOeitx54PSW40bU5zNVhuMlU&authuser=0)  。
-
 - learning python，主要python语言参考，我主要参看了python学习手册（第四版）。原作者：Mark Lutz，中文翻译：李军，刘红伟等。
-
 - programming python，作者Mark Lutz对python编程的进阶讨论；版本：第四版。
-
 - python [官网上的资料](https://docs.python.org/3/) 。
-
 - dive into python3 [english version](http://www.diveintopython3.net/index.html) , 这是[中文版](http://sebug.net/paper/books/dive-into-python3/index.html) 。
-
 - A Guide to Python's Magic Methods，作者：Rafe Kettler ,版本：2014-01-04，[Github 地址](https://github.com/RafeKettler/magicmethods) .
-
 - Foundations of Python Network Programming ，python网络编程基础，[美] John Goerzen 著，莫迟等译 。这是 [中文在线阅读网页](http://likebeta.gitbooks.io/twisted-intro-cn/content/zh/index.html) ，这是 [english version](http://krondo.com/?page_id=1327) 。
-
 - Unix网络编程卷1: 套接字联网API , Author: W. R. Stevens , Bill Fenner 等著 , version: 第三版 
-
 - 计算机网络自顶向下方法 , Author: James F. Kurose , Keith W. Ross ,陈鸣译 。这本书作为入门了解有关计算机网络相关知识还是很不错的。
+- 流畅的python, Luciano Ramalho著, 安道 吴珂译
+- 深入理解python特性, 达恩·巴德尔著
 
 
 
