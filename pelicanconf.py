@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
 
-from pelican_jupyter import markup as nb_markup
 import sys
 
 # set the author metadata
@@ -70,7 +69,7 @@ TAG_SAVE_AS = TAG_URL
 AUTHOR_URL = 'author/{slug}.html'
 AUTHOR_SAVE_AS = ''
 # disable parse html
-READERS = {'html': None}
+# READERS = {'html': None}
 
 
 ######################### MARKDOWN CONFIG #################
@@ -102,11 +101,6 @@ TEMPLATE_PAGES = {'404.html': '404.html'}
 
 ################################### plugin #################
 PLUGIN_PATHS = ['myplugins']
-
-# ipynb
-MARKUP = ("md", "ipynb")
-PLUGINS = [nb_markup]
-IGNORE_FILES = [".ipynb_checkpoints"]
 
 PLUGINS = ['pelican_javascript', 'extract_toc',
            'tipue_search', 'render_math', 'sitemap', 'pandoc_html']

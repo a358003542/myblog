@@ -118,16 +118,13 @@ visual studio2017安装桌面端C++开发环境和python开发环境，然后把
 
 用visual studio打开源码里面 `PCbuild` 里的 `pcbuild.sln` 。你可以使用 `.\build.bat  -p x64` 来编译出64位python，不带`-p` 参数默认编译出32位。一开始可以使用这个来测试下看看能不能编译成功，后面再使用visual studio编译，毕竟后面的重点还是利用visual studio来学习CPython的源码。
 
-`build.bat` 会自动调用 `get_externals.bat` 这个脚本来下载一些第三方组件，建议下执行下这个脚本看看，如果下载实在有问题可以参考 [这个Github项目](https://github.com/python/cpython-source-deps) 。
+`build.bat` 会自动调用 `get_externals.bat` 这个脚本来下载一些第三方组件，建议下执行下这个脚本看看，如果下载实在有问题可以参考 [这个Github项目](https://github.com/python/cpython-source-deps) 。执行后下载内容在 `externals` 文件夹哪里，可以保存起来方便后续使用。
+
+visual studio的`生成->配置管理器`那里可以选择Debug或者Release，win32或者x64等。
 
 这些依赖在linux下编译一样是需要的，如果报错什么 `ssl.h` 找不到或者 `_sqlite3` 找不到就是这些依赖的缺失问题。
 
-
-
-
-
-#### windows下使用pip
-windows下使用pip安装，如果是wheel包，那么可能就直接装上了，有些简单的直接安装源码即可，有些集成了C语言写的子模块的，或者利用cython语言来编写的，在编译过程的就必须确保python装上了 `VC++ for python` ，官网下载地址在 [这里](https://www.microsoft.com/en-us/download/confirmation.aspx?id=44266) 。
+更多关于python源码的知识请参阅后面的python源码学习一章。
 
 
 
@@ -628,12 +625,6 @@ sample(p,k)
 从上一个例子我们看到，虽然我不确定具体随机到某个实数的概率是不是永远也没有可能，但肯定很小很小。所以如果我们要解决某个问题，需要某个确定的概率的话还是用随机整数好一些。
 
 更多内容请参见[官方文档](http://docs.python.org/3/library/random.html)。
-
-### 模块的深入学习
-
-这里插一段高级的知识，在学习python的模块的时候，除了阅读其文档，还可以下载CPython的源码来阅读学习，而在CPython的源码中，有很多是C语言写的，如果可能，那么继续阅读C语言写的这些模块细节才是真正掌握了该模块某个函数实现的具体细节。这样就算以后你使用的是其他语言，在那个语言之下并没有你熟知的这些模块的那些函数，而你是知道这个问题如果使用那个函数就能很好地解决问题。那么这个时候深刻理解阅读该模块源码的具体实现细节，将非常有助于快速实现另外一个语言版本的目标函数。
-
-
 
 ### 序列
 
@@ -5966,13 +5957,46 @@ python的列表解析（迭代）效率是很高的，我们应该多用列表�
 
 文件对象有一个readlines方法，能够一次性把整个文件的所有行字符串装入到一个列表中。然后我们再对这个列表进行解析操作就可以直接对整个文件的内容做出一些修改了。不过不推荐使用readlines方法了，这样将整个文件装入内存的方法具有内存爆炸风险，而迭代版本更好一点。
 
+## python源码学习
+
+### 基本结构
+
+- `Doc` 文档
+- `Grammar` 计算机可理解的语言定义
+- `Include` C的头文件
+- `Lib` 用python写的python内置库部分
+- `Mac` macOs支持
+- `Misc` 杂项
+- `Modules` 用C写的python内置库部分
+- `Objects` 核心对象和类
+- `Parser`  python解析器
+- `PC` 对windows系统旧版本的d编译支持
+- `PCBuild` 对windows系统的编译支持
+- `Programs` python命令行程序
+- `Python` CPython解释器
+- `Tools` 单独的一些有用的工具
+- `m4` 定制脚本用于自动配置makefile
+
+### 基础知识
+
+python解释器的工作不是将你输入的python代码编译为机器码，而是一种中间语言：`bytecode` 。`.pyc`文件下存储的就是这样的字节码。
+
+python语言规范使用的是EBNF（Extended-BNF）规范。
+
+- `*` 重复
+- `+` 至少重复一次
+- `[]` 可选部分
+- `|` 可供选择的部分
+- `()` grouping
+- 
+
 
 
 ## pypi生态圈
 
 似乎讨论pypi生态圈超出了python语言的讨论范畴，但不讨论pypi的python语言教程是不完整的，因为pypi生态圈的丰富和强大正是python语言的一个很大的优势。
 
-### setup.py配置
+### setuptools
 
 本章知识是我们理解前人编写的各个有用的模块包的基础，也是编写自己的模块包的基础。
 
@@ -5980,32 +6004,45 @@ python的列表解析（迭代）效率是很高的，我们应该多用列表�
 
 虽然官方内置distutils模块也能实现类似的功能，不过现在人们更常用的是第三方模块setuptools，其相当于distutils模块的加强版，初学者推荐就使用setuptools模块。更多内容请参看setuptools模块的 [官方文档](https://setuptools.readthedocs.io/en/latest/) 。
 
-安装就是先安装pip3：
+现在setuptools推荐使用`setup.cfg`来进行相关配置管理，而不是之前的 `setup.py` 里的 `setup` 函数。pypi生态圈和相关PEP规范在不断完善中，现在推荐使用 `build` 模块，运行 `python -m build` 来进行你项目的打包工作。
 
-```text
-sudo apt-get install python3-pip
+你首先需要新建一个 `pyproject.toml` 文件，指定本项目的安装环境，setuptools相关如下：
+
+````
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+````
+
+ 然后其他配置都通过 `setup.cfg` 进行，一个简单的 `setup.cfg` 配置如下：
+
+```
+[metadata]
+name = pyskeleton
+version = attr: pyskeleton.__version__
+description = quickly create a python module, have some other good concern.
+url=https://github.com/a358003542/pyskeleton
+long_description = file: README.md
+long_description_content_type=text/markdown
+
+[options]
+include_package_data = True
+packages = find:
+package_dir =
+    = src
+
+[options.packages.find]
+where = src
+include = pyskeleton
+
+[options.entry_points]
+console_scripts =
+    pyskeleton = pyskeleton.__main__:main
 ```
 
-然后通过pip3来安装setuptools：
+#### metadata
 
-```text
-sudo pip3 install setuptools
-```
-
-最简单的"setup.py"文件如下所示：
-
-```python
-from setuptools import setup, find_packages
-setup(
-    name = "HelloWorld",
-    version = "0.1",
-    packages = find_packages(),
-)
-```
-
-第一行是从setuptools模块中引入setup函数和 `find_packages` 函数。
-
-setup函数接受一系列的字典值，下面就setup函数的一些字典值的含义慢慢道来：
+ 一些metadata的填写还是很简单的，不过需要注意上面的 `attr:` 和 `file:` 写法。
 
 name
 
@@ -6066,6 +6103,14 @@ keywords
 
 : 本软件在pypi上搜索的关键词，字符串的列表。
 
+
+
+#### options
+
+zip_safe
+
+include_package_data
+
 packages
 
 : 你的软件依赖的模块。一般如下使用： 
@@ -6096,9 +6141,7 @@ package_data
 
 : 你的软件的模块额外附加的（除了py文件的）其他文件，具体设置类似这样 `{"skeleton":['*.txt'],}` 其中skeleton这里就是具体的你的软件的模块（对应的文件夹名），然后后面跟着的就是一系列的文件名列表，可以接受glob语法。注意这里只能包含你的模块文件夹也就是前面通过packages控制的文件夹下面的内容。
 
-include_package_data
 
-: 这个一般设置为True
 
 
 
@@ -6232,6 +6275,10 @@ pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 ```text
 pip install --download="/pth/to/downloaded/files" package_name
 ```
+
+
+
+
 
 
 
@@ -6451,6 +6498,7 @@ it = (len(x) for x in open('/tmp/myfile.txt'))
 - 计算机网络自顶向下方法 , Author: James F. Kurose , Keith W. Ross ,陈鸣译 。这本书作为入门了解有关计算机网络相关知识还是很不错的。
 - 流畅的python, Luciano Ramalho著, 安道 吴珂译
 - 深入理解python特性, 达恩·巴德尔著
+- CPython Internals, REALPYTHON.com
 
 
 
