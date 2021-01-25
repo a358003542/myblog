@@ -1384,6 +1384,33 @@ pop方法类似列表的pop方法，不同引用的是键，而不是偏移地�
     >>> dict001
     {'c': 3, 'b': 2, 'a': 1}
 
+#### 深入理解字典的寻址
+
+```python
+t = {True: 'yes', 1: 'no', 1.0: 'maybe'}
+t
+Out[3]: {True: 'maybe'}
+```
+
+造成这样的结果首先是python的字典的key相同的判断机制，比如是 值相同 而且是 hash 值相同 才认为是 key相同。
+
+其次是认为key相同key就不做改变了，而值是取最新的。也正是因为这样，下面的字典更新语句写法是可行的：
+
+```
+x = {'a':1, 'b':2}
+y = {'b':3}
+z = {**x, **y}
+```
+
+```
+z
+Out[8]: {'a': 1, 'b': 3}
+```
+
+而且这也是最快的字典更新方式。
+
+
+
 ### 集合
 
 python实现了数学上的无序不重复元素的集合概念，在前面讨论列表去重元素的时候我们提到过正好可以利用集合的这一特性。
@@ -4483,7 +4510,7 @@ with lock:
 
 下面只讨论TCP套接字编程，UDP协议暂不讨论。整个TCP套接字编程的过程如下所述:
 
-## 套接字编程
+### 套接字编程
 
 1.  客户机负责发起连接，其将新建一个套接字对象（在python中是通过**socket**函数来创建的），就好比在一个封闭的黑箱子里开了一个门，在创建这个套接字对象的过程中，你需要指定具体要连接的那个服务器的IP地址和端口号（**connect**方法）。
 
@@ -4535,9 +4562,9 @@ with lock:
 
 下面我们将更深入讨论套接字编程，并用python的socket模块来介绍具体编码的细节问题。
 
-## socket模块
+### socket模块
 
-## host主机名
+### host主机名
 
 host最简单就是人们熟知的IP地址，然后就是由本地hosts文件解析或者网络DNS系统解析的名字。比如
 `localhost` 或者 `python.org` 等。socket模块里面有 `gethostbyname`
@@ -4602,7 +4629,7 @@ getaddrinfo函数返回的 `family,type,proto`
 
 读者还可以用其他域名来试一下。
 
-## 地址族
+### 地址族
 
 AF\_INET
 
@@ -4614,7 +4641,7 @@ AF\_INET6
 
 此外还有一些冷门的地址族: AF\_UNIX ， AF\_NETLINK ， AF\_TIPC
 
-## 套接字类型
+### 套接字类型
 
 SOCK\_STREAM
 
@@ -4627,7 +4654,7 @@ SOCK\_DGRAM
 上面这两个套接字类型是全平台适用的。此外还有一些冷门的套接字类型:
 SOCK\_RAW ， SOCK\_RDM ， SOCK\_SEQPACKET
 
-## 传输协议
+### 传输协议
 
 传输协议 `proto` 一般设置为0。也可以明确指定某个传输协议:
 
@@ -4643,7 +4670,7 @@ IPPROTO\_SCTP
 
 :   SCTP传输协议
 
-## timeout
+### timeout
 
     socket.settimeout(None)
     socket.settimeout(0)
@@ -4666,7 +4693,7 @@ IPPROTO\_SCTP
     socket.setblocking(True)
     socket.setblocking(False)
 
-## listen方法
+### listen方法
 
 服务器端套接字具体开始监听。
 
@@ -4698,7 +4725,7 @@ python有所谓的GIL概念，很多人对其有指责，而实际上那些支�
 
 下面开始通过一些例子来学习吧。
 
-## 低效的诗歌服务器
+### 低效的诗歌服务器
 
 本例子来自参考资料 [@twisted与异步编程入门] ，我将其改成了python3版本
 `slowpoetry.py` 。
@@ -4915,9 +4942,9 @@ python有所谓的GIL概念，很多人对其有指责，而实际上那些支�
 
 这种一个个来，一个任务做完才能进行下一个的模式是很好理解的，但进程间的通信可以不是这样，请看下面的select风格I/O复用的讨论。
 
-## Select风格的诗歌服务器
+### Select风格的诗歌服务器
 
-### Unix五种I/O模型
+#### Unix五种I/O模型
 
 首先讨论一下Unix的五种I/O模型：
 
@@ -4951,7 +4978,7 @@ python有所谓的GIL概念，很多人对其有指责，而实际上那些支�
 
     sel = selectors.DefaultSelector()
 
-### 监控文件读写事件
+#### 监控文件读写事件
 
 Selector对象有个register方法，如下所示：
 
@@ -5208,7 +5235,7 @@ Selector对象有个register方法，如下所示：
 2.
 具体下载行为就是对目标fileobj进行write，把接受到的字节流给写进去即可。
 
-## Asyncio风格的诗歌服务器
+### Asyncio风格的诗歌服务器
 
 通过Selectors模块，不仅现在我们的程序是高效的异步模式了，而且之前代码中那几个丑陋的
 `while True`
@@ -5226,7 +5253,7 @@ reactor
 在进行事件驱动编程之前还需要强调一点，上图这个 *事件循环*
 的概念是事件驱动编程的核心概念，实际上在前面的select风格异步编程中，我们就已经看到这点影子了，那就是开启事件循环之后，剩下的工作就是挂载一些函数，这些函数里面会涉及到另外一些函数的挂载和取消挂载操作等，我们可以在脑海中想象中间一个事件循环大圈，然后四周八围挂载着各种函数各种操作，这就是事件驱动编程风格了。实际上事件驱动编程会让很多工作变得简单，其没有让事情变得复杂，关键是我们的头脑要习惯这种编程风格，脑海里还熟悉这种事件驱动模型。
 
-### 常规eventloop版
+#### 常规eventloop版
 
 下面是Asyncio风格的诗歌服务器第一版，关于asyncio模块有不懂的读者请参看该模块的官方文档。
 
@@ -5438,7 +5465,7 @@ reactor
 
 如果读半部关闭，则将返回0，所以可以如上来判断读操作是否完毕了。
 
-### 自定义协议版
+#### 自定义协议版
 
 asyncio模块还提供了很多功能可以让读者不用使用socket模块，而直接更高层的基于协议来编写网络程序。下面是
 诗歌服务器第二版，本例子参考了
@@ -5636,8 +5663,6 @@ eof\_received
 
 
 ## 核心内置
-
-
 
 ### assert语句
 
@@ -5885,34 +5910,6 @@ f"hello. {name}"
 
 
 
-## 字典
-
-### 深入理解字典的寻址
-
-```python
-t = {True: 'yes', 1: 'no', 1.0: 'maybe'}
-t
-Out[3]: {True: 'maybe'}
-```
-
-造成这样的结果首先是python的字典的key相同的判断机制，比如是 值相同 而且是 hash 值相同 才认为是 key相同。
-
-其次是认为key相同key就不做改变了，而值是取最新的。也正是因为这样，下面的字典更新语句写法是可行的：
-
-```
-x = {'a':1, 'b':2}
-y = {'b':3}
-z = {**x, **y}
-```
-
-```
-z
-Out[8]: {'a': 1, 'b': 3}
-```
-
-而且这也是最快的字典更新方式。
-
-
 
 ## 文件
 
@@ -5964,18 +5961,96 @@ python的列表解析（迭代）效率是很高的，我们应该多用列表�
 - `Doc` 文档
 - `Grammar` 计算机可理解的语言定义
 - `Include` C的头文件
-- `Lib` 用python写的python内置库部分
+- `Lib` 用python写的python内置模块部分
 - `Mac` macOs支持
 - `Misc` 杂项
-- `Modules` 用C写的python内置库部分
+- `Modules` 用C写的python内置模块部分
 - `Objects` 核心对象和类
 - `Parser`  python解析器
-- `PC` 对windows系统旧版本的d编译支持
+- `PC` 对windows系统旧版本的编译支持
 - `PCBuild` 对windows系统的编译支持
 - `Programs` python命令行程序
 - `Python` CPython解释器
 - `Tools` 单独的一些有用的工具
 - `m4` 定制脚本用于自动配置makefile
+
+### 一个简单的C语言扩展
+
+如上面所示，CPython首先是一个C语言实现的解释器，其次是由C语言写的核心对象和类，再就是用C写的内置模块，最后就是用python写的内置模块。python写的模块源码是直接可以拿来阅读的，而C语言写的内置模块这就是本小节要展示。下面将通过C语言来编写一个最简单的python模块。
+
+`ctest.c` 文件内容如下：
+
+```c
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+#include <stdio.h>
+
+static PyObject *
+ctest_hello(PyObject *self, PyObject *args) {
+    char *str;
+
+    /* Parse arguments */
+    if(!PyArg_ParseTuple(args, "s", &str)) {
+        return NULL;
+    }
+
+    printf("hello %s\n", str);
+
+    return Py_None;
+}
+
+static PyMethodDef CtestMethods[] = {
+    {"hello", ctest_hello, METH_VARARGS, "a simple say hello function."},
+    {NULL, NULL, 0, NULL}
+};
+
+
+static struct PyModuleDef ctestmodule = {
+    PyModuleDef_HEAD_INIT,
+    "ctest",
+    "a simple python module writing in c",
+    -1,
+    CtestMethods
+};
+
+PyMODINIT_FUNC PyInit_ctest(void) {
+    return PyModule_Create(&ctestmodule);
+}
+```
+
+setup.py 是用来编译该模块的：
+
+```python
+from distutils.core import setup, Extension
+
+
+def main():
+    setup(
+        ext_modules=[
+            Extension("my_python_module.ctest", ["src/ctest/ctest.c"])]
+    )
+
+
+if __name__ == "__main__":
+    main()
+```
+
+读者可能注意到了，该模块是作为my_python_module的子模块引入进来的。然后正常打包安装：
+
+```
+python -m build
+pip install dist\***.whl
+```
+
+```
+>>> import my_python_module.ctest
+>>> my_python_module.ctest.hello("world")
+hello world
+```
+
+因为这里不是C语言教程，所以这里不会就C语言作过多讨论，而上面的ctest.c先请读者简单看一下，熟悉一下，后面我们再慢慢学习熟悉这其中的细节。
+
+
 
 ### 基础知识
 
@@ -5988,7 +6063,6 @@ python语言规范使用的是EBNF（Extended-BNF）规范。
 - `[]` 可选部分
 - `|` 可供选择的部分
 - `()` grouping
-- 
 
 
 
@@ -6014,7 +6088,50 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 ````
 
- 然后其他配置都通过 `setup.cfg` 进行，一个简单的 `setup.cfg` 配置如下：
+一般推荐的项目结构有如下两种，现在假定这里我们讨论的python模块名字是pyskeleton，如果你的项目只有这样一个python模块，则推荐采用如下结构：
+
+```
+----pyskeleton
+  --__init__.py
+  
+setup.cfg
+pyproject.toml
+```
+
+对应的setup.cfg文件内容大体如下：
+
+```
+[metadata]
+name = pyskeleton
+version = attr: pyskeleton.__version__
+description = quickly create a python module, have some other good concern.
+url=https://github.com/a358003542/pyskeleton
+long_description = file: README.md
+long_description_content_type=text/markdown
+
+[options]
+include_package_data = True
+packages = pyskeleton
+```
+
+也就是直接将packages写上去即可。
+
+还有一种结构如下所示：
+
+```
+----src
+  ----pyskeleton
+    --__init__.py
+  ----other_module
+    --__init__.py
+    
+setup.cfg
+pyproject.toml
+```
+
+现在甚至只有一个模块的python项目也推荐采用这种结构，因为这种结构可扩展性更好一些。一些C语言写的python扩展模块放在src文件夹下也能得到很好地管理。
+
+这种结构的 `setup.cfg` 大体内容如下所示：
 
 ```
 [metadata]
@@ -6040,9 +6157,25 @@ console_scripts =
     pyskeleton = pyskeleton.__main__:main
 ```
 
+这里使用了find来自动从src文件夹下面寻找python模块，你可以将你的python的tests文件夹放在src之外，这样就避免了tests也被find进来了。你可以进一步通过 `include` 和 `exclude` 来控制find函数的行为。
+
+`package_dir` 这个参数正是支持上面结构的关键，其传统的写法是这样的：
+
+```
+package_dir = {'': 'src'}
+```
+
+意思是你的根包在src文件夹下。这个配置还可以进行其他调配，但这会弄得太复杂了，这里就把上面具体的行为说明清楚：
+
+find是自动寻找python模块，where指定要在那个寻找，所以现在find就开始在src文件夹下面寻找了，你可以通过include和exclude参数来进一步规范find的查找行为，就上面的例子来说将只会找到pyskeleton这个模块。为了后面讨论的方便现在假定找到了 `pyskeleton` 和 `other_module` 这两个模块。package_dir 定义了模块名和具体该模块在文件系统中文件夹的映射关系。比如上面设置根包在src文件夹下，则说 `pyskeleton` 就是预期要有 `src/pyskeleton/__init__.py` 这个文件，说得再具体一点，该模块将会拷贝到 `site-packages` 那里的根目录下面去。
+
+为了加深理解我们可以将上面的include参数改成 `pyskeleton*` ，然后再随便新建一个pyskeleton2模块，经过测试就会发现又会多了一个pyskeleton2的模块。
+
+一般子模块会放在总模块的下面方便管理，但项目合作的时候可能各个子模块会分开开发，那么这个时候你可以使用`find_namespace` 来实现多个子模块在一个父模块名字之下，这块讨论这里就略过了。
+
 #### metadata
 
- 一些metadata的填写还是很简单的，不过需要注意上面的 `attr:` 和 `file:` 写法。
+ 一些metadata的填写还是很简单的，不过需要注意上面的 `attr:` 和 `file:` 写法。attr可以提取本模块的某些属性信息，而可用于提取某文件的内容。
 
 name
 
@@ -6107,21 +6240,7 @@ keywords
 
 #### options
 
-zip_safe
-
-include_package_data
-
-packages
-
-: 你的软件依赖的模块。一般如下使用： 
-
-```text
-packages = find_packages()
-```
-
-则文件夹下有 `__init__.py` 文件的，都将视作python模块包，其内的py文件都将加入进去。
-
-除此之外你也可以直接手工输入你的模块名字，具体就是字符串的列表。
+options这里除了上面已经提到的一些，其他的都略过讨论了，一般只在某些特殊情况下才会使用到。
 
 entry_point
 : 
@@ -6134,6 +6253,10 @@ entry_points = {
 
 其中zwc是你的shell调用的名字，然后zwc是你的模块，另外一个zwc是你的主模块的子模块，然后main是其中的main函数。这就是你的shell调用程序的接口了。类似的还有gui_script可以控制你调用GUI图形的命令入口。
 
+include_package_data
+
+: 一般推荐设置为 True，然后通过 `MANIFAST.in` 文件来管理各个数据文件。
+
 install_requires
 : 接受字符串的列表值，将你依赖的可以通过pip安装的模块名放入进去，然后你的软件安装会自动检测并安装这些依赖模块。
 
@@ -6143,9 +6266,7 @@ package_data
 
 
 
-
-
-其他不常用的属性值列在下面：
+#### 不推荐使用的选项
 
 - scripts 不推荐使用，推荐通过entry_point来生成脚本。
 - setup_requires 不推荐使用，基于PEP-518 。
@@ -6161,25 +6282,15 @@ data_files = [('',['skeleton.tar.gz'])],
 
 值得一提的是data_files不能接受glob语法。
 
-data_files已经不推荐使用了，推荐用package_data来管理，可以方便用pkg_resources里面的方法来引用其中的资源文件。具体说明请看后面。
+data_files已经不推荐使用了，推荐用`MANIFAST.in`来管理，可以方便用pkg_resources里面的方法来引用其中的资源文件。
 
-### pip的develop模式
-
-本小节参考了 [这个问题](https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install) 。
-
-对于其他第三方包你不需要修改的，就直接 python setup.py install 就是了，而对于你自己写的包，可能需要频繁变动，最好是加载引用于本地某个文件夹，那么推荐是采用 python setup.py develop 命令来安装。
-
-其对应于 `pip install -e .` 这个命令，或者直接安装本地文件夹不是develop模式 `python install .` 。
-
-pipenv的 `pipenv install -e .` 也是这个develop模式，你修改的代码会实时生效。
-
-### pkg_resources模块来管理读取资源文件
+### 读取资源文件
 
 如下所示：
 
 ```
-    from pkg_resources import resource_filename
-    resource_stream('wise','icos/Folder-Documents.ico')
+from pkg_resources import resource_filename
+resource_stream('wise','icos/Folder-Documents.ico')
 ```
 
 
@@ -6187,33 +6298,29 @@ pipenv的 `pipenv install -e .` 也是这个develop模式，你修改的代码�
 
 上面的例子是resource_filename，返回的是引用的文件名。此外还有命令：resource_string，参数和resource_filename一样，除了它返回的是字节流。这个字节流可以赋值给某个变量从而直接使用，或者存储在某个文件里面。
 
+### pip的develop模式
 
-### 在pypi上传你的软件
+本小节参考了 [这个问题](https://stackoverflow.com/questions/19048732/python-setup-py-develop-vs-install) 。
+
+对于其他第三方包你不需要修改的，就直接 python setup.py install 就是了，而对于你自己写的包，可能需要频繁变动，最好是加载引用于本地某个文件夹，那么推荐是采用 python setup.py develop 命令来安装。develop模式下你修改了你的模块源码是直接生效的，因为安装过程只是提供了一个引用链接，实际还是用的你的源码这边的代码。
+
+`python setup.py install` 对应的是 `pip install .` 命令，如果你没有setup.py这个文件了那么可以使用这个命令来从本地源码安装。develop模式对应的命令是： `pip install -e .`  。
+
+
+### 在pypi上传你的模块
 
 #### 正确处理README文档
 
 现在pypi已经支持markdow文档格式了。推荐按照官方文档 [这里](<https://packaging.python.org/guides/making-a-pypi-friendly-readme/> ) 来处理：
 
 ```python
-from setuptools import setup
-
-# read the contents of your README file
-from os import path
-this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
-
-setup(
-    name='an_example_package',
-    # other arguments omitted
-    long_description=long_description,
-    long_description_content_type='text/markdown'
-)
+long_description = file: README.md
+long_description_content_type=text/markdown
 ```
 
-有段时间我用 `codecs` 来读取README文件一直出现一切奇怪的问题，原因不明。就如同上面这样直接读取即可。
-
 注意上面配置的 `long_description_content_type` ，如果你喜欢 `reStructuredText` 格式，那么设置为 `text/x-rst` 即可。
+
+#### 打包模块
 
 首先推荐升级最新的setuptools，wheel和twine模块。
 
@@ -6225,6 +6332,8 @@ python setup.py sdist bdist_wheel
 
 这样将直接dist文件夹下面生成源码tar包和wheel包。
 
+没有`setup.py` 的项目安装 `build` 模块，然后运行 `python -m build` 。
+
 然后推荐运行下：
 
 ```text
@@ -6233,7 +6342,7 @@ twine check dist/*
 
 来确保你的文档格式没问题。
 
-#### 推荐使用twine上传
+#### 使用twine上传
 
 使用twine上传到pypi很简单：
 
@@ -6278,65 +6387,38 @@ pip install --download="/pth/to/downloaded/files" package_name
 
 
 
-
-
-
-
 ## 附录
 
 ### python虚拟环境
 
-Virtualenv模块的主要作用就是建立一个封闭独立的python开发环境，因为一个python项目的开发通常会涉及到多个模块，而你激活virtualenv环境之后，通过pip命令安装的模块是安装在本项目文件夹内的，这样就建立了单独的固定某个模块版本的开发环境。通过python虚拟环境，一方面控制了python的版本，另一方面控制了python模块的版本，同时使得整个项目类似于绿色安装版具有可移植性。
+Virtualenv模块的主要作用就是建立一个封闭独立的python开发环境，因为一个python项目的开发通常会涉及到多个模块，而你激活virtualenv环境之后，通过pip命令安装的模块是安装在本项目文件夹内的，这样就建立了单独的固定某个模块版本的开发环境。
+
+一般来说绝大部分项目都推荐开始之前就建立专属于自己的虚拟环境，除非是那种临时的测试项目。而一个项目运行时间越长，维护时间越长，虚拟环境所带来的好处就越大。
 
 
-安装就是用pip来安装常规安装即可。
+安装虚拟环境：
 
 ```text
-sudo pip install virtualenv
+python -m venv venv_folder_name
+```
+
+#### 激活虚拟环境
+
+一般简单使用直接调用 `Script` 文件夹下的python解释器即可，但如果有多行命令，或者你后面使用了本python模块的可执行程序等，那么推荐还是激活下虚拟环境再进行后面的动作。
+
+linux下：
+
+```text
+source venv/bin/activate
+```
+
+windows下有 `activate.bat` ：
+
+```
+call .\venv\Scripts\activate.bat
 ```
 
 
-#### 新建一个项目
-新建一个项目就是使用virutalenv命令，然后后面跟一个文件夹名字，等下要新建的文件夹名字。
-
-```text
-virutalenv [path]
-```
-
-这里的path就是你的项目的名字，等下会创建该名字的文件夹，你也可以设定为 "." ，这样就是在当前文件夹下创建。 然后常用的选项有：
-
-
-- `--python=python2` 或者 `--python=python3` 如果不指定这个选项，虚拟环境会使用当前操作系统的默认python版本。
-
-- `--system-site-packages` ，如果加上这个选项，那么你的虚拟环境是可以使用安装到系统里去的那些python模块的。参考了 [这个网页](http://stackoverflow.com/questions/3371136/revert-the-no-site-packages-option-with-virtualenv) ，这是个很值得一提的小技巧，那就是如果你之前设定是venv可以引用系统级的那些python模块，后面你又不想了，这个时候是不需要重新安装虚拟环境的，只需要在虚拟环境中创建一个这个空白文件即可：
-
-```text
-lib/python3.5/no-global-site-packages.txt
-```
-
-如果你又想引用系统级的那些python模块了，把这个文件删除即可。
-
-
-
-#### 激活本地虚拟环境
-
-运行下面的命令即进入本地虚拟环境：
-
-```text
-cd venv
-source bin/activate
-```
-
-激活虚拟环境之后，使用python是使用的虚拟环境设定的python解释器，然后使用pip安装模块也是安装在虚拟环境之下。
-
-
-#### 退出本地虚拟环境
-
-运行deactivate命令即可
-
-```text
-deactivate
-```
 
 
 
