@@ -1,8 +1,4 @@
-Title: unity入门学习笔记
-Slug: unity-beginning-learning-notes
-Date: 2019-12-22
-Tags: unity
-Status: draft
+
 
 [TOC]
 
