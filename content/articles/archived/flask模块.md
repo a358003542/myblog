@@ -1,4 +1,3 @@
-Category: web_server
 Slug: flask-module
 Tags: flask
 Date: 20190405

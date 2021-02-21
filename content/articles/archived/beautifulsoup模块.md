@@ -1,4 +1,3 @@
-Category: python_companion
 Slug: beautifulsoup-module
 Tags: python,
 Date: 20191018

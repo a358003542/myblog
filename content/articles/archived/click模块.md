@@ -1,4 +1,3 @@
-Category: python_companion
 Slug: click-module
 Tags:  python, 
 Date: 20191018

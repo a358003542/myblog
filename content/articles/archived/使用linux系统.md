@@ -1,5 +1,4 @@
 Slug: use-linux-system
-Category: linux
 Tags: linux
 Date: 20191018
 [TOC]

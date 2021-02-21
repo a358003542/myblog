@@ -54,6 +54,7 @@ STATIC_PATHS = ['images',
 
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'},
+    'extra/ads.txt': {'path': 'ads.txt'},
 }
 
 ARTICLE_URL = 'articles/{slug}.html'  # articles 里面的内容
