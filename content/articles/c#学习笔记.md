@@ -116,6 +116,8 @@ C#的注释单行是 `//` ，多行是 `/*...*/` 。
 
 ### value type
 
+C#有两种变量类型，value type直接存储变量的值，reference type存储的是对目标数据的引用。
+
 #### 简单类型
 
 - sbyte short int long
@@ -381,7 +383,101 @@ foreach (var x in new int[] { 1, 2, 3 }){
 
 ## class
 
-C#的class类只允许单继承，也就是最多只能继承自一个父类。
+C#的class类只允许单继承，也就是最多只能继承自一个父类。一般类的声明和使用和C++类似：
+
+```
+public class Character
+{
+    public string name;
+    public int exp = 0;
+
+    public Character(string name)
+    {
+        this.name = name;
+    }
+}
+
+Character hero = new Character("lucy");
+```
+
+### this
+
+this关键词类似于python里面的self，和C++上的this大体含义也是一样的，是一个指向本类实例的指针。同样在本类里面定义的方法下面都默认带入了this这个参数，也就是在各个方法里面直接使用即可。
+
+
+
+### 继承
+
+C#就继承上的概念和写法和C++相比很类似，不过就语法书写层面会更友好一点，比如提供了base关键词对父类的引用，还有概念上简化，只允许有一个父类，此外还有一些C#代码和C++代码上的通用差异。除开这些，我们仍然可以从C#的继承和构造方法编写中看到C++的影子。比如下面的 `: base(name)` 在C++那边具体叫做成员初始化列表写法，也就是 `base(name)` 里面的name这个参数是直接来自 `Paladin(string name)` 接受到的参数name的。
+
+```c#
+public class Paladin : Character
+{
+    public Paladin(string name): base(name)
+    {
+    
+    }
+
+}
+```
+
+### virtual和override
+
+C++就多态这个议题从C++11开始也有virtual和override这两个关键词了，不过都不是强制性的，正因为不是强制性的，所以引出很多问题。比如不使用virtual，如果你的子类声明的时候采用的是子类引用变量或者子类指针，那么使用的方法都将是基类的。而引入virtual这个关键词会根据实例的类型来决定使用的方法。override在C++那边更多的是一个规避bug的写法，表明你的子类的这个方法是要重载基类的某个方法，因为有时一不注意，参数类型没对上，重载行为就会无意跳过去。
+
+在C#这边virtual和override用来描述OOP面向对象编程的多态概念是推荐的标准写法了。
+
+简单来说就是基类的方法要加上virtual，子类的方法要加上override表明这里有重载行为。
+
+```c#
+    // base class
+    public virtual void printStatusInfo()
+    {
+        Debug.LogFormat("Hero: {0} - {1} EXP", this.name, this.exp);
+    }
+    
+    // derived class
+    public override void printStatusInfo()
+    {
+        Debug.LogFormat("Paladin: {0} - take up your weapon: {1}", this.name, this.weapon.name);
+    }
+```
+
+
+
+## struct
+
+C#里面的结构体和C++里面的结构体差异巨大，C++里面的结构体概念和C语言的结构体区别不大，只是一种比数组略灵活点的变量类型，专门用来存储呈现一定结构特征的数据用的。而C#里面struct则更接近于class这个概念，有一些小的使用上的区别，其他都大同小异，其中最大的一个区别是struct是类型是value type，而class的类型是reference type。
+
+比如下面这个例子，C#里面的struct一样也可以有自己的构造方法：
+
+```c#
+struct Coordinate
+{
+    public int x;
+    public int y;
+
+    public Coordinate(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+Coordinate point = new Coordinate(10, 20);
+```
+
+但需要注意的是**C#的struct不能再定义无参构造方法**，因为它默认已经有了。当然struct没有继承关系。
+
+完整的struct不能class能的清单如下：
+
+- You can't declare a parameterless constructor. Every structure type already provides an implicit parameterless constructor that produces the [default value](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/default-values) of the type.
+- You can't initialize an instance field or property at its declaration. However, you can initialize a [static](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/static) or [const](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/const) field or a static property at its declaration.
+- A constructor of a structure type must initialize all instance fields of the type.
+- A structure type can't inherit from other class or structure type and it can't be the base of a class. However, a structure type can implement [interfaces](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/interface).
+- You can't declare a [finalizer](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/destructors) within a structure type.
+
+
 
 
 

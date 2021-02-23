@@ -50,5 +50,30 @@ Start方法每个组件游戏开始时就会执行，在这个方法里面写上
 Debug.LogFormat("{0} + {1} = {2}", 2,3,2+3);
 ```
 
+## 引用Unity对象
+
+### GetComponet generic method
+
+GetComponet方法是一个generic method，需要指定查找的组件类型，查找只限于本GameObject的组件。
+
+```
+private Transform camTransform;
+camTransform = this.GetComponent<Transform>();
+Debug.Log(camTransform.localPosition);
+```
+
+### Find方法
+
+Find方法可以用于查找不是本GameObject的其他GameObject，具体名字就是Unity面板上显示的那个名字。
+
+```
+private GameObject directLight;
+private Transform lightTransorm;
+
+directLight = GameObject.Find("Directional Light");
+lightTransorm = directLight.GetComponent<Transform>();
+Debug.Log(lightTransorm.localPosition);
+```
+
 
 
