@@ -477,6 +477,21 @@ Coordinate point = new Coordinate(10, 20);
 - A structure type can't inherit from other class or structure type and it can't be the base of a class. However, a structure type can implement [interfaces](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/interface).
 - You can't declare a [finalizer](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/destructors) within a structure type.
 
+## 属性值的get和set写法
+
+```c#
+    private string _name;
+    public string Name{
+    get {
+        return _name;
+    }
+    set {
+        _name = value;
+    }
+    
+    }
+```
+
 
 
 
