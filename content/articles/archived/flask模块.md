@@ -304,7 +304,7 @@ url_for('static', filename='favicon.ico')
 
 ## flask进阶参考
 
-在深入了解flask框架内部工作原理之后，读者可以参看我写的 [flask上下文释疑这篇文章]({filename}./flask上下文释疑.md) ，然后再了解下flask具体的一些API细节即可。下面也列出了一些可做核心参考。
+在深入了解flask框架内部工作原理之后，读者可以参看我写的 flask上下文释疑这篇文章 ，然后再了解下flask具体的一些API细节即可。下面也列出了一些可做核心参考。
 
 ### 请求对象
 

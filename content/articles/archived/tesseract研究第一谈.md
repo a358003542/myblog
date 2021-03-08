@@ -193,7 +193,7 @@ tess.Recognize(0);
 std::cout << std::unique_ptr<char[]>(tess.GetUTF8Text()).get() << std::endl;
 ```
 
-简单的看代码知道setImage就是设置tess主接口当前要处理的图片，Recognize应该就是识别的意思，0这个参数意义不明，但这不是重点。然后就是输出，我们看到 `GetUTF8Text` ，这告诉我们其输出的文本是utf8编码的，这在后面给我带来了一点困扰。因为windows的powershell默认的936 gbk编码的，这样其将输出乱码，请将其调成65001 utf8编码，具体可以参看 [这篇文章]({filename}./软件/powershell.md) 。
+简单的看代码知道setImage就是设置tess主接口当前要处理的图片，Recognize应该就是识别的意思，0这个参数意义不明，但这不是重点。然后就是输出，我们看到 `GetUTF8Text` ，这告诉我们其输出的文本是utf8编码的，这在后面给我带来了一点困扰。因为windows的powershell默认的936 gbk编码的，这样其将输出乱码，请将其调成65001 utf8编码，具体可以参看 [这篇文章]({filename}./powershell.md) 。
 
 样例代码默认是加载英文模型，如果要处理中文需要加载中文模型，现在临时这样修改：
 
