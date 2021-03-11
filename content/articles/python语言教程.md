@@ -1,5 +1,4 @@
 Slug: python-tutorial
-Category: python
 Tags: python,
 Date: 20191018
 Modified: 20210117
