@@ -99,6 +99,8 @@ gameManager = GameObject.Find("GameManager").GetComponent<GameBehavior>();
 
  一个空的GameObject就是一个容器，其可以用于在Unity Editor的世界大纲视图中进行层级管理。一个GameObject下面管理的多个物体，如果将这个GameObject拖动到项目文件夹视图下，则将会创建一个Perfab预制件。预制件Perfab可以重复只用，并且改变基础Perfab属性会影响所有相关场景中的由此Perfab实例化的对象。
 
+一个GameObject里的组件如果调用`GameObject` 属性，比如transform，或者脚本类this，都会指向这个目标容器GameObject。
+
 ## animation clip
 
 制作动画片段：
@@ -143,6 +145,16 @@ unity的每一个gameObject都有transform这个属性，transform的parent和ch
 
 你可以通过transform的层级数来定位某个gameObject的transform，然后通过 `.gameObject` 这个属性来获得具体该gameObject对象。
 
+你可以通过如下语句来迭代某个GameObject下的子节点：
+
+```c#
+foreach (Transform child in parent){
+    // do something
+}
+```
+
+
+
 ## 碰撞器组件的是否是触发器属性
 
 默认是否，如果勾选，则该碰撞器不具有物体碰撞功能而只有碰撞事件触发功能，也就是你可以穿模进去了。
@@ -153,11 +165,130 @@ unity的每一个gameObject都有transform这个属性，transform的parent和ch
 
 ![img]({static}/images/2021/unity_capsule.png)
 
+其中的layer层一般将地形GameObject放入该层。
+
 ## 如何将某个摄像头调到当前视角
 
 首先在编辑器上调整好开发者视角，然后选中某个摄像头，然后选择 `游戏对象-> align with view` 。
+
+## Unity导航系统
+
+Unity内置了一个路径导航系统，首先你需要将你的地形 GameObject 进行烘焙：
+
+1. 选择你的地形GameObject，选择Static菜单的Navigation Static
+2. 选择Window->AI->导航，选择烘培Bake Tab，然后点击烘培。
+3. 你将会在目标场景地图下面看到新建了一个NavMesh对象。
+
+导航系统中你想要移动的目标对象需要绑定Nav Mesh Agent组件。
+
+导航系统中你需要定义一系列的导航路径点，空的GameObject即可。
+
+### 如何移动一个Agent
+
+实际会很简单，就是设定destination属性即可。
+
+```
+agent.destination = transform.position;
+```
+
+### 巡逻模式
+
+一个agent的巡逻模式可以通过如下类似编码来实现：
+
+```c#
+    void Update()
+    {
+        if (agent.remainingDistance < 0.2f && !agent.pathPending)
+        {
+            MoveToNextPatrolLocaton();
+        }
+    }
+        private void MoveToNextPatrolLocaton()
+    {
+        if (locations.Count == 0)
+        {
+            return;
+        }
+
+        agent.destination = locations[locationIndex].position;
+
+        locationIndex = (locationIndex + 1) % locations.Count;
+    }
+```
+
+上面的 `agent.pathPending` 的意思是当前路径还没有计算好，取值否表示一定要先等路径计算好然后剩余距离只有多少之后继续移动到下一个导航点。
+
+## OnTriggerEnter和OnCollisionEnter的区别
+
+OnTriggerEnter 的触发条件是：
+
+- 两个GameObject都有碰撞器组件，其中某个GameObject的碰撞器必须勾选了`isTrigger` ，并包含刚体组件。但是如果两个碰撞器都勾选了 `isTrigger` ，也不会触发。
+- 然后就是两个碰撞器发生碰撞则会触发事件。
+
+OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者刚体发生碰撞则会触发。
+
+
+
+## 物理系统优化
+
+如果物理系统表现不太如人意，应该尽可能参照真实物理世界的参数然后再根据自己的需要进行调整。
+
+
+
+##  材质
+
+### albedo
+
+反射率，定义了材质的基本颜色，纹理也是放在这里设置的。
+
+### metallic
+
+金属的，定义了材质的金属表现。
+
+### Smoothness
+
+平滑度，定义了材质的表面光滑性。一般为了看上去更真实不应该设置为0或1而是某个中间值。
+
+### tiling
+
+平铺，定义了纹理在表面平铺重复的次数。
+
+### offset
+
+偏移，定义了纹理在表面平铺的偏移量。
+
+## 地形
+
+地形的搭建应该优先考虑Unity自带的地形功能，可能某些情况下，比如封闭的山洞等地形使用blender建模地形才能实现。
+
+新建一个地形： GameObject -> 3d object -> terrian 。
+
+设置->网络分辨率那里修改地形的大小。 
+
+TODO : 此处记录下关键词，有些东西在视频下面会更方便讲一点。 unity的terrian tools package ，然后一些操作。定义图层和绘图等。
+
+## Makehuman工具
+
+Makehuman工具
+
+## cinemachine
+
+除了刚开始学习接触下摄像头简单的控制概念，后续正式项目推荐cinemachine package。
+
+TODO 视频讲解
+
+## FMOD音效集成
+
+TODO 视频讲解简单的FMOD集成音效知识，刚开始随便找点网上的音效进行一些试探性的集成尝试。
+
+
+
+
 
 ## 其他
 
 `Ctrl+Shift+M` 在visual studio 上调出Unity快速方法输入。
 
+### 默认单位
+
+Unity术语里面长度用的是 1unit，比如velocity 用的每秒移动的unit。比如1unit等于多少并没有一个准数的，要看你自己那边的建模规范。

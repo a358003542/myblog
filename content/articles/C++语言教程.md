@@ -3961,8 +3961,6 @@ int main() {
 
 下面进入C++语言区别C语言引入的最大特性，那就是类和相关面向对象编程的概念。本文假定读者已经熟悉一门高级编程语言比如python了，所以就面向对象编程相关概念不会做过多的讨论，预先假定读者已经对这一块很熟悉了。下面我们来看C++类是如何声明的：
 
-
-
 ```c++
 class Stock
 {
@@ -3992,6 +3990,52 @@ void Stock::acquire(const std::string & co, long n, double pr)
 ### 类作用域
 
 类里面定义的变量具体在C++里面作用域又新增一个概念，叫做类作用域，因为类的声明本身包含一个花括号区块，这个倒不是出人意料之外。你可以把类作用域看作另外一个花括号区块来理解其中的变量作用域关系，然后需要特别强调的是类作用域之内的变量是可以直接调用——这里强调的是类的成员函数里面是可以直接使用类里面的各个变量，因为C++的类的成员函数具体定义是在外面的分开的，所以这里强调下。
+
+### static
+
+在类作用域下static变量和前面谈论的函数作用域下的static变量大体含义是类似的，但因为类class和实例object的关系，需要细讲一下。请看下面这个例子：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+
+class StopWatch
+{
+public:
+	static int NoOfInstances;
+
+	StopWatch()
+	{
+		NoOfInstances++;
+	}
+};
+
+int StopWatch::NoOfInstances = 0;
+
+int main() {
+	
+	StopWatch sw1;
+	StopWatch sw2;
+	cout << StopWatch::NoOfInstances << endl;
+
+	StopWatch sw3;
+	StopWatch sw4;
+
+	cout <<StopWatch::NoOfInstances << endl;
+
+	return 0;
+}
+```
+
+class定义声明了一个static变量，这个变量是为class和各个实例共有的。其和其他静态变量一样统一管理的，然后就是类里面的静态变量声明和实现是分开的，除非声明的时候加上const关键词则可以直接初始化，否则后面还需要加上这样格式的初始化语句：
+
+```
+int StopWatch::NoOfInstances = 0;
+```
+
+
 
 ### 构造函数
 
