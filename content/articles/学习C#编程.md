@@ -129,6 +129,14 @@ x = (int)y;
 
 下面进入学习一门新编程语言最核心的一个环节，详细熟悉该编程语言的类型系统。这块各个编程语言或多或少都有些差异的。
 
+### 查看变量类型
+
+```
+v.GetType();
+```
+
+
+
 ### value type
 
 C#有两种变量类型，value type直接存储变量的值，reference type存储的是对目标数据的引用。value type是存储在stack堆栈里面的，reference type是存储在heap堆里面的，具体这个后面再细说。
@@ -240,11 +248,25 @@ tuple基本使用如下：
 }
 ```
 
+在很多应用场景下，你使用tuple不太喜欢指明数据类型，可以考虑使用 `System.Tuple` ，这个类提供了一些泛型创建Tuple的方法：
+
+```
+
+```
+
 
 
 ### reference type
 
 reference type变量赋值给另外一个变量，它们两个都是指向的同一数据对象。但string情况略有不同，因为string是不可变的，所以string发生变化实际上是又新建了一个string。
+
+### 检查两个reference type是否是同一个东西
+
+```
+ReferenceEquals(object a, object b);
+```
+
+
 
 #### class
 
@@ -1248,7 +1270,7 @@ s1.ExceptWith(b); // s1-b 差集
 
 上面谈论的这些Collection都是线程不安全的，如果你需要在多线程上使用它们则需要加外部锁，而更推荐的做法是使用 `Sysytem.Collections.Concurrent` 里面的对象，里面的对象是线程安全的，也就是C#内部将这些锁的问题解决了，内部锁机制效率会高一点。
 
-## delegate和事件
+## delegate和event
 
 在前面我们大体了解了delegate实现了关于某类函数的指针或者说委托，说的再白话点就是delegate这个对象定义了一种函数类型，具体指向这种函数类型的某个函数实现还不确定，也是可以修改的，若这个delegate指向了func1，那么你可以通过这个delegate来调用func1，若这个delegate指向了func2，那么你可以通过这个delegate来调用func2。
 
@@ -1381,77 +1403,169 @@ namespace cs_project1
 }
 ```
 
-大家一下就看出来了这个C#的event和delegate似乎就是一个东西，但如果完全一样C#为何要多次一举弄出event这个关键词呢。这两个例子最大的一个关键点是event它敢让自己public，而你绝对不敢让delegate变成public。event敢变成public的好处就是抽象出一个事件属性的概念，从而可以如上编程的那样直接增减事件的调用。event敢变成public是因为它比直接使用delegate多了一层封装，现在event只能Add和Remove delegate这两个操作，然后它绑定的delegate是私有的。
+大家一下就看出来了这个C#的event和delegate似乎就是一个东西，但如果完全一样C#为何要多次一举弄出event这个关键词呢。这两个例子最大的一个关键点是event它敢让自己public，而你绝对不敢让delegate变成public。event敢变成public是因为它比直接使用delegate多了一层封装，现在event只能Add和Remove delegate这两个操作，然后它绑定的delegate是私有的。event敢变成public的好处就是抽象出一个事件属性的概念，从而可以如上编程的那样直接增减事件的调用。
 
-具体到C#那边写event又有一些规范，具体就是参数规范为事件的发送人和发送的参数。
+### 事件驱动编程
+
+事件驱动编程模式或者说委托代理模式，其将构建一个事件通道作为第三中间人，事件发送方只负责告诉该第三人事件发生了，事件发送方并不关心这个第三人等下要将这些事件通知给谁。而事件接收方也不知道事件发送方是谁，它只管听第三人也就是事件通道的，事件通道说事件触发了，然后事件接收方再决定做某些事情。
+
+此外编程上还有一个观察模式，观察模式的事件发送方和事件接受方彼此是知道的，事件发生了事件发送方会直接通知各个事件接收方事件发生了。参考了 [这篇文章](https://hackernoon.com/observer-vs-pub-sub-pattern-50d3b27f838c) 。
+
+按照上面的说法，我们最好是构建出一个EventChannel类，由这个EventChannel来负责触发事件，由这个EventChannel负责传递函数参数和通知事件接收方事件发生了。
+
+在实践中的一个编码规范是参数最好把事件的发送人和发送的参数作为两个参数。大概如下：
+
+```
+public delegate void EventHandler<TEventArgs>(object? sender, TEventArgs e);
+```
+
+是的，C#就定义了这个EventHandler委托，于是利用这个EventHandler我们就可以如下定义事件了：
+
+```
+public event EventHandler<SomeEventArgs> someEvent;
+```
+
+下面是定义该事件的参数传递规范：
 
 ```c#
-
-namespace cs_project1
-{
-    public enum Status { Started, Stopped};
-    public class EngineEventArgs: EventArgs
+    public class SomeEventArgs : EventArgs
     {
-        public Status Status { get; private set; }
-        public EngineEventArgs(Status s)
-        {
-            Status = s;
+        public int x { get; private set; }
+        public int y { get; private set; }
+
+        public SomeEventArgs(int x, int y){
+            this.x = x;
+            this.y = y;
         }
     }
-    
-    public delegate void StatusChange(object sender, EngineEventArgs args);
+```
+
+下面定义了一个事件通道基类：
+
+```c#
+    public enum Status { Started, Stopped };
+
+    public class BaseEventChannel<T>
+    {
+        public event EventHandler<T> Event;
+
+        public void RaiseEvent(object sender, T args)
+        {
+            Event?.Invoke(sender, args);
+        }
+
+        public void AddHandler(EventHandler<T> handler)
+        {
+            Event += handler;
+        }
+        public void RemoveHandler(EventHandler<T> handler)
+        {
+            Event -= handler;
+        }
+    }
+```
+
+```c#
+public class SomeEventArgs : EventArgs
+    {
+        public Status status { get; private set; }
+
+        public SomeEventArgs(Status status)
+        {
+            this.status = status;
+        }
+    }
+    public class SomeEventChannel : BaseEventChannel<SomeEventArgs>
+    {
+    }
 
     class Engine
     {
-        public event StatusChange statusChanged;
+        public SomeEventChannel someEventChannel = new SomeEventChannel();
+
+        protected virtual void OnSomeEvent(SomeEventArgs args)
+        {
+            someEventChannel.RaiseEvent(this, args);
+        }
 
         public void Start()
         {
-            statusChanged?.Invoke(this, 
-                new EngineEventArgs(Status.Started));
+            OnSomeEvent(new SomeEventArgs(Status.Started));
         }
 
         public void Stop()
         {
-            statusChanged?.Invoke(this,
-                new EngineEventArgs(Status.Stopped));
+            OnSomeEvent(new SomeEventArgs(Status.Stopped));
         }
 
     }
-}
+```
 
-namespace cs_project1
-{
-    class Program
+具体调用程序大体如下：
+
+```c#
+ class Program
     {
 
         static void Main(string[] args)
         {
             Engine engine = new Engine();
-            engine.statusChanged += OnEngineStatusChanged;
-            engine.statusChanged += OnEngineStatusChanged2;
+            engine.someEventChannel.AddHandler(OnEngineStatusChanged);
+            engine.someEventChannel.AddHandler(OnEngineStatusChanged2);
 
             engine.Start();
             engine.Stop();
 
-            engine.statusChanged -= OnEngineStatusChanged2;
+            engine.someEventChannel.RemoveHandler(OnEngineStatusChanged2);
             engine.Start();
             engine.Stop();
         }
 
-        private static void OnEngineStatusChanged(object o, EngineEventArgs args)
+        private static void OnEngineStatusChanged(object sender, SomeEventArgs args)
         {
-            Console.WriteLine($"{o} is now {args.Status}");
+            Console.WriteLine($"{sender} is now {args.status}");
         }
-        private static void OnEngineStatusChanged2(object o, EngineEventArgs args)
+
+        private static void OnEngineStatusChanged2(object sender, SomeEventArgs args)
         {
-            Console.WriteLine($"Report2: {o} is now {args.Status}");
+            Console.WriteLine($"Report2: {sender} is now {args.status}");
         }
 
     }
-}
+```
+
+就上面这个程序小片段没这个问题，但对于稍大点的应用程序，则需要保证某一特定事件通道的唯一性。有以下做法，并没有那种优于那种一说：
+
+- 一是靠程序员自我编码规范，比如事件和组件是特有的绑定关系，这样你在编码的时候就会很少犯错，因为你总是在想这个组件实体触发了什么事件，自然会做好组件实体的唯一性和对目标事件的引用。
+- 让事件通道成为全局变量从而全局唯一。
+- 从事件通道的编码上实现单例模式
+- 将你的事件通道和外部的数据文件等建立某种唯一关系等。
+
+### 单例模式示例
+
+本小节单例模式实现主要参考了 [这个网页](https://csharpindepth.com/articles/singleton) 。
+
+```c#
+    public sealed class SomeEventChannel : BaseEventChannel<SomeEventArgs>
+    {
+        private static readonly SomeEventChannel instance = new SomeEventChannel();
+        static SomeEventChannel() { } // Make sure it's truly lazy
+        private SomeEventChannel() { } // Prevent instantiation outside
+
+        public static SomeEventChannel Instance { get { return instance; } }
+
+    }
+```
+
+具体在引用的时候要如下这样使用了：
 
 ```
+        public SomeEventChannel someEventChannel = SomeEventChannel.Instance;
+```
+
+
+
+
 
 
 

@@ -95,11 +95,11 @@ gameManager = GameObject.Find("GameManager").GetComponent<GameBehavior>();
 
 如果对这种类似的软件不太熟悉的话，推荐是找个相关的入门视频看看，如果对这类软件有点熟悉的，可能左看看右点点就大体能够掌握了。
 
-## GameObject
+### 如何将某个摄像头调到当前视角
 
- 一个空的GameObject就是一个容器，其可以用于在Unity Editor的世界大纲视图中进行层级管理。一个GameObject下面管理的多个物体，如果将这个GameObject拖动到项目文件夹视图下，则将会创建一个Perfab预制件。预制件Perfab可以重复只用，并且改变基础Perfab属性会影响所有相关场景中的由此Perfab实例化的对象。
+首先在编辑器上调整好开发者视角，然后选中某个摄像头，然后选择 `游戏对象-> align with view` 。
 
-一个GameObject里的组件如果调用`GameObject` 属性，比如transform，或者脚本类this，都会指向这个目标容器GameObject。
+
 
 ## animation clip
 
@@ -121,57 +121,9 @@ gameManager = GameObject.Find("GameManager").GetComponent<GameBehavior>();
 2. 将粒子系统和你想要有该粒子系统效果的物体组件XYZ值设为一样
 3. 调配你的粒子系统的各个属性
 
-## 移动控制
-
-`Input.GetAxis(axis_name)` 获取当前控制轴的值，比如Horizontal axis 方向left和 a键为-1，right和d为1。
 
 
-
-## Update和FixedUpdate
-
-Update是每帧执行，一般键盘输入放在这里。
-
-FixedUpDATE是每个固定时间段执行，一般物理模拟内容放在这里。
-
-## transform.Translate和Rigidbody.MovePosition
-
-经过试验结论如下，在速度特别快的情况下两个都可能发生避开物理碰撞系统而发生穿模，速度很低的情况下两个也都不会穿模。不过在速度中等的情况下，用Transform的translate方法移动物体仍时不时会避开物理刚体碰撞系统，而在这种情况下刚体的MovePosition就表现要好一下。
-
-此外FixUpdate的固定时间设定也会很好地防止物体移动速度不可捉摸的突变情况。
-
-## transform的层级树
-
-unity的每一个gameObject都有transform这个属性，transform的parent和child概念就是来自你在世界大纲视图上定义的GameObject的层级。
-
-你可以通过transform的层级数来定位某个gameObject的transform，然后通过 `.gameObject` 这个属性来获得具体该gameObject对象。
-
-你可以通过如下语句来迭代某个GameObject下的子节点：
-
-```c#
-foreach (Transform child in parent){
-    // do something
-}
-```
-
-
-
-## 碰撞器组件的是否是触发器属性
-
-默认是否，如果勾选，则该碰撞器不具有物体碰撞功能而只有碰撞事件触发功能，也就是你可以穿模进去了。
-
-## Physics.CheckCapsule
-
-这个可以用来测试玩家角色是否接触地面，具体这个方法参数官方文档读起来也不是很直观，具体来说其定义了这样一个胶囊：
-
-![img]({static}/images/2021/unity_capsule.png)
-
-其中的layer层一般将地形GameObject放入该层。
-
-## 如何将某个摄像头调到当前视角
-
-首先在编辑器上调整好开发者视角，然后选中某个摄像头，然后选择 `游戏对象-> align with view` 。
-
-## Unity导航系统
+## 导航系统
 
 Unity内置了一个路径导航系统，首先你需要将你的地形 GameObject 进行烘焙：
 
@@ -218,7 +170,47 @@ agent.destination = transform.position;
 
 上面的 `agent.pathPending` 的意思是当前路径还没有计算好，取值否表示一定要先等路径计算好然后剩余距离只有多少之后继续移动到下一个导航点。
 
-## OnTriggerEnter和OnCollisionEnter的区别
+## 脚本
+
+### GameObject
+
+ 一个空的GameObject就是一个容器，其可以用于在Unity Editor的世界大纲视图中进行层级管理。一个GameObject下面管理的多个物体，如果将这个GameObject拖动到项目文件夹视图下，则将会创建一个Perfab预制件。预制件Perfab可以重复只用，并且改变基础Perfab属性会影响所有相关场景中的由此Perfab实例化的对象。
+
+一个GameObject里的组件如果调用`GameObject` 属性，比如transform，或者脚本类this，都会指向这个目标容器GameObject。
+
+### Update和FixedUpdate
+
+Update是每帧执行，一般键盘输入放在这里。
+
+FixedUpDATE是每个固定时间段执行，一般物理模拟内容放在这里。
+
+
+
+### 移动控制
+
+`Input.GetAxis(axis_name)` 获取当前控制轴的值，比如Horizontal axis 方向left和 a键为-1，right和d为1。
+
+### transform的层级树
+
+unity的每一个gameObject都有transform这个属性，transform的parent和child概念就是来自你在世界大纲视图上定义的GameObject的层级。
+
+你可以通过transform的层级数来定位某个gameObject的transform，然后通过 `.gameObject` 这个属性来获得具体该gameObject对象。
+
+你可以通过如下语句来迭代某个GameObject下的子节点：
+
+```c#
+foreach (Transform child in parent){
+    // do something
+}
+```
+
+### transform.Translate和Rigidbody.MovePosition
+
+经过试验结论如下，在速度特别快的情况下两个都可能发生避开物理碰撞系统而发生穿模，速度很低的情况下两个也都不会穿模。不过在速度中等的情况下，用Transform的translate方法移动物体仍时不时会避开物理刚体碰撞系统，而在这种情况下刚体的MovePosition就表现要好一下。
+
+此外FixUpdate的固定时间设定也会很好地防止物体移动速度不可捉摸的突变情况。
+
+### OnTriggerEnter和OnCollisionEnter的区别
 
 OnTriggerEnter 的触发条件是：
 
@@ -227,9 +219,125 @@ OnTriggerEnter 的触发条件是：
 
 OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者刚体发生碰撞则会触发。
 
+### HeaderAttribute
+
+在编辑器那边新增一个标题头
+
+```
+	[Header("Persistent managers Scene")]
+```
+
+### 序列化
+
+序列化是理解Unity Editor如何工作的关键，这当然对你后面更好地使用Unity Editor从而更好地进行游戏开发很重要，但更重要的是Unity Editor可以看作利用Unity技术实现的第一个游戏，因此Unity Editor广泛使用的序列化技术对你的游戏代码开发同样具有参考价值，这点我们后续会看到。
+
+推荐读者参考阅读 [这篇文章](https://blogs.unity3d.com/2014/06/24/serialization-in-unity/) 。
+
+以下是Unity序列化技术中涉及到的一些场景：
+
+- Unity Editor会将属性面板的一些属性进行序列化存储起来。
+- perfab预制件也是一种序列化手段。
+- 当unity实例化一个对象时，首先是把该对象序列化，然后新建一个对象，然后反序列化获得的数据打入新的对象中。
+- Unity Editor执行保存动作也加载场景是利用了yaml进行的序列化和反序列化动作。
+- Unity Editor的热重载：代码发生变动，首先序列化所有编辑器窗体，再销毁窗体，再更新旧的C#代码，再加载新的C#代码，再重新创建窗体。
 
 
-## 物理系统优化
+
+Unity会对以下属性进行序列化：
+
+- public
+- [SerializeField] 属性
+- not static
+- not readonly
+- not const
+- unity能够序列化的
+
+unity能够序列化的属性：
+
+- 自定义的non abstract class有[SerializeField] 属性
+- 自定义的结构有[SerializeField] 属性
+- 由UntiyEngine.Object衍生出来的类
+- C#的主流数据类型
+- 可以序列化对象组成的array
+- `List<T>`  T是可序列化的类型。
+
+需要强调的是如果不是UntiyEngine.Object衍生出来的类，而是随便自己定义的类，是不能序列化的，会出一些问题。一个推荐的做法是用结构体来中转数据来对接Unity的序列化过程。
+
+```
+   [Serializable]
+    public struct SerializableNode
+    {
+        public string interestingValue;
+        public int childCount;
+        public int indexOfFirstChild;
+    }
+```
+
+### SerializeField
+
+上面序列化一节提到，一个私有字段如果加上 `[SerializeField]` 标识，Unity对该私有字段也将使用序列化技术。
+
+以编辑器脚本的某个公有字段来说，unity会将其序列化存储在硬盘中从而实现热重载，也就是下次启动游戏之后还会将你修改的这些参数填上去。如下加入 SerializeField 之后，该私有字段一样也会进入unity的序列化管理。
+
+```
+[SerializeField] private AssetReference _persistentManagersScene = default;
+```
+
+### ScriptableObject
+
+ScriptableObject继承自UntiyEngine.Object，按照上面序列化一小节的描述，ScriptableObject是可序列化的对象。
+
+ScriptableObject的作用是充当一个数据容器。Unity的预制件实例化，里面的数据将会产生多个副本，所以对于重复使用的公有数据一般是推荐使用ScriptableObject来存储数据，然后预制件来访问这些数据。
+
+#### ScriptableObject的唯一性
+
+如果你的ScriptableObject是通过 `LoadAssetAsync` 加载进来的，那么在引用Asset的时候实际上都是在使用一个ScriptableObject，你可以将这个ScriptableObject看作类似perfab预制件一样的东西，直接使用该数据对象就是直接使用预制件，都是在用同一个东西。
+
+而如果你调用 `InstantiateAsync` 来对ScriptableObject进行了实例化，则就是不同的数据对象了。
+
+https://docs.unity3d.com/cn/2019.4/Manual/class-ScriptableObject.html
+
+
+
+## Unity Addressable Asset system
+
+Unity的官方包，将Asset通过地址来访问，从而增加资源访问的灵活性。原asset bundle管理方案已经处于废弃状态。
+
+在 window->addressables groups 那里新增一个group。
+
+然后将资源拖动到这里，第一列就是后面你要使用引用的名字，默认的名字是根据你的资源的本地目录来的，你也可以修改为你想要的名字。
+
+在脚本中使用资源如下：
+
+```
+using UnityEngine.AddressableAssets;
+Addressables.LoadAssetAsync<GameObject>("AssetAddress");
+Addressables.InstantiateAsync("AssetAddress");
+```
+
+### Addressables.LoadSceneAsync
+
+异步加载一个scene。
+
+
+
+## 物理系统
+
+### 碰撞器组件的是否是触发器属性
+
+默认是否，如果勾选，则该碰撞器不具有物体碰撞功能而只有碰撞事件触发功能，也就是你可以穿模进去了。
+
+### Physics.CheckCapsule
+
+这个可以用来测试玩家角色是否接触地面，具体这个方法参数官方文档读起来也不是很直观，具体来说其定义了这样一个胶囊：
+
+![img]({static}/images/2021/unity_capsule.png)
+
+其中的layer层一般将地形GameObject放入该层。
+
+
+
+### 物理系统优化
 
 如果物理系统表现不太如人意，应该尽可能参照真实物理世界的参数然后再根据自己的需要进行调整。
 
@@ -275,11 +383,49 @@ Makehuman工具
 
 除了刚开始学习接触下摄像头简单的控制概念，后续正式项目推荐cinemachine package。
 
+利用cinemachine创建一个第三人称跟踪式摄像头是很方便的，而后续更多的运镜，包括摇摄，跟摄，多个摄像头视角转换都可以很容易办到。cinemachine并没有创建一个摄像头对象，其绑定在默认的主摄像头上，作为一个摄像头运镜工具而存在。
+
+
+
 TODO 视频讲解
+
+
 
 ## FMOD音效集成
 
 TODO 视频讲解简单的FMOD集成音效知识，刚开始随便找点网上的音效进行一些试探性的集成尝试。
+
+
+
+## 开始菜单
+
+开始菜单就是另外一个场景地图，其是一个2d场景地图，在开发的时候视图中间偏左有个选项，激活了场景处于2d视图中。然后就是在这个场景中添加一些UI元素即构成了开始菜单。
+
+TODO 视频讲解
+
+## 场景间存在的持久数据
+
+### DontDestroyOnLoad
+
+当加载一个新的场景时会把原场景的所有对象destroy掉，如下：
+
+```
+DontDestroyOnLoad(this.gameObject);
+```
+
+则本脚本绑定的那个GameObject在场景切换时将不会被删除掉。
+
+
+
+
+
+## 基于事件驱动的Unity编程
+
+作为和桌面端程序类似的存在，成熟的Unity游戏编程必然是基于事件驱动的编程模式。这对于大中小型Unity项目都是有用的和必须的。
+
+C#那边已经有成熟的事件驱动编程解决方案了，拿过来用就是了。因为Unity那边又新增了UnityAction之类的语法糖，但从 [这篇文章](https://www.jacksondunstan.com/articles/3335) 来看，其效率反而不如C#自带的事件驱动解决方案，除非在某些Unity Editor定制人物上，才一定要使用UnityAction之类的，那个时候再使用。
+
+
 
 
 
