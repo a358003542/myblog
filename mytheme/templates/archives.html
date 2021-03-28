@@ -5,7 +5,7 @@
 {% endblock title %}
 
 {% block head_description %}
-{{ SITENAME|striptags|e }} 存档的博文作者因为精力优先，已经疏于照顾了，放在这里权做读者参考。
+{{ SITENAME|striptags|e }} 存档的博文
 {% endblock head_description %}
 
 {% block meta_tags_in_head %}
@@ -22,14 +22,12 @@
     <div class="col-md-8 col-md-offset-2">
         <div class="blog-archives">
             {% for article in dates %}
-            {% if article.category == "archived" %}
-
+            
             <article>            
             <a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }} {%if article.subtitle %} <small> {{ article.subtitle }} </small> {% endif %} </a>
             <time pubdate="pubdate" datetime="{{ article.date.isoformat() }}">{{ article.locale_date }}</time>
             </article>
             
-            {% endif %}
             {% endfor %}
         </div>
     </div>
