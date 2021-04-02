@@ -227,6 +227,16 @@ OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者
 	[Header("Persistent managers Scene")]
 ```
 
+### TextAreaAttribute
+
+在编辑器那里新增一个可编辑文本区域。
+
+```
+	[TextArea] public string description;
+```
+
+
+
 ### 序列化
 
 序列化是理解Unity Editor如何工作的关键，这当然对你后面更好地使用Unity Editor从而更好地进行游戏开发很重要，但更重要的是Unity Editor可以看作利用Unity技术实现的第一个游戏，因此Unity Editor广泛使用的序列化技术对你的游戏代码开发同样具有参考价值，这点我们后续会看到。
@@ -291,11 +301,104 @@ ScriptableObject的作用是充当一个数据容器。Unity的预制件实例�
 
 #### ScriptableObject的唯一性
 
-如果你的ScriptableObject是通过 `LoadAssetAsync` 加载进来的，那么在引用Asset的时候实际上都是在使用一个ScriptableObject，你可以将这个ScriptableObject看作类似perfab预制件一样的东西，直接使用该数据对象就是直接使用预制件，都是在用同一个东西。
+ScriptableOjbect的唯一性是根据你创建的asset文件唯一性来的，只要保证是引用的同一asset文件，则生成类的实例都是一样的，个人测试也是实例id都是一样的。
 
-而如果你调用 `InstantiateAsync` 来对ScriptableObject进行了实例化，则就是不同的数据对象了。
+如果是和Unity Addressable Asset system相结合，如果你的ScriptableObject是通过 `LoadAssetAsync` 加载进来的，那么在引用Asset的时候实际上都是在使用一个ScriptableObject，你可以将这个ScriptableObject看作类似perfab预制件一样的东西，直接使用该数据对象就是直接使用预制件，都是在用同一个东西。
 
-https://docs.unity3d.com/cn/2019.4/Manual/class-ScriptableObject.html
+而如果你调用 `InstantiateAsync` 来对ScriptableObject进行了实例化，则就是不同的数据对象了。[参考网页](https://docs.unity3d.com/cn/2019.4/Manual/class-ScriptableObject.html)。
+
+
+
+#### 创建一个ScriptableObject对象
+
+```
+[CreateAssetMenu(fileName = "PersistentManagers", menuName = "Scene Data/PersistentManagers")]
+public class PersistentManagersSO : GameSceneSO { }
+```
+
+fileName是点击菜单按钮之后默认保存的文件名，menuName是在Unity Editor对应的菜单按钮位置，上面的例子是：`资源->创建->场景数据->PersistentManagers` 。
+
+### Unity协程
+
+如果读者之前接触过协程概念，对于这里的协程的理解会很快，但有一点是需要特别强调的。那就是Unity的协程更多的是一个Unity自身基于逐帧运算然后做出来的概念，和很多编程语言上的协程概念比较起来，其底层甚至可能都不依赖于线程切换。
+
+C#语言那边有异步编程，其使用的async func 和await之类的和python的异步编程很像，这些才是严格意义上的协程概念，Unity协程只是利用了C#的 `IEnumerator` 和 `yield return` 构建起来的类似python的可迭代对象，然后在这个可迭代对象之上构建出来的Unity协程概念。
+
+具体Unity协程的编写如下：
+
+```c#
+IEnumerator CoroutineExample(int a){
+    // do something 
+    yield return null;
+    // still do something
+    yield return null;
+}
+```
+
+启动一个Unity协程：
+
+```c#
+StartCoroutine(CoroutineExample(1));
+```
+
+该CoroutineExample协程会在遇到yield return 那里停止执行，然后下一帧再回来继续执行本协程。
+
+此外可以如下启动协程：
+
+```
+StartCoroutine("CoroutineExample", 1);
+```
+
+这种指定协程名字符串的启动后面可以指定名字要求停止某个协程：
+
+```
+StopCoroutine("CoroutineExample")
+```
+
+你还可以让某个协程暂停执行多少秒：
+
+```
+yield return new WaitForSeconds(.1f);
+```
+
+#### 嵌套Unity协程
+
+参考了  [这篇文章](https://www.alanzucconi.com/2017/02/15/nested-coroutines-in-unity/) 。
+
+如下：
+
+```
+yield return StartCoroutine(AnotherCoroutine())
+```
+
+这种形式，父协程要等待子协程完成才会继续往下走，也就是对于父协程来说，子协程的整个执行过程是同步的。因为子协程仍然是通过 StartCoroutine启动的，其内部的执行是异步的。
+
+#### 平行Unity协程
+
+```
+IEnumerator A()
+{
+    
+    // Starts B, C, and D as coroutines and continues the execution
+    Coroutine b = StartCoroutine( B() );
+    Coroutine c = StartCoroutine( C() );
+    Coroutine d = StartCoroutine( D() );
+    
+    // Waits for B, C and D to terminate
+    yield return b;
+    yield return c;
+    yield return d;
+    
+}
+```
+
+B C D这几个子协程从启动开始就执行了，说的再直白点就是正常启动协程则一下就启动起来了，根本花费不了什么时间。
+
+上面两种情况可以总结为那就是嵌套Unity协程中，父协程是同步的。所谓同步就是Unity会一直在这里执行，而Unity协程所谓的异步指的是内部执行了很小碎片的不怎么花费时间的动作，然后就yield return了，然后再等待下一帧再继续执行，并不阻塞主程序。
+
+我们看到Unity协程解决的主要是帧动作太多的问题，通过Update等函数我们可以设计每一帧进行某个动作，然后我们发现对于很多问题并不需要每一帧都做，通过Unity协程可以解决这个问题；还有些过程可能横跨多个帧，但其内部动作可以分解为很多小动作，然后每帧再分别执行这些小动作即可，这可以通过Unity协程解决。
+
+但Unity协程不能解决某个动作就是花费时间太长，从而造成你的游戏进程阻塞这个问题，这还是需要靠多线程或异步来解决，Unity协程在这里的作用主要就是每帧来检查一下这个费时的异步动作完成了没有。
 
 
 
@@ -307,13 +410,46 @@ Unity的官方包，将Asset通过地址来访问，从而增加资源访问的�
 
 然后将资源拖动到这里，第一列就是后面你要使用引用的名字，默认的名字是根据你的资源的本地目录来的，你也可以修改为你想要的名字。
 
-在脚本中使用资源如下：
+在脚本中使用资源如下，接受的参数是该资产的名字。
 
 ```
 using UnityEngine.AddressableAssets;
 Addressables.LoadAssetAsync<GameObject>("AssetAddress");
 Addressables.InstantiateAsync("AssetAddress");
 ```
+
+如果是`AssetReference` 配置好的资产则可以直接如下调用，：
+
+```
+_menuLoadChannel.LoadAssetAsync<LoadEventChannelSO>().Completed += LoadMainMenu;
+```
+
+一般的使用大体如下：
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
+using UnityEngine;
+
+public class AddressablesExample : MonoBehaviour {
+
+    GameObject myGameObject;
+
+        ...
+        Addressables.LoadAssetAsync<GameObject>("AssetAddress").Completed += OnLoadDone;
+    }
+
+    private void OnLoadDone(UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<GameObject> obj)
+    {
+        // In a production environment, you should add exception handling to catch scenarios such as a null result.
+        myGameObject = obj.Result;
+    }
+}
+
+```
+
+
 
 ### Addressables.LoadSceneAsync
 
@@ -425,7 +561,97 @@ DontDestroyOnLoad(this.gameObject);
 
 C#那边已经有成熟的事件驱动编程解决方案了，拿过来用就是了。因为Unity那边又新增了UnityAction之类的语法糖，但从 [这篇文章](https://www.jacksondunstan.com/articles/3335) 来看，其效率反而不如C#自带的事件驱动解决方案，除非在某些Unity Editor定制人物上，才一定要使用UnityAction之类的，那个时候再使用。
 
+在C#那边我们已经有了EventChannel的概念，现在要做的就是进一步将EventChannel做成ScriptedObject，这样一避免了数据冗余，另外可以很方便实现单例事件通道。
 
+大体操作步骤如下：
+
+1. 定义事件通道
+
+```c#
+using System;
+using UnityEngine;
+using UnityEngine.Events;
+
+
+public class EventChannelBaseSO<T> : ScriptableObject
+{
+	[TextArea] public string description;
+
+    public event EventHandler<T> Event;
+
+    public void RaiseEvent(object sender, T args)
+    {
+        Event?.Invoke(sender, args);
+    }
+
+    public void AddHandler(EventHandler<T> handler)
+    {
+        Event += handler;
+    }
+    public void RemoveHandler(EventHandler<T> handler)
+    {
+        Event -= handler;
+    }
+}
+
+
+public class LoadEventArgs : EventArgs
+{
+	public GameSceneSO sceneToLoad { get; private set; }
+
+	public LoadEventArgs(GameSceneSO sceneToLoad)
+	{
+		this.sceneToLoad = sceneToLoad;
+	}
+}
+
+[CreateAssetMenu(menuName = "Events/Load Event Channel")]
+public class LoadEventChannelSO : EventChannelBaseSO<LoadEventArgs>
+{
+}
+```
+
+2. 生成事件通道的ScriptableObject文件
+
+3. 一般在设计上会增加一个常驻场景，该常驻场景是最先加载的场景，然后该场景对某些事件进行了如下绑定，这些事件一般是最基本的事件，比如场景切换事件等。
+
+   ```c#
+   	[SerializeField] private LoadEventChannelSO _menuLoadChannel = default;
+   
+   	private void OnEnable()
+   	{
+   		_menuLoadChannel.AddHandler(LoadMenu);
+   	}
+   
+   
+   	private void OnDisable()
+   	{
+   		_menuLoadChannel.RemoveHandler(LoadMenu);
+   	}
+   ```
+
+4. 其他地方引用该事件通道都是如下形式：
+
+   ```c#
+   	[SerializeField] private LoadEventChannelSO _menuLoadChannel = default;
+   ```
+
+   然后指定事件通道都是那一个asset文件，则可以保证事件通道的唯一性或者说单例性。
+
+5. 其他地方想调用事件如下：
+
+   ```c#
+   _menuLoadChannel.RaiseEvent(this, new LoadEventArgs(_menuToLoad));
+   ```
+
+
+
+
+## 多场景无缝切换
+
+
+
+## 玩家场景数据记忆
 
 
 

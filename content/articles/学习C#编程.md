@@ -1567,10 +1567,6 @@ public class SomeEventArgs : EventArgs
 
 
 
-
-
-
-
 ## 其他
 
 ### 表达式形式定义
@@ -1595,7 +1591,9 @@ a?[x]
 
 访问对象a的成员x，如上写法，意思是如果a是null则返回null，如果a不是null则返回 `a.x` 或者 `a[x]` 。
 
+### default
 
+之前在介绍C#类型的时候提到C#的类型都是有默认值的，你可以用default关键词来表示这个默认值。
 
 ### 正则表达式
 
