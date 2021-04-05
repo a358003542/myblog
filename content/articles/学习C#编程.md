@@ -799,6 +799,8 @@ public class Paladin : Character
 
 C#对于多重继承应用场景可以利用接口interface来做到类似的效果，C#的类虽然只能继承自一个父类，但可以继承自多个接口。
 
+上面还演示了对于构造方法来说，并没有重载这个概念，因为构造方法并不是类的属性，子类最多只能基于父类的构造方法来做一些修改。
+
 #### interface
 
 关于interface前面提到过，其定义了一个接口，类继承了这个接口，那么就需要实现接口里面声明的方法或者属性等其他内容。
@@ -1185,6 +1187,9 @@ namespace ConsoleApp1
 此外还有Insert方法，RemoveAt和Remove方法等。
 
 - `.Count` 返回List的元素数
+- Clear 清空
+- Contains
+- IndexOf  search and return the item index
 
 ### Stack
 
@@ -1565,6 +1570,28 @@ public class SomeEventArgs : EventArgs
 
 
 
+## LINQ
+
+### 检查元素是否在array中
+
+```
+using System.Linq;
+
+string[] fruits = { "apple", "banana", "mango", "orange", "passionfruit", "grape" };
+
+string fruit = "mango";
+
+bool hasMango = fruits.Contains(fruit);
+```
+
+
+
+
+
+## 单元测试
+
+C#项目在visual studio上很方便创建一个对应的单元测试项目，在目标public函数上右键创建一个单元测试即可。
+
 
 
 ## 其他
@@ -1594,6 +1621,39 @@ a?[x]
 ### default
 
 之前在介绍C#类型的时候提到C#的类型都是有默认值的，你可以用default关键词来表示这个默认值。
+
+
+
+### hashset打印
+
+```
+string.Join(" ", set);
+```
+
+
+
+### array和list的选用
+
+【本小节所说的list就是C#的List类。】
+
+如果你确切知道你的array不会发生变动了，那么就使用array。
+
+如果你不太确定，那么推荐使用list。
+
+网上对array和list的performance分析文章都是针对大量数据的情况，一般日常遇到的都是一些小型数据的情况，那么怎么好用怎么用，谁也不能批评什么。一般来说list会使用上简单一些，所以一般推荐使用list，但对于那些有微优化喜好的程序员，在确知你的数组不会发生变动了那么使用array当然更好。
+
+这个大量数据的评判标准参考 [这个网页](https://stackoverflow.com/questions/454916/performance-of-arrays-vs-lists) ：
+
+```
+List/for: 1971ms (589725196)
+Array/for: 1864ms (589725196)
+List/foreach: 3054ms (589725196)
+Array/foreach: 1860ms (589725196)
+```
+
+可以看到亿以上的数据array和list才开始慢慢速度效率拉开了一点，不得不承认C#的list效率优化得很好，似乎python的list和C语言的数组比较在效率上很快就会拉开差距【说句公道话，那是因为python的list里面的元素不要求同样的类型。】，亿以上的数据，日常应用场景，放心的使用list吧。
+
+
 
 ### 正则表达式
 

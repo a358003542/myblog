@@ -307,7 +307,21 @@ ScriptableOjbect的唯一性是根据你创建的asset文件唯一性来的，�
 
 而如果你调用 `InstantiateAsync` 来对ScriptableObject进行了实例化，则就是不同的数据对象了。[参考网页](https://docs.unity3d.com/cn/2019.4/Manual/class-ScriptableObject.html)。
 
+经过个人试验发现：
 
+```
+		bool t1 = _menuToLoad[0] == _menuToLoad[1];
+		bool t2 = _menuToLoad[1] == _menuToLoad[2];
+		Debug.Log($"{_menuToLoad[0].GetHashCode()}");
+		Debug.Log($"{_menuToLoad[1].GetHashCode()}");
+		Debug.Log($"{_menuToLoad[2].GetHashCode()}");
+		Debug.Log($"test:      {t1}");
+		Debug.Log($"test:      {t2}");
+
+		return;
+```
+
+上面列表一号和二号是不同的scriptableobject，二号和三号是相同的scriptableobject。然后scrptableobject的相等性可以使用 `==` 运算符来进行，然后通过HashCode发现相同的scriptableobject的哈希值也是相同的。
 
 #### 创建一个ScriptableObject对象
 
@@ -449,11 +463,55 @@ public class AddressablesExample : MonoBehaviour {
 
 ```
 
+### 异步加载你的场景
 
+addressables 系统可用于异步加载你的场景，非常的方便。
 
-### Addressables.LoadSceneAsync
+```
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.SceneManagement;
+using UnityEngine.ResourceManagement.ResourceProviders;
 
-异步加载一个scene。
+Addressables.LoadSceneAsync("sceneName", LoadSceneMode.Additive).Completed += SceneLoadComplete;
+// if scene is a AssetReference
+scene.LoadSceneAsync(LoadSceneMode.Additive).Completed += SceneLoadComplete;
+
+private void SceneLoadComplete(SceneInstance obj)
+{
+	if (obj.Status == AsyncOperationStatus.Succeeded)
+	{
+		Debug.Log("scene load succeeded.")
+		// do something.
+	}
+
+}
+```
+
+卸载场景如下：
+
+```
+private AsyncOperationHandle<SceneInstance> handle;
+handle = obj;
+
+Addressables.UnloadSceneAsync(handle).Completed += SceneUnloadComplete;
+```
+
+上面不管是加载还是卸载一旦启动就异步进行了，Completed事件加入回调是一种方法，但你也可以用Unity的协程方法来检查之：
+
+```
+private IEnumerator LoadingProcess()
+{
+	if (obj.Status == AsyncOperationStatus.Succeeded)
+	{
+		Debug.Log("scene load succeeded.")
+		// do something.
+	}
+	yield return null;
+}
+```
+
+如果大体每一帧都会检测一次加载是否Succeeded。
 
 
 
@@ -615,34 +673,36 @@ public class LoadEventChannelSO : EventChannelBaseSO<LoadEventArgs>
 
 3. 一般在设计上会增加一个常驻场景，该常驻场景是最先加载的场景，然后该场景对某些事件进行了如下绑定，这些事件一般是最基本的事件，比如场景切换事件等。
 
-   ```c#
-   	[SerializeField] private LoadEventChannelSO _menuLoadChannel = default;
    
-   	private void OnEnable()
-   	{
-   		_menuLoadChannel.AddHandler(LoadMenu);
-   	}
-   
-   
-   	private void OnDisable()
-   	{
-   		_menuLoadChannel.RemoveHandler(LoadMenu);
-   	}
-   ```
+
+```c#
+[SerializeField] private LoadEventChannelSO _menuLoadChannel = default;
+
+private void OnEnable()
+{
+_menuLoadChannel.AddHandler(LoadMenu);
+}
+
+
+private void OnDisable()
+{
+_menuLoadChannel.RemoveHandler(LoadMenu);
+}
+```
 
 4. 其他地方引用该事件通道都是如下形式：
 
-   ```c#
-   	[SerializeField] private LoadEventChannelSO _menuLoadChannel = default;
-   ```
+```c#
+[SerializeField] private LoadEventChannelSO _menuLoadChannel = default;
+```
 
-   然后指定事件通道都是那一个asset文件，则可以保证事件通道的唯一性或者说单例性。
+然后指定事件通道都是那一个asset文件，则可以保证事件通道的唯一性或者说单例性。
 
 5. 其他地方想调用事件如下：
 
-   ```c#
-   _menuLoadChannel.RaiseEvent(this, new LoadEventArgs(_menuToLoad));
-   ```
+```c#
+_menuLoadChannel.RaiseEvent(this, new LoadEventArgs(_menuToLoad));
+```
 
 
 
@@ -655,6 +715,22 @@ public class LoadEventChannelSO : EventChannelBaseSO<LoadEventArgs>
 
 
 
+## 单元测试
+
+按照C#的方法，自动创建了一个单元测试项目。即使是空白单元测试也会报错：
+
+```
+CS0006 could not found file Assembly-CSharp.dll
+```
+
+大概这个错误，我好不容易才在 [这个网页](https://developercommunity.visualstudio.com/t/vs-doesnt-put-binaries-of-unity-project-to-output/785717) 知道Unity项目在visual studio中默认是不自动完成生成项目的，你需要在：
+
+```
+工具 ->  选项 -> 适用于Unity的工具 -> 杂项 -> 禁止完整生成项目
+```
+
+
+
 
 
 ## 其他
@@ -664,3 +740,7 @@ public class LoadEventChannelSO : EventChannelBaseSO<LoadEventArgs>
 ### 默认单位
 
 Unity术语里面长度用的是 1unit，比如velocity 用的每秒移动的unit。比如1unit等于多少并没有一个准数的，要看你自己那边的建模规范。
+
+### Unity环境和.net core略有不同
+
+不能使用 System.HashCode ？？？？？？？？？
