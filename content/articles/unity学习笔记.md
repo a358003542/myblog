@@ -50,23 +50,87 @@ Start方法每个组件游戏开始时就会执行，在这个方法里面写上
 Debug.LogFormat("{0} + {1} = {2}", 2,3,2+3);
 ```
 
-## 引用Unity对象
 
-### GetComponet generic method
 
-GetComponet方法是一个generic method，需要指定查找的组件类型，查找只限于本GameObject的组件。
+
+
+
+## Unity Editor的使用
+
+关于Unity Editor的基本使用请读者自行熟悉软件界面，然后试着自己慢慢搭建起，比如一个平面作为一个基本的游玩空间，平面由四面墙围起来，然后等等其他立方体等等。移动缩放旋转和复制等等。
+
+如果对这种类似的软件不太熟悉的话，推荐是找个相关的入门视频看看，如果对这类软件有点熟悉的，可能左看看右点点就大体能够掌握了。
+
+TODO 视频讲解
+
+### 预制件
+
+预制件Perfab非常的有用，可以说是Unity开发里面很重要的一个核心概念了。可以将Perfab理解为编程中的类，而场景中的各个对象在没有perfab之前属于游离的实例，在创建perfab之后才真正可以称之为根据某个perfab类在场景中创建的实例。所以一般来说Unity开发中场景的大部分GameObject都应该perfab化。
+
+嵌套预制件，多个perfab形成嵌套关系并没有改变原perfab和场景中实例间的继承关系。
+
+预制件变体，你可以根据某个perfab来创建某个预制件变体，这些预制件变体更类似于类的继承关系，比如你改变原预制件的某个属性，之后创建的预制件变体的某个属性也会对应发生更改。【变种属性应该继续保持原有的继承更改关系。】
+
+### 练习题1
+
+请读者随便新建一个场景，新建一个平面，命名为ground，预制件化，然后在该平面的两角放置两个立方体，两个立方体是根据一个预制件perfab而来，然后将该立方体拖动为ground的子辈。然后将ground预制件化。然后再根据ground预制件再新建一个平面再将这两个平面对接。
+
+经过试验我们可以发现，嵌套预制件也有一种继承层次在里面。比如现在假设有 boxBase，boxRight，box3这三个材质，其中boxBase作用于box perfab，boxRight作用于ground perfab的右角盒子，box3作用于场景中某个特别的盒子。
+
+以左角的盒子为例，不受ground perfab的修改影响，不受box3修改的影响，所以最终颜色是boxBase决定的。以第二个盒子为例，受boxBase修改影响，然后再受ground perfab右角修改影响，最终颜色是boxRight。而第三个盒子的颜色则就是box3材质颜色。
+
+
+
+### 如何将某个摄像头调到当前视角
+
+首先在编辑器上调整好开发者视角，然后选中某个摄像头，然后选择 `游戏对象-> align with view` 。
+
+
+
+## 脚本
+
+### GameObject
+
+ 一个空的GameObject就是一个容器，其可以用于在Unity Editor的大纲视图中进行层级管理。一个GameObject下面管理的多个物体，如果将这个GameObject拖动到项目文件夹视图下，则将会创建一个Perfab预制件。预制件Perfab可以重复只用，并且改变基础Perfab属性会影响所有相关场景中的由此Perfab实例化的对象。
+
+一个GameObject里的组件如果调用`gameObject` 属性，比如transform，或者脚本类this，都会指向这个目标容器GameObject。
 
 ```
-private Transform camTransform;
-camTransform = this.GetComponent<Transform>();
-Debug.Log(camTransform.localPosition);
+this.gameObject;
+this.transform.gameObject;
 ```
 
-### Find方法
+脚本作为组件绑定在某个GameObject上，如上在脚本中调用 `this.gameObject` 则会引用该GameObject。
+
+所有的GameObject，即使是一个空的GameObject也会有transform属性。
+
+
+
+#### 引用Unity对象
+
+如果本脚本和目标组件在同一个GameObject之下，则可以如下引用该目标组件：
+
+```
+_rb = this.GetComponent<Rigidbody>();
+```
+
+上面假设本脚本和某个刚体组件同在一个GameObject之下，则如上引用该目标组件。其实你在Unity Editor看到的其他组件说白了也是一些脚本，只是说之前Unity官方或者其他库预先帮你写好了。脚本也可以不绑定在GameObject上，这个后面会提到，其叫做 ScriptableObject。
+
+后面会提到ScriptableObject的单例性是建构在文件的唯一性基础之上的，而各个GameObject也是具有唯一的单例性，将某个GameObject做成Perfab预制件就是将目标GameObject实例抽象成类一般的存在。所以当我们在Unity Editor上看到某个GameObject，其就是一个对象，然后在这个对象上的组件的唯一性，也是建立在对象的唯一性上的， 也因此Perfab实例化多个GameObject，各个GameObject之类的组件属性或者说数据都是重新Copy复制了一份的。
+
+现在假设你的GameObject下面有多个脚本组件，则引用另一个脚本组件代码如下：
+
+```
+gameManager = this.GetComponent<GameBehavior>();
+```
+
+上面的意思是本GameObject下还有一个脚本类，其类名叫做 `GameBehavior` ，那么那个刚体组件呢，其对应的就是还有另外一个脚本，其类名叫做Rigidbody。请注意，这里的讨论只是在试图澄清组件和脚本类之间的关系，并不是在说如何使用其他类里面的数据，Unity对于交互数据更推荐使用ScriptableObject或者其他方法来处理，一般来说脚本类里面只放着行为逻辑。
+
+#### Find方法
 
 Find方法可以用于查找不是本GameObject的其他GameObject，具体名字就是Unity面板上显示的那个名字。
 
-```
+```c#
 private GameObject directLight;
 private Transform lightTransorm;
 
@@ -75,108 +139,35 @@ lightTransorm = directLight.GetComponent<Transform>();
 Debug.Log(lightTransorm.localPosition);
 ```
 
+#### 更推荐的做法
 
-
-### 引用脚本类
-
-如果某个脚本类挂载在某个GameObject上，那么如下就可以引用该脚本类：
+在实践中如上使用Find方法其实并不是很好用，更推荐的做法是将你需要定位的GameObject做成你的脚本类的公有属性或者序列化属性，值得一提的是这种做法可用于定位目标GameObject，也可用于定位目标组件，目标组件在十万八千里远或者就在旁边都可以这样用。
 
 ```
-gameManager = GameObject.Find("GameManager").GetComponent<GameBehavior>();
+public YouTargetClass object_name;
 ```
 
-上面代码的意思是有一个 `GameBehavior.csharp` 文件里面有 `GameBehavior` 类挂载在GameManager这个GameObject上，那么按照上面的语句就可以引用该脚本类对象了。
+然后在编辑器上选中目标对象或者拖动目标对象到目标输入框。你给定的类名一定要是你想定位的目标的类，这样选择框才会弹出对应的候选项。
 
+这种做法的好处就是编辑器友好和简单，又能少写代码又简单当然是推荐使用的了。一般大部分应用场景都可以用这个推荐做法来解决引用目标对象的问题，只可能在某些极个别的情况需要代码查找。
 
+#### transform的层级树
 
-## Unity Editor基本的使用
+unity的每一个gameObject都有transform这个属性，这个transform是有一个内在的层级树在里面的，这个层级树也就是里面的parent和child概念是直接对应你在大纲视图上看到的GameObject的层级的。
 
-关于Unity Editor的基本使用请读者自行熟悉软件界面，然后试着自己慢慢搭建起，比如一个平面作为一个基本的游玩空间，平面由四面墙围起来，然后等等其他立方体等等。移动缩放旋转和复制等等。
+你可以通过transform的层级数来定位某个gameObject的transform，然后通过 `.gameObject` 这个属性来获得具体该gameObject对象。
 
-如果对这种类似的软件不太熟悉的话，推荐是找个相关的入门视频看看，如果对这类软件有点熟悉的，可能左看看右点点就大体能够掌握了。
-
-### 如何将某个摄像头调到当前视角
-
-首先在编辑器上调整好开发者视角，然后选中某个摄像头，然后选择 `游戏对象-> align with view` 。
-
-
-
-## animation clip
-
-制作动画片段：
-
-1. 新建一个Animations文件夹等下放动画片段资源
-2. 选中你想要有动画效果的那个组件，选定window->Animation->Animation。
-3. 选择启用关键帧记录模式，然后在每个帧上修改物体组件的某个属性
-
-动画的开头和结尾常常有卡顿现象，哪怕你设置的旋转动作是0度到360度数值上是无缝对接的，仍然会有卡顿现象，你可以在曲线那里看到数值的变动是有一个切线变化率的，每一个帧都有两个切线，左切线是进入，右切线是离开，从头帧到结尾帧要想不卡顿，左右两个切线斜率必须是相同的，也就是co-linear的。
-
-对于旋转动作可以将头尾两帧的双切线都改为线性。对应官方文档的 Broken-Linear模式。这样帧与帧之间是线性变化的，也就不存在那个变动斜率问题了。
-
-## particle system
-
-制作粒子系统：
-
-1. 右键在世界大纲视图下新建->效果->粒子系统
-2. 将粒子系统和你想要有该粒子系统效果的物体组件XYZ值设为一样
-3. 调配你的粒子系统的各个属性
-
-
-
-## 导航系统
-
-Unity内置了一个路径导航系统，首先你需要将你的地形 GameObject 进行烘焙：
-
-1. 选择你的地形GameObject，选择Static菜单的Navigation Static
-2. 选择Window->AI->导航，选择烘培Bake Tab，然后点击烘培。
-3. 你将会在目标场景地图下面看到新建了一个NavMesh对象。
-
-导航系统中你想要移动的目标对象需要绑定Nav Mesh Agent组件。
-
-导航系统中你需要定义一系列的导航路径点，空的GameObject即可。
-
-### 如何移动一个Agent
-
-实际会很简单，就是设定destination属性即可。
-
-```
-agent.destination = transform.position;
-```
-
-### 巡逻模式
-
-一个agent的巡逻模式可以通过如下类似编码来实现：
+你可以通过如下语句来迭代某个GameObject下的子节点：
 
 ```c#
-    void Update()
-    {
-        if (agent.remainingDistance < 0.2f && !agent.pathPending)
-        {
-            MoveToNextPatrolLocaton();
-        }
-    }
-        private void MoveToNextPatrolLocaton()
-    {
-        if (locations.Count == 0)
-        {
-            return;
-        }
-
-        agent.destination = locations[locationIndex].position;
-
-        locationIndex = (locationIndex + 1) % locations.Count;
-    }
+foreach (Transform child in parent){
+    // do something
+}
 ```
 
-上面的 `agent.pathPending` 的意思是当前路径还没有计算好，取值否表示一定要先等路径计算好然后剩余距离只有多少之后继续移动到下一个导航点。
+然后有 `transform.parent` 来返回本transform的父节点transform对象。更多的方法请参看 Transform 类。
 
-## 脚本
 
-### GameObject
-
- 一个空的GameObject就是一个容器，其可以用于在Unity Editor的世界大纲视图中进行层级管理。一个GameObject下面管理的多个物体，如果将这个GameObject拖动到项目文件夹视图下，则将会创建一个Perfab预制件。预制件Perfab可以重复只用，并且改变基础Perfab属性会影响所有相关场景中的由此Perfab实例化的对象。
-
-一个GameObject里的组件如果调用`GameObject` 属性，比如transform，或者脚本类this，都会指向这个目标容器GameObject。
 
 ### Update和FixedUpdate
 
@@ -190,19 +181,7 @@ FixedUpDATE是每个固定时间段执行，一般物理模拟内容放在这里
 
 `Input.GetAxis(axis_name)` 获取当前控制轴的值，比如Horizontal axis 方向left和 a键为-1，right和d为1。
 
-### transform的层级树
 
-unity的每一个gameObject都有transform这个属性，transform的parent和child概念就是来自你在世界大纲视图上定义的GameObject的层级。
-
-你可以通过transform的层级数来定位某个gameObject的transform，然后通过 `.gameObject` 这个属性来获得具体该gameObject对象。
-
-你可以通过如下语句来迭代某个GameObject下的子节点：
-
-```c#
-foreach (Transform child in parent){
-    // do something
-}
-```
 
 ### transform.Translate和Rigidbody.MovePosition
 
@@ -535,6 +514,75 @@ private IEnumerator LoadingProcess()
 
 如果物理系统表现不太如人意，应该尽可能参照真实物理世界的参数然后再根据自己的需要进行调整。
 
+## animation clip
+
+制作动画片段：
+
+1. 新建一个Animations文件夹等下放动画片段资源
+2. 选中你想要有动画效果的那个组件，选定window->Animation->Animation。
+3. 选择启用关键帧记录模式，然后在每个帧上修改物体组件的某个属性
+
+动画的开头和结尾常常有卡顿现象，哪怕你设置的旋转动作是0度到360度数值上是无缝对接的，仍然会有卡顿现象，你可以在曲线那里看到数值的变动是有一个切线变化率的，每一个帧都有两个切线，左切线是进入，右切线是离开，从头帧到结尾帧要想不卡顿，左右两个切线斜率必须是相同的，也就是co-linear的。
+
+对于旋转动作可以将头尾两帧的双切线都改为线性。对应官方文档的 Broken-Linear模式。这样帧与帧之间是线性变化的，也就不存在那个变动斜率问题了。
+
+## particle system
+
+制作粒子系统：
+
+1. 右键在世界大纲视图下新建->效果->粒子系统
+2. 将粒子系统和你想要有该粒子系统效果的物体组件XYZ值设为一样
+3. 调配你的粒子系统的各个属性
+
+
+
+## 导航系统
+
+Unity内置了一个路径导航系统，首先你需要将你的地形 GameObject 进行烘焙：
+
+1. 选择你的地形GameObject，选择Static菜单的Navigation Static
+2. 选择Window->AI->导航，选择烘培Bake Tab，然后点击烘培。
+3. 你将会在目标场景地图下面看到新建了一个NavMesh对象。
+
+导航系统中你想要移动的目标对象需要绑定Nav Mesh Agent组件。
+
+导航系统中你需要定义一系列的导航路径点，空的GameObject即可。
+
+### 如何移动一个Agent
+
+实际会很简单，就是设定destination属性即可。
+
+```
+agent.destination = transform.position;
+```
+
+### 巡逻模式
+
+一个agent的巡逻模式可以通过如下类似编码来实现：
+
+```c#
+    void Update()
+    {
+        if (agent.remainingDistance < 0.2f && !agent.pathPending)
+        {
+            MoveToNextPatrolLocaton();
+        }
+    }
+        private void MoveToNextPatrolLocaton()
+    {
+        if (locations.Count == 0)
+        {
+            return;
+        }
+
+        agent.destination = locations[locationIndex].position;
+
+        locationIndex = (locationIndex + 1) % locations.Count;
+    }
+```
+
+上面的 `agent.pathPending` 的意思是当前路径还没有计算好，取值否表示一定要先等路径计算好然后剩余距离只有多少之后继续移动到下一个导航点。
+
 
 
 ##  材质
@@ -568,6 +616,16 @@ private IEnumerator LoadingProcess()
 设置->网络分辨率那里修改地形的大小。 
 
 TODO : 此处记录下关键词，有些东西在视频下面会更方便讲一点。 unity的terrian tools package ，然后一些操作。定义图层和绘图等。
+
+
+
+### blender建模构建地形
+
+Unity的terrian工具是有一定局限性的，前面提到在某些封闭的场景或者需要和地形进行交互的游戏比如像minecraft这样的游戏，是不应该使用Unity terrian工具的，即使是那些Unity terrian勉强能够应付的场景，如果对于地形在表现细节上有更多要求，则也应该使用blender建模来构建地形。除此之外，当然如果你blender用的很熟练了，那么就直接用blender建模构建地形也是很好的。
+
+
+
+
 
 ## Makehuman工具
 
