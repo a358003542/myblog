@@ -12,7 +12,7 @@ FILENAME_METADATA = '(?P<title>.*)'
 # set default category
 DEFAULT_CATEGORY = 'archived'
 # the sub folder name not decide the category name
-USE_FOLDER_AS_CATEGORY = False
+USE_FOLDER_AS_CATEGORY = True
 # show the pages
 DISPLAY_PAGES_ON_MENU = True
 

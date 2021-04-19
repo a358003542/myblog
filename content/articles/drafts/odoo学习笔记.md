@@ -1,5 +1,6 @@
 Slug: odoo-learning-notes
 Date: 2019
+Status: draft
 
 [TOC]
 
