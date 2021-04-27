@@ -53,15 +53,11 @@ Debug.LogFormat("{0} + {1} = {2}", 2,3,2+3);
 
 
 
-
-
 ## Unity Editor的使用
 
 关于Unity Editor的基本使用请读者自行熟悉软件界面，然后试着自己慢慢搭建起，比如一个平面作为一个基本的游玩空间，平面由四面墙围起来，然后等等其他立方体等等。移动缩放旋转和复制等等。
 
 如果对这种类似的软件不太熟悉的话，推荐是找个相关的入门视频看看，如果对这类软件有点熟悉的，可能左看看右点点就大体能够掌握了。
-
-TODO 视频讲解
 
 ### 预制件
 
@@ -71,6 +67,12 @@ TODO 视频讲解
 
 预制件变体，你可以根据某个perfab来创建某个预制件变体，这些预制件变体更类似于类的继承关系，比如你改变原预制件的某个属性，之后创建的预制件变体的某个属性也会对应发生更改。【变种属性应该继续保持原有的继承更改关系。】
 
+**需要注意的是在项目间重复使用，Perfab和Perfab之间和各个资产之间的引用关系必须是一致的，也就是原Asset资产的文件夹层次是保持一致的。**
+
+### 解压缩Perfab
+
+是由原场景中GameObject转成Perfab的反向操作，也就是该GameObject成为一个常规的GameObject了。
+
 ### 练习题1
 
 请读者随便新建一个场景，新建一个平面，命名为ground，预制件化，然后在该平面的两角放置两个立方体，两个立方体是根据一个预制件perfab而来，然后将该立方体拖动为ground的子辈。然后将ground预制件化。然后再根据ground预制件再新建一个平面再将这两个平面对接。
@@ -79,7 +81,7 @@ TODO 视频讲解
 
 以左角的盒子为例，不受ground perfab的修改影响，不受box3修改的影响，所以最终颜色是boxBase决定的。以第二个盒子为例，受boxBase修改影响，然后再受ground perfab右角修改影响，最终颜色是boxRight。而第三个盒子的颜色则就是box3材质颜色。
 
-
+简单来说嵌套Perfab有一种类似编程上的继承关系在里面，
 
 ### 如何将某个摄像头调到当前视角
 
@@ -397,7 +399,7 @@ B C D这几个子协程从启动开始就执行了，说的再直白点就是正
 
 ## Unity Addressable Asset system
 
-Unity的官方包，将Asset通过地址来访问，从而增加资源访问的灵活性。原asset bundle管理方案已经处于废弃状态。
+Unity的官方包，在包管理里面搜索`addressables` 。这个包可以让你访问资产Asset通过地址访问的方式来进行，从而增加资源访问的灵活性。原asset bundle管理方案已经处于废弃状态。
 
 在 window->addressables groups 那里新增一个group。
 
@@ -492,6 +494,59 @@ private IEnumerator LoadingProcess()
 
 如果大体每一帧都会检测一次加载是否Succeeded。
 
+## 新的输入系统
+
+new unity input system 更多地多设备输入兼容。文档在 [这里]([Installation guide | Input System | 1.1.0-preview.3 (unity3d.com)](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.1/manual/Installation.html)) 。
+
+激活新的输入系统： `Edit->Project settings->Player-> Active Input Handling` 。
+
+添加Player Input 组件
+
+编写Action输入键位绑定
+
+如果设置的是Send Message，则假设有Move Action，则对应该GameObject的`OnMove` 方法，Move发送的是一个Vector2值。x对应的是该GameObject Right方向上的位移，y对应的是该GameObject forward方向上的位移，有一个中间值(0.7,0.7) ，是45度的方向，你可以简单理解为right方向移动了0.7个单位，forward方向移动了0.7个单位，0.7这个数字的含义表示目标方向的移动长度还是大约1个单位。
+
+另外一个是单键位绑定，返回的是float值，1表示键位触发。
+
+如果设置的是InVoke Unity Events，则需要下面写上对应Action的回调方法，似乎InVoke Unity Events功能更强大一些，其支持对按键动作多种状态的判断。
+
+```c#
+    public void OnFire(InputAction.CallbackContext context)
+    {
+        switch (context.phase)
+        {
+            case InputActionPhase.Performed:
+                if (context.interaction is SlowTapInteraction)
+                {
+                    StartCoroutine(BurstFire((int)(context.duration * burstSpeed)));
+                }
+                else
+                {
+                    Fire();
+                }
+                m_Charging = false;
+                break;
+
+            case InputActionPhase.Started:
+                if (context.interaction is SlowTapInteraction)
+                    m_Charging = true;
+                break;
+
+            case InputActionPhase.Canceled:
+                m_Charging = false;
+                break;
+        }
+    }
+```
+
+上面Started最先触发，然后再触发Performed。如果你的context设置了SlowTapInteraction也就是一定时间的按键判断等，这块后面再详细了解。
+
+### 判断本帧某个键位是否按下了
+
+```
+  Keyboard.current.space.wasPressedThisFrame
+```
+
 
 
 ## 物理系统
@@ -514,148 +569,33 @@ private IEnumerator LoadingProcess()
 
 如果物理系统表现不太如人意，应该尽可能参照真实物理世界的参数然后再根据自己的需要进行调整。
 
-## animation clip
+## 四元数和欧拉角度
 
-制作动画片段：
-
-1. 新建一个Animations文件夹等下放动画片段资源
-2. 选中你想要有动画效果的那个组件，选定window->Animation->Animation。
-3. 选择启用关键帧记录模式，然后在每个帧上修改物体组件的某个属性
-
-动画的开头和结尾常常有卡顿现象，哪怕你设置的旋转动作是0度到360度数值上是无缝对接的，仍然会有卡顿现象，你可以在曲线那里看到数值的变动是有一个切线变化率的，每一个帧都有两个切线，左切线是进入，右切线是离开，从头帧到结尾帧要想不卡顿，左右两个切线斜率必须是相同的，也就是co-linear的。
-
-对于旋转动作可以将头尾两帧的双切线都改为线性。对应官方文档的 Broken-Linear模式。这样帧与帧之间是线性变化的，也就不存在那个变动斜率问题了。
-
-## particle system
-
-制作粒子系统：
-
-1. 右键在世界大纲视图下新建->效果->粒子系统
-2. 将粒子系统和你想要有该粒子系统效果的物体组件XYZ值设为一样
-3. 调配你的粒子系统的各个属性
-
-
-
-## 导航系统
-
-Unity内置了一个路径导航系统，首先你需要将你的地形 GameObject 进行烘焙：
-
-1. 选择你的地形GameObject，选择Static菜单的Navigation Static
-2. 选择Window->AI->导航，选择烘培Bake Tab，然后点击烘培。
-3. 你将会在目标场景地图下面看到新建了一个NavMesh对象。
-
-导航系统中你想要移动的目标对象需要绑定Nav Mesh Agent组件。
-
-导航系统中你需要定义一系列的导航路径点，空的GameObject即可。
-
-### 如何移动一个Agent
-
-实际会很简单，就是设定destination属性即可。
+旋转Editor看到的x y z的值就是所谓的欧拉角度，但是如果你要给tranform.rotation赋值的话则需要使用四元数（Quaternion）。
 
 ```
-agent.destination = transform.position;
+transorm.rotation = Quaternion.Euler(0,0,0);
 ```
 
-### 巡逻模式
+上面的过程也可以看做将一个欧拉角度数组转换成Quaternion四元数再赋值给rotation。
 
-一个agent的巡逻模式可以通过如下类似编码来实现：
+四元数访问对应的欧拉角度如下：
 
-```c#
-    void Update()
-    {
-        if (agent.remainingDistance < 0.2f && !agent.pathPending)
-        {
-            MoveToNextPatrolLocaton();
-        }
-    }
-        private void MoveToNextPatrolLocaton()
-    {
-        if (locations.Count == 0)
-        {
-            return;
-        }
-
-        agent.destination = locations[locationIndex].position;
-
-        locationIndex = (locationIndex + 1) % locations.Count;
-    }
+```
+transform.localEulerAngles
 ```
 
-上面的 `agent.pathPending` 的意思是当前路径还没有计算好，取值否表示一定要先等路径计算好然后剩余距离只有多少之后继续移动到下一个导航点。
+### Quaternion.AngleAxis
 
+绕某个轴旋转多少角度。
 
+```
+transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
+```
 
-##  材质
+## 常驻GameObject
 
-### albedo
-
-反射率，定义了材质的基本颜色，纹理也是放在这里设置的。
-
-### metallic
-
-金属的，定义了材质的金属表现。
-
-### Smoothness
-
-平滑度，定义了材质的表面光滑性。一般为了看上去更真实不应该设置为0或1而是某个中间值。
-
-### tiling
-
-平铺，定义了纹理在表面平铺重复的次数。
-
-### offset
-
-偏移，定义了纹理在表面平铺的偏移量。
-
-## 地形
-
-地形的搭建应该优先考虑Unity自带的地形功能，可能某些情况下，比如封闭的山洞等地形使用blender建模地形才能实现。
-
-新建一个地形： GameObject -> 3d object -> terrian 。
-
-设置->网络分辨率那里修改地形的大小。 
-
-TODO : 此处记录下关键词，有些东西在视频下面会更方便讲一点。 unity的terrian tools package ，然后一些操作。定义图层和绘图等。
-
-
-
-### blender建模构建地形
-
-Unity的terrian工具是有一定局限性的，前面提到在某些封闭的场景或者需要和地形进行交互的游戏比如像minecraft这样的游戏，是不应该使用Unity terrian工具的，即使是那些Unity terrian勉强能够应付的场景，如果对于地形在表现细节上有更多要求，则也应该使用blender建模来构建地形。除此之外，当然如果你blender用的很熟练了，那么就直接用blender建模构建地形也是很好的。
-
-
-
-
-
-## Makehuman工具
-
-TODO 视频讲解 Makehuman工具
-
-## cinemachine
-
-除了刚开始学习接触下摄像头简单的控制概念，后续正式项目推荐cinemachine package。
-
-利用cinemachine创建一个第三人称跟踪式摄像头是很方便的，而后续更多的运镜，包括摇摄，跟摄，多个摄像头视角转换都可以很容易办到。cinemachine并没有创建一个摄像头对象，其绑定在默认的主摄像头上，作为一个摄像头运镜工具而存在。
-
-
-
-TODO 视频讲解
-
-
-
-## FMOD音效集成
-
-TODO 视频讲解简单的FMOD集成音效知识，刚开始随便找点网上的音效进行一些试探性的集成尝试。
-
-
-
-## 开始菜单
-
-开始菜单就是另外一个场景地图，其是一个2d场景地图，在开发的时候视图中间偏左有个选项，激活了场景处于2d视图中。然后就是在这个场景中添加一些UI元素即构成了开始菜单。
-
-TODO 视频讲解
-
-## 场景间存在的持久数据
+你可能希望某些GameObject常驻在游戏里面然后多个场景调用。一个做法是不摧毁原场景，设置一个常驻场景作为该GameObject所在地，这可以通过规范你的项目场景加载卸载逻辑来实现。还有一个做法如下：
 
 ### DontDestroyOnLoad
 
@@ -762,14 +702,179 @@ _menuLoadChannel.RemoveHandler(LoadMenu);
 _menuLoadChannel.RaiseEvent(this, new LoadEventArgs(_menuToLoad));
 ```
 
+### UnityAction
+
+UnityAction带来的便利就是Unity Editor那边是支持显示一个按钮方便手工触发该事件的，除此之外UnityAction就是一个有着特定名字的C#委托，并没有什么特殊的。
+
+## UI
+
+UI里面有些地方用的是sprite文件对象，如果你直接导入png图片的话会发现没有对应的选项，需要将导入的png图片的属性那里更改为sprite才可以。
+
+一般来说游戏的UI会放在你的常驻场景里面，和你的其他游戏管理逻辑放在一起，而不是某单个level场景里面。
+
+## 导航系统
+
+Unity内置了一个路径导航系统，首先你需要将你的地形 GameObject 进行烘焙：
+
+1. 选择你的地形GameObject，选择Static菜单的Navigation Static
+2. 选择Window->AI->导航，选择烘培Bake Tab，然后点击烘培。
+3. 你将会在目标场景地图下面看到新建了一个NavMesh对象。
+
+导航系统中你想要移动的目标对象需要绑定Nav Mesh Agent组件。
+
+导航系统中你需要定义一系列的导航路径点，空的GameObject即可。
+
+### 如何移动一个Agent
+
+实际会很简单，就是设定destination属性即可。
+
+```
+agent.destination = transform.position;
+```
+
+### 巡逻模式
+
+一个agent的巡逻模式可以通过如下类似编码来实现：
+
+```c#
+    void Update()
+    {
+        if (agent.remainingDistance < 0.2f && !agent.pathPending)
+        {
+            MoveToNextPatrolLocaton();
+        }
+    }
+        private void MoveToNextPatrolLocaton()
+    {
+        if (locations.Count == 0)
+        {
+            return;
+        }
+
+        agent.destination = locations[locationIndex].position;
+
+        locationIndex = (locationIndex + 1) % locations.Count;
+    }
+```
+
+上面的 `agent.pathPending` 的意思是当前路径还没有计算好，取值否表示一定要先等路径计算好然后剩余距离只有多少之后继续移动到下一个导航点。
+
+## cinemachine
+
+除了刚开始学习接触下摄像头简单的控制概念，后续正式项目推荐cinemachine package。
+
+利用cinemachine创建一个第三人称跟踪式摄像头是很方便的，而后续更多的运镜，包括摇摄，跟摄，多个摄像头视角转换都可以很容易办到。cinemachine并没有创建一个摄像头对象，其绑定在默认的主摄像头上，作为一个摄像头运镜工具而存在。
+
+一般使用就使用virtual camera，其他camera只是在特定应用场景下才好用，可能额外增加的一些特性限定并不适合你的应用需求。
+
+Follow控制的摄像头的跟随对象，Body控制的是摄像头跟随跟随对象的移动行为，但是要注意3rd person follow 似乎还会有额外的摄像头旋转动作。
+
+loot at控制的摄像头的瞄准对象，Aim控制的是摄像头的旋转行为，有可以根据用户行为来旋转摄像头，但只是针对的旧版本的输入控制，如果你希望自己实现根据用户的操作来旋转摄像头，最好是自己编写脚本，那么Aim填上do nothing，免得干扰。
+
+body的Framing transposer很灵活和全面，很好用，摄像头偏移，距离，damping，dead zone，soft zone等概念都是可以调整的。
+
+- dead zone cinemachine会保证那个黄点也就是关注点在dead zone之内
+- soft zone 如果黄点在dead zone则不会有动作，如果黄点在soft zone 则摄像头会开始调整，摄像头调整可块可慢，具体可根据damping这个值来设置。
+
+
+
+更多cinemachine使用技巧后续补充。
+
+
+
+## animation clip
+
+制作动画片段：
+
+1. 新建一个Animations文件夹等下放动画片段资源
+2. 选中你想要有动画效果的那个组件，选定window->Animation->Animation。
+3. 选择启用关键帧记录模式，然后在每个帧上修改物体组件的某个属性
+
+动画的开头和结尾常常有卡顿现象，哪怕你设置的旋转动作是0度到360度数值上是无缝对接的，仍然会有卡顿现象，你可以在曲线那里看到数值的变动是有一个切线变化率的，每一个帧都有两个切线，左切线是进入，右切线是离开，从头帧到结尾帧要想不卡顿，左右两个切线斜率必须是相同的，也就是co-linear的。
+
+对于旋转动作可以将头尾两帧的双切线都改为线性。对应官方文档的 Broken-Linear模式。这样帧与帧之间是线性变化的，也就不存在那个变动斜率问题了。
+
+## particle system
+
+制作粒子系统：
+
+1. 右键在世界大纲视图下新建->效果->粒子系统
+2. 将粒子系统和你想要有该粒子系统效果的物体组件XYZ值设为一样
+3. 调配你的粒子系统的各个属性
+
+
+
+
+
+##  材质
+
+### albedo
+
+反射率，定义了材质的基本颜色，纹理也是放在这里设置的。
+
+### metallic
+
+金属的，定义了材质的金属表现。
+
+### Smoothness
+
+平滑度，定义了材质的表面光滑性。一般为了看上去更真实不应该设置为0或1而是某个中间值。
+
+### tiling
+
+平铺，定义了纹理在表面平铺重复的次数。
+
+### offset
+
+偏移，定义了纹理在表面平铺的偏移量。
+
+## 地形
+
+地形的搭建应该优先考虑Unity自带的地形功能，可能某些情况下，比如封闭的山洞等地形使用blender建模地形才能实现。
+
+新建一个地形： GameObject -> 3d object -> terrian 。
+
+设置->网络分辨率那里修改地形的大小。 
+
+ unity的terrian tools package ，然后一些操作。定义图层和绘图等。
+
+
+
+### blender建模构建地形
+
+Unity的terrian工具是有一定局限性的，前面提到在某些封闭的场景或者需要和地形进行交互的游戏比如像minecraft这样的游戏，是不应该使用Unity terrian工具的，即使是那些Unity terrian勉强能够应付的场景，如果对于地形在表现细节上有更多要求，则也应该使用blender建模来构建地形。除此之外，当然如果你blender用的很熟练了，那么就直接用blender建模构建地形也是很好的。
+
+
+
+
+
+## Makehuman工具
+
+Makehuman工具
+
+
+
+
+
+## FMOD音效集成
+
+FMOD集成音效
+
+
+
+## 开始菜单
+
+开始菜单就是另外一个场景地图，其是一个2d场景地图，在开发的时候视图中间偏左有个选项，激活了场景处于2d视图中。然后就是在这个场景中添加一些UI元素即构成了开始菜单。
+
+
+
+
 
 
 
 ## 多场景无缝切换
 
 
-
-## 玩家场景数据记忆
 
 
 
@@ -795,10 +900,22 @@ CS0006 could not found file Assembly-CSharp.dll
 
 `Ctrl+Shift+M` 在visual studio 上调出Unity快速方法输入。
 
+### RequireComponent
+
+```
+[RequireComponent(typeof(PlayerInput))]
+public class PlayerScript : MonoBehaviour
+{
+//
+}
+```
+
+脚本将会自动添加给本GameObject添加某个组件来确保本GameObject的组件依赖正确。
+
 ### 默认单位
 
 Unity术语里面长度用的是 1unit，比如velocity 用的每秒移动的unit。比如1unit等于多少并没有一个准数的，要看你自己那边的建模规范。
 
 ### Unity环境和.net core略有不同
 
-不能使用 System.HashCode ？？？？？？？？？
+不能使用 System.HashCode ？说明Unity虽然基于C#，但底层可能不是基于.net core，在某些地方上是有所差异的。
