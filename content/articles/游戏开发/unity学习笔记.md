@@ -245,24 +245,14 @@ Unity会对以下属性进行序列化：
 
 unity能够序列化的属性：
 
-- 自定义的non abstract class有[SerializeField] 属性
-- 自定义的结构有[SerializeField] 属性
+- 自定义的non abstract class有[SerializeField] 属性标注
+- 自定义的结构有[SerializeField] 属性标注
 - 由UntiyEngine.Object衍生出来的类
-- C#的主流数据类型
+- C#的基本数据类型（int, float, double, bool, string etc.）
 - 可以序列化对象组成的array
 - `List<T>`  T是可序列化的类型。
 
-需要强调的是如果不是UntiyEngine.Object衍生出来的类，而是随便自己定义的类，是不能序列化的，会出一些问题。一个推荐的做法是用结构体来中转数据来对接Unity的序列化过程。
 
-```
-   [Serializable]
-    public struct SerializableNode
-    {
-        public string interestingValue;
-        public int childCount;
-        public int indexOfFirstChild;
-    }
-```
 
 ### SerializeField
 
@@ -302,7 +292,7 @@ ScriptableOjbect的唯一性是根据你创建的asset文件唯一性来的，�
 		return;
 ```
 
-上面列表一号和二号是不同的scriptableobject，二号和三号是相同的scriptableobject。然后scrptableobject的相等性可以使用 `==` 运算符来进行，然后通过HashCode发现相同的scriptableobject的哈希值也是相同的。
+上面代码`_menuToLoad` 列表一号和二号是不同的scriptableobject，二号和三号是相同的scriptableobject。然后scrptableobject的相等性可以使用 `==` 运算符来进行，然后通过HashCode发现相同的scriptableobject的哈希值也是相同的。
 
 #### 创建一个ScriptableObject对象
 
@@ -540,6 +530,8 @@ new unity input system 更多地多设备输入兼容。文档在 [这里]([Inst
 ```
 
 上面Started最先触发，然后再触发Performed。如果你的context设置了SlowTapInteraction也就是一定时间的按键判断等，这块后面再详细了解。
+
+**NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会出发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
 
 ### 判断本帧某个键位是否按下了
 

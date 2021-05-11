@@ -188,7 +188,7 @@ Color color = Color.blue;
 
 具体到枚举类型的内部细节，和C语言的枚举类型应该是一脉相承。
 
-#### 结构体类型
+#### struct
 
 C#里面的结构体和C++里面的结构体差异巨大，C++里面的结构体概念和C语言的结构体区别不大，只是一种比数组略灵活点的变量类型，专门用来存储呈现一定结构特征的数据用的。而C#里面struct则更接近于class这个概念，有一些小的使用上的区别，其他都大同小异，其中最大的一个区别是struct是类型是value type，而class的类型是reference type。
 
@@ -675,6 +675,32 @@ this关键词类似于python里面的self，和C++上的this大体含义也是�
 public string Name { get; set; }
 ```
 
+在实践中推荐采用如下自动属性写法时间：
+
+```
+public string Name { get; }
+```
+
+Name可访问，如果访问都不希望访问则直接使用private变量即可。构造方法可修改，但不能编写其他方法来修改Name。
+
+```
+public string Name { get; private set; }
+```
+
+Name可访问，构造方法可修改，可以如下另外编写其他方法来修改Name值。
+
+```
+public void SetName(string newName) => Name = newName
+```
+
+
+
+```
+public string Name { get; set; }
+```
+
+Name可直接访问可直接修改。
+
 ### static
 
 C#类里面定义的静态变量和C++类里面定义的静态变量有很多差异，从底层实现角度来说static静态变量两门语言含义都是一样的，意思都是该静态变量进行了额外的静态存储管理，而不是交给编译器的自动存储管理，其在程序运行期间都是存在在内存里面的。但就编程角度来说，C++显得很是松散，而C#对这些变量的使用进行了一些规范，具体来说就是将这些变量定义为为类class所拥有的变量，C++并没有这样的限定，比如C++里面你仍然可以 `sw1.NoOfInstances` 来引用这个静态变量，而在C#这边是不行的，你只能通过 `StopWatch.NoOfInstances` 来引用。请看下面这个例子：
@@ -928,6 +954,16 @@ C++就多态这个议题从C++11开始也有virtual和override这两个关键词
         {
             return new Complex(a.Real + b.Real, a.Imaginary + b.Imaginary);
         }
+```
+
+#### 重载ToString方法
+
+C#的所有class和struct都继承自Object，因此它们都有ToString方法。一般自定义的class和struct都推荐通过重载ToString方法来提供本类或结构体的一些打印信息。
+
+```c#
+public override string ToString(){
+    
+}
 ```
 
 
@@ -1660,6 +1696,19 @@ Array/foreach: 1860ms (589725196)
 ```
 
 如上所示，就是为了提高代码可读性，代码该执行会执行的。
+
+
+
+### struct和class的选择问题
+
+参考 [这篇网页](https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/choosing-between-class-and-struct) 。在没有特别的理由的情况下一般来说是推荐使用class，如果你的类型很小，存在时间很短，一般是嵌入在其他对象里面的那么可以考虑使用struct，但使用情况也必须满足下面四个条件，否则还是用class。
+
+1. 该类型和基本类型比如整数等在行为上很相似
+2. 它的大小在16字节以下（这个条件挺苛刻的，一个整型现在就四个字节，超过四个整型就不行了）
+3. 它必须是不可变的
+4. 它不应该经常boxed，也就是转成reference type。
+
+从上面的描述来看，建议使用struct的情况非常非常的少，日常使用几乎绝大部分情况应该都是推荐使用class。
 
 ### 正则表达式
 
