@@ -21,7 +21,7 @@
 
 ### 双击脚本自动打开visual studio
 
-可能已经设置好了，如果没有设置好，可以去Edit->首选项->外部工具->外部脚本编辑器那里设置。
+可能已经设置好了，如果没有设置好，可以去 `Edit->首选项->外部工具->外部脚本编辑器` 那里设置。
 
 设置好了就可以双击打开visual studio了。
 
@@ -57,7 +57,7 @@ Debug.LogFormat("{0} + {1} = {2}", 2,3,2+3);
 
 关于Unity Editor的基本使用请读者自行熟悉软件界面，然后试着自己慢慢搭建起，比如一个平面作为一个基本的游玩空间，平面由四面墙围起来，然后等等其他立方体等等。移动缩放旋转和复制等等。
 
-如果对这种类似的软件不太熟悉的话，推荐是找个相关的入门视频看看，如果对这类软件有点熟悉的，可能左看看右点点就大体能够掌握了。
+推荐是找个相关的入门视频看看，当然喜欢自己摸索的多接触接触也就可以了。
 
 ### 预制件
 
@@ -86,6 +86,158 @@ Debug.LogFormat("{0} + {1} = {2}", 2,3,2+3);
 ### 如何将某个摄像头调到当前视角
 
 首先在编辑器上调整好开发者视角，然后选中某个摄像头，然后选择 `游戏对象-> align with view` 。
+
+## blender和unity的协作
+
+虽然Unity的ProBuilder和PloyBrush提供了一定的模型建立和地形构建的能力，但这主要还是用于原型开发，一般建模当然还是推荐在blender上完成，然后可能Unity的terrian地形工具搭建某些简单的地形有用，不过就成熟的项目来说地形构建也推荐是通过blender建模来实现。
+
+首先Unity的地形工具是有局限性的，某些封闭的如洞穴场景或者如同minecraft需要和地形的元素进行交互的场景是不应该使用Unity的terrian地形工具的，而应该通过blender建模来导入到Unity场景中来。其次即使是那些似乎看起来Unity地形工具勉强能够应付的场景，如果后续对地形在表现细节上有更多的要求，那么也应该通过blender建模来实现。
+
+### blender建模
+
+blender建模导入Unity下面说一下基本的流程思路，可能有时会有一些细节上的问题。
+
+1. 按A全选你想要导出的元素，主要是网格体和骨架。选择导出到FBX，然后选择网格体，如果有骨骼的话也推荐将骨架选上。然后导出。
+2. 将FBX文件移动到你的Unity项目中，Unity会自动检测导入，但一般来说你还需要对模型导入配置参数进行一些调整。比如材质，比如如果是人形模型，而你希望根据该人形模型构建动画还需要自动创建Avatar。
+3. FBX模型最好是另外单独一个地方存放，导入的模型参数配置好之后，拖入场景，然后拖动制成Perfab预制件，然后解压缩预制件，再对该预制件进行一些你想要的修改，比如有的加上碰撞器和行为脚本之类的。在更新预制件。
+
+### blender动画
+
+blender里面的动画导出到Unity也是类似上面的导出FBX，实际上就是导出的你的模型的骨架的一些移动变换数据，然后Unity接受成为动画Clips。
+
+1. 按A全选你想要导出的元素，主要是网格体和骨架。选择导出到FBX，然后选择骨架，和导出一般模型不同，如果你只希望导出动画的话这里只选择骨架即可。
+2. FBX动画文件导入Unity项目中，然后对动画Animation这一栏一些参数做出一些调配，还有Avatar选择Copy from之前本模型创建的那个Avatar。
+
+个人测试相同的人形模型差异不太大的话即使是原来不同的Avatar动画文件里面的内容也是可以复制，大体可以参考的。这一块主要是动画姿态的不匹配问题，如果是自己很粗略弄的动画反倒是泛用性会很强，而那些动捕或者调配的很好的姿态，泛用性会很差，比如一个女性角色的走路姿态套用到一个男性角色上然后出来的效果你懂的。
+
+简单的Unity动画就在Unity那边编辑即可，但有些动画文件很复杂，而Unity那边的动画文件编辑功能并不是很强大，可能还是要继续再blender那边修改之后再应用到Unity那边。
+
+最后提醒一点blender那边的骨架的各个名字最好先就定义好，从blender到unity预制件这条线路各个骨架的名字基本上不会再修改了，修改只会造成各种麻烦。
+
+
+
+## 新的输入系统
+
+new unity input system 更多地多设备输入兼容。文档在 [这里]([Installation guide | Input System | 1.1.0-preview.3 (unity3d.com)](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.1/manual/Installation.html)) 。
+
+激活新的输入系统： `Edit->Project settings->Player-> Active Input Handling` 。
+
+添加Player Input 组件
+
+编写Action输入键位绑定
+
+如果设置的是Send Message，则假设有Move Action，则对应该GameObject的`OnMove` 方法，Move发送的是一个Vector2值。x对应的是该GameObject Right方向上的位移，y对应的是该GameObject forward方向上的位移，有一个中间值(0.7,0.7) ，是45度的方向，你可以简单理解为right方向移动了0.7个单位，forward方向移动了0.7个单位，0.7这个数字的含义表示目标方向的移动长度还是大约1个单位。
+
+另外一个是单键位绑定，返回的是float值，1表示键位触发。
+
+如果设置的是InVoke Unity Events，则需要下面写上对应Action的回调方法，似乎InVoke Unity Events功能更强大一些，其支持对按键动作多种状态的判断。
+
+```c#
+    public void OnFire(InputAction.CallbackContext context)
+    {
+        switch (context.phase)
+        {
+            case InputActionPhase.Performed:
+                if (context.interaction is SlowTapInteraction)
+                {
+                    StartCoroutine(BurstFire((int)(context.duration * burstSpeed)));
+                }
+                else
+                {
+                    Fire();
+                }
+                m_Charging = false;
+                break;
+
+            case InputActionPhase.Started:
+                if (context.interaction is SlowTapInteraction)
+                    m_Charging = true;
+                break;
+
+            case InputActionPhase.Canceled:
+                m_Charging = false;
+                break;
+        }
+    }
+```
+
+上面Started最先触发，然后再触发Performed。如果你的context设置了SlowTapInteraction也就是一定时间的按键判断等，这块后面再详细了解。
+
+**NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会出发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
+
+### 读取值
+
+上面started，performed和canceld只是针对更复杂的按键情况，如果只是一般的使用则如下读取值然后大致类似传统输入系统那样去做即可。
+
+首先Move和Look读取Vector2的值：
+
+```
+Vector2 m_Movement = context.ReadValue<Vector2>();
+```
+
+然后对于一般按键值读取为bool值：
+
+```
+bool m_Attack = context.ReadValueAsButton();
+```
+
+按照传统的方法这些都应该在Update方法里面写上的，现在在对应的OnMove之类的方法写上然后各个键值每帧都会更新的，也就是相当于Update上执行了这些命令。
+
+
+
+### 判断本帧某个键位是否按下了
+
+这个键位判断不需要去设置Actions的配置对于任何按键都可以如下直接去判断。
+
+```
+  Keyboard.current.space.wasPressedThisFrame
+```
+
+
+
+## Animator组件
+
+控制GameObject的动画组件，需要指定动画控制器，也就是AnimationController。
+
+Apply root motion：应用根运动。是从动画本身控制角色的移动和旋转还是从脚本。脚本控制是 `animator.applyRootMotion` ，如果脚本定义了 `OnAnimatorMove` 方法，则applyRootMotion不起作用。
+
+更新模式：
+
+- Normal 法线 Animator和Update同步更新
+- Animate Physics Animator和FixUpdate同步更新，即和物理系统步调一致
+
+剔除模式：
+
+- 总是动画化，即使在屏幕外也不剔除。
+
+### 动画状态判断
+
+动画状态判断推荐使用 `animator.StringToHash("State")` 来获取一个int型hash值然后进行状态判断。
+
+具体比较是：
+
+```
+CurrentStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
+```
+
+默认的图层索引是0，上面CurrentStateInfo就是当前的动画状态，`CurrentStateInfo.shortNameHash` 就是当前动画状态的短名字的Hash值，短名字的意思就是你的动画控制器那边显示的名字是Run则就是Run，前面没有默认的图层名字。
+
+### 标签
+
+动画控制器的标签也是一个有用的字段方便进行一些动画控制上状态的逻辑管理。
+
+
+
+
+
+
+
+## Character Controller组件
+
+不适用刚体但是希望角色仍有物理碰撞则启动Character Controller组件。
+
+下面三个参数center控制胶囊碰撞体的中心位置，半径控制胶囊碰撞体的宽度，height控制胶囊碰撞体的高度。这三个参数值需要微调下来更适合你的角色情况。
 
 
 
@@ -175,21 +327,17 @@ foreach (Transform child in parent){
 
 Update是每帧执行，一般键盘输入放在这里。
 
-FixedUpDATE是每个固定时间段执行，一般物理模拟内容放在这里。
+FixedUpdate是每隔一定固定时间段执行，一般物理模拟内容放在这里。
+
+此外还需要了解 `Time.deltaTime` ，其返回的是上一帧到这一帧的时间间隔。以FixedUpdate为例，其内每次调用 Time.deltaTime都是相同的某个时间段，而对于Update则没有这个规律。
+
+### Awake和Start
+
+Awake和Start在脚本组件启动时都会被调用一次，Awake先于Start，脚本组件即使没有Enabled，场景启动时Awake也会执行，而Start只有在该脚本组件Enabled的情况下才会执行。
+
+此外还有一个OnEnable方法，它在Awake之后，如果脚本Enabled则会调用。
 
 
-
-### 移动控制
-
-`Input.GetAxis(axis_name)` 获取当前控制轴的值，比如Horizontal axis 方向left和 a键为-1，right和d为1。
-
-
-
-### transform.Translate和Rigidbody.MovePosition
-
-经过试验结论如下，在速度特别快的情况下两个都可能发生避开物理碰撞系统而发生穿模，速度很低的情况下两个也都不会穿模。不过在速度中等的情况下，用Transform的translate方法移动物体仍时不时会避开物理刚体碰撞系统，而在这种情况下刚体的MovePosition就表现要好一下。
-
-此外FixUpdate的固定时间设定也会很好地防止物体移动速度不可捉摸的突变情况。
 
 ### OnTriggerEnter和OnCollisionEnter的区别
 
@@ -202,7 +350,7 @@ OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者
 
 ### HeaderAttribute
 
-在编辑器那边新增一个标题头
+在Unity编辑器那边新增一个标题头
 
 ```
 	[Header("Persistent managers Scene")]
@@ -210,10 +358,16 @@ OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者
 
 ### TextAreaAttribute
 
-在编辑器那里新增一个可编辑文本区域。
+在Unity编辑器那里新增一个可编辑文本区域。
 
 ```
 	[TextArea] public string description;
+```
+
+### Tooltip
+给Unity编辑器的某个字段增加一个提示信息。
+```
+[Tooltip("Time that this gameObject is invulnerable for, after receiving damage.")]
 ```
 
 
@@ -484,61 +638,6 @@ private IEnumerator LoadingProcess()
 
 如果大体每一帧都会检测一次加载是否Succeeded。
 
-## 新的输入系统
-
-new unity input system 更多地多设备输入兼容。文档在 [这里]([Installation guide | Input System | 1.1.0-preview.3 (unity3d.com)](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.1/manual/Installation.html)) 。
-
-激活新的输入系统： `Edit->Project settings->Player-> Active Input Handling` 。
-
-添加Player Input 组件
-
-编写Action输入键位绑定
-
-如果设置的是Send Message，则假设有Move Action，则对应该GameObject的`OnMove` 方法，Move发送的是一个Vector2值。x对应的是该GameObject Right方向上的位移，y对应的是该GameObject forward方向上的位移，有一个中间值(0.7,0.7) ，是45度的方向，你可以简单理解为right方向移动了0.7个单位，forward方向移动了0.7个单位，0.7这个数字的含义表示目标方向的移动长度还是大约1个单位。
-
-另外一个是单键位绑定，返回的是float值，1表示键位触发。
-
-如果设置的是InVoke Unity Events，则需要下面写上对应Action的回调方法，似乎InVoke Unity Events功能更强大一些，其支持对按键动作多种状态的判断。
-
-```c#
-    public void OnFire(InputAction.CallbackContext context)
-    {
-        switch (context.phase)
-        {
-            case InputActionPhase.Performed:
-                if (context.interaction is SlowTapInteraction)
-                {
-                    StartCoroutine(BurstFire((int)(context.duration * burstSpeed)));
-                }
-                else
-                {
-                    Fire();
-                }
-                m_Charging = false;
-                break;
-
-            case InputActionPhase.Started:
-                if (context.interaction is SlowTapInteraction)
-                    m_Charging = true;
-                break;
-
-            case InputActionPhase.Canceled:
-                m_Charging = false;
-                break;
-        }
-    }
-```
-
-上面Started最先触发，然后再触发Performed。如果你的context设置了SlowTapInteraction也就是一定时间的按键判断等，这块后面再详细了解。
-
-**NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会出发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
-
-### 判断本帧某个键位是否按下了
-
-```
-  Keyboard.current.space.wasPressedThisFrame
-```
-
 
 
 ## 物理系统
@@ -576,6 +675,16 @@ transorm.rotation = Quaternion.Euler(0,0,0);
 ```
 transform.localEulerAngles
 ```
+
+在用一个Vector3变量表示游戏里面的方向的时候，现在假定都是全局坐标，则 `(0,0,1)` 也就是所谓的forward方向，即物体的z轴指向表示forword方向，此外还有 `(0,1,0)` 表示物体的Vector3.up方向，即物体的Y轴指向。x轴就是x轴和我们一般常识没有太多出入。
+
+到Vector2坐标输入又有所不同，其x值对应的是水平方向，可以认为影响的是x值，而y值对应的是垂直方向，可以认为影响的是y值。
+
+继续学习，这个四元数确实还是很让人困惑的，手册里面说Unity一般期待四元数是normalized，这个懂点线性代数的大概清楚就是这个矢量的模规约为1。具体调用是 `quaternion.normalized` ，将会返回一个magnitude等于1的四元数。
+
+然后看到四元数乘以一个Vector3，参考 [这个网页](https://answers.unity.com/questions/186252/multiply-quaternion-by-vector.html) 。一个Vector3乘以一个四元数实际上是将这个Vector3进行了该四元数对应的旋转操作，也就是返回的也是一个Vector3变量。那么这又到了这个问题上，四元数表示的是一个什么旋转动作。比如说 `Quaternion.Euler(0,90,0)`  意思是绕着y轴旋转90度，y轴是垂直向上的，绕着y轴旋转90度大概就是一个物体在xy平面的旋转动作。
+
+
 
 ### Quaternion.AngleAxis
 
@@ -698,23 +807,33 @@ _menuLoadChannel.RaiseEvent(this, new LoadEventArgs(_menuToLoad));
 
 UnityAction带来的便利就是Unity Editor那边是支持显示一个按钮方便手工触发该事件的，除此之外UnityAction就是一个有着特定名字的C#委托，并没有什么特殊的。
 
+
+
+
+
+
+
 ## UI
 
 UI里面有些地方用的是sprite文件对象，如果你直接导入png图片的话会发现没有对应的选项，需要将导入的png图片的属性那里更改为sprite才可以。
 
 一般来说游戏的UI会放在你的常驻场景里面，和你的其他游戏管理逻辑放在一起，而不是某单个level场景里面。
 
+
+
 ## 导航系统
 
 Unity内置了一个路径导航系统，首先你需要将你的地形 GameObject 进行烘焙：
 
-1. 选择你的地形GameObject，选择Static菜单的Navigation Static
+1. 选择你的地形GameObject，选择Static菜单的Navigation Static【在烘焙NavMesh的时候只收集标记为Navigation Static的游戏对象数据】
 2. 选择Window->AI->导航，选择烘培Bake Tab，然后点击烘培。
 3. 你将会在目标场景地图下面看到新建了一个NavMesh对象。
 
 导航系统中你想要移动的目标对象需要绑定Nav Mesh Agent组件。
 
 导航系统中你需要定义一系列的导航路径点，空的GameObject即可。
+
+
 
 ### 如何移动一个Agent
 
@@ -751,6 +870,16 @@ agent.destination = transform.position;
 
 上面的 `agent.pathPending` 的意思是当前路径还没有计算好，取值否表示一定要先等路径计算好然后剩余距离只有多少之后继续移动到下一个导航点。
 
+### 烘焙的时候选择高度网格
+
+如果不选择高度网格的话，角色会有一定的悬空浮动问题。高度网络在运行时会占用一些内存和处理资源，只有在必要的时候才开启这个选项。
+
+### NavMesh Surface
+
+这个组件需要在 [这里](https://github.com/Unity-Technologies/NavMeshComponents) 额外下载安装，它可以作为组件附加在游戏对象上，然后可以针对某种特定的NavMesh Agent定义可行走区域。
+
+
+
 ## cinemachine
 
 除了刚开始学习接触下摄像头简单的控制概念，后续正式项目推荐cinemachine package。
@@ -770,8 +899,6 @@ body的Framing transposer很灵活和全面，很好用，摄像头偏移，距�
 
 
 
-更多cinemachine使用技巧后续补充。
-
 
 
 ## animation clip
@@ -785,6 +912,8 @@ body的Framing transposer很灵活和全面，很好用，摄像头偏移，距�
 动画的开头和结尾常常有卡顿现象，哪怕你设置的旋转动作是0度到360度数值上是无缝对接的，仍然会有卡顿现象，你可以在曲线那里看到数值的变动是有一个切线变化率的，每一个帧都有两个切线，左切线是进入，右切线是离开，从头帧到结尾帧要想不卡顿，左右两个切线斜率必须是相同的，也就是co-linear的。
 
 对于旋转动作可以将头尾两帧的双切线都改为线性。对应官方文档的 Broken-Linear模式。这样帧与帧之间是线性变化的，也就不存在那个变动斜率问题了。
+
+
 
 ## particle system
 
@@ -820,21 +949,7 @@ body的Framing transposer很灵活和全面，很好用，摄像头偏移，距�
 
 偏移，定义了纹理在表面平铺的偏移量。
 
-## 地形
 
-地形的搭建应该优先考虑Unity自带的地形功能，可能某些情况下，比如封闭的山洞等地形使用blender建模地形才能实现。
-
-新建一个地形： GameObject -> 3d object -> terrian 。
-
-设置->网络分辨率那里修改地形的大小。 
-
- unity的terrian tools package ，然后一些操作。定义图层和绘图等。
-
-
-
-### blender建模构建地形
-
-Unity的terrian工具是有一定局限性的，前面提到在某些封闭的场景或者需要和地形进行交互的游戏比如像minecraft这样的游戏，是不应该使用Unity terrian工具的，即使是那些Unity terrian勉强能够应付的场景，如果对于地形在表现细节上有更多要求，则也应该使用blender建模来构建地形。除此之外，当然如果你blender用的很熟练了，那么就直接用blender建模构建地形也是很好的。
 
 
 
@@ -846,27 +961,13 @@ Makehuman工具
 
 
 
-
-
-## FMOD音效集成
-
-FMOD集成音效
-
-
-
 ## 开始菜单
 
 开始菜单就是另外一个场景地图，其是一个2d场景地图，在开发的时候视图中间偏左有个选项，激活了场景处于2d视图中。然后就是在这个场景中添加一些UI元素即构成了开始菜单。
 
 
 
-
-
-
-
 ## 多场景无缝切换
-
-
 
 
 
@@ -908,6 +1009,25 @@ public class PlayerScript : MonoBehaviour
 
 Unity术语里面长度用的是 1unit，比如velocity 用的每秒移动的unit。比如1unit等于多少并没有一个准数的，要看你自己那边的建模规范。
 
+
+
+## 备用
+
 ### Unity环境和.net core略有不同
 
 不能使用 System.HashCode ？说明Unity虽然基于C#，但底层可能不是基于.net core，在某些地方上是有所差异的。
+
+### 移动控制
+
+`Input.GetAxis(axis_name)` 获取当前控制轴的值，比如Horizontal axis 方向left和 a键为-1，right和d为1。
+
+### transform.Translate和Rigidbody.MovePosition
+
+经过试验结论如下，在速度特别快的情况下两个都可能发生避开物理碰撞系统而发生穿模，速度很低的情况下两个也都不会穿模。不过在速度中等的情况下，用Transform的translate方法移动物体仍时不时会避开物理刚体碰撞系统，而在这种情况下刚体的MovePosition就表现要好一下。
+
+此外FixUpdate的固定时间设定也会很好地防止物体移动速度不可捉摸的突变情况。
+
+## FMOD音效集成
+
+FMOD集成音效
+
