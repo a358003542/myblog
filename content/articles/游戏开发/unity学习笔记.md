@@ -199,7 +199,11 @@ bool m_Attack = context.ReadValueAsButton();
 
 控制GameObject的动画组件，需要指定动画控制器，也就是AnimationController。
 
-Apply root motion：应用根运动。是从动画本身控制角色的移动和旋转还是从脚本。脚本控制是 `animator.applyRootMotion` ，如果脚本定义了 `OnAnimatorMove` 方法，则applyRootMotion不起作用。
+Apply root motion：应用根运动。是从动画本身控制角色的移动和旋转还是从脚本。
+
+脚本那边设置这个参数是通过 `animator.applyRootMotion` 。
+
+如果脚本定义了 `OnAnimatorMove` 方法，则applyRootMotion不起作用。
 
 更新模式：
 
@@ -229,150 +233,101 @@ Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
 
 
 
+## 物理系统
+
+### 碰撞器
+
+#### 碰撞器组件的是否是触发器属性
+
+默认是否，如果勾选，则该碰撞器不具有物体碰撞功能而只有碰撞事件触发功能，也就是你可以穿模进去了。比如某些液体就可以勾选这个选项这样玩家既可以进入该液体同时也可以跟踪玩家进入该液体的事件。
+
+### Character Controller组件
+
+一般第一人称或第三人称角色控制玩家会需要更灵活地控制角色，这种情况下玩家角色如果加入物理系统的刚体会有一种操作上的不顺畅感，但此时仍然希望保留碰撞的物理效果，可以加入Character Controller组件来实现这点。
+
+我们看到角色控制器下面有三个参数：center控制胶囊碰撞体的中心位置，半径控制胶囊碰撞体的宽度，height控制胶囊碰撞体的高度。大体可以猜到角色控制器就是通过这个胶囊碰撞体来和环境交互的。
+
+### isGrounded
+
+本角色控制器组件在上一次移动中是否接触到了地面。
 
 
 
-
-## Character Controller组件
-
-不适用刚体但是希望角色仍有物理碰撞则启动Character Controller组件。
-
-下面三个参数center控制胶囊碰撞体的中心位置，半径控制胶囊碰撞体的宽度，height控制胶囊碰撞体的高度。这三个参数值需要微调下来更适合你的角色情况。
-
-
-
-## 脚本
-
-### GameObject
-
- 一个空的GameObject就是一个容器，其可以用于在Unity Editor的大纲视图中进行层级管理。一个GameObject下面管理的多个物体，如果将这个GameObject拖动到项目文件夹视图下，则将会创建一个Perfab预制件。预制件Perfab可以重复只用，并且改变基础Perfab属性会影响所有相关场景中的由此Perfab实例化的对象。
-
-一个GameObject里的组件如果调用`gameObject` 属性，比如transform，或者脚本类this，都会指向这个目标容器GameObject。
-
-```
-this.gameObject;
-this.transform.gameObject;
-```
-
-脚本作为组件绑定在某个GameObject上，如上在脚本中调用 `this.gameObject` 则会引用该GameObject。
-
-所有的GameObject，即使是一个空的GameObject也会有transform属性。
-
-
-
-#### 引用Unity对象
-
-如果本脚本和目标组件在同一个GameObject之下，则可以如下引用该目标组件：
+### 射线投射
 
 ```
-_rb = this.GetComponent<Rigidbody>();
+public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance = Mathf.Infinity, int layerMask = DefaultRaycastLayers, QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.UseGlobal);
 ```
 
-上面假设本脚本和某个刚体组件同在一个GameObject之下，则如上引用该目标组件。其实你在Unity Editor看到的其他组件说白了也是一些脚本，只是说之前Unity官方或者其他库预先帮你写好了。脚本也可以不绑定在GameObject上，这个后面会提到，其叫做 ScriptableObject。
+从origin向这direction方向发射一个射线，如果射线和某个碰撞体相交则返回true，否则返回false。
 
-后面会提到ScriptableObject的单例性是建构在文件的唯一性基础之上的，而各个GameObject也是具有唯一的单例性，将某个GameObject做成Perfab预制件就是将目标GameObject实例抽象成类一般的存在。所以当我们在Unity Editor上看到某个GameObject，其就是一个对象，然后在这个对象上的组件的唯一性，也是建立在对象的唯一性上的， 也因此Perfab实例化多个GameObject，各个GameObject之类的组件属性或者说数据都是重新Copy复制了一份的。
+这个射线投射很有用，物理系统里面的很多功能都是基于这个射线投射，然后比如想要确定玩家的交互对象，视窗中心射出一个射线，和什么GameObject相交则认为该GameObject是当前玩家的选择对象。
 
-现在假设你的GameObject下面有多个脚本组件，则引用另一个脚本组件代码如下：
 
-```
-gameManager = this.GetComponent<GameBehavior>();
-```
 
-上面的意思是本GameObject下还有一个脚本类，其类名叫做 `GameBehavior` ，那么那个刚体组件呢，其对应的就是还有另外一个脚本，其类名叫做Rigidbody。请注意，这里的讨论只是在试图澄清组件和脚本类之间的关系，并不是在说如何使用其他类里面的数据，Unity对于交互数据更推荐使用ScriptableObject或者其他方法来处理，一般来说脚本类里面只放着行为逻辑。
+### Physics.CheckCapsule
 
-#### Find方法
+这个可以用来测试玩家角色是否接触地面，具体这个方法参数官方文档读起来也不是很直观，具体来说其定义了这样一个胶囊：
 
-Find方法可以用于查找不是本GameObject的其他GameObject，具体名字就是Unity面板上显示的那个名字。
+![img]({static}/images/2021/unity_capsule.png)
 
-```c#
-private GameObject directLight;
-private Transform lightTransorm;
-
-directLight = GameObject.Find("Directional Light");
-lightTransorm = directLight.GetComponent<Transform>();
-Debug.Log(lightTransorm.localPosition);
-```
-
-#### 更推荐的做法
-
-在实践中如上使用Find方法其实并不是很好用，更推荐的做法是将你需要定位的GameObject做成你的脚本类的公有属性或者序列化属性，值得一提的是这种做法可用于定位目标GameObject，也可用于定位目标组件，目标组件在十万八千里远或者就在旁边都可以这样用。
+其中的layer层一般将地形GameObject放入该层。
 
 ```
-public YouTargetClass object_name;
+public static bool CheckCapsule(Vector3 start, Vector3 end, float radius, int layerMask = DefaultRaycastLayers, QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.UseGlobal);
 ```
 
-然后在编辑器上选中目标对象或者拖动目标对象到目标输入框。你给定的类名一定要是你想定位的目标的类，这样选择框才会弹出对应的候选项。
+### 图层
 
-这种做法的好处就是编辑器友好和简单，又能少写代码又简单当然是推荐使用的了。一般大部分应用场景都可以用这个推荐做法来解决引用目标对象的问题，只可能在某些极个别的情况需要代码查找。
+图层的创建和将某个GameObject分配给某个图层在Unity Editor那边操作熟悉下即可。
 
-#### transform的层级树
-
-unity的每一个gameObject都有transform这个属性，这个transform是有一个内在的层级树在里面的，这个层级树也就是里面的parent和child概念是直接对应你在大纲视图上看到的GameObject的层级的。
-
-你可以通过transform的层级数来定位某个gameObject的transform，然后通过 `.gameObject` 这个属性来获得具体该gameObject对象。
-
-你可以通过如下语句来迭代某个GameObject下的子节点：
-
-```c#
-foreach (Transform child in parent){
-    // do something
-}
-```
-
-然后有 `transform.parent` 来返回本transform的父节点transform对象。更多的方法请参看 Transform 类。
+图层在某些特定的地方会很有用，比如摄像机渲染和物理系统的射线碰撞判断，否则不要创建一些无谓的图层。
 
 
 
-### Update和FixedUpdate
+#### 摄像机的剔除遮罩属性
 
-Update是每帧执行，一般键盘输入放在这里。
+Culling Mask 用来设置本摄像机想要渲染的图层，默认是Everything。
 
-FixedUpdate是每隔一定固定时间段执行，一般物理模拟内容放在这里。
+现在假设有两个摄像机，一个摄像机对着一个红色的立方体，该红色的立方体在RED图层；另外一个摄像机对着蓝色的立方体，该蓝色的立方体在BLUE图层。第一个摄像机的剔除遮罩没有选择BLUE图层，则该摄像机的渲染图像里面没有蓝色的立方体；第二个摄像机的剔除遮罩没有选择RED图层，则该摄像机的渲染图像里面没有红色的立方体。
 
-此外还需要了解 `Time.deltaTime` ，其返回的是上一帧到这一帧的时间间隔。以FixedUpdate为例，其内每次调用 Time.deltaTime都是相同的某个时间段，而对于Update则没有这个规律。
+#### 物理系统的图层碰撞矩阵
 
-### Awake和Start
+在 `Edit->Project settings->Physics` 那里，有一个Layer collision Matrix，用来设置你的项目里面各个图层中的各个GameObject是否有物理系统的碰撞判断。
 
-Awake和Start在脚本组件启动时都会被调用一次，Awake先于Start，脚本组件即使没有Enabled，场景启动时Awake也会执行，而Start只有在该脚本组件Enabled的情况下才会执行。
-
-此外还有一个OnEnable方法，它在Awake之后，如果脚本Enabled则会调用。
-
-
-
-### OnTriggerEnter和OnCollisionEnter的区别
-
-OnTriggerEnter 的触发条件是：
-
-- 两个GameObject都有碰撞器组件，其中某个GameObject的碰撞器必须勾选了`isTrigger` ，并包含刚体组件。但是如果两个碰撞器都勾选了 `isTrigger` ，也不会触发。
-- 然后就是两个碰撞器发生碰撞则会触发事件。
-
-OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者刚体发生碰撞则会触发。
-
-### HeaderAttribute
-
-在Unity编辑器那边新增一个标题头
+此外物理系统的射线投射函数`Raycast` 里面有个 `layerMask` 参数就是设置你希望该射线和那些图层交互的。比如：
 
 ```
-	[Header("Persistent managers Scene")]
+int layerMask = 0;
 ```
 
-### TextAreaAttribute
+则射线不会和任何东西发生碰撞。
 
-在Unity编辑器那里新增一个可编辑文本区域。
+如果：
 
 ```
-	[TextArea] public string description;
+int layerMask = 1<<8;
 ```
 
-### Tooltip
-给Unity编辑器的某个字段增加一个提示信息。
+则射线会和第8图层的GameObject发生碰撞。
+
+如果：
+
 ```
-[Tooltip("Time that this gameObject is invulnerable for, after receiving damage.")]
+int layerMask = ~(1<<8);
 ```
 
+则射线会和其他图层的GameObject发生碰撞除了第8图层。
 
+看到这里读者可能已经明白了，一共32个图层，第一图层是 `00...00001` ，第二图层是`000...00010` ，比如我现在希望取第一图层和第二图层，就是 `00...0001 | 000...00010`  ，也就是 `00...11` 。
 
-### 序列化
+但个人还是不喜欢这种写法，还是推荐多使用 `LayerMask.GetMask` 这个方法，这个方法接受一个图层或者多个图层的名字，然后返回也就是类似上面描述的layermask的数值：
+
+```
+LayerMask.GetMask("UserLayerA", "UserLayerB");
+```
+
+## 序列化
 
 序列化是理解Unity Editor如何工作的关键，这当然对你后面更好地使用Unity Editor从而更好地进行游戏开发很重要，但更重要的是Unity Editor可以看作利用Unity技术实现的第一个游戏，因此Unity Editor广泛使用的序列化技术对你的游戏代码开发同样具有参考价值，这点我们后续会看到。
 
@@ -405,8 +360,6 @@ unity能够序列化的属性：
 - C#的基本数据类型（int, float, double, bool, string etc.）
 - 可以序列化对象组成的array
 - `List<T>`  T是可序列化的类型。
-
-
 
 ### SerializeField
 
@@ -539,6 +492,155 @@ B C D这几个子协程从启动开始就执行了，说的再直白点就是正
 
 但Unity协程不能解决某个动作就是花费时间太长，从而造成你的游戏进程阻塞这个问题，这还是需要靠多线程或异步来解决，Unity协程在这里的作用主要就是每帧来检查一下这个费时的异步动作完成了没有。
 
+## 脚本
+
+### GameObject
+
+ 一个空的GameObject就是一个容器，其可以用于在Unity Editor的大纲视图中进行层级管理。一个GameObject下面管理的多个物体，如果将这个GameObject拖动到项目文件夹视图下，则将会创建一个Perfab预制件。预制件Perfab可以重复只用，并且改变基础Perfab属性会影响所有相关场景中的由此Perfab实例化的对象。
+
+一个GameObject里的组件如果调用`gameObject` 属性，比如transform，或者脚本类this，都会指向这个目标容器GameObject。
+
+```
+this.gameObject;
+this.transform.gameObject;
+```
+
+脚本作为组件绑定在某个GameObject上，如上在脚本中调用 `this.gameObject` 则会引用该GameObject。
+
+所有的GameObject，即使是一个空的GameObject也会有transform属性。
+
+
+
+#### GetComponent方法
+
+这个方法在 `GameObject.GetComponent` 上，也就是Unity上的所有游戏对象都是可以调用这个方法的，这既包括脚本组件对象，也包括transform对象。
+
+然后GetComponent方法主要是找目标组件和本脚本组件或者其他组件在同一GameObject之下的情况，当然你也可以直接引用本GameObject来调用这个方法：`gameObject.GetComponent` 。返回的是找到的第一个相同类型的目标组件，如果没有找到则返回null。
+
+```
+_rb = this.GetComponent<Rigidbody>();
+```
+
+上面假设本脚本和某个刚体组件同在一个GameObject之下，则如上引用该目标组件。其实你在Unity Editor看到的其他组件说白了也是一些脚本，只是说之前Unity官方或者其他库预先帮你写好了。脚本也可以不绑定在GameObject上，这个后面会提到，其叫做 ScriptableObject。
+
+#### 引用其他脚本组件
+
+现在假设你的GameObject下面有多个脚本组件，则引用另一个脚本组件代码如下：
+
+```
+gameManager = this.GetComponent<GameBehavior>();
+```
+
+上面的意思是本GameObject下还有一个脚本类，其类名叫做 `GameBehavior` ，那么那个刚体组件呢，其对应的就是还有另外一个脚本，其类名叫做Rigidbody。请注意，这里的讨论只是在试图澄清组件和脚本类之间的关系，并不是在说如何使用其他类里面的数据，Unity对于交互数据更推荐使用ScriptableObject或者其他方法来处理，一般来说脚本类里面只放着行为逻辑。
+
+#### Find方法
+
+Find方法可以用于查找不是本GameObject的其他GameObject，具体名字就是Unity面板上显示的那个名字。
+
+```c#
+private GameObject directLight;
+private Transform lightTransorm;
+
+directLight = GameObject.Find("Directional Light");
+lightTransorm = directLight.GetComponent<Transform>();
+Debug.Log(lightTransorm.localPosition);
+```
+
+##### 更推荐的做法
+
+在实践中如上使用Find方法其实并不是很好用，更推荐的做法是将你需要定位的GameObject做成你的脚本类的公有属性或者序列化属性，值得一提的是这种做法可用于定位目标GameObject，也可用于定位目标组件，目标组件在十万八千里远或者就在旁边都可以这样用。
+
+```
+public YouTargetClass object_name;
+```
+
+然后在编辑器上选中目标对象或者拖动目标对象到目标输入框。你给定的类名一定要是你想定位的目标的类，这样选择框才会弹出对应的候选项。
+
+这种做法的好处就是编辑器友好和简单，又能少写代码又简单当然是推荐使用的了。一般大部分应用场景都可以用这个推荐做法来解决引用目标对象的问题，只可能在某些极个别的情况需要代码查找。
+
+#### transform的层级树
+
+unity的每一个gameObject都有transform这个属性，这个transform是有一个内在的层级树在里面的，这个层级树也就是里面的parent和child概念是直接对应你在大纲视图上看到的GameObject的层级的。
+
+你可以通过transform的层级数来定位某个gameObject的transform，然后通过 `.gameObject` 这个属性来获得具体该gameObject对象。
+
+你可以通过如下语句来迭代某个GameObject下的子节点：
+
+```c#
+foreach (Transform child in parent){
+    // do something
+}
+```
+
+然后有 `transform.parent` 来返回本transform的父节点transform对象。更多的方法请参看 Transform 类。
+
+### 常驻GameObject
+
+你可能希望某些GameObject常驻在游戏里面然后多个场景调用。一个做法是不摧毁原场景，设置一个常驻场景作为该GameObject所在地，这可以通过规范你的项目场景加载卸载逻辑来实现。还有一个做法如下：
+
+#### DontDestroyOnLoad
+
+当加载一个新的场景时会把原场景的所有对象destroy掉，如果加入如下代码：
+
+```
+DontDestroyOnLoad(this.gameObject);
+```
+
+则本脚本绑定的那个GameObject在场景切换时将不会被删除掉。
+
+### Update和FixedUpdate
+
+Update是每帧执行，一般键盘输入放在这里。
+
+FixedUpdate是每隔一定固定时间段执行，一般物理模拟内容放在这里。
+
+此外还需要了解 `Time.deltaTime` ，其返回的是上一帧到这一帧的时间间隔。以FixedUpdate为例，其内每次调用 Time.deltaTime都是相同的某个时间段，而对于Update则没有这个规律。
+
+### Awake和Start
+
+Awake和Start在脚本组件启动时都会被调用一次，Awake先于Start，脚本组件即使没有Enabled，场景启动时Awake也会执行，而Start只有在该脚本组件Enabled的情况下才会执行。
+
+此外还有一个OnEnable方法，它在Awake之后，如果脚本Enabled则会调用。
+
+
+
+### OnTriggerEnter和OnCollisionEnter
+
+OnTriggerEnter 的触发条件是：
+
+- 两个GameObject都有碰撞器组件，其中某个GameObject的碰撞器必须勾选了`isTrigger` ，并包含刚体组件。但是如果两个碰撞器都勾选了 `isTrigger` ，也不会触发。
+- 然后就是两个碰撞器发生碰撞则会触发事件。
+
+OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者刚体发生碰撞则会触发。
+
+### HeaderAttribute
+
+在Unity编辑器那边新增一个标题头
+
+```
+	[Header("Persistent managers Scene")]
+```
+
+### TextAreaAttribute
+
+在Unity编辑器那里新增一个可编辑文本区域。
+
+```
+	[TextArea] public string description;
+```
+
+### Tooltip
+给Unity编辑器的某个字段增加一个提示信息。
+```
+[Tooltip("Time that this gameObject is invulnerable for, after receiving damage.")]
+```
+
+
+
+
+
+
+
 
 
 ## Unity Addressable Asset system
@@ -640,25 +742,7 @@ private IEnumerator LoadingProcess()
 
 
 
-## 物理系统
 
-### 碰撞器组件的是否是触发器属性
-
-默认是否，如果勾选，则该碰撞器不具有物体碰撞功能而只有碰撞事件触发功能，也就是你可以穿模进去了。
-
-### Physics.CheckCapsule
-
-这个可以用来测试玩家角色是否接触地面，具体这个方法参数官方文档读起来也不是很直观，具体来说其定义了这样一个胶囊：
-
-![img]({static}/images/2021/unity_capsule.png)
-
-其中的layer层一般将地形GameObject放入该层。
-
-
-
-### 物理系统优化
-
-如果物理系统表现不太如人意，应该尽可能参照真实物理世界的参数然后再根据自己的需要进行调整。
 
 ## 四元数和欧拉角度
 
@@ -693,20 +777,6 @@ transform.localEulerAngles
 ```
 transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
 ```
-
-## 常驻GameObject
-
-你可能希望某些GameObject常驻在游戏里面然后多个场景调用。一个做法是不摧毁原场景，设置一个常驻场景作为该GameObject所在地，这可以通过规范你的项目场景加载卸载逻辑来实现。还有一个做法如下：
-
-### DontDestroyOnLoad
-
-当加载一个新的场景时会把原场景的所有对象destroy掉，如下：
-
-```
-DontDestroyOnLoad(this.gameObject);
-```
-
-则本脚本绑定的那个GameObject在场景切换时将不会被删除掉。
 
 
 
@@ -899,6 +969,28 @@ body的Framing transposer很灵活和全面，很好用，摄像头偏移，距�
 
 
 
+### 多个摄像机
+
+Unity可以添加多个摄像机组件，摄像机有个参数叫做深度，这个深度值最大的摄像机将是最终显示的那个摄像机【如果两个摄像机在显示上都是全覆盖的】。
+
+### 分屏显示
+
+摄像机的Viewport矩形x和y值决定了显示的起始位置，x值是横向，y值是竖向。比如(0,0) 是最左边那里，`(0.5,0)` 是横向宽度50%竖向继续0%那里。然后w是显示的宽度，0.5就是显示宽度为整个宽度的50%。h是显示高度。
+
+调配两个摄像头的Viewport矩形参数，一个(0,0)显示宽度0.5，显示高度1；一个(0.5,0)显示宽度0.5，显示高度1就可以达到一种横向分两个屏幕显示的效果。
+
+继续调配这个Viewport矩形参数还可以做到另外一个摄像头专门在显示界面右上角来显示，一种类似小地图的功能。
+
+### viewportToWorldPoint
+
+根据摄像机视图空间的一个Vector3坐标转成游戏场景中的Vector3坐标。
+
+```
+Vector3 p = camera.ViewportToWorldPoint(new Vector3(1, 1, camera.nearClipPlane));
+```
+
+其中Vector3的x和y如果是 `(0,0)` 则是左下角，如果是 `(1,1)` 则是右上角，这个z值设置为 `camera.nearClipPlane` 是摄像机的近裁剪平面，还有一个远裁剪平面，z值也可以设置为0就是紧贴着摄像机。
+
 
 
 ## animation clip
@@ -929,29 +1021,39 @@ body的Framing transposer很灵活和全面，很好用，摄像头偏移，距�
 
 ##  材质
 
-### albedo
+### standard着色器
+
+#### albedo
 
 反射率，定义了材质的基本颜色，纹理也是放在这里设置的。
 
-### metallic
+#### metallic
 
 金属的，定义了材质的金属表现。
 
-### Smoothness
+#### Smoothness
 
 平滑度，定义了材质的表面光滑性。一般为了看上去更真实不应该设置为0或1而是某个中间值。
 
-### tiling
+#### tiling
 
 平铺，定义了纹理在表面平铺重复的次数。
 
-### offset
+#### offset
 
 偏移，定义了纹理在表面平铺的偏移量。
 
 
 
+## 光源
 
+默认的定向光可以类比太阳光，点光源可以类比灯泡，聚光灯可以类比汽车的前照灯。
+
+需要强调一点的是Unity里面的灯光是游戏对象的组件，当你在空白地方新建一个灯光的时候，实际上是新建了一个空白对象然后包含了一个灯光组件。前面提到的各个灯光类型比如定向光点光源都是灯光组件的类型变量控制的，这都是可以调整的。
+
+以新建一个路灯为例子，路灯有杆子和上面的立方体，给上面的立方体一个灯光组件就有了一个类似路灯的效果。
+
+最后要提醒一点的是灯光只是让这个对象在发光，要让这个对象看起来在发光还需要给这个对象添加对应的发光材质。
 
 
 
