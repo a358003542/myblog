@@ -116,7 +116,9 @@ blender里面的动画导出到Unity也是类似上面的导出FBX，实际上�
 
 
 
-## 新的输入系统
+## 输入
+
+### input system
 
 new unity input system 更多地多设备输入兼容。文档在 [这里]([Installation guide | Input System | 1.1.0-preview.3 (unity3d.com)](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.1/manual/Installation.html)) 。
 
@@ -165,7 +167,7 @@ new unity input system 更多地多设备输入兼容。文档在 [这里]([Inst
 
 **NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会出发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
 
-### 读取值
+#### 读取值
 
 上面started，performed和canceld只是针对更复杂的按键情况，如果只是一般的使用则如下读取值然后大致类似传统输入系统那样去做即可。
 
@@ -185,7 +187,7 @@ bool m_Attack = context.ReadValueAsButton();
 
 
 
-### 判断本帧某个键位是否按下了
+#### 判断本帧某个键位是否按下了
 
 这个键位判断不需要去设置Actions的配置对于任何按键都可以如下直接去判断。
 
@@ -193,43 +195,13 @@ bool m_Attack = context.ReadValueAsButton();
   Keyboard.current.space.wasPressedThisFrame
 ```
 
+### Input.mousePosition
+
+获取当前鼠标在屏幕上的坐标，返回一个Vector3值，z值总为0，x和y都等于0时表示左下角，右上角是 `(Screen.width, Screen.height)` 。
 
 
-## Animator组件
 
-控制GameObject的动画组件，需要指定动画控制器，也就是AnimationController。
 
-Apply root motion：应用根运动。是从动画本身控制角色的移动和旋转还是从脚本。
-
-脚本那边设置这个参数是通过 `animator.applyRootMotion` 。
-
-如果脚本定义了 `OnAnimatorMove` 方法，则applyRootMotion不起作用。
-
-更新模式：
-
-- Normal 法线 Animator和Update同步更新
-- Animate Physics Animator和FixUpdate同步更新，即和物理系统步调一致
-
-剔除模式：
-
-- 总是动画化，即使在屏幕外也不剔除。
-
-### 动画状态判断
-
-动画状态判断推荐使用 `animator.StringToHash("State")` 来获取一个int型hash值然后进行状态判断。
-
-具体比较是：
-
-```
-CurrentStateInfo = animator.GetCurrentAnimatorStateInfo(0);
-Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
-```
-
-默认的图层索引是0，上面CurrentStateInfo就是当前的动画状态，`CurrentStateInfo.shortNameHash` 就是当前动画状态的短名字的Hash值，短名字的意思就是你的动画控制器那边显示的名字是Run则就是Run，前面没有默认的图层名字。
-
-### 标签
-
-动画控制器的标签也是一个有用的字段方便进行一些动画控制上状态的逻辑管理。
 
 
 
@@ -247,7 +219,7 @@ Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
 
 我们看到角色控制器下面有三个参数：center控制胶囊碰撞体的中心位置，半径控制胶囊碰撞体的宽度，height控制胶囊碰撞体的高度。大体可以猜到角色控制器就是通过这个胶囊碰撞体来和环境交互的。
 
-### isGrounded
+#### isGrounded
 
 本角色控制器组件在上一次移动中是否接触到了地面。
 
@@ -261,7 +233,10 @@ public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance 
 
 从origin向这direction方向发射一个射线，如果射线和某个碰撞体相交则返回true，否则返回false。
 
-这个射线投射很有用，物理系统里面的很多功能都是基于这个射线投射，然后比如想要确定玩家的交互对象，视窗中心射出一个射线，和什么GameObject相交则认为该GameObject是当前玩家的选择对象。
+这个射线投射很有用，物理系统里面的很多功能都是基于这个射线投射，比如碰撞判断。此外还可以基于这个射线投射来构建出很多有用的功能：
+
+- 比如想要确定玩家当前的选择交互对象，视窗中心射出一个射线，和什么GameObject相交则认为该GameObject是当前玩家的选择对象。
+- 然后再比如射击游戏可以用射线投射来模拟射击动作，并利用RayCatHit返回对象来获取被击中物体的很多信息，从而来更好地构建射击动作。
 
 
 
@@ -410,7 +385,7 @@ public class PersistentManagersSO : GameSceneSO { }
 
 fileName是点击菜单按钮之后默认保存的文件名，menuName是在Unity Editor对应的菜单按钮位置，上面的例子是：`资源->创建->场景数据->PersistentManagers` 。
 
-### Unity协程
+## Unity协程
 
 如果读者之前接触过协程概念，对于这里的协程的理解会很快，但有一点是需要特别强调的。那就是Unity的协程更多的是一个Unity自身基于逐帧运算然后做出来的概念，和很多编程语言上的协程概念比较起来，其底层甚至可能都不依赖于线程切换。
 
@@ -453,7 +428,7 @@ StopCoroutine("CoroutineExample")
 yield return new WaitForSeconds(.1f);
 ```
 
-#### 嵌套Unity协程
+### 嵌套Unity协程
 
 参考了  [这篇文章](https://www.alanzucconi.com/2017/02/15/nested-coroutines-in-unity/) 。
 
@@ -465,7 +440,7 @@ yield return StartCoroutine(AnotherCoroutine())
 
 这种形式，父协程要等待子协程完成才会继续往下走，也就是对于父协程来说，子协程的整个执行过程是同步的。因为子协程仍然是通过 StartCoroutine启动的，其内部的执行是异步的。
 
-#### 平行Unity协程
+### 平行Unity协程
 
 ```
 IEnumerator A()
@@ -491,6 +466,65 @@ B C D这几个子协程从启动开始就执行了，说的再直白点就是正
 我们看到Unity协程解决的主要是帧动作太多的问题，通过Update等函数我们可以设计每一帧进行某个动作，然后我们发现对于很多问题并不需要每一帧都做，通过Unity协程可以解决这个问题；还有些过程可能横跨多个帧，但其内部动作可以分解为很多小动作，然后每帧再分别执行这些小动作即可，这可以通过Unity协程解决。
 
 但Unity协程不能解决某个动作就是花费时间太长，从而造成你的游戏进程阻塞这个问题，这还是需要靠多线程或异步来解决，Unity协程在这里的作用主要就是每帧来检查一下这个费时的异步动作完成了没有。
+
+
+
+## 摄像机
+
+### 多个摄像机
+
+Unity可以添加多个摄像机组件，摄像机有个参数叫做深度，这个深度值最大的摄像机将是最终显示的那个摄像机【如果两个摄像机在显示上都是全覆盖的】。
+
+### Camera.main
+
+如果你的主摄像机有标签 `MainCamera` ，则可以通过 `Camera.main` 来调用。
+
+### Camera.ScreenPointToRay
+
+定义了一个射线，从摄像机出发射向屏幕的某个坐标点。
+
+```
+public Ray ScreenPointToRay(Vector3 pos);
+```
+
+该pos的z值将忽略。
+
+### 分屏显示
+
+摄像机的Viewport矩形x和y值决定了显示的起始位置，x值是横向，y值是竖向。比如(0,0) 是最左边那里，`(0.5,0)` 是横向宽度50%竖向继续0%那里。然后w是显示的宽度，0.5就是显示宽度为整个宽度的50%。h是显示高度。
+
+调配两个摄像头的Viewport矩形参数，一个(0,0)显示宽度0.5，显示高度1；一个(0.5,0)显示宽度0.5，显示高度1就可以达到一种横向分两个屏幕显示的效果。
+
+继续调配这个Viewport矩形参数还可以做到另外一个摄像头专门在显示界面右上角来显示，一种类似小地图的功能。
+
+### viewportToWorldPoint
+
+根据摄像机视图空间的一个Vector3坐标转成游戏场景中的Vector3坐标。
+
+```
+Vector3 p = camera.ViewportToWorldPoint(new Vector3(1, 1, camera.nearClipPlane));
+```
+
+其中Vector3的x和y如果是 `(0,0)` 则是左下角，如果是 `(1,1)` 则是右上角，这个z值设置为 `camera.nearClipPlane` 是摄像机的近裁剪平面，还有一个远裁剪平面，z值也可以设置为0就是紧贴着摄像机。
+
+### cinemachine
+
+cinemachine不是要取代原Unity的摄像机组件，而是新增了一个cinemachine brain组件用于控制原Unity摄像机的位置和Aim，同时还提供了其他一些额外的功能，比如摇动效果。
+
+利用cinemachine创建一个第三人称跟踪式摄像头是很方便的，而后续更多的运镜，包括摇摄，跟摄，多个摄像头视角转换都可以很容易办到。
+
+一般使用就使用virtual camera，其他camera只是在特定应用场景下才好用，可能额外增加的一些特性限定并不适合你的应用需求。
+
+Follow控制的摄像头的跟随对象，Body控制的是摄像头跟随跟随对象的移动行为，但是要注意3rd person follow 似乎还会有额外的摄像头旋转动作。
+
+loot at控制的摄像头的瞄准对象，Aim控制的是摄像头的旋转行为，有可以根据用户行为来旋转摄像头，但只是针对的旧版本的输入控制，如果你希望自己实现根据用户的操作来旋转摄像头，最好是自己编写脚本，那么Aim填上do nothing，免得干扰。
+
+body的Framing transposer很灵活和全面，很好用，摄像头偏移，距离，damping，dead zone，soft zone等概念都是可以调整的。
+
+- dead zone cinemachine会保证那个黄点也就是关注点在dead zone之内
+- soft zone 如果黄点在dead zone则不会有动作，如果黄点在soft zone 则摄像头会开始调整，摄像头调整可块可慢，具体可根据damping这个值来设置。
+
+
 
 ## 脚本
 
@@ -950,50 +984,13 @@ agent.destination = transform.position;
 
 
 
-## cinemachine
-
-除了刚开始学习接触下摄像头简单的控制概念，后续正式项目推荐cinemachine package。
-
-利用cinemachine创建一个第三人称跟踪式摄像头是很方便的，而后续更多的运镜，包括摇摄，跟摄，多个摄像头视角转换都可以很容易办到。cinemachine并没有创建一个摄像头对象，其绑定在默认的主摄像头上，作为一个摄像头运镜工具而存在。
-
-一般使用就使用virtual camera，其他camera只是在特定应用场景下才好用，可能额外增加的一些特性限定并不适合你的应用需求。
-
-Follow控制的摄像头的跟随对象，Body控制的是摄像头跟随跟随对象的移动行为，但是要注意3rd person follow 似乎还会有额外的摄像头旋转动作。
-
-loot at控制的摄像头的瞄准对象，Aim控制的是摄像头的旋转行为，有可以根据用户行为来旋转摄像头，但只是针对的旧版本的输入控制，如果你希望自己实现根据用户的操作来旋转摄像头，最好是自己编写脚本，那么Aim填上do nothing，免得干扰。
-
-body的Framing transposer很灵活和全面，很好用，摄像头偏移，距离，damping，dead zone，soft zone等概念都是可以调整的。
-
-- dead zone cinemachine会保证那个黄点也就是关注点在dead zone之内
-- soft zone 如果黄点在dead zone则不会有动作，如果黄点在soft zone 则摄像头会开始调整，摄像头调整可块可慢，具体可根据damping这个值来设置。
 
 
 
-### 多个摄像机
-
-Unity可以添加多个摄像机组件，摄像机有个参数叫做深度，这个深度值最大的摄像机将是最终显示的那个摄像机【如果两个摄像机在显示上都是全覆盖的】。
-
-### 分屏显示
-
-摄像机的Viewport矩形x和y值决定了显示的起始位置，x值是横向，y值是竖向。比如(0,0) 是最左边那里，`(0.5,0)` 是横向宽度50%竖向继续0%那里。然后w是显示的宽度，0.5就是显示宽度为整个宽度的50%。h是显示高度。
-
-调配两个摄像头的Viewport矩形参数，一个(0,0)显示宽度0.5，显示高度1；一个(0.5,0)显示宽度0.5，显示高度1就可以达到一种横向分两个屏幕显示的效果。
-
-继续调配这个Viewport矩形参数还可以做到另外一个摄像头专门在显示界面右上角来显示，一种类似小地图的功能。
-
-### viewportToWorldPoint
-
-根据摄像机视图空间的一个Vector3坐标转成游戏场景中的Vector3坐标。
-
-```
-Vector3 p = camera.ViewportToWorldPoint(new Vector3(1, 1, camera.nearClipPlane));
-```
-
-其中Vector3的x和y如果是 `(0,0)` 则是左下角，如果是 `(1,1)` 则是右上角，这个z值设置为 `camera.nearClipPlane` 是摄像机的近裁剪平面，还有一个远裁剪平面，z值也可以设置为0就是紧贴着摄像机。
 
 
 
-## animation clip
+## 动画
 
 制作动画片段：
 
@@ -1005,7 +1002,41 @@ Vector3 p = camera.ViewportToWorldPoint(new Vector3(1, 1, camera.nearClipPlane))
 
 对于旋转动作可以将头尾两帧的双切线都改为线性。对应官方文档的 Broken-Linear模式。这样帧与帧之间是线性变化的，也就不存在那个变动斜率问题了。
 
+### Animator组件
 
+控制GameObject的动画组件，需要指定动画控制器，也就是AnimationController。
+
+Apply root motion：应用根运动。是从动画本身控制角色的移动和旋转还是从脚本。
+
+脚本那边设置这个参数是通过 `animator.applyRootMotion` 。
+
+如果脚本定义了 `OnAnimatorMove` 方法，则applyRootMotion不起作用。
+
+更新模式：
+
+- Normal 法线 Animator和Update同步更新
+- Animate Physics Animator和FixUpdate同步更新，即和物理系统步调一致
+
+剔除模式：
+
+- 总是动画化，即使在屏幕外也不剔除。
+
+#### 动画状态判断
+
+动画状态判断推荐使用 `animator.StringToHash("State")` 来获取一个int型hash值然后进行状态判断。
+
+具体比较是：
+
+```
+CurrentStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
+```
+
+默认的图层索引是0，上面CurrentStateInfo就是当前的动画状态，`CurrentStateInfo.shortNameHash` 就是当前动画状态的短名字的Hash值，短名字的意思就是你的动画控制器那边显示的名字是Run则就是Run，前面没有默认的图层名字。
+
+#### 标签
+
+动画控制器的标签也是一个有用的字段方便进行一些动画控制上状态的逻辑管理。
 
 ## particle system
 
@@ -1057,12 +1088,6 @@ Vector3 p = camera.ViewportToWorldPoint(new Vector3(1, 1, camera.nearClipPlane))
 
 
 
-## Makehuman工具
-
-Makehuman工具
-
-
-
 ## 开始菜单
 
 开始菜单就是另外一个场景地图，其是一个2d场景地图，在开发的时候视图中间偏左有个选项，激活了场景处于2d视图中。然后就是在这个场景中添加一些UI元素即构成了开始菜单。
@@ -1070,6 +1095,27 @@ Makehuman工具
 
 
 ## 多场景无缝切换
+
+
+
+## respawn玩家角色
+
+一般都是如下respawn玩家角色：
+
+```
+		player.transform.position = spawnPoint.position;
+		player.transform.rotation = spawnPoint.rotation;
+```
+
+Unity游戏开发一书就是这样写的，然而现在不可以了。 [这个视频](https://www.youtube.com/watch?v=FPU3uR3HYGo) 说了需要把项目设置的Physics的 `Auto Sync Transforms` 勾选上，一试果然就可以了。看了下Unity文档，Unity的物理系统默认没有勾选上，也就是你的transform属性硬修改Unity的物理系统是没有跟上同步的，然后Unity文档又说了这个自动勾选上开销会有一些，所以最好在需要硬修改的地方加上：
+
+```
+		player.transform.position = spawnPoint.position;
+		player.transform.rotation = spawnPoint.rotation;
+		Physics.SyncTransforms();
+```
+
+
 
 
 
@@ -1089,7 +1135,15 @@ CS0006 could not found file Assembly-CSharp.dll
 
 
 
+## 雾效
 
+在 window->渲染->照明设置那里勾选雾，则可以为你的场景打开雾效。
+
+
+
+## skybox
+
+天空盒就是在天空那个巨大盒子上应用你想要的材质。可以新建一个材质，然后这个材质在stardard着色器那里选择skybox，从而快速创建一个skybox材质，然后在 window->渲染->照明设置 那里应用该skybox材质。
 
 ## 其他
 
@@ -1129,7 +1183,18 @@ Unity术语里面长度用的是 1unit，比如velocity 用的每秒移动的uni
 
 此外FixUpdate的固定时间设定也会很好地防止物体移动速度不可捉摸的突变情况。
 
-## FMOD音效集成
+### 地形绘制纹理
+
+主要是编辑图形层那里，显示创建图层，再是添加图层。在这些图层里面利用不同的笔刷进行绘制。
+
+笔刷的不透明度是笔刷的力度。
+
+
+
+### FMOD音效集成
 
 FMOD集成音效
 
+### Makehuman工具
+
+Makehuman工具
