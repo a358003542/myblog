@@ -213,6 +213,43 @@ bool m_Attack = context.ReadValueAsButton();
 
 默认是否，如果勾选，则该碰撞器不具有物体碰撞功能而只有碰撞事件触发功能，也就是你可以穿模进去了。比如某些液体就可以勾选这个选项这样玩家既可以进入该液体同时也可以跟踪玩家进入该液体的事件。
 
+### 网格碰撞器
+
+网格碰撞器虽然对物体边界的模拟虽然更精细了，但一般都不推荐使用，因为它非常的消耗性能。我们看到即使是最常见的玩家角色，角色控制器组件也只是简单用一个胶囊碰撞器进行了碰撞模拟。
+
+### 物理材质
+
+碰撞器的那个材质属性是来设置物理材质用的，物理材质可以通过新建物理材质来创建。
+
+- dynamic friction 动态摩擦
+- static friction 静态摩擦
+- bounciness 反弹力 0不反弹，1没有动量损失
+- Friction Combine 摩擦力如何组合，取最小值，取最大值或者取平均值
+- Friction Combine 反弹力如何组合，取最小值，取最大值或者取平均值
+
+### 触发器
+
+触发器如果被满足条件的碰撞器发生碰撞则会调用下面三个方法：
+
+```
+OnTriggerEnter(Collider other)
+OnTriggerStay(Collider other)
+OnTriggerExit(Collider other)
+```
+
+#### OnTriggerEnter和OnCollisionEnter
+
+OnTriggerEnter 的触发条件是：
+
+- 两个GameObject都有碰撞器组件，其中某个GameObject的碰撞器必须勾选了`isTrigger` ，其中某个GameObject必须刚体组件。但是如果两个碰撞器都勾选了 `isTrigger` ，也不会触发。
+- 然后就是两个碰撞器发生碰撞则会触发事件。
+
+OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者刚体发生碰撞则会触发。
+
+个人编写了一个测试场景，OnTriggerEnter的触发情况确实如上所述，还必须要求某个GameObject有刚体组件。
+
+但是我碰到了这样一种情况，那就是基于Unity Standard Assets的FPSController和另外一个单纯的平面trigger进行交互，两个都没有刚体也出发了OnTriggerEnter方法，**经过个人试探 Unity2019.4.19f1c1这边的情况是Chatacter Controller和随便一个trigger发生碰撞就会触发OnTriggerEnter方法，并没有刚体的要求**。
+
 ### Character Controller组件
 
 一般第一人称或第三人称角色控制玩家会需要更灵活地控制角色，这种情况下玩家角色如果加入物理系统的刚体会有一种操作上的不顺畅感，但此时仍然希望保留碰撞的物理效果，可以加入Character Controller组件来实现这点。
@@ -225,7 +262,7 @@ bool m_Attack = context.ReadValueAsButton();
 
 
 
-### 射线投射
+### RayCast方法
 
 ```
 public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance = Mathf.Infinity, int layerMask = DefaultRaycastLayers, QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.UseGlobal);
@@ -237,6 +274,8 @@ public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance 
 
 - 比如想要确定玩家当前的选择交互对象，视窗中心射出一个射线，和什么GameObject相交则认为该GameObject是当前玩家的选择对象。
 - 然后再比如射击游戏可以用射线投射来模拟射击动作，并利用RayCatHit返回对象来获取被击中物体的很多信息，从而来更好地构建射击动作。
+
+RayCast参数还有好几种形式，这个就参看官方文档了，不在这里赘述了。
 
 
 
@@ -301,6 +340,24 @@ int layerMask = ~(1<<8);
 ```
 LayerMask.GetMask("UserLayerA", "UserLayerB");
 ```
+
+
+
+### 刚体
+
+####  isKinematic
+
+是否是运动学刚体，如果勾选了，则力，碰撞和joint将不再影响刚体，刚体的移动仅仅动画或者脚本【transform.position】来控制。
+
+#### Continuous Collision Detection
+
+防止碰撞器快速移动穿过彼此，可以将碰撞属性检测设置为连续或者连续动态。
+
+设置为连续可以防止刚体穿过任何静态碰撞器。
+
+设置为连续动态可以防止刚体穿过任何支持刚体碰撞检测的物体。
+
+
 
 ## 序列化
 
@@ -580,6 +637,8 @@ lightTransorm = directLight.GetComponent<Transform>();
 Debug.Log(lightTransorm.localPosition);
 ```
 
+**WARNING：** Find方法是场景所有对象的遍历搜索动作，开销会很大，没有特别的理由不要使用Find方法，更推荐的其他GameObject引用参看下面。
+
 ##### 更推荐的做法
 
 在实践中如上使用Find方法其实并不是很好用，更推荐的做法是将你需要定位的GameObject做成你的脚本类的公有属性或者序列化属性，值得一提的是这种做法可用于定位目标GameObject，也可用于定位目标组件，目标组件在十万八千里远或者就在旁边都可以这样用。
@@ -638,14 +697,9 @@ Awake和Start在脚本组件启动时都会被调用一次，Awake先于Start，
 
 
 
-### OnTriggerEnter和OnCollisionEnter
 
-OnTriggerEnter 的触发条件是：
 
-- 两个GameObject都有碰撞器组件，其中某个GameObject的碰撞器必须勾选了`isTrigger` ，并包含刚体组件。但是如果两个碰撞器都勾选了 `isTrigger` ，也不会触发。
-- 然后就是两个碰撞器发生碰撞则会触发事件。
 
-OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者刚体发生碰撞则会触发。
 
 ### HeaderAttribute
 
@@ -671,9 +725,13 @@ OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者
 
 
 
+### Transform.TransformPoint
 
+```
+public Vector3 TransformPoint(Vector3 position);
+```
 
-
+根据某个Transform的local space偏移值Vector3 position，获得目标值的世界坐标值Vector3。
 
 
 
@@ -1146,6 +1204,14 @@ CS0006 could not found file Assembly-CSharp.dll
 天空盒就是在天空那个巨大盒子上应用你想要的材质。可以新建一个材质，然后这个材质在stardard着色器那里选择skybox，从而快速创建一个skybox材质，然后在 window->渲染->照明设置 那里应用该skybox材质。
 
 ## 其他
+
+### 查看你使用的Unity的C#版本
+
+这个其实很重要的，最好先查看清楚，免得后面因为一些版本细节问题纠结半天。目前笔者使用的是Unity2019.4，从 [这个网页](https://docs.unity3d.com/2019.4/Documentation/Manual/CSharpCompiler.html) 来看，它使用的是 .net 4.6，使用的C#版本是7.3，并不是C#8，有些差异还是需要特别注意的。
+
+
+
+### visual studio快速方法输入
 
 `Ctrl+Shift+M` 在visual studio 上调出Unity快速方法输入。
 

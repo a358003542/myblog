@@ -226,6 +226,28 @@ Coordinate point = new Coordinate(10, 20);
 
 reference type变量的默认值就是null。
 
+判断某个object是否是null以前一般的写法是：
+
+```
+if (object != null){
+
+}
+```
+
+更推荐的写法是：
+
+```
+if (object is null){
+
+}
+```
+
+如果你使用is表达式的话，编译器会确保该object的`==` 和 `!=` 运算符没有被重载。这会更严谨些吧。
+
+还有一种两个问号的写法C#8版本才有，这里就忽略讨论了。
+
+
+
 #### Tuple
 
 tuple基本使用如下：
@@ -615,7 +637,9 @@ C#的foreach可以迭代的对象除了上面演示的array之外，C#常用的C
 
 ### 异常捕捉
 
-```
+这一块因为和python那边很是类似，估计很多编程语言也差不多的，所以这里就没有太多赘述异常捕捉的一些基本知识。
+
+```c#
 try{
   // do something
 }catch (Exception ex){
@@ -624,6 +648,47 @@ try{
 
 }
 ```
+
+更精细的捕捉异常：
+
+```c#
+try
+{
+  // do something
+}
+catch (ArgumentNullException){}
+catch (IOException){}
+catch (Exception ex)
+{
+	Console.WriteLine(ex);
+}
+finally
+{
+	// always do something.
+}
+```
+
+#### 自定义异常类型
+
+下面这种写法是C#官方文档的推荐实现：
+
+```
+public class MyCustomException: Exception
+{
+	public MyCustomException(){}
+	
+	public MyCustomException(string message): base(message)
+	{
+		
+	}
+	public MyCustomException(string message, Exception inner): base(message, inner)
+	{
+		
+	}
+}
+```
+
+
 
 
 
@@ -1615,7 +1680,7 @@ string fruit = "mango";
 bool hasMango = fruits.Contains(fruit);
 ```
 
-
+## 文件读写
 
 
 
@@ -1624,6 +1689,20 @@ bool hasMango = fruits.Contains(fruit);
 C#项目在visual studio上很方便创建一个对应的单元测试项目，在目标public函数上右键创建一个单元测试即可。
 
 
+
+## 多线程和异步
+
+这块Unity那边有相应的支持，遇到需求了再说。
+
+
+
+## 正则表达式
+
+这块后面有需求遇到了再补上。
+
+## Relection和Dynamic Programming
+
+粗略看了下，估计一般用不上吧。
 
 ## 其他
 
@@ -1694,7 +1773,7 @@ Array/foreach: 1860ms (589725196)
             #endregion
 ```
 
-如上所示，就是为了提高代码可读性，代码该执行会执行的。
+如上所示，就是为了提高代码可读性，这块代码可以折叠，代码该执行还是会执行的。
 
 
 
@@ -1709,7 +1788,7 @@ Array/foreach: 1860ms (589725196)
 
 从上面的描述来看，建议使用struct的情况非常非常的少，日常使用几乎绝大部分情况应该都是推荐使用class。
 
-### 正则表达式
+
 
 
 
