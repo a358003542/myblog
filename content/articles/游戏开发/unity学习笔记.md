@@ -75,13 +75,39 @@ Debug.LogFormat("{0} + {1} = {2}", 2,3,2+3);
 
 ### 练习题1
 
-请读者随便新建一个场景，新建一个平面，命名为ground，预制件化，然后在该平面的两角放置两个立方体，两个立方体是根据一个预制件perfab而来，然后将该立方体拖动为ground的子辈。然后将ground预制件化。然后再根据ground预制件再新建一个平面再将这两个平面对接。
+请读者随便新建一个场景，新建一个平面，然后在该平面的两角放置两个立方体，两个立方体是根据一个立方体预制件perfab而来，然后将该立方体拖动为平面的子辈。然后将平面预制件化。然后再根据该平面预制件再新建一个平面。
 
-经过试验我们可以发现，嵌套预制件也有一种继承层次在里面。比如现在假设有 boxBase，boxRight，box3这三个材质，其中boxBase作用于box perfab，boxRight作用于ground perfab的右角盒子，box3作用于场景中某个特别的盒子。
+经过试验我们可以发现，嵌套预制件也有一种继承层次在里面。
 
-以左角的盒子为例，不受ground perfab的修改影响，不受box3修改的影响，所以最终颜色是boxBase决定的。以第二个盒子为例，受boxBase修改影响，然后再受ground perfab右角修改影响，最终颜色是boxRight。而第三个盒子的颜色则就是box3材质颜色。
+比如现在假设立方体盒子的基色是橙色，那么最开始两个平面的所有盒子都是橙色材质。然后现在修改平面预制件里面的右边的盒子颜色为紫色材质。继而出来后会发现两个平面的右边的盒子都变为了紫色。
 
-简单来说嵌套Perfab有一种类似编程上的继承关系在里面，
+再继而修改场景中具体某个平面的右边的盒子材质为红色，继而我们发现只有该盒子变为了红色材质。
+
+这个显示结果是符合大家预期的，但这里更深入的是需要理解嵌套预制件的属性继承关系。
+
+以最左角的盒子为例子，它的材质属性场景中没有修改，再继而去找平面的预制件，然后平面预制件也没有修改，再继而去找立方体盒子预制件，最终该盒子的材质属性等于原立方体盒子预制件的属性。
+
+以第二个盒子为例子，它的材质场景中没有修改，平面预制件中修改为了紫色，所以该盒子的材质为紫色。
+
+简单点来说，各个GameObject中的属性查找是：场景中的修改 > 预制件中的属性修改 > 嵌套预制件中的属性。
+
+### 通过代码实例化预制件
+
+```
+Instantiate(GameObject perfab);
+```
+
+最常见的例子就是发射子弹或者射弓箭，子弹一开始没有在场景中，然后需要合适的时候再实例化子弹预制件。
+
+该函数还可以接受几个可选参数，用来控制新生成实例的位置，转向和parent属性：
+
+```
+public static Object Instantiate(Object original, Vector3 position, Quaternion rotation, Transform parent);
+```
+
+
+
+
 
 ### 如何将某个摄像头调到当前视角
 
@@ -451,6 +477,8 @@ C#语言那边有异步编程，其使用的async func 和await之类的和pytho
 具体Unity协程的编写如下：
 
 ```c#
+using System.Collections;
+
 IEnumerator CoroutineExample(int a){
     // do something 
     yield return null;
@@ -832,9 +860,9 @@ private IEnumerator LoadingProcess()
 
 如果大体每一帧都会检测一次加载是否Succeeded。
 
+### build发布前记得运行下build
 
-
-
+你的项目build独立运行记得将在那个窗口的build子菜单那里点击new build一个资源。
 
 ## 四元数和欧拉角度
 
@@ -880,90 +908,167 @@ transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
 
 C#那边已经有成熟的事件驱动编程解决方案了，拿过来用就是了。因为Unity那边又新增了UnityAction之类的语法糖，但从 [这篇文章](https://www.jacksondunstan.com/articles/3335) 来看，其效率反而不如C#自带的事件驱动解决方案，除非在某些Unity Editor定制人物上，才一定要使用UnityAction之类的，那个时候再使用。
 
-在C#那边我们已经有了EventChannel的概念，现在要做的就是进一步将EventChannel做成ScriptedObject，这样一避免了数据冗余，另外可以很方便实现单例事件通道。
+**更新：** ScriptableObject最好只是作为数据文件存在，否则在Build那边会有一些问题，之前C#那边已经讨论过事件驱动编程了，下面将这些讨论粘贴过来，在Unity那边同样也是可以用的。
 
-大体操作步骤如下：
+### 事件驱动编程
 
-1. 定义事件通道
+事件驱动编程模式或者说委托代理模式，其将构建一个事件通道作为第三中间人，事件发送方只负责告诉该第三人事件发生了，事件发送方并不关心这个第三人等下要将这些事件通知给谁。而事件接收方也不知道事件发送方是谁，它只管听第三人也就是事件通道的，事件通道说事件触发了，然后事件接收方再决定做某些事情。
+
+此外编程上还有一个观察模式，观察模式的事件发送方和事件接受方彼此是知道的，事件发生了事件发送方会直接通知各个事件接收方事件发生了。参考了 [这篇文章](https://hackernoon.com/observer-vs-pub-sub-pattern-50d3b27f838c) 。
+
+按照上面的说法，我们最好是构建出一个EventChannel类，由这个EventChannel来负责触发事件，由这个EventChannel负责传递函数参数和通知事件接收方事件发生了。
+
+在实践中的一个编码规范是参数最好把事件的发送人和发送的参数作为两个参数。大概如下：
+
+```
+public delegate void EventHandler<TEventArgs>(object? sender, TEventArgs e);
+```
+
+是的，C#就定义了这个EventHandler委托，于是利用这个EventHandler我们就可以如下定义事件了：
+
+```
+public event EventHandler<SomeEventArgs> someEvent;
+```
+
+下面是定义该事件的参数传递规范：
 
 ```c#
-using System;
-using UnityEngine;
-using UnityEngine.Events;
-
-
-public class EventChannelBaseSO<T> : ScriptableObject
-{
-	[TextArea] public string description;
-
-    public event EventHandler<T> Event;
-
-    public void RaiseEvent(object sender, T args)
+    public class SomeEventArgs : EventArgs
     {
-        Event?.Invoke(sender, args);
+        public int x { get; private set; }
+        public int y { get; private set; }
+
+        public SomeEventArgs(int x, int y){
+            this.x = x;
+            this.y = y;
+        }
+    }
+```
+
+下面定义了一个事件通道基类：
+
+```c#
+    public enum Status { Started, Stopped };
+
+    public class BaseEventChannel<T>
+    {
+        public event EventHandler<T> Event;
+
+        public void RaiseEvent(object sender, T args)
+        {
+            Event?.Invoke(sender, args);
+        }
+
+        public void AddHandler(EventHandler<T> handler)
+        {
+            Event += handler;
+        }
+        public void RemoveHandler(EventHandler<T> handler)
+        {
+            Event -= handler;
+        }
+    }
+```
+
+```c#
+public class SomeEventArgs : EventArgs
+    {
+        public Status status { get; private set; }
+
+        public SomeEventArgs(Status status)
+        {
+            this.status = status;
+        }
+    }
+    public class SomeEventChannel : BaseEventChannel<SomeEventArgs>
+    {
     }
 
-    public void AddHandler(EventHandler<T> handler)
+    class Engine
     {
-        Event += handler;
+        public SomeEventChannel someEventChannel = new SomeEventChannel();
+
+        protected virtual void OnSomeEvent(SomeEventArgs args)
+        {
+            someEventChannel.RaiseEvent(this, args);
+        }
+
+        public void Start()
+        {
+            OnSomeEvent(new SomeEventArgs(Status.Started));
+        }
+
+        public void Stop()
+        {
+            OnSomeEvent(new SomeEventArgs(Status.Stopped));
+        }
+
     }
-    public void RemoveHandler(EventHandler<T> handler)
+```
+
+具体调用程序大体如下：
+
+```c#
+ class Program
     {
-        Event -= handler;
+
+        static void Main(string[] args)
+        {
+            Engine engine = new Engine();
+            engine.someEventChannel.AddHandler(OnEngineStatusChanged);
+            engine.someEventChannel.AddHandler(OnEngineStatusChanged2);
+
+            engine.Start();
+            engine.Stop();
+
+            engine.someEventChannel.RemoveHandler(OnEngineStatusChanged2);
+            engine.Start();
+            engine.Stop();
+        }
+
+        private static void OnEngineStatusChanged(object sender, SomeEventArgs args)
+        {
+            Console.WriteLine($"{sender} is now {args.status}");
+        }
+
+        private static void OnEngineStatusChanged2(object sender, SomeEventArgs args)
+        {
+            Console.WriteLine($"Report2: {sender} is now {args.status}");
+        }
+
     }
-}
-
-
-public class LoadEventArgs : EventArgs
-{
-	public GameSceneSO sceneToLoad { get; private set; }
-
-	public LoadEventArgs(GameSceneSO sceneToLoad)
-	{
-		this.sceneToLoad = sceneToLoad;
-	}
-}
-
-[CreateAssetMenu(menuName = "Events/Load Event Channel")]
-public class LoadEventChannelSO : EventChannelBaseSO<LoadEventArgs>
-{
-}
 ```
 
-2. 生成事件通道的ScriptableObject文件
+就上面这个程序小片段没这个问题，但对于稍大点的应用程序，则需要保证某一特定事件通道的唯一性。有以下做法，并没有那种优于那种一说：
 
-3. 一般在设计上会增加一个常驻场景，该常驻场景是最先加载的场景，然后该场景对某些事件进行了如下绑定，这些事件一般是最基本的事件，比如场景切换事件等。
+- 一是靠程序员自我编码规范，比如事件和组件是特有的绑定关系，这样你在编码的时候就会很少犯错，因为你总是在想这个组件实体触发了什么事件，自然会做好组件实体的唯一性和对目标事件的引用。
+- 让事件通道成为全局变量从而全局唯一。
+- 从事件通道的编码上实现单例模式
+- 将你的事件通道和外部的数据文件等建立某种唯一关系等。
 
-   
+### 单例模式示例
+
+本小节单例模式实现主要参考了 [这个网页](https://csharpindepth.com/articles/singleton) 。
 
 ```c#
-[SerializeField] private LoadEventChannelSO _menuLoadChannel = default;
+    public sealed class SomeEventChannel : BaseEventChannel<SomeEventArgs>
+    {
+        private static readonly SomeEventChannel instance = new SomeEventChannel();
+        static SomeEventChannel() { } // Make sure it's truly lazy
+        private SomeEventChannel() { } // Prevent instantiation outside
 
-private void OnEnable()
-{
-_menuLoadChannel.AddHandler(LoadMenu);
-}
+        public static SomeEventChannel Instance { get { return instance; } }
 
-
-private void OnDisable()
-{
-_menuLoadChannel.RemoveHandler(LoadMenu);
-}
+    }
 ```
 
-4. 其他地方引用该事件通道都是如下形式：
+具体在引用的时候要如下这样使用了：
 
-```c#
-[SerializeField] private LoadEventChannelSO _menuLoadChannel = default;
+```
+        public SomeEventChannel someEventChannel = SomeEventChannel.Instance;
 ```
 
-然后指定事件通道都是那一个asset文件，则可以保证事件通道的唯一性或者说单例性。
 
-5. 其他地方想调用事件如下：
-
-```c#
-_menuLoadChannel.RaiseEvent(this, new LoadEventArgs(_menuToLoad));
-```
 
 ### UnityAction
 
@@ -971,15 +1076,27 @@ UnityAction带来的便利就是Unity Editor那边是支持显示一个按钮方
 
 
 
-
-
-
-
 ## UI
+
+### Canvas
+
+Unity的UI是基于画布Canvas构建的，其他UI元素都需要在Canvas之上，或者说所有的UI元素都需要是Canvas的子对象。
+
+Unity的UI可以有多个Canvas画布，出于性能上的考虑推荐总是变化的UI元素放在一个单独的画布上，因为画布的某部分发生了变化会重新绘制全部内容。
+
+#### 画布渲染模式
+
+- Screen Space-Overlay 【屏幕空间-覆盖】默认的渲染模式，在场景中的UI对象位置和具体的UI显示没有关系。Unity内置的图层UI，一般UI元素都放在这一层，在场景中选择隐藏UI图层也是没有问题的【运行游戏时仍然会在】。
+- Screen Space-Camera 【屏幕空间-摄像机】这种模式使用摄像机来渲染UI。一般这种情况最好专门再添加一个摄像机专门用来渲染画布。
+- World Space 【世界空间】这种情况下画布是作为场景中一个游戏对象和其他游戏对象没有区别地混在一起的。比如游戏角色头顶上的问号。
+
+### sprite文件
 
 UI里面有些地方用的是sprite文件对象，如果你直接导入png图片的话会发现没有对应的选项，需要将导入的png图片的属性那里更改为sprite才可以。
 
 一般来说游戏的UI会放在你的常驻场景里面，和你的其他游戏管理逻辑放在一起，而不是某单个level场景里面。
+
+
 
 
 
@@ -1050,6 +1167,8 @@ agent.destination = transform.position;
 
 ## 动画
 
+### 新建动画
+
 制作动画片段：
 
 1. 新建一个Animations文件夹等下放动画片段资源
@@ -1059,6 +1178,15 @@ agent.destination = transform.position;
 动画的开头和结尾常常有卡顿现象，哪怕你设置的旋转动作是0度到360度数值上是无缝对接的，仍然会有卡顿现象，你可以在曲线那里看到数值的变动是有一个切线变化率的，每一个帧都有两个切线，左切线是进入，右切线是离开，从头帧到结尾帧要想不卡顿，左右两个切线斜率必须是相同的，也就是co-linear的。
 
 对于旋转动作可以将头尾两帧的双切线都改为线性。对应官方文档的 Broken-Linear模式。这样帧与帧之间是线性变化的，也就不存在那个变动斜率问题了。
+
+### 导入模型动画时的可选配置
+
+- Loop Time 循环时间：动画是否循环播放
+- Root Transform Rotation 根变换旋转  Bake into pose 烘焙成动作 。下面三个根变换相关的选项都是在说你是否希望动画会实际影响模型的这些属性，比如这里就是你是否希望动画会影响模型的旋转属性，如果勾选了烘焙成动作，则动画不会影响角色的根旋转。比如说直走，则动画导入勾选这个选项。
+- Root Transform Position (Y) - 烘焙成动作。动画剪辑不会影响游戏对象的高度。大部分游戏动画剪辑都会启动此设置，只有跳跃才应该将此设置关闭，不过跳跃动画有的也只是一种原地跳姿态，然后再实际动画中用脚本去移动游戏对象。
+- Root Transform Position (XZ) - 烘焙成动作。一般角色的IDLE状态会希望启用此选项。
+
+我看到有的推荐将这三个选项都勾选上，也就是动画剪辑完全不会影响游戏对象的根运动，游戏对象的移动旋转都由脚本控制。
 
 ### Animator组件
 
@@ -1095,14 +1223,6 @@ Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
 #### 标签
 
 动画控制器的标签也是一个有用的字段方便进行一些动画控制上状态的逻辑管理。
-
-## particle system
-
-制作粒子系统：
-
-1. 右键在世界大纲视图下新建->效果->粒子系统
-2. 将粒子系统和你想要有该粒子系统效果的物体组件XYZ值设为一样
-3. 调配你的粒子系统的各个属性
 
 
 
@@ -1143,6 +1263,53 @@ Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
 以新建一个路灯为例子，路灯有杆子和上面的立方体，给上面的立方体一个灯光组件就有了一个类似路灯的效果。
 
 最后要提醒一点的是灯光只是让这个对象在发光，要让这个对象看起来在发光还需要给这个对象添加对应的发光材质。
+
+
+
+## 粒子系统
+
+粒子系统可以制作出很多种效果，比如爆炸，火焰，烟雾，烟花，施法效果等。粒子系统就是空间中的一个点，从这个点出发发射一些粒子对象，从而制造出一些视觉效果。
+
+### 新建一个粒子系统
+
+新建一个粒子系统，右键在世界大纲视图下新建->效果->粒子系统。你也可以将粒子系统作为某个对象的组件添加进去。
+
+从粒子系统属性面板可以看到很多属性调配参数，这些更规范的叫法叫做模块，默认启用的模块有默认模块和发射模块和形状模块。除了默认模块其他模块都是可选可启用也可停用的。这么多模块和参数，慢慢熟悉吧。
+
+### 默认模块
+
+显然至少默认模块的一些参数要先熟悉清楚。
+
+- Duration 持续时间 粒子系统的运行时间
+- Looping 是否循环播放
+- Prewarm 预热 粒子系统从上次的循环中开始播放
+- Start Delay 启动延迟 发射粒子之前等待的时间，不能和预热共存。
+- Start Lifetime 每个粒子的存活时间，单位是秒
+- Start Speed 粒子的初始速度
+- Start Size 粒子的初始大小
+- Start Rotation 粒子的初始旋转角度
+- 翻转旋转 某些粒子向反方向旋转
+- Start Color 粒子的起始颜色
+- 重力修改器 应用于粒子的重力修改器
+- 模拟空间 指定坐标是本地局部坐标系还是世界坐标系
+- 模拟速度 微调粒子系统的播放速度
+- 时间差 粒子系统的时间是基于缩放时间还是非缩放时间
+- 缩放模式 缩放是基于游戏对象的父对象还是发射器的形状
+- 唤醒时播放 创建粒子系统时就开始辐射粒子
+- 发射器速度 速度的计算是基于对象的变换还是它的刚体
+- 最大粒子 粒子可以存在的最大数目，如果达到最大数目，粒子系统将暂停新粒子生成。
+- 自动随机种子 每次播放粒子系统选择不同的随机种子
+- 停止行动 选择粒子系统停止播放时执行什么动作
+
+### 发射模块
+
+- Rate over time 随单位时间产生的粒子数，即每秒发射的粒子数目
+- Rate over distance 每Unit单位发射的粒子数目
+- bursts 爆发，突变。在某个特定时间内突然发射额外的粒子
+
+### 形状模块
+
+这个确定的是发射器，或者说发射的粒子们组成的形状。
 
 
 
@@ -1209,7 +1376,7 @@ CS0006 could not found file Assembly-CSharp.dll
 
 这个其实很重要的，最好先查看清楚，免得后面因为一些版本细节问题纠结半天。目前笔者使用的是Unity2019.4，从 [这个网页](https://docs.unity3d.com/2019.4/Documentation/Manual/CSharpCompiler.html) 来看，它使用的是 .net 4.6，使用的C#版本是7.3，并不是C#8，有些差异还是需要特别注意的。
 
-
+之前的一个问题解释清楚了，我这边使用的是.net framework4.6，并没有 `System.HashCode` 这个方法。
 
 ### visual studio快速方法输入
 
@@ -1234,10 +1401,6 @@ Unity术语里面长度用的是 1unit，比如velocity 用的每秒移动的uni
 
 
 ## 备用
-
-### Unity环境和.net core略有不同
-
-不能使用 System.HashCode ？说明Unity虽然基于C#，但底层可能不是基于.net core，在某些地方上是有所差异的。
 
 ### 移动控制
 
