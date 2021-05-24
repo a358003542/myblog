@@ -1664,6 +1664,63 @@ public class SomeEventArgs : EventArgs
         public SomeEventChannel someEventChannel = SomeEventChannel.Instance;
 ```
 
+### 和组件绑定的事件
+
+在实践中有一种情况，那就是事件是和某一个组件是绑定的一对一关系，那么自然这个事件就是单例的。而这个事件作为某个组件的属性在单例的处理上就会稍微简单一点，这个组件事件也没必要发送sender这个参数了，因为事件发起人肯定是本组件this。出于代码简洁的考虑，可以引入组件事件的概念：
+
+```
+namespace System
+{
+    public delegate void VoidComponentEventHandler();
+    public delegate void ComponentEventHandler<TEventArgs>(TEventArgs e);
+}
+
+public class ComponentEventBase<T>
+{
+    public event ComponentEventHandler<T> Event;
+
+    public void RaiseEvent(T args)
+    {
+        Event?.Invoke(args);
+    }
+
+    public void AddHandler(ComponentEventHandler<T> handler)
+    {
+        Event += handler;
+    }
+    public void RemoveHandler(ComponentEventHandler<T> handler)
+    {
+        Event -= handler;
+    }
+}
+
+
+public class VoidComponentEvent
+{
+    public event VoidComponentEventHandler Event;
+
+    public void RaiseEvent()
+    {
+        Event?.Invoke();
+    }
+
+    public void AddHandler(VoidComponentEventHandler handler)
+    {
+        Event += handler;
+    }
+    public void RemoveHandler(VoidComponentEventHandler handler)
+    {
+        Event -= handler;
+    }
+}
+
+```
+
+```
+public VoidComponentEvent myEvent1 = new VoidComponentEvent();
+public VoidComponentEvent myEvent2 = new VoidComponentEvent();
+```
+
 
 
 ## LINQ
@@ -1790,9 +1847,17 @@ Array/foreach: 1860ms (589725196)
 
 
 
+### partial class
 
+类的定义分散在两个或更多的源码文件里面，程序编译时这些部分代码会合并起来。
 
+### as运算符
 
+```
+E as T
+```
+
+执行E表达式，然后将结果转成类型T，此过程不会抛出异常，如果转换失败则会返回null。
 
 ## 参考资料
 

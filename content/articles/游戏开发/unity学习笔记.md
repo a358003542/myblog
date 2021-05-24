@@ -412,8 +412,19 @@ Unity会对以下属性进行序列化：
 
 unity能够序列化的属性：
 
-- 自定义的non abstract class有[SerializeField] 属性标注
-- 自定义的结构有[SerializeField] 属性标注
+- 自定义的非抽象类有[Serializable] 标注，比如：
+
+```c#
+[Serializable]
+class Trouble
+{
+   public Trouble t1;
+   public Trouble t2;
+   public Trouble t3;
+}
+```
+
+- 自定义的结构有[Serializable] 标注
 - 由UntiyEngine.Object衍生出来的类
 - C#的基本数据类型（int, float, double, bool, string etc.）
 - 可以序列化对象组成的array
@@ -467,6 +478,19 @@ public class PersistentManagersSO : GameSceneSO { }
 ```
 
 fileName是点击菜单按钮之后默认保存的文件名，menuName是在Unity Editor对应的菜单按钮位置，上面的例子是：`资源->创建->场景数据->PersistentManagers` 。
+
+
+
+### NonSerialized
+
+有的时候某些public属性你不需要系列化则可以加上修饰头 `[NonSerialized]` 。
+
+```
+    [NonSerialized]
+    public int p = 5;
+```
+
+
 
 ## Unity协程
 
@@ -924,7 +948,7 @@ C#那边已经有成熟的事件驱动编程解决方案了，拿过来用就是
 public delegate void EventHandler<TEventArgs>(object? sender, TEventArgs e);
 ```
 
-是的，C#就定义了这个EventHandler委托，于是利用这个EventHandler我们就可以如下定义事件了：
+是的，C#就已经定义了这个EventHandler委托，于是利用这个EventHandler我们就可以如下定义事件了：
 
 ```
 public event EventHandler<SomeEventArgs> someEvent;
@@ -1068,11 +1092,80 @@ public class SomeEventArgs : EventArgs
         public SomeEventChannel someEventChannel = SomeEventChannel.Instance;
 ```
 
+### 和组件绑定的事件
+
+在实践中有一种情况，那就是事件是和某一个组件是绑定的一对一关系，那么自然这个事件就是单例的。而这个事件作为某个组件的属性在单例的处理上就会稍微简单一点，这个组件事件也没必要发送sender这个参数了，因为事件发起人肯定是本组件this。出于代码简洁的考虑，可以引入组件事件的概念：
+
+```
+namespace System
+{
+    public delegate void VoidComponentEventHandler();
+    public delegate void ComponentEventHandler<TEventArgs>(TEventArgs e);
+}
+
+public class ComponentEventBase<T>
+{
+    public event ComponentEventHandler<T> Event;
+
+    public void RaiseEvent(T args)
+    {
+        Event?.Invoke(args);
+    }
+
+    public void AddHandler(ComponentEventHandler<T> handler)
+    {
+        Event += handler;
+    }
+    public void RemoveHandler(ComponentEventHandler<T> handler)
+    {
+        Event -= handler;
+    }
+}
+
+
+public class VoidComponentEvent
+{
+    public event VoidComponentEventHandler Event;
+
+    public void RaiseEvent()
+    {
+        Event?.Invoke();
+    }
+
+    public void AddHandler(VoidComponentEventHandler handler)
+    {
+        Event += handler;
+    }
+    public void RemoveHandler(VoidComponentEventHandler handler)
+    {
+        Event -= handler;
+    }
+}
+
+```
+
+```
+public VoidComponentEvent myEvent1 = new VoidComponentEvent();
+public VoidComponentEvent myEvent2 = new VoidComponentEvent();
+```
+
 
 
 ### UnityAction
 
 UnityAction带来的便利就是Unity Editor那边是支持显示一个按钮方便手工触发该事件的，除此之外UnityAction就是一个有着特定名字的C#委托，并没有什么特殊的。
+
+### UnityEvent
+
+UnityEvent如上的讨论，在效率上反而不如C#原生的事件，但你给你的组件脚本上随便如下添加：
+
+```
+UnityEvent OnSomeEvent;
+```
+
+那么在Unity Editor那里就会多出一个`OnSomeEvent` 选单，这个选单你可以随意添加很多行为，其他脚本的其他方法都可以随意拖动过来，UnityEvent带来的就是这个好处。一般来说熟悉C#编程的Unity开发人员在这种程序行为定义的地方是不推荐采用拖动的方式的，还是直接用代码编写吧。
+
+具体这块应用场景主要对应上面和组件绑定的事件的讨论，个人对于代码并没有太极端的微优化喜好，所以在这种和组件绑定的事件应用场景下，简单使用UnityEvent也是可以的，更多情况请参见官方手册。
 
 
 
