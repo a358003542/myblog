@@ -191,7 +191,7 @@ new unity input system 更多地多设备输入兼容。文档在 [这里]([Inst
 
 上面Started最先触发，然后再触发Performed。如果你的context设置了SlowTapInteraction也就是一定时间的按键判断等，这块后面再详细了解。
 
-**NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会出发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
+**NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会触发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
 
 #### 读取值
 
@@ -209,7 +209,7 @@ Vector2 m_Movement = context.ReadValue<Vector2>();
 bool m_Attack = context.ReadValueAsButton();
 ```
 
-按照传统的方法这些都应该在Update方法里面写上的，现在在对应的OnMove之类的方法写上然后各个键值每帧都会更新的，也就是相当于Update上执行了这些命令。
+按照传统输入系统的方法读取值会在Update方法那边编写，现在在回调方法上对应地如上写上读取值之后，就类似传统输入在Update方法那里获取到目标值了，然后后面的都是类似的了。
 
 
 
@@ -425,7 +425,7 @@ class Trouble
 ```
 
 - 自定义的结构有[Serializable] 标注
-- 由UntiyEngine.Object衍生出来的类
+- 由UntiyEngine.Object衍生出来的类【所以ScriptableOjbect是可以序列化的】
 - C#的基本数据类型（int, float, double, bool, string etc.）
 - 可以序列化对象组成的array
 - `List<T>`  T是可序列化的类型。
@@ -473,11 +473,17 @@ ScriptableOjbect的唯一性是根据你创建的asset文件唯一性来的，�
 #### 创建一个ScriptableObject对象
 
 ```
-[CreateAssetMenu(fileName = "PersistentManagers", menuName = "Scene Data/PersistentManagers")]
-public class PersistentManagersSO : GameSceneSO { }
+[CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/SpawnManagerScriptableObject", order = 1)]
+public class SpawnManagerScriptableObject : ScriptableObject
+{
+    public string prefabName;
+
+    public int numberOfPrefabsToCreate;
+    public Vector3[] spawnPoints;
+}
 ```
 
-fileName是点击菜单按钮之后默认保存的文件名，menuName是在Unity Editor对应的菜单按钮位置，上面的例子是：`资源->创建->场景数据->PersistentManagers` 。
+fileName是点击菜单按钮之后默认保存的文件名，menuName是在Unity Editor对应的菜单按钮位置。
 
 
 
@@ -689,7 +695,9 @@ lightTransorm = directLight.GetComponent<Transform>();
 Debug.Log(lightTransorm.localPosition);
 ```
 
-**WARNING：** Find方法是场景所有对象的遍历搜索动作，开销会很大，没有特别的理由不要使用Find方法，更推荐的其他GameObject引用参看下面。
+**WARNING：** Find方法是对所有已经加载的场景中激活的所有对象的遍历搜索动作，开销会很大，没有特别的理由不要使用Find方法，更推荐的其他GameObject引用参看下面。
+
+
 
 ##### 更推荐的做法
 
@@ -718,6 +726,39 @@ foreach (Transform child in parent){
 ```
 
 然后有 `transform.parent` 来返回本transform的父节点transform对象。更多的方法请参看 Transform 类。
+
+#### FindWithTag方法
+
+正如上面的讨论，但在某些情况下你确实需要使用Find来查找，那么推荐你使用 `FindWithTag` 方法，然后你想要查找的目标GameObject上添加一个专门的标签，这样效率会高很多。
+
+#### SendMessage方法
+
+非常有用的一个方法，请注意看官方文档下面的这个例子，两个class是作为同一GameObject的两个脚本组件挂在上面的，确切来说本GameObject上所有MonoBehaviour也就是脚本组件都会被通知到，如果脚本组件有目标方法，则会执行该方法。
+
+```
+using UnityEngine;
+
+public class Example : MonoBehaviour
+{
+    void Start()
+    {
+        // Calls the function ApplyDamage with a value of 5
+        // Every script attached to the game object
+        // that has an ApplyDamage function will be called.
+        gameObject.SendMessage("ApplyDamage", 5.0);
+    }
+}
+
+public class Example2 : MonoBehaviour
+{
+    public void ApplyDamage(float damage)
+    {
+        print(damage);
+    }
+}
+```
+
+
 
 ### 常驻GameObject
 
@@ -1151,10 +1192,6 @@ public VoidComponentEvent myEvent2 = new VoidComponentEvent();
 
 
 
-### UnityAction
-
-UnityAction带来的便利就是Unity Editor那边是支持显示一个按钮方便手工触发该事件的，除此之外UnityAction就是一个有着特定名字的C#委托，并没有什么特殊的。
-
 ### UnityEvent
 
 UnityEvent如上的讨论，在效率上反而不如C#原生的事件，但你给你的组件脚本上随便如下添加：
@@ -1166,6 +1203,16 @@ UnityEvent OnSomeEvent;
 那么在Unity Editor那里就会多出一个`OnSomeEvent` 选单，这个选单你可以随意添加很多行为，其他脚本的其他方法都可以随意拖动过来，UnityEvent带来的就是这个好处。一般来说熟悉C#编程的Unity开发人员在这种程序行为定义的地方是不推荐采用拖动的方式的，还是直接用代码编写吧。
 
 具体这块应用场景主要对应上面和组件绑定的事件的讨论，个人对于代码并没有太极端的微优化喜好，所以在这种和组件绑定的事件应用场景下，简单使用UnityEvent也是可以的，更多情况请参见官方手册。
+
+### UnityAction
+
+UnityAction带来的便利就是Unity Editor那边是支持显示一个按钮方便手工触发该事件的，除此之外UnityAction就是一个有着特定名字的C#委托，并没有什么特殊的。
+
+UnityEvent相比较原生C#事件确实有点性能方面的问题，但UnityAction则仅仅只是一个语法糖而已，有的地方觉得好用还是可以用的。
+
+它提供了不接受参数，接受一个参数，到接受四个参数的函数委托模型。
+
+
 
 
 
@@ -1463,6 +1510,19 @@ CS0006 could not found file Assembly-CSharp.dll
 
 天空盒就是在天空那个巨大盒子上应用你想要的材质。可以新建一个材质，然后这个材质在stardard着色器那里选择skybox，从而快速创建一个skybox材质，然后在 window->渲染->照明设置 那里应用该skybox材质。
 
+## 日志
+
+早期调试Debug.Log基本上只是一个打印信息功能，但后面随着项目完善Debug日志就要开始慢慢规范了，也需要考虑下面方法来显示不同信息：
+
+```
+Debug.LogError
+Debug.LogWarning
+```
+
+在终端可见的这些日志信息对于正式游戏运行版本也是有的，还有游戏调试版本也会显示这些日志信息，具体日志文件在那里请参阅  [官方文档的这里](https://docs.unity3d.com/Manual/LogFiles.html) 。
+
+Windows下玩家的日志在：`%USERPROFILE%\AppData\LocalLow\CompanyName\ProductName\Player.log` 。
+
 ## 其他
 
 ### 查看你使用的Unity的C#版本
@@ -1491,7 +1551,15 @@ public class PlayerScript : MonoBehaviour
 
 Unity术语里面长度用的是 1unit，比如velocity 用的每秒移动的unit。比如1unit等于多少并没有一个准数的，要看你自己那边的建模规范。
 
+### 平台相关编译代码
 
+```
+#if UNITY_EDITOR
+
+#endif
+```
+
+这段宏定义了中间的一些代码调用Unity Editor的脚本，也就是依赖Unity Editor环境的。
 
 ## 备用
 

@@ -1282,6 +1282,19 @@ namespace ConsoleApp1
 
 此外还有Insert方法，RemoveAt和Remove方法等。
 
+此外这种集合类型初始化语法了解下：
+
+```c#
+ new List<string>(){
+                    "New York",
+                    "London",
+                    "Mumbai",
+                    "Chicago"                    
+                };
+```
+
+
+
 - `.Count` 返回List的元素数
 - Clear 清空
 - Contains
