@@ -274,7 +274,7 @@ OnCollisionEnter的触发条件较为宽松，两个GameObject的碰撞器或者
 
 个人编写了一个测试场景，OnTriggerEnter的触发情况确实如上所述，还必须要求某个GameObject有刚体组件。
 
-但是我碰到了这样一种情况，那就是基于Unity Standard Assets的FPSController和另外一个单纯的平面trigger进行交互，两个都没有刚体也出发了OnTriggerEnter方法，**经过个人试探 Unity2019.4.19f1c1这边的情况是Chatacter Controller和随便一个trigger发生碰撞就会触发OnTriggerEnter方法，并没有刚体的要求**。
+但是我碰到了这样一种情况，那就是基于Unity Standard Assets的FPSController和另外一个单纯的平面trigger进行交互，两个都没有刚体也触发了OnTriggerEnter方法，**经过个人试探 Unity2019.4.19f1c1这边的情况是Chatacter Controller和随便一个trigger发生碰撞就会触发OnTriggerEnter方法，并没有刚体的要求**。
 
 ### Character Controller组件
 
@@ -543,6 +543,10 @@ StopCoroutine("CoroutineExample")
 yield return new WaitForSeconds(.1f);
 ```
 
+理解Unity协程的关键是理解它是一种基于Unity的按帧运算的类协程，首先协程函数通过 StartCoroutine 启动之后是完全不会阻塞程序的流程的，也就是程序继续往下面执行了。而协程那边在本帧执行到某个yield return 语句获得值之后就按照一般的协程逻辑挂在那边了。然后那个协程在下一帧又会继续执行下面的逻辑。
+
+
+
 ### 嵌套Unity协程
 
 参考了  [这篇文章](https://www.alanzucconi.com/2017/02/15/nested-coroutines-in-unity/) 。
@@ -554,6 +558,8 @@ yield return StartCoroutine(AnotherCoroutine())
 ```
 
 这种形式，父协程要等待子协程完成才会继续往下走，也就是对于父协程来说，子协程的整个执行过程是同步的。因为子协程仍然是通过 StartCoroutine启动的，其内部的执行是异步的。
+
+
 
 ### 平行Unity协程
 
@@ -574,13 +580,19 @@ IEnumerator A()
 }
 ```
 
-B C D这几个子协程从启动开始就执行了，说的再直白点就是正常启动协程则一下就启动起来了，根本花费不了什么时间。
+B C D这几个子协程从启动开始就执行了，说的再直白点就是正常启动协程一下就启动起来了，根本花费不了什么时间。
 
-上面两种情况可以总结为那就是嵌套Unity协程中，父协程是同步的。所谓同步就是Unity会一直在这里执行，而Unity协程所谓的异步指的是内部执行了很小碎片的不怎么花费时间的动作，然后就yield return了，然后再等待下一帧再继续执行，并不阻塞主程序。
+### WaitUntil
 
-我们看到Unity协程解决的主要是帧动作太多的问题，通过Update等函数我们可以设计每一帧进行某个动作，然后我们发现对于很多问题并不需要每一帧都做，通过Unity协程可以解决这个问题；还有些过程可能横跨多个帧，但其内部动作可以分解为很多小动作，然后每帧再分别执行这些小动作即可，这可以通过Unity协程解决。
+一个方便的协程支持方法，可以进行条件判断，条件判断满足之后才往下走。
 
-但Unity协程不能解决某个动作就是花费时间太长，从而造成你的游戏进程阻塞这个问题，这还是需要靠多线程或异步来解决，Unity协程在这里的作用主要就是每帧来检查一下这个费时的异步动作完成了没有。
+```
+yield return new WaitUntil(() => frame >= 10);
+```
+
+### WaitForSecondsRealtime
+
+类似WaitForSeconds ，只是对应的不是游戏中缩放的时间，而是真实时间。
 
 
 
@@ -774,7 +786,13 @@ DontDestroyOnLoad(this.gameObject);
 
 则本脚本绑定的那个GameObject在场景切换时将不会被删除掉。
 
-### Update和FixedUpdate
+**值得一提的是：** DontDestroyOnLoad 只能操作在场景大纲视图下的root对象。
+
+### MonoBehavior
+
+MonoBehavior定义了一个脚本组件，这个脚本组件必须附加在某个GameObject之上。
+
+#### Update和FixedUpdate
 
 Update是每帧执行，一般键盘输入放在这里。
 
@@ -782,17 +800,21 @@ FixedUpdate是每隔一定固定时间段执行，一般物理模拟内容放在
 
 此外还需要了解 `Time.deltaTime` ，其返回的是上一帧到这一帧的时间间隔。以FixedUpdate为例，其内每次调用 Time.deltaTime都是相同的某个时间段，而对于Update则没有这个规律。
 
-### Awake和Start
+#### Awake和Start
 
 Awake和Start在脚本组件启动时都会被调用一次，Awake先于Start，脚本组件即使没有Enabled，场景启动时Awake也会执行，而Start只有在该脚本组件Enabled的情况下才会执行。
 
 此外还有一个OnEnable方法，它在Awake之后，如果脚本Enabled则会调用。
 
+#### Reset方法
 
+在Editor上，右键点击查看最上面有个选项，叫做重置，具体对应的就是这个方法。可以在Reset方法上执行一些变量的默认值配置工作，然后你点击重置就会得到这些默认值。一个MonoBehavior新建的时候的默认值也会参考这个方法。
 
+### StateMachineBehaviour
 
+又是一个大块内容，类似于MonoBehavior，这是你继承StateMachineBehaviour编写的类不是附在GameObject上，而是附在动画器的动画行为【叫做状态】上。
 
-
+有很多回调方法，具体参看官方文档，比如刚进入某个动画状态干什么，比如退出动画状态做什么等等。
 
 ### HeaderAttribute
 
@@ -1218,17 +1240,62 @@ UnityEvent相比较原生C#事件确实有点性能方面的问题，但UnityAct
 
 ## UI
 
+下面介绍的内容大多是指unity的UI包，也就是unity最新的UI系统。
+
+### 分辨率
+
+在游戏界面下面一栏有一格可以调整分辨率和显示比例。
+
+默认的Free Aspect是指随着你的Editor的游戏界面窗口大小来改变分辨率。考虑到一般开发者在调整好自己喜欢的Editor布局之后是不喜欢再随意改动的，所以更好的做法是选择好一个你喜欢的显示分辨率，在这个喜欢的显示分辨率下进行项目早期的开发工作，后面再集中测试各个不同分辨率下游戏的显示细节问题。
+
+在Editor->项目设置->Player那里可以进一步设置你喜欢的分辨率。然后下面的支持纵横比【显示比例】也取消一些，不同的纵横比里面的游戏效果是需要单独测试的。
+
 ### Canvas
 
 Unity的UI是基于画布Canvas构建的，其他UI元素都需要在Canvas之上，或者说所有的UI元素都需要是Canvas的子对象。
 
 Unity的UI可以有多个Canvas画布，出于性能上的考虑推荐总是变化的UI元素放在一个单独的画布上，因为画布的某部分发生了变化会重新绘制全部内容。
 
+#### Rect Transform
+
+UI系统里面的定位属性，类似于其他GameObject的Transform属性有位置，旋转和缩放，此外还多了一些其他的属性。
+
+画布如果不是世界空间模式Rect Transform属性是不可以调整的，不过其内的UI元素是可以的。请读者随便新建一个UI元素来测试下面的讨论。
+
+矩形工具在UI元素操作中很有用，矩形工具可以移动对象；也可以缩放对象，鼠标贴近边界或角落；也可以旋转对象，鼠标贴近角落外面点。矩形工具的旋转和缩放相对点右边两个按钮控制的：
+
+- 选择中心 则矩形工具的操作是相对该对象的中心点
+- 选择轴心【Pivot Point】 则矩形工具的操作是相对轴心点
+- 选择全局 矩形工具的那个边界盒子和对象有点出入
+- 选择局部 矩形工具的那个边界盒子会和对象紧贴在一起。
+
+一般UI操作会推荐选择轴心和局部。
+
+此外还有一个锚点【Anchor】概念。理解锚点和轴心点是让你的UI元素正确布局的关键。
+
+以刚开始最简单的单锚点【也就是四个锚点指标合并在一起的情况】来说，锚点定义了本对象Rect Transform和父对象Rect Transform的关系，如果父对象发生了缩放变化，则锚点的移动变化是保证相对于父对象所在的位置没有变化，然后本对象会根据锚点的移动再移动。
+
+再四个锚点分开讨论，四个锚点分别对应了本对象的边界盒子的那四个点，现在将两个锚点分开，一个在父对象的左上角，一个在父对象的右上角，则本对象会随着父对象长度的变化而发生长度变化。
+
+
+
 #### 画布渲染模式
 
-- Screen Space-Overlay 【屏幕空间-覆盖】默认的渲染模式，在场景中的UI对象位置和具体的UI显示没有关系。Unity内置的图层UI，一般UI元素都放在这一层，在场景中选择隐藏UI图层也是没有问题的【运行游戏时仍然会在】。
+- Screen Space-Overlay 【屏幕空间-覆盖】默认的渲染模式，在场景中的UI对象位置和具体的UI显示没有关系。Unity内置的图层UI，一般UI元素都放在这一层，在场景中选择隐藏UI图层也是没有问题的【运行游戏时仍然会在】。排序次序在多个画布的时候有用，数值越高越最后显示，也就是会覆盖前面的。
 - Screen Space-Camera 【屏幕空间-摄像机】这种模式使用摄像机来渲染UI。一般这种情况最好专门再添加一个摄像机专门用来渲染画布。
-- World Space 【世界空间】这种情况下画布是作为场景中一个游戏对象和其他游戏对象没有区别地混在一起的。比如游戏角色头顶上的问号。
+- World Space 【世界空间】这种情况下画布是作为场景中一个游戏对象和其他游戏对象没有区别地混在一起的。比如游戏角色头顶上的问号。事件摄像头如果你希望你的画布响应用户的动作则需要设置，具体是根据用户鼠标在屏幕的位置和事件摄像头的方向发射射线，射线触碰到画布的那里就是那里。一般使用设置主摄像头是合理的。
+
+#### 画布缩放
+
+- 恒定像素缩放 UI元素不缩放，保持恒定像素大小。
+- 屏幕大小缩放 UI元素会随着屏幕分辨率而缩放。
+- 恒定物理大小
+
+
+
+### 画布组
+
+
 
 ### sprite文件
 
@@ -1561,7 +1628,17 @@ Unity术语里面长度用的是 1unit，比如velocity 用的每秒移动的uni
 
 这段宏定义了中间的一些代码调用Unity Editor的脚本，也就是依赖Unity Editor环境的。
 
+
+
+
+
 ## 备用
+
+```
+[Space]
+```
+
+在Unity Editor上的检查器面板上增加一点距离。
 
 ### 移动控制
 
@@ -1588,3 +1665,18 @@ FMOD集成音效
 ### Makehuman工具
 
 Makehuman工具
+
+
+
+
+
+## 参考资料
+
+1. Unity官方文档
+2. Stack overflow
+3. 其他模块文档
+4. Unity商城Free资源
+5. Learning c# by developing games with unity 2019 by Harrison Ferrone
+6. Unity 游戏开发 by  Mike Geig
+7. Mastering UI Development with Unity by Asheley Godbold
+

@@ -927,7 +927,14 @@ class Point : IPoint
 }
 ```
 
-C#8对interface新增了很多内容，这块暂时先略过讨论。
+C#8对interface新增了很多内容，目前我这边环境是C#7，interface的功能很有限，只支持
+
+- 方法
+- 属性
+- Indexers
+- Events
+
+static方法也是不支持的。
 
 #### abstract和sealed
 
@@ -1871,6 +1878,16 @@ E as T
 ```
 
 执行E表达式，然后将结果转成类型T，此过程不会抛出异常，如果转换失败则会返回null。
+
+
+
+### 获取本类的名字
+
+```
+this.GetType().Name
+```
+
+
 
 ## 参考资料
 
