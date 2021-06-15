@@ -142,111 +142,25 @@ blender里面的动画导出到Unity也是类似上面的导出FBX，实际上�
 
 
 
-## 输入
-
-### input system
-
-new unity input system 更多地多设备输入兼容。文档在 [这里]([Installation guide | Input System | 1.1.0-preview.3 (unity3d.com)](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.1/manual/Installation.html)) 。
-
-激活新的输入系统： `Edit->Project settings->Player-> Active Input Handling` 。
-
-添加Player Input 组件
-
-编写Action输入键位绑定
-
-如果设置的是Send Message，则假设有Move Action，则对应该GameObject的`OnMove` 方法，Move发送的是一个Vector2值。x对应的是该GameObject Right方向上的位移，y对应的是该GameObject forward方向上的位移，有一个中间值(0.7,0.7) ，是45度的方向，你可以简单理解为right方向移动了0.7个单位，forward方向移动了0.7个单位，0.7这个数字的含义表示目标方向的移动长度还是大约1个单位。
-
-另外一个是单键位绑定，返回的是float值，1表示键位触发。
-
-如果设置的是InVoke Unity Events，则需要下面写上对应Action的回调方法，似乎InVoke Unity Events功能更强大一些，其支持对按键动作多种状态的判断。
-
-```c#
-    public void OnFire(InputAction.CallbackContext context)
-    {
-        switch (context.phase)
-        {
-            case InputActionPhase.Performed:
-                if (context.interaction is SlowTapInteraction)
-                {
-                    StartCoroutine(BurstFire((int)(context.duration * burstSpeed)));
-                }
-                else
-                {
-                    Fire();
-                }
-                m_Charging = false;
-                break;
-
-            case InputActionPhase.Started:
-                if (context.interaction is SlowTapInteraction)
-                    m_Charging = true;
-                break;
-
-            case InputActionPhase.Canceled:
-                m_Charging = false;
-                break;
-        }
-    }
-```
-
-上面Started最先触发，然后再触发Performed。如果你的context设置了SlowTapInteraction也就是一定时间的按键判断等，这块后面再详细了解。
-
-**NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会触发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
-
-#### 读取值
-
-上面started，performed和canceld只是针对更复杂的按键情况，如果只是一般的使用则如下读取值然后大致类似传统输入系统那样去做即可。
-
-首先Move和Look读取Vector2的值：
-
-```
-Vector2 m_Movement = context.ReadValue<Vector2>();
-```
-
-然后对于一般按键值读取为bool值：
-
-```
-bool m_Attack = context.ReadValueAsButton();
-```
-
-按照传统输入系统的方法读取值会在Update方法那边编写，现在在回调方法上对应地如上写上读取值之后，就类似传统输入在Update方法那里获取到目标值了，然后后面的都是类似的了。
-
-
-
-#### 判断本帧某个键位是否按下了
-
-这个键位判断不需要去设置Actions的配置对于任何按键都可以如下直接去判断。
-
-```
-  Keyboard.current.space.wasPressedThisFrame
-```
-
-### Input.mousePosition
-
-获取当前鼠标在屏幕上的坐标，返回一个Vector3值，z值总为0，x和y都等于0时表示左下角，右上角是 `(Screen.width, Screen.height)` 。
-
-
-
 ## 序列化
 
-序列化是理解Unity Editor如何工作的关键，这当然对你后面更好地使用Unity Editor从而更好地进行游戏开发很重要，但更重要的是Unity Editor可以看作利用Unity技术实现的第一个游戏，因此Unity Editor广泛使用的序列化技术对你的游戏代码开发同样具有参考价值，这点我们后续会看到。
+序列化这小节内容又往前提了一点，其重要性总是超过了Unity初学者的预期。最开始以为这是理解Unity Editor如何工作的关键，但实际上序列化这小节内容可以说是渗透进了Unity开发的方方面面，从理解Unity Editor工作原理，到理解ScriptableObject，到理解JsonUtility和相关JSON序列化手段，到如何更有效地搭建自己游戏的状态保存方案等。
 
-推荐读者参考阅读 [这篇文章](https://blogs.unity3d.com/2014/06/24/serialization-in-unity/) 。
+首先推荐读者参考阅读 [这篇文章](https://blogs.unity3d.com/2014/06/24/serialization-in-unity/) 和官方文档的 [脚本序列化](https://docs.unity3d.com/cn/current/Manual/script-Serialization.html) 一小节。
 
-以下是Unity序列化技术中涉及到的一些场景：
+首先是你在Unity Editor上执行保存这个动作的过程，实际上就是Unity内部执行序列化的过程。一般来说这些可以序列化的对象在Unity Editor的检查器面板是看得到的。此外还有：
 
-- Unity Editor会将属性面板的一些属性进行序列化存储起来。
-- perfab预制件也是一种序列化手段。
-- 当unity实例化一个对象时，首先是把该对象序列化，然后新建一个对象，然后反序列化获得的数据打入新的对象中。
-- Unity Editor执行保存动作也加载场景是利用了yaml进行的序列化和反序列化动作。
-- Unity Editor的热重载：代码发生变动，首先序列化所有编辑器窗体，再销毁窗体，再更新旧的C#代码，再加载新的C#代码，再重新创建窗体。
+- perfab 预制件实际就是对一个或多个游戏对象的序列化数据存储。
+- 实例化过程 当调用 `Instantiate`方法是Unity首先是把该对象序列化，然后新建一个对象，然后反序列化获得的数据打入新的对象中。
+- 场景的保存和加载也是利用了基于yaml的序列化和反序列化动作。
+- 热重载【就是Unity侦测到你的脚本或者某个资源等发生了变化会自动进行热重载更新】其首先会序列化所有编辑器窗体，再销毁窗体，再更新旧的C#代码，再加载新的C#代码，再重新创建窗体。
 
 
 
 Unity会对以下属性进行序列化：
 
 - public
-- [SerializeField] 属性
+- [SerializeField] 标记的属性
 - not static
 - not readonly
 - not const
@@ -269,18 +183,40 @@ class Trouble
 - 自定义的结构有[Serializable] 标注
 - 由UntiyEngine.Object衍生出来的类【所以ScriptableOjbect是可以序列化的】
 - C#的基本数据类型（int, float, double, bool, string etc.）
+- 枚举类型
+- 某些 Unity 内置类型：Vector2、Vector3、Vector4、Rect、Quaternion、Matrix4x4、Color、Color32、LayerMask、AnimationCurve、Gradient、RectOffset、GUIStyle
 - 可以序列化对象组成的array
 - `List<T>`  T是可序列化的类型。
+
+可序列化对象组成的数组或列表稍有一些要注意的点，后面再说。
+
+### 自定义的可序列化类
+
+自定义的类除了上面提到的要有 `[Serializable]`  属性标注之外，还需要是**非抽象的**，**非静态的**，**非泛型的**【但可继承自泛型类】。
+
+此外自定义的可序列化类**不支持null** ，但是我看到有的地方在实现上会给那些可自定义可序列化类赋值default，按照道理来讲default其实就是null，然后从具体运行来看可以看出和普通的c#代码的一个很大的不同就是，自定义的可序列化类已经默认执行了 `new What()` 这样的实例化动作了，而c#那边则仍然是null。
+
+
 
 ### SerializeField
 
 上面序列化一节提到，一个私有字段如果加上 `[SerializeField]` 标识，Unity对该私有字段也将使用序列化技术。
 
-以编辑器脚本的某个公有字段来说，unity会将其序列化存储在硬盘中从而实现热重载，也就是下次启动游戏之后还会将你修改的这些参数填上去。如下加入 SerializeField 之后，该私有字段一样也会进入unity的序列化管理。
+```
+[SerializeField] 
+private AssetReference _persistentManagersScene = default;
+```
+
+### NonSerialized
+
+有的时候某些public属性你不需要系列化则可以加上修饰头 `[NonSerialized]` 。
 
 ```
-[SerializeField] private AssetReference _persistentManagersScene = default;
+    [NonSerialized]    
+    public int p = 5;
 ```
+
+### 
 
 ### ScriptableObject
 
@@ -329,14 +265,274 @@ fileName是点击菜单按钮之后默认保存的文件名，menuName是在Unit
 
 
 
-### NonSerialized
+### JsonUtility
 
-有的时候某些public属性你不需要系列化则可以加上修饰头 `[NonSerialized]` 。
+这个就不多说了，具体参见官方文档。
+
+[Unity - Manual: JSON Serialization (unity3d.com)](https://docs.unity3d.com/2019.4/Documentation/Manual/JSONSerialization.html)
+
+[Unity - Scripting API: JsonUtility (unity3d.com)](https://docs.unity3d.com/2019.4/Documentation/ScriptReference/JsonUtility.html)
+
+### 游戏状态的保存经验分享
+
+**PlayerPrefs** 这个不是用来进行游戏状态保存的，最多就是一些游戏配置放在这上面。实际上这个东西在windows下是写在注册表里面的，东西稍微写多一些都是很不好的。
+
+Json序列化参考上面的讨论，很适合小型项目开始快速搭建游戏状态保存系统，实际上就算是联网游戏用json来传递数据也是一个不错的选择。
+
+json序列化具体到文件操作层面那是程序员自己的事，还有很大的优化空间，特别值得一提的是，json格式很容易发生格式损坏，因此对存档文件进行备份和在写的时候先写在临时文件上，再用临时文件替换掉存档文件是必要的手段。
+
+**不要用ScriptableObject来保存要变动的数据**。也不要试着直接将ScriptableObject通过JSONUtility序列化，那些InstanceId都是不可靠的，基本上表示数据丢失了。从游戏状态存储的角度来说再把ScriptableObject又存一遍也是没必要的。以物品来说，一般来说将物品定义为ScriptableObject是很合适的，在游戏运行时的那些代码都引用ItemSO也是很方便的，但在游戏状态存储这边通过物品名去引用即可，不要把事情弄复杂了，具体还需要再另外建一个ScriptableObject来保存所有的物品清单。
+
+建立自己的数据类型的序列化解决方案和Editor那边的显示支持会给你的游戏开发带来极大的便利，包括这里讨论的游戏状态的保存。有时间就去做。粗略看了下一个是加入 `ISerializationCallbackReceiver` interface，Editor那边Unity也专门提供了 `PropertyDrawer` ，在描述上就直接说明了方便定义自己的序列化类的显示定制。这块有时间再研究。
+
+
+
+## 基于事件驱动的Unity编程
+
+作为和桌面端程序类似的存在，成熟的Unity游戏编程必然是基于事件驱动的编程模式。这对于大中小型Unity项目都是有用的和必须的。
+
+C#那边已经有成熟的事件驱动编程解决方案了，拿过来用就是了。因为Unity那边又新增了UnityAction之类的语法糖，但从 [这篇文章](https://www.jacksondunstan.com/articles/3335) 来看，其效率反而不如C#自带的事件驱动解决方案，除非在某些Unity Editor定制人物上，才一定要使用UnityAction之类的，那个时候再使用。
+
+**更新：** ScriptableObject最好只是作为数据文件存在，否则在Build那边会有一些问题，之前C#那边已经讨论过事件驱动编程了，下面将这些讨论粘贴过来，在Unity那边同样也是可以用的。
+
+### 事件驱动编程
+
+事件驱动编程模式或者说委托代理模式，其将构建一个事件通道作为第三中间人，事件发送方只负责告诉该第三人事件发生了，事件发送方并不关心这个第三人等下要将这些事件通知给谁。而事件接收方也不知道事件发送方是谁，它只管听第三人也就是事件通道的，事件通道说事件触发了，然后事件接收方再决定做某些事情。
+
+此外编程上还有一个观察模式，观察模式的事件发送方和事件接受方彼此是知道的，事件发生了事件发送方会直接通知各个事件接收方事件发生了。参考了 [这篇文章](https://hackernoon.com/observer-vs-pub-sub-pattern-50d3b27f838c) 。
+
+按照上面的说法，我们最好是构建出一个EventChannel类，由这个EventChannel来负责触发事件，由这个EventChannel负责传递函数参数和通知事件接收方事件发生了。
+
+在实践中的一个编码规范是参数最好把事件的发送人和发送的参数作为两个参数。大概如下：
 
 ```
-    [NonSerialized]
-    public int p = 5;
+public delegate void EventHandler<TEventArgs>(object? sender, TEventArgs e);
 ```
+
+是的，C#就已经定义了这个EventHandler委托，于是利用这个EventHandler我们就可以如下定义事件了：
+
+```
+public event EventHandler<SomeEventArgs> someEvent;
+```
+
+下面是定义该事件的参数传递规范：
+
+```c#
+    public class SomeEventArgs : EventArgs
+    {
+        public int x { get; private set; }
+        public int y { get; private set; }
+
+        public SomeEventArgs(int x, int y){
+            this.x = x;
+            this.y = y;
+        }
+    }
+```
+
+下面定义了一个事件通道基类：
+
+```c#
+    public enum Status { Started, Stopped };
+
+    public class BaseEventChannel<T>
+    {
+        public event EventHandler<T> Event;
+
+        public void RaiseEvent(object sender, T args)
+        {
+            Event?.Invoke(sender, args);
+        }
+
+        public void AddHandler(EventHandler<T> handler)
+        {
+            Event += handler;
+        }
+        public void RemoveHandler(EventHandler<T> handler)
+        {
+            Event -= handler;
+        }
+    }
+```
+
+```c#
+public class SomeEventArgs : EventArgs
+    {
+        public Status status { get; private set; }
+
+        public SomeEventArgs(Status status)
+        {
+            this.status = status;
+        }
+    }
+    public class SomeEventChannel : BaseEventChannel<SomeEventArgs>
+    {
+    }
+
+    class Engine
+    {
+        public SomeEventChannel someEventChannel = new SomeEventChannel();
+
+        protected virtual void OnSomeEvent(SomeEventArgs args)
+        {
+            someEventChannel.RaiseEvent(this, args);
+        }
+
+        public void Start()
+        {
+            OnSomeEvent(new SomeEventArgs(Status.Started));
+        }
+
+        public void Stop()
+        {
+            OnSomeEvent(new SomeEventArgs(Status.Stopped));
+        }
+
+    }
+```
+
+具体调用程序大体如下：
+
+```c#
+ class Program
+    {
+
+        static void Main(string[] args)
+        {
+            Engine engine = new Engine();
+            engine.someEventChannel.AddHandler(OnEngineStatusChanged);
+            engine.someEventChannel.AddHandler(OnEngineStatusChanged2);
+
+            engine.Start();
+            engine.Stop();
+
+            engine.someEventChannel.RemoveHandler(OnEngineStatusChanged2);
+            engine.Start();
+            engine.Stop();
+        }
+
+        private static void OnEngineStatusChanged(object sender, SomeEventArgs args)
+        {
+            Console.WriteLine($"{sender} is now {args.status}");
+        }
+
+        private static void OnEngineStatusChanged2(object sender, SomeEventArgs args)
+        {
+            Console.WriteLine($"Report2: {sender} is now {args.status}");
+        }
+
+    }
+```
+
+就上面这个程序小片段没这个问题，但对于稍大点的应用程序，则需要保证某一特定事件通道的唯一性。有以下做法，并没有那种优于那种一说：
+
+- 一是靠程序员自我编码规范，比如事件和组件是特有的绑定关系，这样你在编码的时候就会很少犯错，因为你总是在想这个组件实体触发了什么事件，自然会做好组件实体的唯一性和对目标事件的引用。
+- 让事件通道成为全局变量从而全局唯一。
+- 从事件通道的编码上实现单例模式
+- 将你的事件通道和外部的数据文件等建立某种唯一关系等。
+
+### 单例模式示例
+
+本小节单例模式实现主要参考了 [这个网页](https://csharpindepth.com/articles/singleton) 。
+
+```c#
+    public sealed class SomeEventChannel : BaseEventChannel<SomeEventArgs>
+    {
+        private static readonly SomeEventChannel instance = new SomeEventChannel();
+        static SomeEventChannel() { } // Make sure it's truly lazy
+        private SomeEventChannel() { } // Prevent instantiation outside
+
+        public static SomeEventChannel Instance { get { return instance; } }
+
+    }
+```
+
+具体在引用的时候要如下这样使用了：
+
+```
+        public SomeEventChannel someEventChannel = SomeEventChannel.Instance;
+```
+
+### 和组件绑定的事件
+
+在实践中有一种情况，那就是事件是和某一个组件是绑定的一对一关系，那么自然这个事件就是单例的。而这个事件作为某个组件的属性在单例的处理上就会稍微简单一点，这个组件事件也没必要发送sender这个参数了，因为事件发起人肯定是本组件this。出于代码简洁的考虑，可以引入组件事件的概念：
+
+```
+namespace System
+{
+    public delegate void VoidComponentEventHandler();
+    public delegate void ComponentEventHandler<TEventArgs>(TEventArgs e);
+}
+
+public class ComponentEventBase<T>
+{
+    public event ComponentEventHandler<T> Event;
+
+    public void RaiseEvent(T args)
+    {
+        Event?.Invoke(args);
+    }
+
+    public void AddHandler(ComponentEventHandler<T> handler)
+    {
+        Event += handler;
+    }
+    public void RemoveHandler(ComponentEventHandler<T> handler)
+    {
+        Event -= handler;
+    }
+}
+
+
+public class VoidComponentEvent
+{
+    public event VoidComponentEventHandler Event;
+
+    public void RaiseEvent()
+    {
+        Event?.Invoke();
+    }
+
+    public void AddHandler(VoidComponentEventHandler handler)
+    {
+        Event += handler;
+    }
+    public void RemoveHandler(VoidComponentEventHandler handler)
+    {
+        Event -= handler;
+    }
+}
+
+```
+
+```
+public VoidComponentEvent myEvent1 = new VoidComponentEvent();
+public VoidComponentEvent myEvent2 = new VoidComponentEvent();
+```
+
+
+
+### UnityEvent
+
+UnityEvent如上的讨论，在效率上反而不如C#原生的事件，但你给你的组件脚本上随便如下添加：
+
+```
+UnityEvent OnSomeEvent;
+```
+
+那么在Unity Editor那里就会多出一个`OnSomeEvent` 选单，这个选单你可以随意添加很多行为，其他脚本的其他方法都可以随意拖动过来，UnityEvent带来的就是这个好处。一般来说熟悉C#编程的Unity开发人员在这种程序行为定义的地方是不推荐采用拖动的方式的，还是直接用代码编写吧。
+
+具体这块应用场景主要对应上面和组件绑定的事件的讨论，个人对于代码并没有太极端的微优化喜好，所以在这种和组件绑定的事件应用场景下，简单使用UnityEvent也是可以的，更多情况请参见官方手册。
+
+### UnityAction
+
+UnityAction带来的便利就是Unity Editor那边是支持显示一个按钮方便手工触发该事件的，除此之外UnityAction就是一个有着特定名字的C#委托，并没有什么特殊的。
+
+UnityEvent相比较原生C#事件确实有点性能方面的问题，但UnityAction则仅仅只是一个语法糖而已，有的地方觉得好用还是可以用的。
+
+它提供了不接受参数，接受一个参数，到接受四个参数的函数委托模型。
+
+
 
 
 
@@ -435,6 +631,95 @@ yield return new WaitUntil(() => frame >= 10);
 ### WaitForSecondsRealtime
 
 类似WaitForSeconds ，只是对应的不是游戏中缩放的时间，而是真实时间。
+
+
+
+## 输入
+
+### input system
+
+new unity input system 更多地多设备输入兼容。文档在 [这里]([Installation guide | Input System | 1.1.0-preview.3 (unity3d.com)](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.1/manual/Installation.html)) 。
+
+激活新的输入系统： `Edit->Project settings->Player-> Active Input Handling` 。
+
+添加Player Input 组件
+
+编写Action输入键位绑定
+
+如果设置的是Send Message，则假设有Move Action，则对应该GameObject的`OnMove` 方法，Move发送的是一个Vector2值。x对应的是该GameObject Right方向上的位移，y对应的是该GameObject forward方向上的位移，有一个中间值(0.7,0.7) ，是45度的方向，你可以简单理解为right方向移动了0.7个单位，forward方向移动了0.7个单位，0.7这个数字的含义表示目标方向的移动长度还是大约1个单位。
+
+另外一个是单键位绑定，返回的是float值，1表示键位触发。
+
+如果设置的是InVoke Unity Events，则需要下面写上对应Action的回调方法，似乎InVoke Unity Events功能更强大一些，其支持对按键动作多种状态的判断。
+
+```c#
+    public void OnFire(InputAction.CallbackContext context)
+    {
+        switch (context.phase)
+        {
+            case InputActionPhase.Performed:
+                if (context.interaction is SlowTapInteraction)
+                {
+                    StartCoroutine(BurstFire((int)(context.duration * burstSpeed)));
+                }
+                else
+                {
+                    Fire();
+                }
+                m_Charging = false;
+                break;
+
+            case InputActionPhase.Started:
+                if (context.interaction is SlowTapInteraction)
+                    m_Charging = true;
+                break;
+
+            case InputActionPhase.Canceled:
+                m_Charging = false;
+                break;
+        }
+    }
+```
+
+上面Started最先触发，然后再触发Performed。如果你的context设置了SlowTapInteraction也就是一定时间的按键判断等，这块后面再详细了解。
+
+**NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会触发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
+
+#### 读取值
+
+上面started，performed和canceld只是针对更复杂的按键情况，如果只是一般的使用则如下读取值然后大致类似传统输入系统那样去做即可。
+
+首先Move和Look读取Vector2的值：
+
+```
+Vector2 m_Movement = context.ReadValue<Vector2>();
+```
+
+然后对于一般按键值读取为bool值：
+
+```
+bool m_Attack = context.ReadValueAsButton();
+```
+
+按照传统输入系统的方法读取值会在Update方法那边编写，现在在回调方法上对应地如上写上读取值之后，就类似传统输入在Update方法那里获取到目标值了，然后后面的都是类似的了。
+
+
+
+#### 判断本帧某个键位是否按下了
+
+这个键位判断不需要去设置Actions的配置对于任何按键都可以如下直接去判断。
+
+```
+  Keyboard.current.space.wasPressedThisFrame
+```
+
+### Input.mousePosition
+
+获取当前鼠标在屏幕上的坐标，返回一个Vector3值，z值总为0，x和y都等于0时表示左下角，右上角是 `(Screen.width, Screen.height)` 。
+
+
+
+
 
 
 
@@ -857,251 +1142,6 @@ public Vector3 TransformPoint(Vector3 position);
 
 
 
-
-## 基于事件驱动的Unity编程
-
-作为和桌面端程序类似的存在，成熟的Unity游戏编程必然是基于事件驱动的编程模式。这对于大中小型Unity项目都是有用的和必须的。
-
-C#那边已经有成熟的事件驱动编程解决方案了，拿过来用就是了。因为Unity那边又新增了UnityAction之类的语法糖，但从 [这篇文章](https://www.jacksondunstan.com/articles/3335) 来看，其效率反而不如C#自带的事件驱动解决方案，除非在某些Unity Editor定制人物上，才一定要使用UnityAction之类的，那个时候再使用。
-
-**更新：** ScriptableObject最好只是作为数据文件存在，否则在Build那边会有一些问题，之前C#那边已经讨论过事件驱动编程了，下面将这些讨论粘贴过来，在Unity那边同样也是可以用的。
-
-### 事件驱动编程
-
-事件驱动编程模式或者说委托代理模式，其将构建一个事件通道作为第三中间人，事件发送方只负责告诉该第三人事件发生了，事件发送方并不关心这个第三人等下要将这些事件通知给谁。而事件接收方也不知道事件发送方是谁，它只管听第三人也就是事件通道的，事件通道说事件触发了，然后事件接收方再决定做某些事情。
-
-此外编程上还有一个观察模式，观察模式的事件发送方和事件接受方彼此是知道的，事件发生了事件发送方会直接通知各个事件接收方事件发生了。参考了 [这篇文章](https://hackernoon.com/observer-vs-pub-sub-pattern-50d3b27f838c) 。
-
-按照上面的说法，我们最好是构建出一个EventChannel类，由这个EventChannel来负责触发事件，由这个EventChannel负责传递函数参数和通知事件接收方事件发生了。
-
-在实践中的一个编码规范是参数最好把事件的发送人和发送的参数作为两个参数。大概如下：
-
-```
-public delegate void EventHandler<TEventArgs>(object? sender, TEventArgs e);
-```
-
-是的，C#就已经定义了这个EventHandler委托，于是利用这个EventHandler我们就可以如下定义事件了：
-
-```
-public event EventHandler<SomeEventArgs> someEvent;
-```
-
-下面是定义该事件的参数传递规范：
-
-```c#
-    public class SomeEventArgs : EventArgs
-    {
-        public int x { get; private set; }
-        public int y { get; private set; }
-
-        public SomeEventArgs(int x, int y){
-            this.x = x;
-            this.y = y;
-        }
-    }
-```
-
-下面定义了一个事件通道基类：
-
-```c#
-    public enum Status { Started, Stopped };
-
-    public class BaseEventChannel<T>
-    {
-        public event EventHandler<T> Event;
-
-        public void RaiseEvent(object sender, T args)
-        {
-            Event?.Invoke(sender, args);
-        }
-
-        public void AddHandler(EventHandler<T> handler)
-        {
-            Event += handler;
-        }
-        public void RemoveHandler(EventHandler<T> handler)
-        {
-            Event -= handler;
-        }
-    }
-```
-
-```c#
-public class SomeEventArgs : EventArgs
-    {
-        public Status status { get; private set; }
-
-        public SomeEventArgs(Status status)
-        {
-            this.status = status;
-        }
-    }
-    public class SomeEventChannel : BaseEventChannel<SomeEventArgs>
-    {
-    }
-
-    class Engine
-    {
-        public SomeEventChannel someEventChannel = new SomeEventChannel();
-
-        protected virtual void OnSomeEvent(SomeEventArgs args)
-        {
-            someEventChannel.RaiseEvent(this, args);
-        }
-
-        public void Start()
-        {
-            OnSomeEvent(new SomeEventArgs(Status.Started));
-        }
-
-        public void Stop()
-        {
-            OnSomeEvent(new SomeEventArgs(Status.Stopped));
-        }
-
-    }
-```
-
-具体调用程序大体如下：
-
-```c#
- class Program
-    {
-
-        static void Main(string[] args)
-        {
-            Engine engine = new Engine();
-            engine.someEventChannel.AddHandler(OnEngineStatusChanged);
-            engine.someEventChannel.AddHandler(OnEngineStatusChanged2);
-
-            engine.Start();
-            engine.Stop();
-
-            engine.someEventChannel.RemoveHandler(OnEngineStatusChanged2);
-            engine.Start();
-            engine.Stop();
-        }
-
-        private static void OnEngineStatusChanged(object sender, SomeEventArgs args)
-        {
-            Console.WriteLine($"{sender} is now {args.status}");
-        }
-
-        private static void OnEngineStatusChanged2(object sender, SomeEventArgs args)
-        {
-            Console.WriteLine($"Report2: {sender} is now {args.status}");
-        }
-
-    }
-```
-
-就上面这个程序小片段没这个问题，但对于稍大点的应用程序，则需要保证某一特定事件通道的唯一性。有以下做法，并没有那种优于那种一说：
-
-- 一是靠程序员自我编码规范，比如事件和组件是特有的绑定关系，这样你在编码的时候就会很少犯错，因为你总是在想这个组件实体触发了什么事件，自然会做好组件实体的唯一性和对目标事件的引用。
-- 让事件通道成为全局变量从而全局唯一。
-- 从事件通道的编码上实现单例模式
-- 将你的事件通道和外部的数据文件等建立某种唯一关系等。
-
-### 单例模式示例
-
-本小节单例模式实现主要参考了 [这个网页](https://csharpindepth.com/articles/singleton) 。
-
-```c#
-    public sealed class SomeEventChannel : BaseEventChannel<SomeEventArgs>
-    {
-        private static readonly SomeEventChannel instance = new SomeEventChannel();
-        static SomeEventChannel() { } // Make sure it's truly lazy
-        private SomeEventChannel() { } // Prevent instantiation outside
-
-        public static SomeEventChannel Instance { get { return instance; } }
-
-    }
-```
-
-具体在引用的时候要如下这样使用了：
-
-```
-        public SomeEventChannel someEventChannel = SomeEventChannel.Instance;
-```
-
-### 和组件绑定的事件
-
-在实践中有一种情况，那就是事件是和某一个组件是绑定的一对一关系，那么自然这个事件就是单例的。而这个事件作为某个组件的属性在单例的处理上就会稍微简单一点，这个组件事件也没必要发送sender这个参数了，因为事件发起人肯定是本组件this。出于代码简洁的考虑，可以引入组件事件的概念：
-
-```
-namespace System
-{
-    public delegate void VoidComponentEventHandler();
-    public delegate void ComponentEventHandler<TEventArgs>(TEventArgs e);
-}
-
-public class ComponentEventBase<T>
-{
-    public event ComponentEventHandler<T> Event;
-
-    public void RaiseEvent(T args)
-    {
-        Event?.Invoke(args);
-    }
-
-    public void AddHandler(ComponentEventHandler<T> handler)
-    {
-        Event += handler;
-    }
-    public void RemoveHandler(ComponentEventHandler<T> handler)
-    {
-        Event -= handler;
-    }
-}
-
-
-public class VoidComponentEvent
-{
-    public event VoidComponentEventHandler Event;
-
-    public void RaiseEvent()
-    {
-        Event?.Invoke();
-    }
-
-    public void AddHandler(VoidComponentEventHandler handler)
-    {
-        Event += handler;
-    }
-    public void RemoveHandler(VoidComponentEventHandler handler)
-    {
-        Event -= handler;
-    }
-}
-
-```
-
-```
-public VoidComponentEvent myEvent1 = new VoidComponentEvent();
-public VoidComponentEvent myEvent2 = new VoidComponentEvent();
-```
-
-
-
-### UnityEvent
-
-UnityEvent如上的讨论，在效率上反而不如C#原生的事件，但你给你的组件脚本上随便如下添加：
-
-```
-UnityEvent OnSomeEvent;
-```
-
-那么在Unity Editor那里就会多出一个`OnSomeEvent` 选单，这个选单你可以随意添加很多行为，其他脚本的其他方法都可以随意拖动过来，UnityEvent带来的就是这个好处。一般来说熟悉C#编程的Unity开发人员在这种程序行为定义的地方是不推荐采用拖动的方式的，还是直接用代码编写吧。
-
-具体这块应用场景主要对应上面和组件绑定的事件的讨论，个人对于代码并没有太极端的微优化喜好，所以在这种和组件绑定的事件应用场景下，简单使用UnityEvent也是可以的，更多情况请参见官方手册。
-
-### UnityAction
-
-UnityAction带来的便利就是Unity Editor那边是支持显示一个按钮方便手工触发该事件的，除此之外UnityAction就是一个有着特定名字的C#委托，并没有什么特殊的。
-
-UnityEvent相比较原生C#事件确实有点性能方面的问题，但UnityAction则仅仅只是一个语法糖而已，有的地方觉得好用还是可以用的。
-
-它提供了不接受参数，接受一个参数，到接受四个参数的函数委托模型。
 
 
 
@@ -1638,9 +1678,9 @@ Windows下玩家的日志在：`%USERPROFILE%\AppData\LocalLow\CompanyName\Produ
 
 这个其实很重要的，最好先查看清楚，免得后面因为一些版本细节问题纠结半天。目前笔者使用的是Unity2019.4，从 [这个网页](https://docs.unity3d.com/2019.4/Documentation/Manual/CSharpCompiler.html) 来看，它使用的是 .net 4.6，使用的C#版本是7.3，并不是C#8，有些差异还是需要特别注意的。
 
-之前的一个问题解释清楚了，我这边使用的是.net framework4.6，并没有 `System.HashCode` 这个方法。
+比如之前纠结的一个问题，就是因为我这边使用的是.net framework4.6，并没有 `System.HashCode` 这个方法。
 
-
+如果使用的Unity2020 LTS版本，则使用的也是.net framework4.6，c#语言版本是c#8。
 
 ### visual studio快速方法输入
 
@@ -1718,6 +1758,12 @@ transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
 这个网页也推荐看下： https://learn.unity.com/tutorial/textmesh-pro-localization
 
 目前还没遇到上面说的那么复杂的问题，那么 Atlas Population Mode 也不太明白，不过如果只有一个回滚字体的话那么是需要设置static的，默认好像也是static。所以就如上创建一个中文回滚字体即可。
+
+#### unitypackage文件怎么用
+
+选择资源-----导入包-------自定义包
+
+
 
 ### 平台相关编译代码
 
