@@ -113,13 +113,13 @@ DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
 SITEMAP = {
     'format': 'xml',
     'priorities': {
-        'articles': 0.5,
-        'indexes': 0.5,
+        'articles': 0.8,
+        'indexes': 0.2,
         'pages': 0.5
     },
     'changefreqs': {
-        'articles': 'monthly',
-        'indexes': 'daily',
+        'articles': 'weekly',
+        'indexes': 'weekly',
         'pages': 'monthly'
     },
     'exclude': ['tags/', 'categorys/']

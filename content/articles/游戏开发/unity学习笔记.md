@@ -2,6 +2,14 @@
 
 [TOC]
 
+## 前言
+
+### 本文内容的取舍
+
+- 因为笔者开发的是3D游戏，因此专属于2D游戏的那些内容将不会在这里讨论。
+- 笔者使用的是Unity 2020.3.11 LTS版本，之前的版本被废弃的特性或者之后的版本新增的特性将不会在这里讨论。
+- 一般来说官方文档里面有的不会在这里赘述，不过有时某些内容会特别重要而会再强调一遍。
+
 ## 开发环境
 
 1. 安装visual studio
@@ -196,7 +204,7 @@ class Trouble
 
 此外自定义的可序列化类**不支持null** ，但是我看到有的地方在实现上会给那些可自定义可序列化类赋值default，按照道理来讲default其实就是null，然后从具体运行来看可以看出和普通的c#代码的一个很大的不同就是，自定义的可序列化类已经默认执行了 `new What()` 这样的实例化动作了，而c#那边则仍然是null。
 
-
+自定义的可序列化类不支持多态。老实说官方文档这段怎么也没看懂。。
 
 ### SerializeField
 
@@ -285,7 +293,14 @@ json序列化具体到文件操作层面那是程序员自己的事，还有很�
 
 建立自己的数据类型的序列化解决方案和Editor那边的显示支持会给你的游戏开发带来极大的便利，包括这里讨论的游戏状态的保存。有时间就去做。粗略看了下一个是加入 `ISerializationCallbackReceiver` interface，Editor那边Unity也专门提供了 `PropertyDrawer` ，在描述上就直接说明了方便定义自己的序列化类的显示定制。这块有时间再研究。
 
+### 新增可序列化类
 
+主要是加入 `ISerializationCallbackReceiver` ，具体要实现两个方法：
+
+- OnAfterDeserialize
+- OnBeforeSerialize
+
+一般来说你新增的可序列化类是基于原Unity能够序列化的那些数据字段的，然后你想保存的某种数据结构会是该可序列化类的私有对象。下面就是要实现上面的两个方法来实现核心数据和可序列化数据的同步。  `OnBeforeSerialize` 是根据核心数据来生成可序列化数据，然后让Unity去处理那些可序列化数据，一般来说后面自定编辑器的其他功能都只能看到那些可序列化数据的。`OnAfterDeserialize`  要做的事情就是根据那些可序列化数据来生成你的核心数据。这两个过程都必须是完成新生成数据模式，这样才能保证两端数据是同步的，因为你根本无法知道编辑器那边对那些可序列化数据做了些什么改动，所以只能完全重新生成。
 
 ## 基于事件驱动的Unity编程
 
@@ -1024,6 +1039,8 @@ foreach (Transform child in parent){
 
 然后有 `transform.parent` 来返回本transform的父节点transform对象。更多的方法请参看 Transform 类。
 
+**NOTICE: 这里再强调一遍，gameObject之间是没有父子层级关系的，你在大纲视图上看到的层级关系只是各个gameObject的transform属性的层级关系。**
+
 #### FindWithTag方法
 
 正如上面的讨论，但在某些情况下你确实需要使用Find来查找，那么推荐你使用 `FindWithTag` 方法，然后你想要查找的目标GameObject上添加一个专门的标签，这样效率会高很多。
@@ -1136,6 +1153,22 @@ public Vector3 TransformPoint(Vector3 position);
 根据某个Transform的local space偏移值Vector3 position，获得目标值的世界坐标值Vector3。
 
 
+
+### 启用和禁用组件
+
+```
+component.enable = true;
+```
+
+### Object
+
+#### name
+
+```
+Object.name
+```
+
+名字，所有的MonoBehavior也就是脚本组件如果绑定到某个游戏对象上，它的名字和该游戏对象的名字会是一样的。
 
 
 
@@ -1483,10 +1516,6 @@ Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
 
 
 
-## 开始菜单
-
-开始菜单就是另外一个场景地图，其是一个2d场景地图，在开发的时候视图中间偏左有个选项，激活了场景处于2d视图中。然后就是在这个场景中添加一些UI元素即构成了开始菜单。
-
 ## Unity Addressable Asset system
 
 Unity的官方包，在包管理里面搜索`addressables` 。这个包可以让你访问资产Asset通过地址访问的方式来进行，从而增加资源访问的灵活性。原asset bundle管理方案已经处于废弃状态。
@@ -1672,6 +1701,44 @@ Windows下玩家的日志在：`%USERPROFILE%\AppData\LocalLow\CompanyName\Produ
 
 更复杂的多场景情况的一个建议就是不要跨场景引用对象了【好像也不太好跨场景引用了吧，也不要脚本依赖式的Find去查找】，用事件通道，因为多个场景的加载顺序会更加不可控制了，还是用事件通道会好一点。
 
+## Editor开发
+
+Editor的一些脚本开发很有用，但目前个人还没怎么学明白。
+
+```
+CustomPropertyDrawer
+```
+
+只能从别人的代码或者官方文档的脚本描述里面大概摸索。
+
+### 这是给你的类加个按钮
+
+```c#
+using UnityEditor;
+using UnityEngine;
+
+[CustomEditor(typeof(TestSerializableDict))]
+public class TestSerializableDictEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+
+        TestSerializableDict targetScript = (TestSerializableDict)target;
+        if (GUILayout.Button("test"))
+        {
+            targetScript.Test();
+        }
+    }
+}
+```
+
+这个方便有时手工触发事件或者动作或者打印Debug信息都是很有用的。
+
+
+
+
+
 ## 其他
 
 ### 查看你使用的Unity的C#版本
@@ -1759,7 +1826,7 @@ transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
 
 目前还没遇到上面说的那么复杂的问题，那么 Atlas Population Mode 也不太明白，不过如果只有一个回滚字体的话那么是需要设置static的，默认好像也是static。所以就如上创建一个中文回滚字体即可。
 
-#### unitypackage文件怎么用
+### unitypackage文件怎么用
 
 选择资源-----导入包-------自定义包
 
@@ -1777,7 +1844,38 @@ transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
 
 
 
+### 常驻单例对象
 
+有很多对象在游戏初始化加载之后就应该以单例常驻的形式而存在，可以编写一个 `PersistentGameObject` 来获得这个效果。
+
+其主要要做两件事：
+
+1.  DontDestroyOnLoad 常驻本gameObject
+2. 构造一个static字典保存本gameObject的名字和实例，保证在游戏运行起见所有的常驻对象都单例而且名字唯一。
+
+### 翻译插件实践经验分享
+
+目前官方的Localization那个插件还处于preview状态，个人使用体验并不是很好，比如说TextMeshPro下面新增他们的脚本没有正常检测到，然后那么多文本每个都要加入实在是浪费时间。
+
+1. 自己编写一个ScriptableObecjt，核心就是一个字典结构，来存放各个翻译语言的数据，key是字段Key，value是实际的文本。
+2. 全局检索TextMeshPro文本组件，然后根据你的翻译数据来查找对应的字段。这个动作要在每次场景加载完毕之后触发。然后要注意查找最好使用 `Resources.FindObjectsOfTypeAll<TMP_Text>();` ，因为一般来说一些UI面板刚开始是inactive状态，这样使用 `FindObjectsOfType` 是找不到的。
+3. 编写核心找到方法，大概逻辑如下：
+   1. 查找对应的语言，如果找到对应语言的翻译，则试着查找对应的key，没有找到则试着使用默认的翻译
+   2. 默认的翻译即第一个翻译数据，试着查找对应的key，没有找到则返回原key字符串
+4. 这个核心查找方法后面动态变动的文本都要根据这个来，之前那个自动翻译过程只能保证第一次静态的那些文本得到翻译了，后面所有动态文本在对应的变动方法里面加上上面的查找方法 `Translator.Instance[key]` 。
+5. 这个Translator是常驻单例对象。
+
+
+
+### AsyncOperation
+
+场景异步加载 `SceneManager.LoadSceneAsync` 返回的就是一个 AsyncOperation 对象，可以利用其 completed 事件来对接完成后的一些动作。
+
+## FAQ
+
+### 怎么我的场景看上去有点暗
+
+在窗口-渲染那些烘焙下光照，一般Build项目之前是需要烘焙下光照的。
 
 ## 备用
 

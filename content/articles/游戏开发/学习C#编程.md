@@ -12,14 +12,51 @@ Unity游戏开发就是构建在.net平台之上的，这也是笔者学习C#语
 
 笔者还是推荐安装visual studio，然后通过visual studio来安装.net开发环境。具体就是 `.NET桌面开发` 工作负载。有时间和精力的可以折腾dotnet命令行来编译
 
+### .net运行时
 
+前面提到.net平台是支持多个编程语言的，对于C#的编译器来说它们只负责将这些编程语言翻译成那个中间语言，然后.net平台再将这个中间语言翻译成机器码。对于.net运行时来说对于不同的平台有不同的实现，比如.net framework是支持window系统的；.net core支持较多，对windows，linux，macOS都支持；还有Mono+Xamarin了解下是支持IOS和Android。.net framework从4.8版本开始就处于一种待遗弃状态，微软计划以后会将各个.net 平台运行时合并为一个：.net5 。
 
-## helloworld
+本文笔者前面都是使用的 `.net core3` ，后面因为了解到Unity 2020LTS底层是 .net framework4.6之后再新建项目的时候会有意设成 `.net framework` 。然后csproj 文件需要加上这样一小段配置【因为visual studio对于.net framework4.6默认的语言版本是C#7】：
+
+```
+<PropertyGroup>
+  <LangVersion>8.0</LangVersion>
+</PropertyGroup>
+```
+
+好让visual studio使用的C#语言版本是8.0。
+
+对于本文讨论的内容要是约定C#8的话那么各个平台运行时差异是不会太大的，但我也接触到一个这种差异了，比如说 `System.HashCode` 方法在.net framework 运行时上是没有的。所以对于你的项目，从一开始就控制好.net平台的具体实现和版本，有时会让你规避到很多麻烦的问题的。在查看Unity2020.3.11 LTS的vsproj文件配置：
+
+```
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+```
+
+于是决定**本文的代码开发环境是 `.net framework 4.7.1` ，语言版本是c#8，并已全部测试通过了。**
+
+### 本文内容的取舍
+
+本文关于C#编程语言的讨论并不是什么都会加入进来的，除了上面的规定平台是`.net framework 4.7.1` ，语言版本是C#8之外，还会一下内容取舍的考虑：
+
+- 按照Unity官方文档的说明推荐所有语法都遵守.net standard 2.0，因此`Span<T>` 和 `Memory<T>`  和 `Reflection.Emit`不会讨论。
+- 按照Unity官方文档的说明Unity的API都是线程不安全的，因此不应该使用async和await任务。也就是关于C#的异步相关讨论将会忽略。
+- Unity官方文档有自己的线程解决方案而且是推荐使用它们的接口，因此C#原生的线程方面讨论将会忽略。
+- Unity2020.3LTS对于C#8语法有四个不支持的特性，这四个不支持的特性将不会讨论：
+  - Default interface methods
+  - Indices and ranges
+  - Asynchronous streams
+  - Asynchronous disposable
+- Unity官方文档谈到使用C#的reflection有开销过大的问题，不应该使用 Assembly.GetTypes 和 Type.GetMethods() 这样的方法，暂时C#的reflection将略过讨论。
+- 序列化方面会更推荐使用Unity的JSONUtility，这部分内容也略过讨论。
+- 网络方面更推荐直接使用Unity提供的网络接口工具，这部分内容也略过讨论。
+- 从实践角度考虑会更多地介绍class而忽略struct的讨论，会更多地介绍List而忽略数组array的讨论。
+
+### helloworld
 
 学习任何一门新的编程语言，必然先从打印一串hello world字符串开始。
 
 1. 创建新项目
-2. 选择控制台应用(.net core)【.net core就是上面谈及的.net平台的运行时，此外还有.net framwork等。.net framework只支持windows系统，.net core支持多个操作系统，微软对.net framework处于待遗弃状态，visual studio2019，C\#8 ，.net core3.0 这几个关键词需要了解下，它们是同一时间发布的。以后微软计划将各个.net平台运行时合并为一个——.net5。】
+2. 选择控制台应用(.net framework)
 3. 生成->生成解决方案
 4. 调试->开始调试
 
@@ -44,6 +81,8 @@ namespace ConsoleApp1
 - `static void Main...` 这是定义一个类的方法，Main方法比较特殊，为本程序的入口方法
 - `string[] args` 这是该方法接受的一个参数，该参数是一个string类型的数组。
 - `Console.WriteLine` 调用打印方法 【完整的变量名是 System.Console.WriteLine，该变量名是一个方法，因为你之前使用了using System，所以这里可以省略System的命名空间前缀了。】
+
+
 
 ## 第二个例子
 
@@ -103,6 +142,7 @@ C#在基本的运算符这块和C++或者说和大部分编程语言来说都差
 & 按位与
 | 按位或
 ^ 按位异或
+~ 反码
 << 按位左移
 >> 按位右移
 += 即运算后赋值，这类还有 -= /= 等等就不赘述了
@@ -139,9 +179,9 @@ v.GetType();
 
 ### value type
 
-C#有两种变量类型，value type直接存储变量的值，reference type存储的是对目标数据的引用。value type是存储在stack堆栈里面的，reference type是存储在heap堆里面的，具体这个后面再细说。
+C#有两种变量类型，value type直接存储变量的值，reference type存储的是对目标数据的引用。value type的值是存储在堆栈stack里面的，具体是什么值就存放的是什么值，value type变量之间的赋值是传递的实际的值；而reference type的值存放在堆栈stack里面的只是对一个堆heap结构的引用地址，也就是具体该对象的值是存储在该堆heap里面的，reference type变量之间的赋值是传递的引用地址，也就是它们实际上都指向的是同一对象【或者说同一内存段内的数据】。
 
-<u>C#的所有变量都是有默认值的</u>，比如reference type变量的默认值是null，比如bool类型默认值是false。虽然如此但个人建议对于布尔值还是明确确定初始值会好一些。其他的数值一般默认值为0字符串默认为空字符串等这些都符合大家的心理预期。
+<u>C#的所有变量都是有默认值的</u>，比如reference type变量的默认值是null，比如bool类型默认值是false。该默认值可以用default关键词来表示。
 
 value type变量赋值给另外一个变量，其值是copy过去的。比如说
 
@@ -224,7 +264,7 @@ Coordinate point = new Coordinate(10, 20);
 
 #### null
 
-reference type变量的默认值就是null。
+reference type变量的默认值就是null。一个reference type变量的值为null表示该reference type变量还没有赋值。
 
 判断某个object是否是null以前一般的写法是：
 
@@ -244,7 +284,11 @@ if (object is null){
 
 如果你使用is表达式的话，编译器会确保该object的`==` 和 `!=` 运算符没有被重载。这会更严谨些吧。
 
-还有一种两个问号的写法C#8版本才有，这里就忽略讨论了。
+一般来说value type变量是不能为null的，但如果你类似下面的声明一个value type变量，则其也是可以为null的：
+
+```
+int? a;
+```
 
 
 
@@ -324,7 +368,9 @@ C# 采用 **统一的类型系统**。 所有 C# 类型（包括 `int` 和 `doub
 
 读者可能会问int不是value type吗，其继承自object，而object则是reference type，这怎么回事。这涉及到 Boxing and Unboxing 的概念。
 
-将一个object转成value type称之为unboxing过程，反之是boxing过程。value type存储在堆栈stack里面的，reference type存储在堆heap里面的。boxing过程先需要将value type里的value取出存入heap，然后获得heap的reference指向。而unboxing过程是从heap里面将对应值取出来然后存放入stack。
+##### boxing和unboxing
+
+将一个object转成value type称之为unboxing过程，将一个value type变量转成reference type变量称之为boxing过程。value type存储在堆栈stack里面的，reference type实际值是存储在堆heap里面的。boxing过程先需要将value type里的value取出存入heap，然后获得heap的reference指向。而unboxing过程是从heap里面将对应值取出来然后存放入堆栈stack里面。
 
 下面是boxing过程：
 
@@ -574,7 +620,7 @@ params关键词，参数类型一维数组，后面不能再带参数了。
 
 ### switch语句
 
-switch语句在C#这边和C++那边差异很大，C++的switch语句的目标测试变量必须是整型或者枚举类型或者能够转成整型或枚举类型的对象。而C#那边之前支持的类型就很多，现在是任何非null表达式都行。比如下面就是直接对字符串是否相等然后进行switch，这在C++那边是不行的。
+switch语句在C#这边和C++那边差异很大，C++的switch语句的目标测试变量必须是整型或者枚举类型或者能够转成整型或枚举类型的对象。而C#那边之前支持的类型就很多，现在是**任何非null表达式**都行。比如下面就是直接对字符串是否相等然后进行switch，这在C++那边是不行的。
 
 ```c#
             string x = "xxxx";
@@ -633,7 +679,7 @@ C#的foreach可以迭代的对象除了上面演示的array之外，C#常用的C
 (input-parameters) => expression
 ```
 
-
+labmda表达式就是程序界为大家熟知的匿名函数的概念，因为C#这边没有所谓的函数对象，所以C#lambda表达式要某就是一个delegate对象，这个delegate对象一开始就绑定了这个匿名函数定义的行为，或者其他什么对象。
 
 ### 异常捕捉
 
@@ -672,7 +718,7 @@ finally
 
 下面这种写法是C#官方文档的推荐实现：
 
-```
+```c#
 public class MyCustomException: Exception
 {
 	public MyCustomException(){}
@@ -713,13 +759,59 @@ Character hero = new Character("lucy");
 
 上面演示了如何声明一个class，这个class继承自某个父类，class类都有默认的无参构造方法，这里再给该class类定义了一个接受参数的构造方法，然后演示了this关键词，最后演示了如何实例化一个class类。
 
+### 构造方法允许重载
+
+如下所示构造方法还允许重载并使用this关键词。
+
+```c#
+public class Character: BaseClass
+{
+    public string name;
+    public int exp = 0;
+
+    public Character(string name)
+    {
+        this.name = name;
+    }
+    public Character(string name, int exp): this(name)
+    {
+        this.exp = exp;
+    }
+}
+
+Character hero = new Character("lucy");
+```
+
+### 单例类
+
+类的构造方法可以是private的，这个类的生成可以通过本类下面的某个static方法来获得，一个经典应用就是实现单例类：
+
+```c#
+public sealed class Singleton
+{
+    private static readonly Singleton s_Instance = new Singleton();
+
+    static Singleton()
+    {
+    } // Make sure it's truly lazy
+
+    private Singleton()
+    {
+    } // Prevent instantiation outside
+
+    public static Singleton Instance { get { return s_Instance; } }
+}
+```
+
+
+
 ### this
 
 this关键词类似于python里面的self，和C++上的this大体含义也是一样的，是一个指向本类实例的指针。同样在本类里面定义的方法下面都默认带入了this这个参数，也就是在各个方法里面直接使用即可。静态类或静态方法里面是没有this关键词的，因为默认是不实例化，当然就没有this这个关键词了。
 
 
 
-### 属性值的get和set写法
+### 属性
 
 ```c#
     private string _name;
@@ -739,7 +831,7 @@ this关键词类似于python里面的self，和C++上的this大体含义也是�
 public string Name { get; set; }
 ```
 
-在实践中推荐采用如下自动属性写法时间：
+在实践中推荐采用如下自动属性写法：
 
 ```
 public string Name { get; }
@@ -813,7 +905,7 @@ readonly修饰属性字段和const的区别是，const初始化时必须给定�
 
 ### 静态构造方法
 
-如下静态构造方法：
+静态构造方法对于每个type只执行一次而不是每个实例。如下静态构造方法：
 
 ```
 class SimpleClass
@@ -830,7 +922,7 @@ class SimpleClass
 }
 ```
 
-这个静态构造方法不接受参数，也没有访问权限修饰符，其被运行时自动调用，主要的作用就是对 `static readonly` 的变量进行初始值计算和设定【const和static是不能共存的】。具体该构造方法调用是在非静态类实例化之前或者静态类第一次属性访问之前。
+静态构造方法不接受参数，也没有访问权限修饰符，其被运行时自动调用，主要的作用就是对 `static readonly` 的变量进行初始值计算和设定【const和static是不能共存的】。具体该构造方法调用是在非静态类实例化之前或者静态类第一次属性访问之前。
 
 ### ref和in和out
 
@@ -841,6 +933,7 @@ void Method(ref int refArgument)
 {
     refArgument = refArgument + 44;
 }
+
 int number = 1;
 Method(ref number);
 Console.WriteLine(number);
@@ -853,18 +946,41 @@ in关键词大体可以类似于 `readonly ref` 这样的作用机制。
 
 out关键词大体类似于ref除了它不要求初始化，主要是用于如下应用场景【方法进行一些动作，然后将动作的结果存储在out变量上】：
 
-```
-int initializeInMethod;
-OutArgExample(out initializeInMethod);
-Console.WriteLine(initializeInMethod);     // value is now 44
-
+```c#
 void OutArgExample(out int number)
 {
     number = 44;
 }
+
+int initializeInMethod;
+OutArgExample(out initializeInMethod);
+Console.WriteLine(initializeInMethod);     // value is now 44
 ```
 
+现在out接受变量可以直接被声明了，比如说上面的例子，可以直接简写为：
 
+```c#
+OutArgExample(out int initializeInMethod);
+Console.WriteLine(initializeInMethod);     // value is now 44
+```
+
+如果out出来的变量你是不需要的，则可以用 `_` 忽略掉。
+
+```
+Split("a b c", out string a, out _ , out _);
+```
+
+### 定义索引语法
+
+让你的自定义对象支持类似字典 `d["a"]` 这样的索引语法：
+
+```c#
+public string this [int index]
+{
+    get {// do your retrieve work; }
+    set {// what = value;}
+}
+```
 
 ### 继承
 
@@ -927,7 +1043,7 @@ class Point : IPoint
 }
 ```
 
-C#8对interface新增了很多内容，目前我这边环境是C#7，interface的功能很有限，只支持
+C#7的interface的功能只支持
 
 - 方法
 - 属性
@@ -988,7 +1104,11 @@ class Square : Shape
 1. 抽象基类的abstract成员不用写上virtual关键词了，因为它已经暗含virtual了。
 2. 子类实现abstract成员需要加上override关键词。
 
+#### 类型转换
 
+如果是子类对象要求向上强制转成父类对象，子类对象没有发生变化，还是指向原来的子类对象。就好比你要将香蕉转成水果，香蕉本来就是水果了，没什么好转的。
+
+但是如果是父类转子类则情况就较复杂了，还可能会失败。
 
 ### 多态
 
@@ -1014,7 +1134,37 @@ C++就多态这个议题从C++11开始也有virtual和override这两个关键词
 
 上面的讨论主要是在说方法，属性同样也适用上面关于多态的讨论。
 
+#### 隐藏继承来的成员
 
+如果子类直接定义一个和父类同名的成员则就直接隐藏覆盖继承来的成员了，不过编译器可能会报警说你隐藏了继承来的成员，你是有意要这样做吗，可以加个new关键词。
+
+```c#
+public class A 
+{
+    public int a = 1;
+}
+public class B:A
+{
+    public new int a = 2;
+}
+```
+
+这个new和new一个object没有任何关系，这里new的意思只是告诉编译器我是有意要隐藏继承来的成员。
+
+virtual-override和这里讨论的隐藏new一个成员的区别是，override会影响基类的行为，当override之后基类调用这些成员的行为和子类是一致的。
+
+#### base
+
+base调用父类的构造方法这个前面说过了，此外base还有一个用法那就是调用被override的父类的成员：
+
+```c#
+public class House: Asset
+{
+    public override decimal Liability => base.liability + Mortgage;
+}
+```
+
+所以base的含义就是总是调用父类，而不会管隐藏继承或者override。
 
 #### 运算符重载
 
@@ -1035,6 +1185,43 @@ C#的所有class和struct都继承自Object，因此它们都有ToString方法�
 public override string ToString(){
     
 }
+```
+
+### 解构方法
+
+给你的类定义一个Deconstruct方法，然后你的类可以如下解构了：
+
+```c#
+    public class Complex
+    {
+        public double Real { get; private set; }
+        public double Imaginary { get; private set; }
+
+        public Complex(double real = 0, double imaginary = 0)
+        {
+            this.Real = real;
+            this.Imaginary = imaginary;
+        }
+        
+        public void Deconstruct(out double real, out double imaginary)
+        {
+            real = Real;
+            imaginary = Imaginary;
+        }
+    }
+    
+    ////////
+    
+    Complex test = new Complex(1,2);
+    var (a, b) = test;
+    Console.WriteLine($"a = {a}, b = {b}");
+```
+
+上面的写法更简洁，大概等价于：
+
+```
+            double a, b;
+            test.Deconstruct(out a, out b);
 ```
 
 
@@ -1162,7 +1349,7 @@ public override string ToString(){
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Real, Imaginary);
+            return new { this.Real, this.Imaginary }.GetHashCode();
         }
 
         public static bool operator ==(Complex a, Complex b)
@@ -1390,6 +1577,16 @@ s1.ExceptWith(b); // s1-b 差集
 ```
 
 上面谈论的这些Collection都是线程不安全的，如果你需要在多线程上使用它们则需要加外部锁，而更推荐的做法是使用 `Sysytem.Collections.Concurrent` 里面的对象，里面的对象是线程安全的，也就是C#内部将这些锁的问题解决了，内部锁机制效率会高一点。
+
+### Collection类打印
+
+```
+string.Join(" ", set);
+```
+
+
+
+
 
 ## delegate和event
 
@@ -1745,6 +1942,10 @@ public VoidComponentEvent myEvent2 = new VoidComponentEvent();
 
 ## LINQ
 
+LINQ ( Language Integrated Query) 
+
+
+
 ### 检查元素是否在array中
 
 ```
@@ -1757,7 +1958,143 @@ string fruit = "mango";
 bool hasMango = fruits.Contains(fruit);
 ```
 
+
+
+## C#8的新特性
+
+Unity2019用的是C#7，Unity2020用的是C#8，本小节主要讨论C#8新增的然后Unity2020也是支持的新特性，剩下那四个Unity2020还不支持的就暂时略过讨论了。
+
+### nullable reference types
+
+这个更多的是一个防止出现 `NullReferenceException` 的一个手段，加上Unity那边情况又有所不同，个人不怎么考虑使用这个特性了。
+
+默认情况下visual studio也没有开启这个特性，也就是默认认为reference type的默认值是null，都是可能为null的。
+
+
+
+### switch语句更紧凑
+
+这里主要是指的switch语句的更紧凑版本，这个更紧凑的版本可以让那些if elseif 格式的狂热爱好者也来看上一眼并喜欢上switch语句了。前面提到到 c#7的时候switch语句的那个评估表达式就可以是任意非空的表达式了，而在c#8则有了这样的更紧凑版本：
+
+```c#
+public static RGBColor FromRainbow(Rainbow colorBand) =>
+    colorBand switch
+    {
+        Rainbow.Red    => new RGBColor(0xFF, 0x00, 0x00),
+        Rainbow.Orange => new RGBColor(0xFF, 0x7F, 0x00),
+        Rainbow.Yellow => new RGBColor(0xFF, 0xFF, 0x00),
+        Rainbow.Green  => new RGBColor(0x00, 0xFF, 0x00),
+        Rainbow.Blue   => new RGBColor(0x00, 0x00, 0xFF),
+        Rainbow.Indigo => new RGBColor(0x4B, 0x00, 0x82),
+        Rainbow.Violet => new RGBColor(0x94, 0x00, 0xD3),
+        _              => throw new ArgumentException(message: "invalid enum value", paramName: nameof(colorBand)),
+    };
+```
+
+其相当于以前的写法是：
+
+```c#
+public static RGBColor FromRainbowClassic(Rainbow colorBand)
+{
+    switch (colorBand)
+    {
+        case Rainbow.Red:
+            return new RGBColor(0xFF, 0x00, 0x00);
+        case Rainbow.Orange:
+            return new RGBColor(0xFF, 0x7F, 0x00);
+        case Rainbow.Yellow:
+            return new RGBColor(0xFF, 0xFF, 0x00);
+        case Rainbow.Green:
+            return new RGBColor(0x00, 0xFF, 0x00);
+        case Rainbow.Blue:
+            return new RGBColor(0x00, 0x00, 0xFF);
+        case Rainbow.Indigo:
+            return new RGBColor(0x4B, 0x00, 0x82);
+        case Rainbow.Violet:
+            return new RGBColor(0x94, 0x00, 0xD3);
+        default:
+            throw new ArgumentException(message: "invalid enum value", paramName: nameof(colorBand));
+    };
+}
+```
+
+但是在以前的写法基础上，还增加了更多灵活的属性匹配，数组对匹配等。
+
+### using语句更好用
+
+using语句大概类似python里面的with语句，本来using语句是这样的：
+
+```
+using (FileStream fs = File.Open(path, FileMode.Open))
+{
+}
+```
+
+或者其他类似的对象实现了 `IDisposable` 接口。
+
+现在可以直接这样写了：
+
+```
+{
+    using FileStream fs = File.Open(path, FileMode.Open);
+} // Dispose
+```
+
+不要担心Dispose方法没有调用，Dispose方法会在下一次遇到的花括号之后再执行的。
+
+### Disposable ref structs
+
+### readonly struct member
+
+现在结构体的成员可以加上readonly修饰符了。
+
+```c#
+public readonly override string ToString() =>
+    $"({X}, {Y}) is {Distance} from the origin";
+```
+
+比如结构体的方法加上readonly之后编译器会检查这个方法，强制要求这个方法不能修改结构体内的属性字段，否则编译器将会报错。
+
+### Null-coalescing assignment
+
+【null合并赋值】之前就有了 `??` 符号，意思是如果左边不是null，则返回左边的值，否则计算右边的表达式的值，然后返回该值。
+现在C#8 新增了下面的写法：
+
+```
+list ??= new List<string>();
+```
+而上面 `??=` 的意思是如果list不会null则什么都不做，如果list为null则执行右边表达式的值并赋值给list。
+
+### Unmanaged constructed types
+
+### Static local functions
+
+从c#7开始方法里面还可以再定义一个函数了，这个函数叫做local function。现在C#8开始local function可以是static的了。一个static的local function不能捕捉本地变量和实例状态了【规范术语叫做enclosing scope里面的变量，local function里面叫做local scope，再外面就是enclosing scope，然后就是global scope】。
+
+这个一般能用lambda表达式就用lambda表达式，实在确实感觉需要这个再说吧。
+
+
+
 ## 文件读写
+
+### File类
+
+- File.Exists  判断文件是否存在
+- File.Copy 文件复制动作，第三个参数设为true则允许覆写目标文件，否则抛出异常。
+- File.Create 创建一个空白的临时文件，如果指定文件名已存在则会覆写。返回FileStream对象
+- File.CreateText 创建一个空白的UTF8的空白文本文件，如果指定文件名已存在则会覆写。返回FileStream对象。
+- File.Delete 删除某个文件
+- File.Move 文件移动动作，源文件不存在或者目标文件已经存在都会抛出异常，需要做好判断。
+- File.ReadAllText 打开某个文件，读取文本内容，然后关闭该文件，然后返回读取到的string内容。如果找不到源文件会抛出异常。
+- File.WriteAllText 创建一个新的文件，如果目标文件已经存在，则会被覆写，然后将内容写入该文本文件中，然后关闭该文件。
+
+
+
+## 程序诊断
+
+
+
+## 资源管理
 
 
 
@@ -1767,19 +2104,11 @@ C#项目在visual studio上很方便创建一个对应的单元测试项目，�
 
 
 
-## 多线程和异步
-
-这块Unity那边有相应的支持，遇到需求了再说。
-
-
-
 ## 正则表达式
 
 这块后面有需求遇到了再补上。
 
-## Relection和Dynamic Programming
 
-粗略看了下，估计一般用不上吧。
 
 ## 其他
 
@@ -1815,12 +2144,49 @@ a?[x]
 default(int);
 ````
 
+### initializer
 
+#### object initializer
 
-### hashset打印
+首先object initializer和类的构造方法初始化类是两回事，object initializer是一个便捷的初始化对象各个字段值的方法。其完整的写法是：
+
+```c#
+Cat cat = new Cat() { Age = 10, Name = "Fluffy" };
+```
+
+然后一般简写为：
+
+```c#
+Cat cat = new Cat { Age = 10, Name = "Fluffy" };
+```
+
+完整的写法表示object initializer调用的是该类的无参构造方法，默认假设你没有给该类编写构造方法则自动会有一个默认的。但如果你给该类编写了构造方法，则还需要写个简单的无参构造方法然后才能使用object initializer：
 
 ```
-string.Join(" ", set);
+    public Cat()
+    {
+    }
+```
+
+
+
+#### collector initializer
+
+collector initializer是对于实现了IEnumerable接口的类【比如Collection库里面的那些对象】然后其有Add方法，则可以用来快速初始化一些值。
+
+```c#
+List<int> digits = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };  
+```
+
+字典因为支持`d["a"]` 和 `d["a"] = 1` 这样的索引写法，所以collector initializer还支持这样的写法：
+
+```c#
+var moreNumbers = new Dictionary<int, string>
+{
+    {19, "nineteen" },
+    {23, "twenty-three" },
+    {42, "forty-two" }
+};
 ```
 
 
@@ -1885,7 +2251,35 @@ E as T
 
 执行E表达式，然后将结果转成类型T，此过程不会抛出异常，如果转换失败则会返回null。
 
+### Func delegate
 
+C#定义了一系列的Func delegate用来表示不同的函数类型从而来定义函数参数：
+
+```
+T Applay<T> (T a, T b, Func<T, T, T> f){
+    return f(a,b);
+}
+```
+
+上面的Func delegate调用的是：
+
+```
+public delegate TResult Func<in T1,in T2,out TResult>(T1 arg1, T2 arg2);
+```
+
+此外还有：
+
+```
+public delegate TResult Func<out TResult>();
+public delegate TResult Func<in T,out TResult>(T arg);
+.......
+```
+
+无参函数直到接受16个参数的函数。
+
+### Action delegate
+
+C#还定义了一系列的Action delegate委托，从无参直到接受16个参数的函数，和Func的唯一不同就是这些函数没有返回值。一般Action delegate在上面讨论的事件驱动编程那边应用较多。
 
 ### 获取本类的名字
 
@@ -1893,12 +2287,127 @@ E as T
 this.GetType().Name
 ```
 
+### using static
+
+该类下的所有静态方法将可以直接使用：
+
+```
+using static System.Console;
+
+WriteLine("Hello World.");
+```
+
+### XML注释文档
+
+#### summary
+
+```
+/// <summary>
+/// 这里放着对该方法的一些说明文字 
+///</summary>
+public void Method(){
+
+}
+```
+
+#### param
+
+```
+/// <param name="what">这里放着对某个参数的描述</param>
+```
+
+#### return
+
+```
+/// <returns>
+/// The sum of two integers.
+/// </returns>
+```
+
+### 定义自己的可迭代对象
+
+这个可迭代对象术语不知道正不正确，但不管怎么说意思就是你的类实现了IEumeratable接口之后，该类可以用foreach来迭代了。它需要你返回一个 IEumerator对象。
+
+```c#
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return (IEnumerator)GetEnumerator();
+    }
+
+    public SerializableDictionaryEnum<TKey, TValue> GetEnumerator()
+    {
+        return new SerializableDictionaryEnum<TKey, TValue>(m_keys, m_values);
+    }
+
+```
+
+然后定义IEumerator对象需要定义Current，MoveNext和Reset三个方法即可。写法大体类似下面所示：
+
+```c#
+public class SerializableDictionaryEnum<TKey, TValue> : IEnumerator
+{
+    private List<TKey> m_keys;
+
+    private List<TValue> m_values;
+
+    private int position = -1;
+
+    public SerializableDictionaryEnum(List<TKey> m_keys, List<TValue> m_values)
+    {
+        this.m_keys = new List<TKey>(m_keys);
+        this.m_values = new List<TValue>(m_values);
+    }
+
+    object IEnumerator.Current
+    {
+        get
+        {
+            return Current;
+        }
+    }
+
+    public KeyValuePair<TKey, TValue> Current
+    {
+        get
+        {
+            try
+            {
+                return new KeyValuePair<TKey, TValue>(m_keys[position], m_values[position]);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
+
+    public bool MoveNext()
+    {
+        position++;
+        return (position < m_keys.Count);
+    }
+
+    public void Reset()
+    {
+        position = -1;
+    }
+}
+```
+
+
+
+### LINQpad工具
+
+一个很方便地快速测试C#表达式和LINQ表达式或者C#片段小程序的工具：[https://www.linqpad.net](https://www.linqpad.net/)
+
 
 
 ## 参考资料
 
 1. [microsoft docs: a tour of csharp](https://docs.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/)
 2. learning C# programming by Marius Bancila and Raffaele Rialdi and Ankit Sharma
+3. c# 8.0 in a nutshell by Joseph Albahari and Eric Johannsen 
+4. c# in depth forth edition by Jon Skeet
 
 
 
