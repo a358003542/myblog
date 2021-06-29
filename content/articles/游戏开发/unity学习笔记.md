@@ -121,32 +121,7 @@ public static Object Instantiate(Object original, Vector3 position, Quaternion r
 
 首先在编辑器上调整好开发者视角，然后选中某个摄像头，然后选择 `游戏对象-> align with view` 。
 
-## blender和unity的协作
 
-虽然Unity的ProBuilder和PloyBrush提供了一定的模型建立和地形构建的能力，但这主要还是用于原型开发，一般建模当然还是推荐在blender上完成，然后可能Unity的terrian地形工具搭建某些简单的地形有用，不过就成熟的项目来说地形构建也推荐是通过blender建模来实现。
-
-首先Unity的地形工具是有局限性的，某些封闭的如洞穴场景或者如同minecraft需要和地形的元素进行交互的场景是不应该使用Unity的terrian地形工具的，而应该通过blender建模来导入到Unity场景中来。其次即使是那些似乎看起来Unity地形工具勉强能够应付的场景，如果后续对地形在表现细节上有更多的要求，那么也应该通过blender建模来实现。
-
-### blender建模
-
-blender建模导入Unity下面说一下基本的流程思路，可能有时会有一些细节上的问题。
-
-1. 按A全选你想要导出的元素，主要是网格体和骨架。选择导出到FBX，然后选择网格体，如果有骨骼的话也推荐将骨架选上。然后导出。
-2. 将FBX文件移动到你的Unity项目中，Unity会自动检测导入，但一般来说你还需要对模型导入配置参数进行一些调整。比如材质，比如如果是人形模型，而你希望根据该人形模型构建动画还需要自动创建Avatar。
-3. FBX模型最好是另外单独一个地方存放，导入的模型参数配置好之后，拖入场景，然后拖动制成Perfab预制件，然后解压缩预制件，再对该预制件进行一些你想要的修改，比如有的加上碰撞器和行为脚本之类的。在更新预制件。
-
-### blender动画
-
-blender里面的动画导出到Unity也是类似上面的导出FBX，实际上就是导出的你的模型的骨架的一些移动变换数据，然后Unity接受成为动画Clips。
-
-1. 按A全选你想要导出的元素，主要是网格体和骨架。选择导出到FBX，然后选择骨架，和导出一般模型不同，如果你只希望导出动画的话这里只选择骨架即可。
-2. FBX动画文件导入Unity项目中，然后对动画Animation这一栏一些参数做出一些调配，还有Avatar选择Copy from之前本模型创建的那个Avatar。
-
-个人测试相同的人形模型差异不太大的话即使是原来不同的Avatar动画文件里面的内容也是可以复制，大体可以参考的。这一块主要是动画姿态的不匹配问题，如果是自己很粗略弄的动画反倒是泛用性会很强，而那些动捕或者调配的很好的姿态，泛用性会很差，比如一个女性角色的走路姿态套用到一个男性角色上然后出来的效果你懂的。
-
-简单的Unity动画就在Unity那边编辑即可，但有些动画文件很复杂，而Unity那边的动画文件编辑功能并不是很强大，可能还是要继续再blender那边修改之后再应用到Unity那边。
-
-最后提醒一点blender那边的骨架的各个名字最好先就定义好，从blender到unity预制件这条线路各个骨架的名字基本上不会再修改了，修改只会造成各种麻烦。
 
 
 
@@ -810,19 +785,25 @@ public static bool Raycast(Vector3 origin, Vector3 direction, float maxDistance 
 
 RayCast参数还有好几种形式，这个就参看官方文档了，不在这里赘述了。
 
+### BoxCast
 
+BoxCast的意思是沿着某个Ray投射一个Box。可以理解为在RayCast的基础上再加上了一个移动的Box的体积判断。
 
-### Physics.CheckCapsule
+还有SphereCast也是类似的。
+
+### CheckCapsule
 
 这个可以用来测试玩家角色是否接触地面，具体这个方法参数官方文档读起来也不是很直观，具体来说其定义了这样一个胶囊：
 
 ![img]({static}/images/2021/unity_capsule.png)
 
-其中的layer层一般将地形GameObject放入该层。
+
 
 ```
 public static bool CheckCapsule(Vector3 start, Vector3 end, float radius, int layerMask = DefaultRaycastLayers, QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.UseGlobal);
 ```
+
+这里的layerMask是选中的图层才会进入碰撞判断。
 
 ### 图层
 
@@ -898,6 +879,18 @@ LayerMask.GetMask("UserLayerA", "UserLayerB");
 
 ## 摄像机
 
+摄像机里面有些术语，具体观察下场景：
+
+- Near cliping plane 最近裁剪面，摄像头和最近裁剪面之间的那点空间里面的游戏对象是不会渲染的。
+
+- Far cliping plane 最远裁剪面 意义很明显，超过那个平面的游戏对象是不会渲染的。
+
+- Camera frustum 摄像机截头体 就是由上面的最近裁剪面和最远裁剪面组成的一个类似金字塔形状去掉头的那个空间，这部分空间里面的游戏对象才会渲染到摄像机里面。
+
+  
+
+后面会讲到从摄像机发射射线的概念，这个射线的定义对物理系统射线投射可以相互配合，这个射线有个screenpoint或者vireport的平面概念，这个平面指的就是最近裁剪面，也就是可以理解为这个射线是从最近裁剪面发射出去的。
+
 ### 多个摄像机
 
 Unity可以添加多个摄像机组件，摄像机有个参数叫做深度，这个深度值最大的摄像机将是最终显示的那个摄像机【如果两个摄像机在显示上都是全覆盖的】。
@@ -916,13 +909,7 @@ public Ray ScreenPointToRay(Vector3 pos);
 
 该pos的z值将忽略。
 
-### 分屏显示
-
-摄像机的Viewport矩形x和y值决定了显示的起始位置，x值是横向，y值是竖向。比如(0,0) 是最左边那里，`(0.5,0)` 是横向宽度50%竖向继续0%那里。然后w是显示的宽度，0.5就是显示宽度为整个宽度的50%。h是显示高度。
-
-调配两个摄像头的Viewport矩形参数，一个(0,0)显示宽度0.5，显示高度1；一个(0.5,0)显示宽度0.5，显示高度1就可以达到一种横向分两个屏幕显示的效果。
-
-继续调配这个Viewport矩形参数还可以做到另外一个摄像头专门在显示界面右上角来显示，一种类似小地图的功能。
+还有一个类似的方法 ViewportPointToRay ，ViewPortPoint里面是通过 `0-1` 来定义平面点的位置，而ScreenPoint是通过像素距离来定义平面点的位置。
 
 ### viewportToWorldPoint
 
@@ -933,6 +920,18 @@ Vector3 p = camera.ViewportToWorldPoint(new Vector3(1, 1, camera.nearClipPlane))
 ```
 
 其中Vector3的x和y如果是 `(0,0)` 则是左下角，如果是 `(1,1)` 则是右上角，这个z值设置为 `camera.nearClipPlane` 是摄像机的近裁剪平面，还有一个远裁剪平面，z值也可以设置为0就是紧贴着摄像机。
+
+
+
+### 分屏显示
+
+摄像机的Viewport矩形x和y值决定了显示的起始位置，x值是横向，y值是竖向。比如(0,0) 是最左边那里，`(0.5,0)` 是横向宽度50%竖向继续0%那里。然后w是显示的宽度，0.5就是显示宽度为整个宽度的50%。h是显示高度。
+
+调配两个摄像头的Viewport矩形参数，一个(0,0)显示宽度0.5，显示高度1；一个(0.5,0)显示宽度0.5，显示高度1就可以达到一种横向分两个屏幕显示的效果。
+
+继续调配这个Viewport矩形参数还可以做到另外一个摄像头专门在显示界面右上角来显示，一种类似小地图的功能。
+
+
 
 ### cinemachine
 
@@ -1049,7 +1048,7 @@ foreach (Transform child in parent){
 
 非常有用的一个方法，请注意看官方文档下面的这个例子，两个class是作为同一GameObject的两个脚本组件挂在上面的，确切来说本GameObject上所有MonoBehaviour也就是脚本组件都会被通知到，如果脚本组件有目标方法，则会执行该方法。
 
-```
+```c#
 using UnityEngine;
 
 public class Example : MonoBehaviour
@@ -1071,6 +1070,10 @@ public class Example2 : MonoBehaviour
     }
 }
 ```
+
+sendmessage和getcomponent by type 估计内部效率是差不多的，有一个很有用的应用情景。一般来说我们编写的脚本比如selecable啊，damageable等等都是一些通用的脚本组件。这些通用的脚本组件是不合适编写具体某一个游戏对象的行为逻辑的。但是对于select或者damage来说又另外再编写一个脚本组件也没必要，所以通过事件通道上传信息之后再由上面系统分发通知各个组件来sendmessage，这个时候通过sendmessage再具体调用某一消息下的更具体的实例行为。
+
+sendmessage第三个选项可以设置为没有接收人也不会报错。
 
 
 
@@ -1106,9 +1109,15 @@ FixedUpdate是每隔一定固定时间段执行，一般物理模拟内容放在
 
 Start Awake 脚本都只会执行一次，Awake先于Start执行。而OnEnable是本脚本组件只要发生了Enable事件都会被执行一次。
 
+这里说的再具体一点就是`.enable = true` 执行之后该脚本组件将会执行 `OnEnable` 方法。`.enable=false` 执行之后将会执行 `OnDisenable` 方法。还有就是因为脚本组件会随着挂载上的游戏对象激活而激活，如果是整个游戏对象 `SetActive(true)` ，那么脚本组件也会执行 `OnEnable` 方法。
+
 Start和Awake的区别是Awake那怕本脚本组件没有激活，只要本脚本组件挂载的GameObject已经激活了那么本脚本组件也会Awake，但不会执行Start，只有本脚本组件第一次Enable之后才会执行Start函数。
 
 
+
+#### LateUpdate
+
+在Update方法之后执行，也在各个可能的动画移动之后，一般用于摄像机的调整动作。
 
 #### Reset方法
 
@@ -1260,7 +1269,7 @@ Panel其实就是Image，只是有些属性预设值和Image的预设值不太�
 
 #### Image
 
-
+Raycast Target 选项是本Image是否是一个Raycast目标，也就是 `GraphicRaycaster.Raycast` 是否和该Image交互。
 
 ### 自动布局
 
@@ -1301,7 +1310,17 @@ UI里面有些地方用的是sprite文件对象，如果你直接导入png图片
 
 
 
+### EventSystem
 
+一个场景只能有一个EventSystem组件，如果是多个场景，场景切换有时会出现问题，推荐的做法是将最开始的EventSystem组件做成常驻对象，然后之后所有的场景都共享这一个EventSystem。
+
+EventSystem下面有输入模块支持，如果使用的是Unity的新的输入系统，推荐统一为你游戏内统一使用的Action Assets。
+
+首个选择项指的是首个UI元素选择项，这在某些情况下比如鼠标突然不能动，一般为空也没关系。
+
+发送导航事件，一般勾选上，发送move，submit，cancel等等导航事件。
+
+阻力阈值，这个中文翻译很让人困惑，英文是Drag threshold，就是拖动操作的判断阈值。
 
 ## 导航系统
 
@@ -1397,9 +1416,7 @@ agent.destination = transform.position;
 
 Apply root motion：应用根运动。是从动画本身控制角色的移动和旋转还是从脚本。
 
-脚本那边设置这个参数是通过 `animator.applyRootMotion` 。
-
-如果脚本定义了 `OnAnimatorMove` 方法，则applyRootMotion不起作用。
+脚本那边设置这个参数是通过 `animator.applyRootMotion` 。如果脚本定义了 `OnAnimatorMove` 方法，则applyRootMotion不起作用 【参考Animator.applyRootMotion 文档。】。
 
 更新模式：
 
@@ -1467,7 +1484,36 @@ Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
 
 最后要提醒一点的是灯光只是让这个对象在发光，要让这个对象看起来在发光还需要给这个对象添加对应的发光材质。
 
+## 地形
 
+前面说过，这里再强调一遍，地形更多是你未来场景的蓝图，而不是你未来游戏的实际效果展示，所以在绘制地形的时候不要花费太多精力在地形的细枝末节上，点到为止即可，很多细节还需要后面慢慢调整的【因为地形也不仅仅只是环境搭建，还要考虑游戏流程和关卡设计的。】
+
+默认地形宽度长度为一千米。
+
+## blender和unity的协作
+
+虽然Unity的ProBuilder和PloyBrush提供了一定的模型建立和地形构建的能力，但这主要还是用于原型开发，一般建模当然还是推荐在blender上完成。
+
+至于Unity的地形工具是有局限性的，某些封闭的如洞穴场景或者如同minecraft需要和地形的元素进行交互的场景是不应该使用Unity的terrian地形工具的，而应该通过blender建模来导入到Unity场景中来。其次即使是那些似乎看起来Unity地形工具勉强能够应付的场景，如果后续对地形在表现细节上有更多的要求，那么也应该通过blender建模来实现。【**这里补充说明一下**：关于Unity 地形工具后面会讨论的，上面对Unity地形工具的讨论不是说Unity地形工具没用，我们在成熟的项目的场景里面可能都看不到地形这个要素了，但地形工具还是很有用，Unity地形工具和ProBuilder一样更多的是用于原型开发阶段，就好比搭建一栋大楼一样，你看到满地的砖头或者说满地的blender模型素材会无从下手的，而地形工具就好比建建筑的蓝图，后面实际场景地形搭建还是要根据你之前的地形蓝图来的。也正是因为如此，后面再介绍地形的时候我也会强调一遍，**地形更多的相当于你未来场景的蓝图**，所以不要花费太多精力在地形的细枝末节上。】
+
+### blender建模
+
+blender建模导入Unity下面说一下基本的流程思路，可能有时会有一些细节上的问题。
+
+1. 按A全选你想要导出的元素，主要是网格体和骨架。选择导出到FBX，然后选择网格体，如果有骨骼的话也推荐将骨架选上。然后导出。
+2. 将FBX文件移动到你的Unity项目中，Unity会自动检测导入，但一般来说你还需要对模型导入配置参数进行一些调整。比如材质，比如如果是人形模型，而你希望根据该人形模型构建动画还需要自动创建Avatar。
+3. FBX模型最好是另外单独一个地方存放，导入的模型参数配置好之后，拖入场景，然后拖动制成Perfab预制件，然后解压缩预制件，再对该预制件进行一些你想要的修改，比如有的加上碰撞器和行为脚本之类的。在更新预制件。
+
+### blender动画
+
+blender里面的动画导出到Unity也是类似上面的导出FBX，实际上就是导出的你的模型的骨架的一些移动变换数据，然后Unity接受成为动画Clips。
+
+1. 按A全选你想要导出的元素，主要是网格体和骨架。选择导出到FBX，然后选择骨架，和导出一般模型不同，如果你只希望导出动画的话这里只选择骨架即可。
+2. FBX动画文件导入Unity项目中，然后对动画Animation这一栏一些参数做出一些调配，还有Avatar选择Copy from之前本模型创建的那个Avatar。
+
+个人测试相同的人形模型差异不太大的话即使是原来不同的Avatar动画文件里面的内容也是可以复制，大体可以参考的。这一块主要是动画姿态的不匹配问题，如果是自己很粗略弄的动画反倒是泛用性会很强，而那些动捕或者调配的很好的姿态，泛用性会很差，比如一个女性角色的走路姿态套用到一个男性角色上然后出来的效果你懂的。
+
+简单的Unity动画就在Unity那边编辑即可，但有些动画文件很复杂，而Unity那边的动画文件编辑功能并不是很强大，可能还是要继续再blender那边修改之后再应用到Unity那边。
 
 ## 粒子系统
 
@@ -1619,23 +1665,6 @@ private IEnumerator LoadingProcess()
 
 
 
-## respawn玩家角色
-
-一般都是如下respawn玩家角色：
-
-```
-		player.transform.position = spawnPoint.position;
-		player.transform.rotation = spawnPoint.rotation;
-```
-
-Unity游戏开发一书就是这样写的，然而现在不可以了。 [这个视频](https://www.youtube.com/watch?v=FPU3uR3HYGo) 说了需要把项目设置的Physics的 `Auto Sync Transforms` 勾选上，一试果然就可以了。看了下Unity文档，Unity的物理系统默认没有勾选上，也就是你的transform属性硬修改Unity的物理系统是没有跟上同步的，然后Unity文档又说了这个自动勾选上开销会有一些，所以最好在需要硬修改的地方加上：
-
-```
-		player.transform.position = spawnPoint.position;
-		player.transform.rotation = spawnPoint.rotation;
-		Physics.SyncTransforms();
-```
-
 
 
 
@@ -1689,7 +1718,7 @@ Windows下玩家的日志在：`%USERPROFILE%\AppData\LocalLow\CompanyName\Produ
 
 比如多个场景的切换，如果你在暂停菜单退出到主菜单，再从主菜单切换到某个场景下，如果你忘了之前暂停的各个状态切回来，那么进入场景就会很困惑怎么游戏处于一种僵死状态会很困惑。
 
-### 详细阅读事件函数的执行顺序这篇文章
+### 详细阅读事件函数的执行顺序
 
 [官方文档在这里，强烈推荐！](https://docs.unity3d.com/cn/current/Manual/ExecutionOrder.html)
 
@@ -1824,7 +1853,7 @@ transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
 
 这个网页也推荐看下： https://learn.unity.com/tutorial/textmesh-pro-localization
 
-目前还没遇到上面说的那么复杂的问题，那么 Atlas Population Mode 也不太明白，不过如果只有一个回滚字体的话那么是需要设置static的，默认好像也是static。所以就如上创建一个中文回滚字体即可。
+目前还没遇到上面说的那么复杂的问题，那个 Atlas Population Mode 也不太明白，不过如果只有一个回滚字体的话那么是需要设置static的，默认好像也是static。所以就如上创建一个中文回滚字体即可。
 
 ### unitypackage文件怎么用
 
@@ -1864,6 +1893,7 @@ transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
    2. 默认的翻译即第一个翻译数据，试着查找对应的key，没有找到则返回原key字符串
 4. 这个核心查找方法后面动态变动的文本都要根据这个来，之前那个自动翻译过程只能保证第一次静态的那些文本得到翻译了，后面所有动态文本在对应的变动方法里面加上上面的查找方法 `Translator.Instance[key]` 。
 5. 这个Translator是常驻单例对象。
+6. 如果直接设置 `.text` 属性，UI元素的最原始文本也修改了，推荐是通过 `SetText` 方法来修改文本，这只是临时修改的。
 
 
 
@@ -1871,13 +1901,52 @@ transform.rotation = Quaternion.AngleAxis(30, Vector3.up);
 
 场景异步加载 `SceneManager.LoadSceneAsync` 返回的就是一个 AsyncOperation 对象，可以利用其 completed 事件来对接完成后的一些动作。
 
+### 比较矢量的长度推荐使用sqrMagnitude
+
+magnitude是 $\sqrt{a^2 + b^2}$  ，sqrMagnitude是 $a^2 + b^2$ ，官方文档说一般比较矢量长度大小推荐使用sqrMagnitude，会稍微效率高点。
+
+### respawn玩家角色
+
+一般都是如下respawn玩家角色：
+
+```
+		player.transform.position = spawnPoint.position;
+		player.transform.rotation = spawnPoint.rotation;
+```
+
+Unity游戏开发一书就是这样写的，然而现在不可以了。 [这个视频](https://www.youtube.com/watch?v=FPU3uR3HYGo) 说了需要把项目设置的Physics的 `Auto Sync Transforms` 勾选上，一试果然就可以了。看了下Unity文档，Unity的物理系统默认没有勾选上，也就是你的transform属性硬修改Unity的物理系统是没有跟上同步的，然后Unity文档又说了这个自动勾选上开销会有一些，所以最好在需要硬修改的地方加上：
+
+```
+		player.transform.position = spawnPoint.position;
+		player.transform.rotation = spawnPoint.rotation;
+		Physics.SyncTransforms();
+```
+
+
+
 ## FAQ
 
 ### 怎么我的场景看上去有点暗
 
 在窗口-渲染那些烘焙下光照，一般Build项目之前是需要烘焙下光照的。
 
+### 怎么修改动画的播放速度
+
+可以通过某个参数来控制动画的播放速度，具体如下图所示：
+
+![img]({static}/images/2021/unity_animation_speed.png)
+
 ## 备用
+
+### 加载多个场景之后要激活场景
+
+默认是第一个为激活的场景，最好明确指定那个场景为激活场景。
+
+```
+public static bool SetActiveScene(SceneManagement.Scene scene);
+```
+
+
 
 ### Mathf.clamp
 

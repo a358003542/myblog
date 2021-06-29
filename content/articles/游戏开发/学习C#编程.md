@@ -1110,7 +1110,7 @@ class Square : Shape
 
 但是如果是父类转子类则情况就较复杂了，还可能会失败。
 
-### 多态
+### 多态（virtual+override）
 
 C++就多态这个议题从C++11开始也有virtual和override这两个关键词了，不过都不是强制性的，正因为不是强制性的，所以引出很多问题。比如不使用virtual，如果你的子类声明的时候采用的是子类引用变量或者子类指针，那么使用的方法都将是基类的。而引入virtual这个关键词会根据实例的类型来决定使用的方法。override在C++那边更多的是一个规避bug的写法，表明你的子类的这个方法是要重载基类的某个方法，因为有时一不注意，参数类型没对上，重载行为就会无意跳过去。
 
@@ -2096,7 +2096,156 @@ list ??= new List<string>();
 
 ## 资源管理
 
+### IDisposable
 
+```c#
+using (FileStream fs = new FileStream(path, FileMode.Open))
+{
+}
+```
+
+等价于：
+
+```c#
+FileStream fs = new FileStream(path, FileMode.Open);
+try{
+
+}finally{
+    if (fs != null) ((IDisposable)fs).Dispose();
+}
+```
+
+using语句会确保退出的时候调用Dispose方法来进行一些资源的清理释放工作。
+
+自定义的类对接IDisposable接口首先Dispose方法之后也可以类似的使用。
+
+### 自动垃圾回收
+
+CLR会自动进行垃圾回收。
+
+在自动垃圾回收之前，类的Finalizer函数会被执行，在C++那边叫做析构函数。
+
+```
+class Test
+{
+~Test(){
+
+}
+}
+```
+
+一般来说不推荐编写析构函数，如果一定要编写你需要对析构函数里面的每一行代码具体在做什么为什么要这么做很清楚，然后还有以下规则：
+
+- 析构函数要很快执行
+- 析构函数不要Block
+- 不用引用其他finaliable object
+- 不要抛出异常
+
+### 内存泄露
+
+#### 记得退订事件监听
+
+参考资料3里面讲了这个例子：
+
+```c#
+class Host
+{
+    public event EventHandler Click;
+}
+class Client
+{
+    Host _host;
+    public Client (Host host)
+    {
+        _host = host;
+        _host.Click += HostClicked;
+    }
+    void HostClicked(object sender, EventArgs e){}
+}
+
+class Test
+{
+    static Host _host =new Host();
+    
+    public static void CreateClient()
+    {
+        Client[] clients = Enumerable.Range(0,1000)
+        .Select(i=> new Client(_host)).ToArray();
+        //
+    }
+}
+```
+
+上面的一千个client不会被正确地垃圾回收，因为它们里面还都有_host的Click事件监听，必须释放之后这些client才会被正确垃圾回收。
+
+```
+public void Dispose() {_host.Click -= HostClicked;}
+
+Array.ForEach(clients, c=>c.Dispose());
+```
+
+####  忘记回收Timer
+
+System.Timer 如果忘记调用它的 `Dispose` 方法也会出现内存泄露问题。
+
+
+
+## Debug手段
+
+### 条件编译
+
+```
+#define DEBUG
+
+#if DEBUG
+Console.WriteLine("info");
+#endif
+```
+
+上面的打印信息语句只有define DEBUG之后才会进入编译，否则将会被注释掉。
+
+觉得每次写上这样一段太麻烦了，于是编写一个方法：
+
+```c#
+public static class Debug{
+
+public static void Log(string info)
+{
+	#if DEBUG
+	Console.WriteLone($"{info}");
+	#endif
+}
+}
+```
+
+但后来人们觉得还是太麻烦了，于是有了条件属性。
+
+### 条件属性
+
+```c#
+[Conditional("DEBUG")]
+public static class Debug{
+
+public static void Log(string info)
+{
+	Console.WriteLone($"{info}");
+}
+}
+```
+
+条件属性的意思是这一整个类或者方法都被 `#if DEBUG ... #endif` 包围了，如果没有define DEBUG，则整个类或者方法都可以认为是空的。
+
+### Debug类
+
+C#已经有类似上面讨论的Debug类了，都封装了 `[Conditional("DEBUG")]`
+
+```
+Debug.WriteLine("Data");
+```
+
+也就是这些打印信息只在DEBUG这个define之后才会打印出来。
+
+Unity里面的Debug类应该也是类似的，不过Unity里面的Debug类功能更多，此外Debug信息都会被打印入日志。
 
 ## 单元测试
 
