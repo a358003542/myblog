@@ -1944,7 +1944,67 @@ public VoidComponentEvent myEvent2 = new VoidComponentEvent();
 
 LINQ ( Language Integrated Query) 
 
+首先长话短说，C#的LINQ大概类似于python的列表解析式那一块讨论的领域：
 
+```
+>>> [i for i in range(10) if i % 2 == 0]
+[0, 2, 4, 6, 8]
+```
+
+具体来说就是针对可迭代对象进行的一系列流式操作。
+
+当然上面只是一个类比，到C#这边是对实现了 `IEumerable<T>` 接口的类执行的一系列流式的查询操作。
+
+类似上面的python语句的C#语句是：
+
+```c#
+int[] array = new int[] {0,1,2,3,4,5,6,7,8,9};
+
+var query = from num in array where (num % 2) ==0 select num;
+
+foreach (var i in query){
+	Console.WriteLine(i);
+}
+```
+
+我们看到C#的LINQ语法有点类似于SQL语句，然后LINQ的查询和具体查询的执行是分开的。上面query的类型写明的话是 `IEumaerable<int>` 。query可以通过 `ToList` 或 `ToArray` 方法来立即执行：
+
+```c#
+int[] array = new int[] {0,1,2,3,4,5,6,7,8,9};
+
+var query = from num in array where (num % 2) ==0 select num;
+
+List<int> list = query.ToList();
+
+foreach (var i in list){
+	Console.WriteLine(i);
+}
+```
+
+要使用C#的LINQ，需要加载：
+
+```
+using System.Linq;
+```
+
+
+
+然后你可能还会看到如下的method语法：
+
+```c#
+int[] array = new int[] {0,1,2,3,4,5,6,7,8,9};
+
+var query = from num in array where (num % 2) ==0 select num;
+var query2 = array.Where(num => (num % 2) ==0);
+
+foreach (var i in query2){
+	Console.WriteLine(i);
+}
+```
+
+
+
+类似python的可迭代对象，c#这边的LINQ应该也是惰性查询的，既然说到流式操作编程模式，当然LINQ是支持 `.what.what` 这样的操作。这些后面有时间会慢慢再列举一些相关例子，但总的来说LINQ是让你的C#程序在某些地方上用的更灵活更优美，不过总的来说这部分内容其实已经算不上C#语言的核心，而只是让C#更好用的组件，所以这里的讨论能够从简就从简了。
 
 ### 检查元素是否在array中
 
@@ -1957,6 +2017,16 @@ string fruit = "mango";
 
 bool hasMango = fruits.Contains(fruit);
 ```
+
+### Range方法
+
+类似python的 `range(10)` 的实现：
+
+```
+int[] array = Enumerable.Range(0,10).ToArray();
+```
+
+第一个参数是起始值，第二个参数是输出数个数。
 
 
 
