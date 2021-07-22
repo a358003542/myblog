@@ -679,7 +679,22 @@ C#的foreach可以迭代的对象除了上面演示的array之外，C#常用的C
 (input-parameters) => expression
 ```
 
-labmda表达式就是程序界为大家熟知的匿名函数的概念，因为C#这边没有所谓的函数对象，所以C#lambda表达式要某就是一个delegate对象，这个delegate对象一开始就绑定了这个匿名函数定义的行为，或者其他什么对象。
+labmda表达式就是程序界为大家熟知的匿名函数的概念，因为C#这边没有所谓的函数对象，所以C#lambda表达式其实就是一个delegate对象，这个delegate对象一开始就绑定了这个匿名函数定义的行为，或者其他什么对象
+
+读者可进一步参考阅读 [Delegates and lambdas | Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/standard/delegates-lambdas) ，该文章中提到lambda表达式就是另外一种定义delegate对象的方式，delegate对象其实也是有匿名delegate这个说法的：
+
+```c#
+          delegate (int no)
+          {
+              return (no % 2 == 0);
+          }
+```
+
+不过考虑到lambda表达式这个概念在程序界很早就已经为人们熟知了，而且经常是以编程语言中的第一公民身份出现的，所以一般匿名函数还是推荐写成C#这边的lambda表达式形式：
+
+```c#
+no => no % 2 == 0 
+```
 
 ### 异常捕捉
 
@@ -1994,17 +2009,18 @@ using System.Linq;
 ```c#
 int[] array = new int[] {0,1,2,3,4,5,6,7,8,9};
 
-var query = from num in array where (num % 2) ==0 select num;
-var query2 = array.Where(num => (num % 2) ==0);
+var query = array.Where(num => (num % 2) ==0);
 
-foreach (var i in query2){
+foreach (var i in query){
 	Console.WriteLine(i);
 }
 ```
 
 
 
-类似python的可迭代对象，c#这边的LINQ应该也是惰性查询的，既然说到流式操作编程模式，当然LINQ是支持 `.what.what` 这样的操作。这些后面有时间会慢慢再列举一些相关例子，但总的来说LINQ是让你的C#程序在某些地方上用的更灵活更优美，不过总的来说这部分内容其实已经算不上C#语言的核心，而只是让C#更好用的组件，所以这里的讨论能够从简就从简了。
+类似python的可迭代对象，c#这边的LINQ应该也是惰性查询的，既然说到流式操作编程模式，当然LINQ是支持 `.what.what` 这样的操作。这些后面有时间会慢慢再列举一些相关例子，但总的来说LINQ是让你的C#程序在某些地方上用的更灵活更优美，这部分内容其实已经算不上C#语言的核心，而只是个让C#更好用的组件，所以这里的讨论能够从简就从简了。
+
+
 
 ### 检查元素是否在array中
 

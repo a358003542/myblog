@@ -31,5 +31,31 @@ Object -> Apply -> Make Instances Real
 
 
 
+## 树建模
+
+在参考了多个树的建模视频之后，确定树干建模最好的方式就是先绘制树干线，然后加入蒙皮修改器，经过适当的末端和根部的衰减编辑的缩放操作，然后再加上精简修改器，得到的树干表现效果不错，而且节点数也是适合游戏引擎的。直到我看了 [这个视频](https://www.youtube.com/watch?v=wPBX9kqcHzE) 知道了sapling tree gen插件。
+
+推荐的blender树干建模方法如下：
+
+1. 激活blender的sapling tree gen 插件，在blender上搜索tree既可以看到。
+2. `Shift+A` 在曲线那里可以看到sapling tree gen。
+3. 调整各个参数，默认的参数节点数还是较多的，需要下调一些参数。
+4. 然后选择 `物体 -> 转换为 -> 曲线转网格` 
+
+继续了解sapling tree gen插件发现这个插件是可以生成树叶的，甚至还可以模拟风吹动时候的动画。之前提到的那个视频采用的是球体积内的粒子系统发射小型树叶模型的方式，这种方法远看还行，但近看各个树叶歪七倒八表现效果不是很令人满意的。所以强烈推荐 sapling tree gen 这个插件来进行树的基础建模，如果各个参数调整之后对于树的模型你还有哪些地方不满意的，再利用blender的功能微调整就是了。
+
+这个插件树干应该也是用的蒙皮修改器，我看到有个参数和蒙皮相关，不过树叶的生成就不清楚了，这个插件的树叶生成表现效果非常好，而且树叶的网格节点数也非常的低，如果是自己用粒子系统发射，估计要调配半天效果还不好，不是树叶节点数过多就是粒子系统发射表现效果不好。强烈推荐这个插件。
 
 
+
+## 人体建模
+
+利用MakeHuman插件进行基础人体建模是很方便的，笔者没有绘画功底，3d建模经验也不是丰富，短时间内来看是不可能驾驭得了人体建模的，先利用MakeHuman插件人体建模救救急，后面有点功底了再可以考虑进一步的深加工和修改。
+
+出来的人体模型各个部分可以考虑再加上精简修改器试着再减小下多边形的数目。
+
+模型和衣服材质等表现效果甚至都可以导出到fbx模型中再导入到unity而得到保留，只是材质表现上可能会出现一些小问题。我遇到的一个问题就是眼睛的材质表现，参考了这个网页： [Documentation:Saving models for Unity and how to import them there - MakeHuman Community Wiki](http://www.makehumancommunity.org/wiki/Documentation:Saving_models_for_Unity_and_how_to_import_them_there) 的这段文字：
+
+> For each material that has a transparent component, you will need to set the material type to "legacy shaders" -> "transparent" -> "diffuse". 
+
+对眼睛的shader进行一下修改即可。

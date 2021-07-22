@@ -389,9 +389,11 @@ blender修改器很多，有时间慢慢熟悉，不着急一下就学会它们�
 
 ### 精简修改器
 
-【decimate】精简修改器允许你在尽量不改变网格体的形状的情况下，减少其顶点和面的数量。下面摘自Unity官方文档的一段文字：
+【decimate】精简修改器允许你在尽量不改变网格体的形状的情况下，减少其顶点和面的数量。下面摘自Unity2018官方文档的一段文字：
 
 > 您应该使用的多边形数量取决于您需要达到的质量，以及您的目标平台。对于移动设备而言，每个网格 300 到 1500 个多边形就可以取得良好的效果，而对于桌面平台，理想的数量范围大约为 1500 到 4000。如果游戏经常会同屏内出现大量角色，那么您可能需要减少每个网格的多边形数量。
+
+在最新的Unity2020官方文档的 [Unity - Manual: Modeling characters for optimal performance (unity3d.com)](https://docs.unity3d.com/2020.3/Documentation/Manual/ModelingOptimizedCharacters.html) 中已经略去了具体多边形的推荐数目，而只是在讨论要尽可能减小模型的多边形数目。
 
 
 
