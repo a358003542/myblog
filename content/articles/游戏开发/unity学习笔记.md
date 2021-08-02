@@ -1271,6 +1271,16 @@ Panel其实就是Image，只是有些属性预设值和Image的预设值不太�
 
 Raycast Target 选项是本Image是否是一个Raycast目标，也就是 `GraphicRaycaster.Raycast` 是否和该Image交互。
 
+#### Button
+
+Button的高亮hightlight指的是鼠标hover在button之上的状态。
+
+而selected指的是鼠标已经在该按钮上点击之后的状态。
+
+disable状态是该按钮设置`interactable = false`之后进入，这和 `setActive(false)` 有所不同，`setActive(false)` 会将按钮完全移除，这可能会改变UI布局。
+
+
+
 ### 自动布局
 
 给某一UI元素增加一个自动布局组件，其内的子元素的大小位置缩放等属性将被自动布局组件控制，有点类似于画布组。自动布局的添加在布局那一栏，不在UI那里。
@@ -1321,6 +1331,36 @@ EventSystem下面有输入模块支持，如果使用的是Unity的新的输入�
 发送导航事件，一般勾选上，发送move，submit，cancel等等导航事件。
 
 阻力阈值，这个中文翻译很让人困惑，英文是Drag threshold，就是拖动操作的判断阈值。
+
+
+
+### EventTrigger
+
+可以绑定在任意UI元素上，也可以绑定在非UI元素上。
+
+EventTrigger会监听所有事件，效率不是很高，不是很推荐使用。
+
+#### Pointer event 
+
+Pointerenter 事件 当pointer 进入物体的边界时会出发 这个物体的边界对于UI元素是由Rect Transform定义的矩形区域，或者其他物体的碰撞器边界。此外还有pointerexit 事件
+
+Pointerdown down
+
+Pointerup  up事件
+
+Pointerclick 一次点击事件
+
+#### drag事件
+
+Begindrap 开始拖动
+
+Enddrap 结束拖动
+
+#### drop事件
+
+Enddrop 事件调用的对象是drop位置下的物体
+
+
 
 ## 导航系统
 
@@ -1444,6 +1484,8 @@ Animator.StringToHash("Run") == CurrentStateInfo.shortNameHash;
 
 动画控制器的标签也是一个有用的字段方便进行一些动画控制上状态的逻辑管理。
 
+#### 动画层
+
 
 
 
@@ -1549,16 +1591,16 @@ blender那边需要建模不同精细度的模型，导出的时候名字一般�
 - Start Rotation 粒子的初始旋转角度
 - 翻转旋转 某些粒子向反方向旋转
 - Start Color 粒子的起始颜色
-- 重力修改器 应用于粒子的重力修改器
+- 重力修改器 应用于粒子的重力修改器，0是没有重力。
 - 模拟空间 指定坐标是本地局部坐标系还是世界坐标系
 - 模拟速度 微调粒子系统的播放速度
 - 时间差 粒子系统的时间是基于缩放时间还是非缩放时间
 - 缩放模式 缩放是基于游戏对象的父对象还是发射器的形状
-- 唤醒时播放 创建粒子系统时就开始辐射粒子
+- 唤醒时播放 粒子系统Awake就开始播放，如果关闭则需要手动开启粒子系统。
 - 发射器速度 速度的计算是基于对象的变换还是它的刚体
 - 最大粒子 粒子可以存在的最大数目，如果达到最大数目，粒子系统将暂停新粒子生成。
 - 自动随机种子 每次播放粒子系统选择不同的随机种子
-- 停止行动 选择粒子系统停止播放时执行什么动作
+- 停止行动 如果粒子系统停止或所有粒子消亡，是否禁用或销毁自身。
 
 ### 发射模块
 
