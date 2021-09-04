@@ -2343,7 +2343,62 @@ C#项目在visual studio上很方便创建一个对应的单元测试项目，�
 
 这块后面有需求遇到了再补上。
 
+## 拾遗
 
+### 扩展方法
+
+比如说给string类型扩展一个方法：
+
+```c#
+static class StringExtensions
+{
+	public static string Reverse(this string s)
+	{
+	    var charArray = s.ToCharArray();
+	    Array.Reverse(charArray);
+	    return new string(charArray);
+	}
+}
+```
+
+如上所示，在一个static class里面定义一个static method，然后第一个参数前面加上关键字 `this` ，表示本方法是一个扩展方法，这个this参数就是目标扩展的类型。然后就可以如下使用：
+
+```
+var text = "abc";
+var res = text.Reverse();
+```
+
+### 枚举类型的Flags属性标记
+
+编程中常见的Flags属性表示问题，可以如下方便用带Flags属性标记的枚举类型来实现，有 `HasFlag` 方法支持，如下所示可以用 `|` 运算符很方便地表示出多个flag。
+
+```c#
+using System;
+
+[Flags] public enum DinnerItems {
+   None = 0,
+   Entree = 1,
+   Appetizer = 2,
+   Side = 4,
+   Dessert = 8,
+   Beverage = 16,
+   BarBeverage = 32
+}
+
+public class Example
+{
+   public static void Main()
+   {
+      DinnerItems myOrder = DinnerItems.Appetizer | DinnerItems.Entree |
+                            DinnerItems.Beverage | DinnerItems.Dessert;
+      DinnerItems flagValue = DinnerItems.Entree | DinnerItems.Beverage;
+      Console.WriteLine("{0} includes {1}: {2}",
+                        myOrder, flagValue, myOrder.HasFlag(flagValue));
+   }
+}
+// The example displays the following output:
+//    Entree, Appetizer, Dessert, Beverage includes Entree, Beverage: True
+```
 
 ## 其他
 

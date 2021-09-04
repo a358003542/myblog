@@ -199,7 +199,7 @@ private AssetReference _persistentManagersScene = default;
     public int p = 5;
 ```
 
-### 
+
 
 ### ScriptableObject
 
@@ -1760,7 +1760,93 @@ Debug.LogWarning
 
 Windows下玩家的日志在：`%USERPROFILE%\AppData\LocalLow\CompanyName\ProductName\Player.log` 。
 
+## Shader
 
+### 绘图管线
+
+参看资料wiki ：[Graphics pipeline - Wikipedia](https://en.wikipedia.org/wiki/Graphics_pipeline)
+
+计算机图形学中，绘图管线描述了图像系统通过一系列步骤来将3D场景渲染为2D图像的这一过程。更具体来说这一过程就是我们游戏中的3d场景投射到摄像机上的过程。
+
+绘图管线大体分为三个主要阶段：应用阶段，几何阶段和光栅化阶段（rasterization）。
+
+### Shader
+
+上面的应用阶段是在CPU上进行的，而几何阶段和光栅化阶段是在GPU上进行的，基本上绘图管线上定义的工作就是GPU要做的事情。然后GPU那边的工作大概也是一系列的工作流，这其中情况各不相同，有的是固定不变的，有的是可配置的，有的是可编程的。然后这里面有一些重要的工作节点称之为什么着色器Shader。常常听到什么Shader比如片元着色器就是对应GPU的某个Shader工作节点。
+
+所以简单来说谈到Shader实际上指的是GPU上的某段程序。
+
+### ShaderLab
+
+所谓的编写Shader其实只是因为GPU上的某个Shader提供了可配置接口或者可编程入口，然后再通过某种语言来对这个Shader进行编程或者说编写。这个语言很多GPU厂商都提供了自己特定的语言，Unity提供了两种Shader编码语言，然后会将其根据不同的GPU转成对应的它支持的语言。其中ShaderLab是Unity专门开发出来的专门写Shader的一门语言。此外Unity还支持HLSL语言，这些就不做过多讨论了。
+
+### 标准表面着色器
+
+新建一个标准表面着色器，这个选项放在最上面，应该是最常用的，其他什么Shader后面再了解。其内容如下：
+
+```c#
+Shader "Custom/NewSurfaceShader"
+{
+    Properties
+    {
+        _Color ("Color", Color) = (1,1,1,1)
+        _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        _Metallic ("Metallic", Range(0,1)) = 0.0
+    }
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" }
+        LOD 200
+
+        CGPROGRAM
+        // Physically based Standard lighting model, and enable shadows on all light types
+        #pragma surface surf Standard fullforwardshadows
+
+        // Use shader model 3.0 target, to get nicer looking lighting
+        #pragma target 3.0
+
+        sampler2D _MainTex;
+
+        struct Input
+        {
+            float2 uv_MainTex;
+        };
+
+        half _Glossiness;
+        half _Metallic;
+        fixed4 _Color;
+
+        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
+        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
+        // #pragma instancing_options assumeuniformscaling
+        UNITY_INSTANCING_BUFFER_START(Props)
+            // put more per-instance properties here
+        UNITY_INSTANCING_BUFFER_END(Props)
+
+        void surf (Input IN, inout SurfaceOutputStandard o)
+        {
+            // Albedo comes from a texture tinted by color
+            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            o.Albedo = c.rgb;
+            // Metallic and smoothness come from slider variables
+            o.Metallic = _Metallic;
+            o.Smoothness = _Glossiness;
+            o.Alpha = c.a;
+        }
+        ENDCG
+    }
+    FallBack "Diffuse"
+}
+
+```
+
+- Shader "Custom/NewSurfaceShader" 这里定义了你的着色器名字，后面选择着色器在Custom的NewSurfaceShader那里。
+- Properties 定义属性，这些属性在材质面板那里可以看到。`_Color ("Color", Color) = (1,1,1,1)` ，`_Color` 是Shader内部使用该属性的调用名，后面一个元组第一个是材质那边的显示名字，第二个是该变量的类型，最后等号后面是该属性的默认值。
+- SubShader 至少要定义一个SubShader区块，多个SubShader的意思是针对不同的硬件。
+- FallBack 含义很明显，如果所有的SubShader都失败了则回滚到某个着色器。
+
+这里就简单讨论下，更详细的讨论在后面。
 
 ## 开发过程中避免踩坑的点
 
@@ -1782,17 +1868,123 @@ Windows下玩家的日志在：`%USERPROFILE%\AppData\LocalLow\CompanyName\Produ
 
 更复杂的多场景情况的一个建议就是不要跨场景引用对象了【好像也不太好跨场景引用了吧，也不要脚本依赖式的Find去查找】，用事件通道，因为多个场景的加载顺序会更加不可控制了，还是用事件通道会好一点。
 
-## Editor开发
 
-Editor的一些脚本开发很有用，但目前个人还没怎么学明白。
+
+## 实战经验分享
+
+### 翻译插件遇到的一个问题
+
+个人编写的小型翻译插件没太多花里胡哨的东西，反而很好用，不过遇到了一个问题，那就是不管是设置 `.text` 还是通过 `SetText` 方法都有可能让原Text对象的原始文本内容给永久修改掉。这个似乎有时并没有修改，有时会修改，可能和退出机制有关，但不管怎么说这个是不可控的。
+
+只好每个text下面再另外新增一个脚本用来保留该text的字典key。
+
+### UI图像类型属性和sprite导入设置
+
+UI图像类型有一个已切片sliced属性，假设你的sprite图像分为九个区域，其中四个角落是那种圆角，然后你希望你的图像有很好地拉伸扩展性能并保留四个圆角的显示效果，则可以选择这个sliced属性。具体来说这九个区域的设置和你的sprite导入设置有关系。
+
+sprite是单一还是多个都是可以的，不过推荐还是用外部编辑器将周边的多余的透明区块剔除掉，能够选择单一就选择单一。然后就是sprite图片从个人实践经验来看并不是像素越高越好，比如这里讨论的四个圆角，四个圆角加上一定的周边区域，32*32的图片大小就够用了，因为sprite作用在UI上缩放，直线或者涂满颜色的区块缩放显示效果都还是挺不错的。
+
+然后网格类型mesh type一定要选择 **全矩形** 。然后进入sprite editor：
+
+![img]({static}/images/2021/sprite_sliced.png)
+
+注意拖动要拖动中间的绿色方块，其他位置是调整整个sprite大小的。然后点击应用。
+
+
+
+### 场景里面东西太多，如何选择性地显示
+
+参考官方文档的这里： [Unity - Manual: Scene visibility (unity3d.com)](https://docs.unity3d.com/Manual/SceneVisibility.html)
+
+世界大纲视图对象左侧有个眼睛的形状可以切换该对象在场景中的可见性，不影响实际游戏中的效果。
+
+如果是只想观察场景中的某个或某些对象其他对象都希望隐藏则选中那些你想要显示的对象，然后按键 `Shift+H` 进入Isolation view模式，再按键 `Shift+H` 退出Isolation view模式。
+
+### 怎么我的场景看上去有点暗
+
+在窗口-渲染那些烘焙下光照，一般Build项目之前是需要烘焙下光照的。
+
+### 怎么修改动画的播放速度
+
+可以通过某个参数来控制动画的播放速度，具体如下图所示：
+
+![img]({static}/images/2021/unity_animation_speed.png)
+
+### Audio mixer是做什么的
+
+请参看这个视频： [Audio Mixer and Audio Mixer Groups - Unity Official Tutorials - YouTube](https://www.youtube.com/watch?v=vOaQp2x-io0&ab_channel=Unity)
+
+
+
+### URP
+
+Universal Render Pipeline，除非是很高画面要求的游戏，则推荐使用HDRP，否则一般项目推荐使用URP。
+
+URP的安装就是安装URP包，因为URP包内置了post process功能，所以原来的Post Processing Stack包可以删掉了。
+
+然后需要在` 项目设置->Player->其他设置` 那里，将Color Space颜色空间设置为线性，意义不明，[参考网页](https://learn.unity.com/tutorial/introduction-to-urp)。
+
+然后需要创建一个URP asset，具体是
 
 ```
-CustomPropertyDrawer
+Assets > Create > Rendering > Universal Render Pipeline > Pipeline Asset
 ```
 
-只能从别人的代码或者官方文档的脚本描述里面大概摸索。
+然后是启用该asset，具体是在 `项目设置->图形` 那里选择该asset文件。
 
-### 这是给你的类加个按钮
+至此原有项目就已经升级为URP项目了。
+
+#### 升级你的着色器
+
+项目升级为URP项目，会自动升级你的着色器，后面你也可以手工选择那些旧有的着色器来升级为URP支持的着色器，具体就是选择：
+
+```
+Edit > Render Pipeline > Universal Render Pipeline
+```
+
+然后选择 ` Upgrade Project Materials to URP Materials` 或者  `Upgrade Selected Materials to URP Materials` 。
+
+不是所有的旧有着色器都能成功升级为URP支持的着色器的。
+
+### null check
+
+在C#那边推荐的null检查语法是 `is null` ，当时说的是可以规避掉 `==` 被重载的情况，null 检查会更严谨些，但在unity这边，似乎unity对象的 `==` 运算符已经被重载了，所以 `is null` 检查会失效。而unity的官方2020版推荐的null check语法是这样的：
+
+```c#
+using UnityEngine;
+using System.Collections;
+
+public class Example : MonoBehaviour {
+
+    void Start () {
+        GameObject go = GameObject.Find("wibble");
+        if (go) {
+            Debug.Log(go.name);
+        } else {
+            Debug.Log("No game object called wibble found");
+        }
+    }
+
+}
+```
+
+对于unity的对象可以这样判断，但对于C#的其他对象还是推荐使用 `is null` 。个人实践unity的null对象通过 `is null` 判断并不是一个c#的null对象，而如果通过 `go == null` 是可以判断的，然后unity的null对象能够用上面的写法，也说明了它不是一个c#的null，而是一个对象，并且这个对象还支持转bool类型的方法。个人推断这种转bool和 `== null` 写法内部区别不是太大。
+
+但这种情况是令人沮丧的，不说还需要额外区分哪些对象是不是unit对象，因为null在C#中的普遍存在，经常你编写的函数和某些地方可能返回null或者unity空对象或者unity对象，所以更推荐的做法都写成
+
+```c#
+        if (go != null) {
+            Debug.Log(go.name);
+        } else {
+            Debug.Log("No game object called wibble found");
+        }
+```
+
+
+
+### Editor开发
+
+首先列出一个简单的例子，这个例子是给你的类在编辑器视图下添加一个按钮：
 
 ```c#
 using UnityEditor;
@@ -1818,7 +2010,104 @@ public class TestSerializableDictEditor : Editor
 
 
 
+- `using UnityEditor;` 一般进行Unity Editor开发需要引入这个命名空间。
+- 关于Editor的类是继承自 `Editor` 这个类。
+- `[CustomEditor(typeof(TestSerializableDict))]` 在你的类上面写上一个标记表明你的这个编辑器类是针对某个类对象进行编辑器显示定制优化的。
+- 重载 `OnInspectorGUI` 方法来实现编辑器显示定制。在`OnInspectorGUI` 方法里面 `target` 就是目标类对象。
 
+
+
+#### 插入一个整数值
+
+```
+myLevelScript.experience = EditorGUILayout.IntField("Experience", myLevelScript.experience);
+```
+
+上面接受两个参数，第一个参数是显示字符，第二个参数是整数值来源。
+
+上面写成再一次赋值语句，应该是从编辑器那边修改值之后，然后修改值再回写回来。【个人尝试是如果不写成这种赋值语句修改值动作是无效的】
+
+#### 插入一个Lable
+
+```
+EditorGUILayout.LabelField("Label", myLevelScript.Level.ToString());
+```
+
+上面接受两个字符串参数，其中第一个参数是左边的label，第二个参数是右边的label。
+
+
+
+#### 默认显示动作
+
+```
+public override void OnInspectorGUI(){
+    DrawDefaultInspector();
+}
+```
+
+`DrawDefaultInspector` 方法会让你的自定义类显示先绘制默认的显示动作。
+
+估计 `base.OnInspectorGUI` 的写法效果是一样的。
+
+
+
+### 自定义属性装饰函数
+
+不知道这个属性装饰函数的叫法正不正确，就是指的是如下：
+
+```
+	[Header("Persistent managers Scene")]
+```
+
+添加一个属性装饰函数Header，则会在编辑器的Inspector窗口上添加一个标题头，你也可以自定义自己的属性装饰函数。
+
+```c#
+	public class HeaderLineAttribute : PropertyAttribute {
+
+		public readonly string header;
+		
+		public HeaderLineAttribute(string header)
+		{
+			this.header = header;
+		}
+	}
+```
+
+如上定义了一个 `HeaderLineAttribute` 属性装饰函数，实际使用是：
+
+```
+[HeaderLine("Input")]
+```
+
+【似乎如果该类的名字有Attribute则会省略。】
+
+然后该属性装饰函数你可以定义属性绘制类：
+
+```c#
+	[CustomPropertyDrawer (typeof(HeaderLineAttribute))]
+	public class HeaderLineDrawer : DecoratorDrawer
+	{
+		public HeaderLineDrawer ()
+		{
+		}
+	}
+```
+
+DecoratorDrawer类似PropertyDrawer，区别就是DecoratorDrawer不绘制属性，除了从对应的PropertyAttribute对象那里获取的数据。
+
+具体绘图是根据 `OnGUI`  重载方法来的。
+
+### 地形环境的开发
+
+笔者经过摸索并没有找到特别好的地形环境搭建工具，至少免费的没有。那个L3DT并不是很好用，还将很多问题弄复杂了。地形环境开发最关键的问题不是要弄出一个随机的看上去还行的地形环境出来，那随便怎么弄一下就行，而是要首先用绘画工具加上游戏设计思路将地图的大概形状和玩家活动区域分块和玩家可行走区域等设计规划出来。然后才是实际搭建unity的Terrian。
+
+游戏设计阶段对地图的大概情况也就是等高线的手绘是一个很重要的一环，我想在这一环之上，试着完善等高线图然后使用用unity的terrian地形生成，也就是基于等高线图来自动生成地形，实际输出效果不是很好。等高线边缘通过光滑倒是可以微调，等高线的相对高度通过绘制图形是利用灰度的百分比也可以做到一个大概的效果。但仍然有太多地方需要优化了，比如规划的玩家可行走路线的斜坡表达，比如河道边的效果表现，比如等高线区域太过于平坦。
+
+这些微调整优化里面有一些倒是不那么紧要的，毕竟Unity的地形仍然只是一个原型工具，比如等高线区域太过于平坦，加入岩石模型就可以改变这点，但有一些则是需要立刻在地形上进行微调的，一个是河道边路斜面优化，一个是玩家可行走路线上一些斜坡的优化等。
+
+Unity的灰度百分比推荐8位灰度，0%白表示z=0，然后100%白表示你的地形的最大高度，然后进行百分比划分。Unity接受的Terrian必须是正方形的raw图片格式。
+
+整个地形环境的开发如上描述从地图等高线手绘，到玩家活动区域和行走路线设定到Unity的Terrian，再就是构想玩家于某一点的视觉呈现概念图到Unity的terrian地形微调，再到各个岩石，地面，树木等模型的建模，再到模型制成unity的预制件和根据terrian来放置，然后后期还有根据地图设计对石头树木矿石等各个资源型预制件的微调。这一流程虽然繁琐但每一步都是必要的，可见一个游戏的地形环境开发也不是一蹴而就的事。
 
 ## 其他
 
@@ -2034,4 +2323,6 @@ public static float Clamp(float value, float min, float max);
 6. Unity 游戏开发 by  Mike Geig
 7. Mastering UI Development with Unity by Asheley Godbold
 8. Unity in Action by Joseph Hocking
+9. Unity Shader入门精要 by 冯乐乐
+2. Mastering Unity Shaders and Effects by Jamie Dean
 
