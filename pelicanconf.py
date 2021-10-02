@@ -10,7 +10,7 @@ AUTHOR = 'wanze'
 FILENAME_METADATA = '(?P<title>.*)'
 
 # set default category
-DEFAULT_CATEGORY = 'archived'
+DEFAULT_CATEGORY = '其他'
 # the sub folder name not decide the category name
 USE_FOLDER_AS_CATEGORY = True
 # show the pages

@@ -1,5 +1,5 @@
 Slug: how-to-represent-physics-quantity
-Tags:  python, xchemistry, pint
+Tags:  python, pint
 Date: 20201018
 
 [TOC]
