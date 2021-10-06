@@ -1,3 +1,5 @@
+Status: draft
+
 pbr材质【全称叫做 Physically Based Shading】能和环境交互，因此提供了更真实的材质效果。
 
 pbr材质主要有以下参数：

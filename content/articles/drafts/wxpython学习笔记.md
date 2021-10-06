@@ -1,5 +1,6 @@
 Slug: wxpython-learning-notes
 Tags: gui, python
+Status: draft
 Date: 20191018
 
 
