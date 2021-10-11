@@ -1,4 +1,4 @@
-Slug: how-to-represent-physics-quantity
+Slug: pint-module
 Tags:  python, pint
 Date: 20201018
 

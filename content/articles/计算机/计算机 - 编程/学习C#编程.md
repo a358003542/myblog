@@ -1,4 +1,5 @@
-
+Slug: learning-csharp-programming
+Tags: csharp,
 
 [TOC]
 

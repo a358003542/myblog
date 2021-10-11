@@ -1,6 +1,7 @@
 Tags: editor
 Slug: atom-editor
 Date: 20201120
+Status: draft
 
 [TOC]
 

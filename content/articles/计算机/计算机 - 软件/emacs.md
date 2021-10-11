@@ -1,4 +1,4 @@
-Slug: emacs-learning-notes
+Slug: emacs
 Tags: emacs,
 Date: 2018
 
