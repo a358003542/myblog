@@ -71,7 +71,7 @@ Unity的包主要是由 `package.json` 这个文件来定义的，关于包的�
 
 这个asmdef文件就是所谓的程序集定义，在unity那里可以通过 `Create -> Assembly definition` 来创建。对于Editor那边如下：
 
-![img]({filename}/images/游戏开发/unity_package_1.png)
+![img]({static}/images/游戏开发/unity_package_1.png)
 
 注意下面平台只勾选了Editor，这应该是节省了C#的编译行为开销。然后在Runtime那边也新建一个程序集定义之后，如果我们用visual studio打开这个项目会发现解决方案那里有两个项目，一个是Editor的，一个是Runtime的，这应该也是节省项目编译行为开销的。具体这块笔者还不是很懂，总之刚开始按照这种推荐方式来。
 

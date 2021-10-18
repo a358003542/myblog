@@ -4,7 +4,7 @@ Tags: unity
 
 ## 前言
 
-本文是Unity游戏开发系列的输入部分。
+本文是Unity游戏开发系列的输入部分。本文主要讨论的是Unity内置的Input输入模块，此外还有一个新的input system，不过对于刚接触unity输入系统这块的初学者来说，还是建议先学习用好unity内置的input输入模块，这个用熟了然后后面再根据需要决定是否需要升级为新的input system。
 
 ### 本系列内容的取舍
 
@@ -13,92 +13,59 @@ Tags: unity
 - 笔者在行文上会尽可能节省笔墨，只是标出官方参考文档的引用出处，但在某些地方会额外花费笔墨来说明，比如个人觉得官方文档文字可能不是很好懂，某些内容很重要需要再特别强调一遍等。
 - 一般来说官方文档里面有的不会在这里赘述，不过有时某些内容会特别重要而会再强调一遍。
 
-## 输入
 
-### input system
 
-new unity input system 更多地多设备输入兼容。文档在 [这里]([Installation guide | Input System | 1.1.0-preview.3 (unity3d.com)](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.1/manual/Installation.html)) 。
+## GraphicRaycaster和UI操作
 
-激活新的输入系统： `Edit->Project settings->Player-> Active Input Handling` 。
+Canvas的GraphicRaycaster组件的用处就是将射线投射到画布上，可以利用GraphicRaycaster来判断本Canvas当前那些画布元素是被击中的，或者说的再简单点是在鼠标当前所在位置上的。
 
-添加Player Input 组件
-
-编写Action输入键位绑定
-
-如果设置的是Send Message，则假设有Move Action，则对应该GameObject的`OnMove` 方法，Move发送的是一个Vector2值。x对应的是该GameObject Right方向上的位移，y对应的是该GameObject forward方向上的位移，有一个中间值(0.7,0.7) ，是45度的方向，你可以简单理解为right方向移动了0.7个单位，forward方向移动了0.7个单位，0.7这个数字的含义表示目标方向的移动长度还是大约1个单位。
-
-另外一个是单键位绑定，返回的是float值，1表示键位触发。
-
-如果设置的是InVoke Unity Events，则需要下面写上对应Action的回调方法，似乎InVoke Unity Events功能更强大一些，其支持对按键动作多种状态的判断。
+如下面的代码就是利用本画布上的GraphicRaycaster组件来获取当前鼠标位置上的画布元素。
 
 ```c#
-    public void OnFire(InputAction.CallbackContext context)
-    {
-        switch (context.phase)
+private GraphicRaycaster rc;
+private PointerEventData pt; 
+
+rc = GetComponent<GraphicRaycaster>();
+pt = new PointerEventData(EventSystem.current);
+
+pt.position = Input.mousePosition;
+
+List<RaycastResult> results = new List<RaycastResult>();
+
+rc.Raycast(pt, results);
+```
+
+这些画布元素存储在results上：
+
+```
+        foreach (RaycastResult swatch in results)
         {
-            case InputActionPhase.Performed:
-                if (context.interaction is SlowTapInteraction)
-                {
-                    StartCoroutine(BurstFire((int)(context.duration * burstSpeed)));
-                }
-                else
-                {
-                    Fire();
-                }
-                m_Charging = false;
-                break;
-
-            case InputActionPhase.Started:
-                if (context.interaction is SlowTapInteraction)
-                    m_Charging = true;
-                break;
-
-            case InputActionPhase.Canceled:
-                m_Charging = false;
-                break;
+            Debug.Log($"{swatch.gameObject.name}");
         }
-    }
 ```
 
-上面Started最先触发，然后再触发Performed。如果你的context设置了SlowTapInteraction也就是一定时间的按键判断等，这块后面再详细了解。
+假设有两个画布元素，一个Panel，Panel上面一个Image，`Raycast Target` 属性是勾选确认状态，则上面results的长度是二。如上所示`swatch.gameObject`就是该画布元素对象，后续可以进行进一步的判断操作。
 
-**NOTICE:**  详细阅读上面的case判断，如果不加上case判断，一般的行为会触发三次，一次started = 1，一次performed = 1，一次canceld = 0。 
+在一些Canvas情况不是很复杂的时候推荐使用Raycast来解决问题。
 
-#### 读取值
+### RaycastAll
 
-上面started，performed和canceld只是针对更复杂的按键情况，如果只是一般的使用则如下读取值然后大致类似传统输入系统那样去做即可。
+RaycastAll方法是所有的BaseRaycasters都进行了射线投射，这其中还包括PhysicsRaycaster等。还不清楚PhysicsRaycaster的用途，不过假设有多个Canvas的情况下，通过这个RaycastAll来进行所有GraphicRaycaster的射线投射是很便利的。
 
-首先Move和Look读取Vector2的值：
-
-```
-Vector2 m_Movement = context.ReadValue<Vector2>();
-```
-
-然后对于一般按键值读取为bool值：
-
-```
-bool m_Attack = context.ReadValueAsButton();
+```c#
+        PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+        eventDataCurrentPosition.position = Input.mousePosition;
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
 ```
 
-按照传统输入系统的方法读取值会在Update方法那边编写，现在在回调方法上对应地如上写上读取值之后，就类似传统输入在Update方法那里获取到目标值了，然后后面的都是类似的了。
+上面获得的result含义和之前讨论的相同，是当前鼠标所在位置射线投射穿过的所有对象。
 
+同样类似上面的讨论如果某个UI元素 `Raycast Target` 属性没有勾选也是不会检测到的。
 
+### IsPointerOverGameObject
 
-#### 判断本帧某个键位是否按下了
-
-这个键位判断不需要去设置Actions的配置对于任何按键都可以如下直接去判断。
-
-```
-  Keyboard.current.space.wasPressedThisFrame
-```
-
-### Input.mousePosition
-
-获取当前鼠标在屏幕上的坐标，返回一个Vector3值，z值总为0，x和y都等于0时表示左下角，右上角是 `(Screen.width, Screen.height)` 。
-
-
-
-
+通过 `EventSystem.current.IsPointerOverGameObject()` 可以判断当前的pointer是否在某个event system object上，在很多情况下似乎可以达到一种能够判断当前pointer是否在UI上的效果，但这个函数名，加上所谓的event system object具体是什么东西并不大确切，而且具体各个对象的属性也没有获取无法获得进一步的判断效果，这个方法只是备用。
 
 ## 参考资料
 

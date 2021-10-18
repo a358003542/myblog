@@ -323,7 +323,7 @@ tuple基本使用如下：
 
 reference type变量赋值给另外一个变量，它们两个都是指向的同一数据对象。但string情况略有不同，因为string是不可变的，所以string发生变化实际上是又新建了一个string。
 
-### 检查两个reference type是否是同一个东西
+#### 检查两个reference type是否是同一个东西
 
 ```
 ReferenceEquals(object a, object b);

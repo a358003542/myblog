@@ -51,51 +51,6 @@ blender那边需要建模不同精细度的模型，导出的时候名字一般�
 
 
 
-## 粒子系统
-
-粒子系统可以制作出很多种效果，比如爆炸，火焰，烟雾，烟花，施法效果等。粒子系统就是空间中的一个点，从这个点出发发射一些粒子对象，从而制造出一些视觉效果。
-
-### 新建一个粒子系统
-
-新建一个粒子系统，右键在世界大纲视图下新建->效果->粒子系统。你也可以将粒子系统作为某个对象的组件添加进去。
-
-从粒子系统属性面板可以看到很多属性调配参数，这些更规范的叫法叫做模块，默认启用的模块有默认模块和发射模块和形状模块。除了默认模块其他模块都是可选可启用也可停用的。这么多模块和参数，慢慢熟悉吧。
-
-### 默认模块
-
-显然至少默认模块的一些参数要先熟悉清楚。
-
-- Duration 持续时间 粒子系统的运行时间
-- Looping 是否循环播放
-- Prewarm 预热 粒子系统从上次的循环中开始播放
-- Start Delay 启动延迟 发射粒子之前等待的时间，不能和预热共存。
-- Start Lifetime 每个粒子的存活时间，单位是秒
-- Start Speed 粒子的初始速度
-- Start Size 粒子的初始大小
-- Start Rotation 粒子的初始旋转角度
-- 翻转旋转 某些粒子向反方向旋转
-- Start Color 粒子的起始颜色
-- 重力修改器 应用于粒子的重力修改器，0是没有重力。
-- 模拟空间 指定坐标是本地局部坐标系还是世界坐标系
-- 模拟速度 微调粒子系统的播放速度
-- 时间差 粒子系统的时间是基于缩放时间还是非缩放时间
-- 缩放模式 缩放是基于游戏对象的父对象还是发射器的形状
-- 唤醒时播放 粒子系统Awake就开始播放，如果关闭则需要手动开启粒子系统。
-- 发射器速度 速度的计算是基于对象的变换还是它的刚体
-- 最大粒子 粒子可以存在的最大数目，如果达到最大数目，粒子系统将暂停新粒子生成。
-- 自动随机种子 每次播放粒子系统选择不同的随机种子
-- 停止行动 如果粒子系统停止或所有粒子消亡，是否禁用或销毁自身。
-
-### 发射模块
-
-- Rate over time 随单位时间产生的粒子数，即每秒发射的粒子数目
-- Rate over distance 每Unit单位发射的粒子数目
-- bursts 爆发，突变。在某个特定时间内突然发射额外的粒子
-
-### 形状模块
-
-这个确定的是发射器，或者说发射的粒子们组成的形状。
-
 
 
 
@@ -106,7 +61,7 @@ blender那边需要建模不同精细度的模型，导出的时候名字一般�
 
 参看资料wiki ：[Graphics pipeline - Wikipedia](https://en.wikipedia.org/wiki/Graphics_pipeline)
 
-计算机图形学中，绘图管线描述了图像系统通过一系列步骤来将3D场景渲染为2D图像的这一过程。更具体来说这一过程就是我们游戏中的3d场景投射到摄像机上的过程。
+在计算机图形学中，绘图管线描述了图像系统通过一系列步骤来将3D场景渲染为2D图像这一过程。更具体来说这一过程就是我们游戏中的3d场景投射到摄像机上的过程。
 
 绘图管线大体分为三个主要阶段：应用阶段，几何阶段和光栅化阶段（rasterization）。
 
@@ -116,16 +71,55 @@ blender那边需要建模不同精细度的模型，导出的时候名字一般�
 
 所以简单来说谈到Shader实际上指的是GPU上的某段程序。
 
-### ShaderLab
+### vertex shader
 
-所谓的编写Shader其实只是因为GPU上的某个Shader提供了可配置接口或者可编程入口，然后再通过某种语言来对这个Shader进行编程或者说编写。这个语言很多GPU厂商都提供了自己特定的语言，Unity提供了两种Shader编码语言，然后会将其根据不同的GPU转成对应的它支持的语言。其中ShaderLab是Unity专门开发出来的专门写Shader的一门语言。此外Unity还支持HLSL语言，这些就不做过多讨论了。
+GPU的vertex shader顶点着色器是完全可编程的，它是GPU渲染流水管线的第一个作业阶段。vertex shader的工作任务有完成顶点从3D空间到2D摄像机平面的坐标变换。
 
-### 标准表面着色器
+### fragment shader
 
-新建一个标准表面着色器，这个选项放在最上面，应该是最常用的，其他什么Shader后面再了解。其内容如下：
+片元着色器是另外一个可编程的着色器。
+
+### surface shader
+
+unity提出的surface shader是基于vertex and fragment shader，其需要在unity的build-in render pipeline下使用，主要是节省了原来编写Shader对光照的一些工作。
+
+下面是一个简单的vertex and fragment shader的例子，来自参考资料9：
 
 ```c#
-Shader "Custom/NewSurfaceShader"
+Shader "Custom/Simple VertexFragment Shader" {
+    SubShader {
+        Pass {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            float4 vert(float4 v : POSITION) : SV_POSITION {
+                return mul (UNITY_MATRIX_MVP, v);
+            }
+
+            fixed4 frag() : SV_Target {
+                return fixed4(1.0,0.0,0.0,1.0);
+            }
+
+            ENDCG
+        }
+    }
+}
+
+```
+
+和surface shader的最大的区别就是其代码是放在Pass区块里面的，然后这个Pass区块在SubShader区块里面。
+
+### ShaderLab
+
+所谓的编写Shader其实只是因为GPU上的某个Shader提供了可配置接口或者可编程入口，然后再通过某种语言来对这个Shader进行编程和配置。这个语言很多GPU厂商都提供了自己特定的语言，Unity提供了两种Shader编码语言，然后会将其根据不同的GPU转成对应的它支持的语言。其中ShaderLab是Unity开发出来的专门写Shader的一门语言。此外Unity还支持HLSL语言，不管你是用的ShaderLab还是HLSL，最终unity都会将它们针对不同的硬件编译成不同的目标机器支持的语言的。
+
+#### 基本结构
+
+要熟悉ShaderLab基本结构，最好是自己新建一个最常用的Shader，`Create -> Shader -> Standard Surface Shader` ，打开该文件我们会看到如下内容：
+
+```c#
+Shader "Custom/MySurfaceShader"
 {
     Properties
     {
@@ -181,12 +175,175 @@ Shader "Custom/NewSurfaceShader"
 
 ```
 
-- Shader "Custom/NewSurfaceShader" 这里定义了你的着色器名字，后面选择着色器在Custom的NewSurfaceShader那里。
-- Properties 定义属性，这些属性在材质面板那里可以看到。`_Color ("Color", Color) = (1,1,1,1)` ，`_Color` 是Shader内部使用该属性的调用名，后面一个元组第一个是材质那边的显示名字，第二个是该变量的类型，最后等号后面是该属性的默认值。
-- SubShader 至少要定义一个SubShader区块，多个SubShader的意思是针对不同的硬件。
-- FallBack 含义很明显，如果所有的SubShader都失败了则回滚到某个着色器。
+1. `Shader "Custom/MySurfaceShader"` 我已经将这个Shader的名字改为MySurfaceShader了，现在随便新建一个立方体，然后新建一个材质。该材质的最上面就可以设置该材质对应的Shader，默认是Standard Shader，现在选中我们这里新建的MySurfaceShader。
+2. `Properties` 区块，在这个区块里面会定义本Shader的一些属性，这些属性在材质的Inspector面板那里看得到的。
+3. `SubShader` 区块，至少要定义一个SubShader区块，多个SubShader区块可以对不同的硬件进行支持。
+4. `FallBack` ，含义很明显，如果所有的SubShader都失败了则回滚到某个着色器。
 
-这里就简单讨论下，更详细的讨论在后面。
+
+
+#### Properties
+
+```
+_Color ("Color", Color) = (1,1,1,1)
+```
+
+这是定义了颜色属性。`_Color` 是Shader内部该属性的调用名，后面一个元组第一个是材质Inspector面板那边的显示名字，第二个是该变量的类型，最后等号后面是该属性的默认值。具体执行的属性类型有：
+
+- Int
+- Float
+- Range(min,max)
+- Color
+- Vector
+- 2D
+- Cube
+- 3D
+
+参考资料9给出了一个不错的例子同时展示了这些属性的使用情况：
+
+```c#
+Shader "Custom/ShaderLabProperties" {
+    Properties {
+        // Numbers and Sliders
+        _Int ("Int", Int) = 2
+        _Float ("Float", Float) = 1.5
+        _Range("Range", Range(0.0, 5.0)) = 3.0
+        // Colors and Vectors
+        _Color ("Color", Color) = (1,1,1,1)
+        _Vector ("Vector", Vector) = (2, 3, 6, 1)
+        // Textures
+        _2D ("2D", 2D) = "" {}
+        _Cube ("Cube", Cube) = "white" {}
+        _3D ("3D", 3D) = "black" {}
+    }
+
+    FallBack "Diffuse"
+}
+```
+
+#### SubShader
+
+##### Tags
+
+```
+ Tags { "RenderType"="Opaque" }
+```
+
+设置本SubShader的RenderType。
+
+##### LOD
+
+```
+LOD 200
+```
+
+指定本SubShader的计算需求【computationally demanding】。
+
+##### CGPROGRAM
+
+插入HLSL写的shader代码。
+
+```
+        CGPROGRAM
+        // HLSL CODE
+        ENDCG
+```
+
+### HLSL shader
+
+#### `#pragma`
+
+`#pragma` shader编译预处理指令。有很多`pragma` 预处理指令，如下这一句：
+
+```
+#pragma surface surf Standard fullforwardshadows
+```
+
+写surface shader需要加上这一句，后面代码surf函数就是在这里定义的，表示编译出来的这个surf函数对应的就是surface shader。后面的Standard是lightmodel，再后面fullforwardshadows是一个可选参数。具体更多细节请参见 [官方文档](https://docs.unity3d.com/2020.3/Documentation/Manual/SL-SurfaceShaders.html) 。
+
+类似的有：
+
+- `#pragma vertex <name>` 编译出来的这个函数是vertex shader
+- `#pragma fragment <name>`  编译出来的这个函数是fragment shader
+- `#pragma target 5.0` 等价于DirectX shader model5.0，但是不要求支持32位插值和cubemap arrays。
+
+#### `#include`
+
+```
+#include "UnityStandardUtils.cginc"
+```
+
+unity提供了一些文件，里面有可供你shader编程使用的预定义变量和帮助函数。
+
+
+
+
+
+
+
+## 编写Surface shader
+
+实际上默认的标准surface shader的代码就是一个不错的学习例子：
+
+```
+        void surf (Input IN, inout SurfaceOutputStandard o)
+        {
+            // Albedo comes from a texture tinted by color
+            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            o.Albedo = c.rgb;
+            // Metallic and smoothness come from slider variables
+            o.Metallic = _Metallic;
+            o.Smoothness = _Glossiness;
+            o.Alpha = c.a;
+        }
+```
+
+这其中的有些东西还是不太明白，不过从材质Inspector面板来的 `sampler2D _MainTex;` 和颜色怎么相乘怎么封装一下获得的 c 其rgb就是Albedo，其a就是Alpha，然后就是设置o的Metallic和Smoothness，这两个参数的值是直接从材质Inspector面板那里获得的。
+
+## 粒子系统
+
+粒子系统可以制作出很多种效果，比如爆炸，火焰，烟雾，烟花，施法效果等。粒子系统就是空间中的一个点，从这个点出发发射一些粒子对象，从而制造出一些视觉效果。
+
+### 新建一个粒子系统
+
+新建一个粒子系统，右键在世界大纲视图下新建->效果->粒子系统。你也可以将粒子系统作为某个对象的组件添加进去。
+
+从粒子系统属性面板可以看到很多属性调配参数，这些更规范的叫法叫做模块，默认启用的模块有默认模块和发射模块和形状模块。除了默认模块其他模块都是可选可启用也可停用的。这么多模块和参数，慢慢熟悉吧。
+
+### 默认模块
+
+显然至少默认模块的一些参数要先熟悉清楚。
+
+- Duration 持续时间 粒子系统的运行时间
+- Looping 是否循环播放
+- Prewarm 预热 粒子系统从上次的循环中开始播放
+- Start Delay 启动延迟 发射粒子之前等待的时间，不能和预热共存。
+- Start Lifetime 每个粒子的存活时间，单位是秒
+- Start Speed 粒子的初始速度
+- Start Size 粒子的初始大小
+- Start Rotation 粒子的初始旋转角度
+- 翻转旋转 某些粒子向反方向旋转
+- Start Color 粒子的起始颜色
+- 重力修改器 应用于粒子的重力修改器，0是没有重力。
+- 模拟空间 指定坐标是本地局部坐标系还是世界坐标系
+- 模拟速度 微调粒子系统的播放速度
+- 时间差 粒子系统的时间是基于缩放时间还是非缩放时间
+- 缩放模式 缩放是基于游戏对象的父对象还是发射器的形状
+- 唤醒时播放 粒子系统Awake就开始播放，如果关闭则需要手动开启粒子系统。
+- 发射器速度 速度的计算是基于对象的变换还是它的刚体
+- 最大粒子 粒子可以存在的最大数目，如果达到最大数目，粒子系统将暂停新粒子生成。
+- 自动随机种子 每次播放粒子系统选择不同的随机种子
+- 停止行动 如果粒子系统停止或所有粒子消亡，是否禁用或销毁自身。
+
+### 发射模块
+
+- Rate over time 随单位时间产生的粒子数，即每秒发射的粒子数目
+- Rate over distance 每Unit单位发射的粒子数目
+- bursts 爆发，突变。在某个特定时间内突然发射额外的粒子
+
+### 形状模块
+
+这个确定的是发射器，或者说发射的粒子们组成的形状。
 
 
 
