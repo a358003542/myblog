@@ -11,35 +11,98 @@ Tags: unity
 - 因为笔者开发的是3D游戏，因此专属于2D游戏的那些内容将不会在这里讨论。
 - 笔者使用的是Unity 2020.3 LTS版本，之前的版本被废弃的特性或者之后的版本新增的特性将不会在这里讨论。
 - 笔者在行文上会尽可能节省笔墨，只是标出官方参考文档的引用出处，但在某些地方会额外花费笔墨来说明，比如个人觉得官方文档文字可能不是很好懂，某些内容很重要需要再特别强调一遍等。
-- 一般来说官方文档里面有的不会在这里赘述，不过有时某些内容会特别重要而会再强调一遍。
 
-##  材质
 
-### standard着色器
 
-#### albedo
+## 计算机图形学
 
-反射率，定义了材质的基本颜色，纹理也是放在这里设置的。
+个人精力有限，不可能去钻研计算机图形学里面那些复杂的东西的，但是Unity游戏开发里面的图形说到底和计算机图形学里面讨论的图形是一个东西，很多东西概念都是相同的，如果完全不理会的话，会发现接触的很多概念都没弄懂没弄明白，有的不深究也可，有的不深究则是完全不知道这是一个什么东西，用都用不好。本小节主要讨论的是计算机图形学相关理论知识，一般是和下面讨论的内容很相关，觉得实在有必要拿出来讨论一下。
 
-#### metallic
+
+
+
+
+### 摄像机
+
+模拟的3D世界最终在摄像机上成为2D图像。摄像机定义了一个锥体，这个锥体叫做viewing volume，只有在
+
+## PBR材质
+
+pbr材质【全称叫做 Physically Based Rendering】能和环境交互，因此提供了更真实的材质效果。
+
+### 光线的基本原理
+
+光是走直线的，遇到金属表面会反射，法线是垂直于金属表面的线，入射光线与法线的夹角叫入射角，反射光线与法线的夹角叫反射角，入射角和反射角相等。当光线从一个介质进入另外一个介质则会发生折射现象，折射角具体大小由介质之间的折射率决定。因为物体表面并不是绝对光滑的，于是还存在着散射现象。这是高中光学的基本知识。
+
+散射现象的另外一种解释是光线射入另外一个介质中，然后被里面的原子反复弹射几次之后再射出来，也就是不认为是物体表面不够光滑造成的。比如Lambertian模型在考虑散射现象的时候是不考虑粗糙度这个变量的。其他散射模型比如Oren-Nayar会考虑粗糙度这个变量。
+
+### 微表面理论
+
+微表面理论认为物体表面是由一些细小的各自朝向不同的微小表面组成，每个微小的表面上面基于自己的法线发生着反射现象。也就是微表面理论认为物体表面的粗糙引起了光的散射。
+
+
+
+### F0(Fresnel Reflectance at 0 degree)
+
+Fresnel effect描述了一种光的现象，当光的入射角越来越接近于零，也就是越来越接近物体表面的时候，反射光的量会越来越大。
+
+F0就是描述了这个入射角接近零度的时候的情况，对于非金属来说其值一般为0.02-0.05，对于金属来说其值一般为0.5-1.0。
+
+
+
+### 金属还是非金属
+
+现实中物质的颜色是因为某部分波长的光被吸收了，然后散射出来的光显出了颜色。对于非金属来说diffuse map里面是有颜色的，这个颜色一般对应的就是现实世界中非金属我们看到的那个颜色；对于金属来说在PBR里面是认为折射进入金属的光都被吸收了，金属的diffuse map里面是没有颜色的。
+
+### linear space rendering
+
+对于颜色值的计算和颜色操作应该在linear space下，人眼对颜色的观察是非线性的是gamma-encoded space（sRGB）。
+
+对于人眼看到观察的颜色应该用sRGB，对于粗糙度的表达或者金属度的表达则应该使用linear。
+
+
+
+### Metal/Roughness
+
+- base color map  sRGB 【对于非金属是颜色对于金属是反射度，金属的反射度一般是70%-100%，颜色在180-255。】
+- metallic map grayscale linear 【0是黑色代表非金属，1是白色代表金属。】【对于金属度的不同PRB对上面base color map里面的值的解释会不同，非金属是颜色，金属是反射度。】【会自动应用F0 4%。】
+- roughness map grayscale linear【黑色表示光滑，白色表示粗糙。】
+- height map 可选
+- ambient occlusion map 可选
+
+### Specular/Glossiness
+
+- diffuse map 【有的地方也叫做albedo】【金属就是0黑色没有颜色，其他配上相应的颜色。】
+- specular map 【对于金属是反射度，对于非金属是F0。】
+- glossiness map
+- normal map 可选
+- height map 可选
+- ambient occlusion map 可选
+
+### metallic
 
 金属的，定义了材质的金属表现。
 
-#### Smoothness
+### Smoothness
 
 平滑度，定义了材质的表面光滑性。一般为了看上去更真实不应该设置为0或1而是某个中间值。
 
-#### tiling
+### 
 
-平铺，定义了纹理在表面平铺重复的次数。
+pbr材质主要有以下参数：
 
-#### offset
+- color 基础颜色 有的地方你会看到叫做albedo
+- metallic  金属度 
+- roughness 粗糙程度
+- normal 法线图
+- height 
+- ambient occlusion 环境光遮蔽 有的地方会简称为AO
 
-偏移，定义了纹理在表面平铺的偏移量。
+颜色可能是初学者最容易理解也是推荐最先使用好的参数。
 
+金属度 和 粗糙度 
 
-
-
+法线图 和 高度图 影响的材质的高度表现
 
 ## LOD技术
 
@@ -361,4 +424,8 @@ unity提供了一些文件，里面有可供你shader编程使用的预定义变
 8. Unity in Action by Joseph Hocking
 9. Unity Shader入门精要 by 冯乐乐
 2. Mastering Unity Shaders and Effects by Jamie Dean
+11. [The PBR Guide - Part 1 (adobe.com)](https://substance3d.adobe.com/tutorials/courses/the-pbr-guide-part-1)
+12. [Physically Based Rendering: From Theory to Implementation (pbr-book.org)](https://www.pbr-book.org/)
+13. 计算机图形学导论 by James D.Foley and Andries van Dam etc.
+14. 计算机图形学 by Steve Cunningham
 
