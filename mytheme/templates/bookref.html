@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ article.bookname|striptags|e }} - {{ article.bookauthor | striptags | e}} · {{ super() }}
+{% endblock title %}
+
+{% block content %}
+<article>
+
+    <div class="row">
+        <header class="page-header col-md-10 col-md-offset-2">
+            <h1><a href="{{ SITEURL }}/{{ article.url }}"> {{ article.bookname }} </a></h1>
+        </header>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10 col-md-offset-2 article-content">
+
+            <div class="col-md-4">
+                <img class="img-responsive" src="{{article.bookcover }}" alt="book cover">
+            </div>
+
+
+            <div class="col-md-8">
+
+                <div class="row">
+                    作者：<i>{{ article.bookauthor}}</i>
+                </div>
+
+                {% if article.category|trim|count > 0 %}
+                <div class="row">
+                    分类：<a class="category-link" href="{{ SITEURL }}/categories.html#{{ category.slug }}-ref">{{
+                        article.category
+                        }}</a>
+                </div>
+                {% endif %}
+
+                {% if article.tags and article.tags[0]|trim|count > 0 %}
+                <div class="row">
+                    标签：
+                    <ul class="list-of-tags tags-in-article">
+                        {% for tag in article.tags|sort %}
+                        <li><a href="{{ SITEURL }}/tags.html#{{ tag.slug }}-ref">{{ tag }}
+                                {% for aTag, tagged_articles in tags if aTag == tag %}
+                                <span>{{ tagged_articles|count }}</span>
+                                {% endfor %}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+
+                {% if article.bookpublisher %}
+                <div class="row">
+                    出版商：{{ article.bookpublisher}}
+                </div>
+                {% endif %}
+
+                {% if article.booklanguage %}
+                <div class="row">
+                    语言：{{ article.booklanguage}}
+                </div>
+                {% endif %}
+
+                {% if article.bookbaidupandownloadurl %}
+                <div class="row">
+                    <a class="btn btn-primary" target="_blank"href="{{article.bookbaidupandownloadurl}}"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                        百度盘下载
+                    </a>
+                    提取码是：{{ article.bookbaidupandownloadcode }}
+                </div>
+                {% endif %}
+
+            </div>
+
+            <div class="col-md-10">
+                {{ article.content }}
+            </div>
+
+        </div>
+
+    </div>
+</article>
+{% endblock content %}

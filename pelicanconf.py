@@ -20,7 +20,7 @@ SITENAME = "万泽的博客"
 SITEURL = ''
 
 PATH = 'content'
-ARTICLE_EXCLUDES= ['articles\\python\\algorithm\\examples']
+ARTICLE_EXCLUDES= []
 
 TIMEZONE = 'Asia/Shanghai'
 

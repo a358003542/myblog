@@ -25,6 +25,12 @@ from pelicanconf import *
 
 ### pelican的工作流程
 
+静态网站就是一堆html文件和其他相关的静态资源，比如css文件，图片文件等。静态资源的处理基本上就是Copy动作，唯一的区别就是决定Copy目的地的位置，这一块后面再讨论。pelican最核心的工作就是要利用各种不同类型的文件源，比如markdown文件，reStructuredText文件，html文件等各种文件格式，利用这些文件源里面的文件内容，然后输出HTML文件。
+
+程序刚开始的命令行接口和配置参数相关工作这里就略过讨论了。然后工作主体就是启动各种不同类型的generator，有默认要启动的：`ArticlesGenerator` 和 `PagesGenerator` ，如果设置了 `TEMPLATE_PAGES` ，还会启动 `TemplatePagesGenerator` 等，如果还有用户自定义的Generator也会启动。
+
+然后是调用每个Generator的  `generate_context` 方法，继而调用 `generate_output` 。`generate_context` 主要是加载各个文件然后利用Reader来加载目标文件的元数据和内容数据。`generate_output` 利用有对其他一些额外html页面的额外生成动作，但不管怎么说现在先简单理解为利用Write和之前加载的元数据和内容数据生成目标文件。
+
 
 
 ## 支持Markdown写作
@@ -268,6 +274,7 @@ theme内部static文件夹下的内容会copy到output文件夹下，比如 `sta
 
 1. 配置文件里面的变量直接可以使用，比如你在配置文件里面定义了`SITEURL="WHAT"` ，那么在模板文件里面可以这样引用 `{{ SITEURL}}` 。注意这些配置名按照规范是应该全部大写字母的。
 2. 比如在article模板下你定义的那些metadata都是可以引用的，如`article.tags` 。
+3. 你也可以在文档头里面定义自己想要的metadata，值得一提的是这些变量在Jinja2那边都要写成小写，比如：`article.bookname` 。
 
 具体那些模板文件可以使用那些变量内容更多，请读者参看官方文档5.6 Creating themes的Templates and variables 一小节。
 

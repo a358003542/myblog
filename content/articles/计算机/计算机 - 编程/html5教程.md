@@ -148,7 +148,9 @@ html5新加入了很多关于文档结构的标签，这些标签并没有任何
 <a href="mailto:nowhere@mozilla.org">Send email to nowhere</a>
 ```
 
-
+- `//what` 指向互联网的链接，相当于省略了前面的https。
+- `/what` 指向本站点的链接，加入本站点是localhost，则为 `localhost/what`
+- `./what` 链接的相对位置路径。 
 
 ## 文字强调的html5规范
 
