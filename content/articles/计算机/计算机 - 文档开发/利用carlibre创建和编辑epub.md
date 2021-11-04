@@ -1,0 +1,7 @@
+carlibre是一个很不错的个人电子书籍图书馆管理软件，除了epub书籍的阅读功能外，其还有很强大的epub编辑功能，虽然并没有直接创建epub这个按钮，但你可以先引入其他格式的文档资源。
+
+比如新建一个markdown文档，然后导入carlibre，然后点击转换书籍到格式epub，则就能够创建一个epub文件了。后面还可以继续利用carlibre的epub编辑功能来进一步进行epub文件的元数据和封面等信息的修改。
+
+可以根据html来创建epub，可以利用chrome的SingleFile插件来更好地下载网页，不过html转epub因为html的复杂性并不能保证结果会令人满意，最后还需要人工编辑一下。
+
+此外用pandoc来进行html转epub的处理也是可以的。

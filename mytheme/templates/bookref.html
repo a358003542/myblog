@@ -16,12 +16,12 @@
     <div class="row">
         <div class="col-md-10 col-md-offset-2 article-content">
 
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <img class="img-responsive" src="{{article.bookcover }}" alt="book cover">
             </div>
 
 
-            <div class="col-md-8">
+            <div class="col-md-6">
 
                 <div class="row">
                     作者：<i>{{ article.bookauthor}}</i>
@@ -74,7 +74,15 @@
             </div>
 
             <div class="col-md-10">
+                
+                {% if article.toc %}
+                <h2>书籍目录<h2></h2>
+                {{ article.toc }}
+                {% endif %}
+
+                <h2>书籍简介</h2>
                 {{ article.content }}
+                
             </div>
 
         </div>
