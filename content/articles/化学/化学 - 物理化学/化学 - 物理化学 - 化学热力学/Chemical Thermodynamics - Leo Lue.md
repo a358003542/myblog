@@ -9,7 +9,7 @@ BookBaidupanDownloadCode: 29pc
 
 [TOC]
 
-本pdf是文字版的。基本上就是传统物理化学中的化学热力学部分的那些内容的讨论。
+本书pdf是文字版的。基本上就是传统物理化学中的化学热力学部分的那些内容的讨论。
 
 ### Introduction
 

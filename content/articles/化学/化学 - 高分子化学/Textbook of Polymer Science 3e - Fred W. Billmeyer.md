@@ -9,7 +9,7 @@ BookBaidupanDownloadCode: w5z4
 
 [TOC]
 
-本书pdf影印质量较差。
+本书pdf是文字识别版。影印质量较差。
 
 ### The Science of Large Molecules
 

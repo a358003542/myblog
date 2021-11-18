@@ -9,6 +9,8 @@ BookBaidupanDownloadCode: 69ta
 
 [TOC]
 
+本书是文字版的。
+
 This is the famous Lange's Handbook of Chemistry, the fifteenth edition. this book's main contents list here:
 
 ### Organic Compounds
