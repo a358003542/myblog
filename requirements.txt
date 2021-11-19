@@ -1,7 +1,5 @@
 click
 beautifulsoup4
-pelican
+pelican>=4.6.0
 markdown
-simple_nltk
-fenci>=0.2.2
-my_python_module>=0.4.1
+fenci>=0.3.0

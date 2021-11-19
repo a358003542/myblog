@@ -18,13 +18,11 @@
 
 右键点击powershell最上面的一栏，会看到默认值那个选项，设置布局的窗口大小即可，我这边宽度高度是100-40，感觉还行。
 
-## 编写powershell脚本
+## 安全策略管理
 
-powershell脚本的后缀是 `ps1` ，人们开始编写powershell遇到的第一个挫折就是会提示没有权限执行脚本，这是windows的默认安全策略，你需要以管理员身份运行：
+powershell脚本的后缀是 `ps1` 。直接运行powershell脚本一般会提示有权限错误，更多信息请参看 [这个网页](https://docs.microsoft.com/zh-cn/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.2) 。
 
-```powershell
-set-executionpolicy remotesigned
-```
+
 
 ## 启动一个进程
 
@@ -37,6 +35,8 @@ Start-Process -FilePath "ping.exe" -Args "www.baidu.com"
 ```powershell
 Start-Process -FilePath "ping.exe" -Args "www.baidu.com" -RedirectStandardOutput '.\console.out' -RedirectStandardError '.\console.err'
 ```
+
+
 
 ## 获取当前工作目录
 

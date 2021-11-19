@@ -1,5 +1,7 @@
 Slug: nltk-learning-notes
 
+[TOC]
+
 
 
 ## 前言
@@ -45,6 +47,84 @@ else:
 具体里面的内容可以在 [nltk_data](https://github.com/nltk/nltk_data) 这个github项目中找到。具体内容在packages下面，其中corpora的内容是不需要zip解压的，其他的一般需要先解压再放好位置。
 
 
+
+## 有用的工具集
+
+
+
+
+
+
+
+### FreqDist
+
+很有用的一个类，其继承自Counter类，用于记数的一个字典。
+
+输入的是就是你分词好的词汇列表：`[a, b, c, a ,a ,b .....]`
+
+```python
+t = FreqDist([a,b,c,a....])
+```
+
+其内部会自动处理然后得到一个词的词频统计，比如下面是看频率最高的25个： 
+
+```
+t.most_common(25)
+[('天下', 56), ('不', 51), ('圣人', 32), ('道', 27), ('谓', 24), ('曰', 21), ('万物', 20), ('吾', 20), ('无', 18), ('欲', 14), ('无为', 13), ('亦', 10), ('章', 10), ('人', 9), ('天地', 8), ('不争', 8), ('下', 8), ('道者', 8), ('大', 8), ('夫', 8), ('无以', 8), ('贵', 7), ('不知', 7), ('知', 7), ('善人', 7)]
+```
+
+### bigrams
+
+自然语言处理研究中的n元语法模型中的二元语法：
+
+```
+>>> list(bigrams([1,2,3,4,5]))
+[(1, 2), (2, 3), (3, 4), (4, 5)]
+```
+
+
+
+### ConditionalFreqDist
+
+其是一个字典套字典结构，第一个字典key是一些条件，具体再引用该条件`cfd[condition]` 返回的是一个FreqDist对象。更具体来说其用来存储某一条件下的FreqDist分布。
+
+```
+cfd = ConditionalFreqDist([['1','a'],['1','b'],['0','a'],['1','a']])
+cfd['1']
+FreqDist({'a': 2, 'b': 1})
+cfd['0']
+FreqDist({'a': 1})
+```
+
+
+
+### str2tuple
+
+一般POS（part of speech）标注或者其他标注都可以采用 `word/tag` 这样的格式，然后可以利用 `str2tuple` 函数来拆分它们。
+
+```
+tagged_token = str2tuple('fly/NN')
+
+tagged_token
+('fly', 'NN')
+```
+
+```python
+def str2tuple(s, sep="/"):
+    pass
+```
+
+第二个参数sep默认是 `/` ，你也可以指定其他的分隔符。
+
+### Index类
+
+Index类是一个默认为列表的defaultdict类，可以用来构建多值字典。
+
+```
+index = nltk.Index([('a',1),('a',2),('b',3)])
+index
+Index(<class 'list'>, {'a': [1, 2], 'b': [3]})
+```
 
 ## 语料库管理
 
@@ -118,8 +198,6 @@ zh_gutenberg.raw('xiyouji_s.txt')
 zh_gutenberg.words('xiyouji_s.txt')
 zh_gutenberg.sents('xiyouji_s.txt')
 ```
-
-
 
 ## Text接口
 
@@ -203,94 +281,3 @@ class ChineseText(Text):
 具体修改是原过滤器过滤了词语的长度，这个不适合中文。然后停用词换成了中文停用词词库。然后增加了一个空白字符去除动作。
 
 具体里面评估二元语法组得分用的是 `bigram_measures.likelihood_ratio` 这个算法。有兴趣可以研究一下，这里暂时略过了。
-
-
-
-## FreqDist
-
-很有用的一个类，其继承自Counter类，用于记数的一个字典。比如下面统计老子里面最常用的词语。
-
-```python
-from nltk import FreqDist
-from my_python_module.nlp.chinese_stop_words import STOP_WORDS
-from my_python_module.nlp.utils import is_empty_string
-
-t = FreqDist(
-    [i for i in laozi if (i not in STOP_WORDS and not is_empty_string(i))])
-```
-
- 上面进行了空字符的过滤和停用词的过滤。
-
-```
-t.most_common(25)
-[('天下', 56), ('不', 51), ('圣人', 32), ('道', 27), ('谓', 24), ('曰', 21), ('万物', 20), ('吾', 20), ('无', 18), ('欲', 14), ('无为', 13), ('亦', 10), ('章', 10), ('人', 9), ('天地', 8), ('不争', 8), ('下', 8), ('道者', 8), ('大', 8), ('夫', 8), ('无以', 8), ('贵', 7), ('不知', 7), ('知', 7), ('善人', 7)]
-```
-
-## bigrams
-
-自然语言处理研究中的n元语法模型中的二元语法：
-
-```
->>> from nltk.util import bigrams
->>> list(bigrams([1,2,3,4,5]))
-[(1, 2), (2, 3), (3, 4), (4, 5)]
-```
-
-
-
-## ConditionalFreqDist
-
-其是一个字典套字典结构，第一个字典key是一些条件，具体再引用该条件`cfd[condition]` 返回的是一个FreqDist对象。更具体来说其用来存储某一条件下的FreqDist分布。
-
-```
-from nltk import ConditionalFreqDist
-cfd = ConditionalFreqDist([['1','a'],['1','b'],['0','a'],['1','a']])
-cfd['1']
-FreqDist({'a': 2, 'b': 1})
-cfd['0']
-FreqDist({'a': 1})
-```
-
-
-
-## 标注
-
-### str2tuple
-
-一般POS（part of speech）标注或者其他标注都可以采用 `word/tag` 这样的格式，然后可以利用 `str2tuple` 函数来拆分它们。
-
-```
-import nltk
-tagged_token = nltk.tag.str2tuple('fly/NN')
-
-tagged_token
-('fly', 'NN')
-```
-
-### 通用POS标注集
-
-| Tag    | Meaning             | English Examples                         |
-| ------ | ------------------- | ---------------------------------------- |
-| `ADJ`  | adjective           | *new, good, high, special, big, local*   |
-| `ADP`  | adposition          | *on, of, at, with, by, into, under*      |
-| `ADV`  | adverb              | *really, already, still, early, now*     |
-| `CONJ` | conjunction         | *and, or, but, if, while, although*      |
-| `DET`  | determiner, article | *the, a, some, most, every, no, which*   |
-| `NOUN` | noun                | *year, home, costs, time, Africa*        |
-| `NUM`  | numeral             | *twenty-four, fourth, 1991, 14:24*       |
-| `PRT`  | particle            | *at, on, out, over per, that, up, with*  |
-| `PRON` | pronoun             | *he, their, her, its, my, I, us*         |
-| `VERB` | verb                | *is, say, told, given, playing, would*   |
-| `.`    | punctuation marks   | *. , ; !*                                |
-| `X`    | other               | *ersatz, esprit, dunno, gr8, univeristy* |
-
-### Index类
-
-Index类是一个默认为列表的defaultdict类，可以用来构建多值字典。
-
-```
-index = nltk.Index([('a',1),('a',2),('b',3)])
-index
-Index(<class 'list'>, {'a': [1, 2], 'b': [3]})
-```
-

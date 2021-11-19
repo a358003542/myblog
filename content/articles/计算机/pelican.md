@@ -4,7 +4,7 @@ Slug: pelican
 
 ## pelican简介
 
-**本文的讨论基于pelican version 4.6.0** 。
+**本文的讨论基于pelican version 4.6.0** 【】。
 
 pelican是一个静态网站生成工具，其是用python编写实现的，所以对于pythoner来说显得格外的亲切。
 
@@ -29,7 +29,7 @@ from pelicanconf import *
 
 程序刚开始的命令行接口和配置参数相关工作这里就略过讨论了。然后工作主体就是启动各种不同类型的generator，有默认要启动的：`ArticlesGenerator` 和 `PagesGenerator` ，如果设置了 `TEMPLATE_PAGES` ，还会启动 `TemplatePagesGenerator` 等，如果还有用户自定义的Generator也会启动。
 
-然后是调用每个Generator的  `generate_context` 方法，继而调用 `generate_output` 。`generate_context` 主要是加载各个文件然后利用Reader来加载目标文件的元数据和内容数据。`generate_output` 利用有对其他一些额外html页面的额外生成动作，但不管怎么说现在先简单理解为利用Write和之前加载的元数据和内容数据生成目标文件。
+然后是调用每个Generator的  `generate_context` 方法，继而调用 `generate_output` 。`generate_context` 主要是加载各个文件然后利用Reader来加载目标文件的元数据和内容数据。`generate_output` 过程里面有对其他一些额外html页面的生成动作，但不管怎么说现在先简单理解为利用Write和之前加载的元数据和内容数据生成目标html文件。
 
 
 
@@ -108,7 +108,7 @@ MARKDOWN = {
             content.toc = content.toc[12:-14]
 ```
 
-我们看到 `toc.extract()` 也就是将之前 toc 插件生成的目录删去了，然后将toc赋值给了content，这个content对应的就是 `article` 【当然在pelican的page就是对应的page】。
+我们看到 `toc.extract()` 也就是将之前 toc 插件生成的目录删去了，然后将toc赋值给了content，这个content对应的就是 `article` 。
 
 因此在pelican里，你可以查看一下你的theme，如果toc显示正常的话，应该有类似如下jinja2代码：
 
@@ -147,7 +147,7 @@ MARKDOWN = {
 引用本博客内部文章不需要考虑该文章的slug细节，直接如下引用：
 
 ```text
-{filename}path/to/what.md
+[what]({filename}path/to/what.md)
 ```
 
 相对路径支持 `..` 表达。
