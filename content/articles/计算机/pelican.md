@@ -4,7 +4,7 @@ Slug: pelican
 
 ## pelican简介
 
-**本文的讨论基于pelican version 4.6.0** 【】。
+**本文的讨论基于pelican version 4.7.1** 。
 
 pelican是一个静态网站生成工具，其是用python编写实现的，所以对于pythoner来说显得格外的亲切。
 

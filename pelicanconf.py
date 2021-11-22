@@ -26,7 +26,7 @@ TIMEZONE = 'Asia/Shanghai'
 
 # set default date
 DEFAULT_DATE = 'fs'
-DEFAULT_LANG = 'Chinese (Simplified)'
+DEFAULT_LANG = 'zh_cn'
 
 DEFAULT_DATE_FORMAT = '%Y年 %b %-d日'
 
