@@ -1,11 +1,11 @@
 Template: bookref
-BookName: Laboratory Manual for Principles of General Chemistry 10e
+BookName: Laboratory Manual for Principles of General Chemistry 9e
 BookAuthor: J. A. Beran
 BookPublisher: John Wiley & Sons
 BookLanguage: 英语
-BookCover: /images/Covers/Laboratory Manual for Principles of General Chemistry 10e - J. A. Beran.jpg
-BookBaidupanDownloadUrl: https://pan.baidu.com/s/1aEYb6vlhXqg96Q3pwEs-Vw 
-BookBaidupanDownloadCode: 04a3
+BookCover: /images/Covers/Laboratory Manual for Principles of General Chemistry 9e - J. A. Beran.jpg
+BookBaidupanDownloadUrl: https://pan.baidu.com/s/1ocYNhWrR-Mj0Uel4JILRuw 
+BookBaidupanDownloadCode: wddt
 
 
 
@@ -20,11 +20,11 @@ BookBaidupanDownloadCode: 04a3
 - [Laboratory Manual for Principles of General Chemistry 9e]({filename}./Laboratory Manual for Principles of General Chemistry 9e - J. A. Beran.md)
 - [Laboratory Manual for Principles of General Chemistry 10e]({filename}./Laboratory Manual for Principles of General Chemistry 10e - J. A. Beran.md)
 
+
+
 ### Laboratory Safety and Guidelines
 
-### Data Documentation
-
-### Data Analysis
+### Laboratory Data 
 
 ### Laboratory Techniques
 
