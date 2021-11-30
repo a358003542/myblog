@@ -21,6 +21,7 @@ Slug: pelican-source-code
 - 命令行listen参数，这个只是pelican额外提供的辅助工具，自己另外再用python的 `http.server` 模块启动一个效果都是一样的。
 - 忽略了程序运行计时和相关日志的输出讨论
 - 忽略了一些程序运行统计信息和相关日志输出的讨论
+- 忽略翻译问题
 
 
 
@@ -259,10 +260,7 @@ Readers类 `__init__` 构造方法主要工作执行完毕之后会发送这个�
 ```
 all_generators_finalized = signal('all_generators_finalized')
 
-article_generator_pretaxonomy = signal('article_generator_pretaxonomy')
-article_generator_finalized = signal('article_generator_finalized')
 article_generator_write_article = signal('article_generator_write_article')
-article_writer_finalized = signal('article_writer_finalized')
 
 page_generator_finalized = signal('page_generator_finalized')
 page_generator_write_page = signal('page_generator_write_page')
@@ -272,10 +270,6 @@ static_generator_init = signal('static_generator_init')
 static_generator_finalized = signal('static_generator_finalized')
 
 # Page-level signals
-
-article_generator_preread = signal('article_generator_preread')
-article_generator_context = signal('article_generator_context')
-
 page_generator_preread = signal('page_generator_preread')
 page_generator_context = signal('page_generator_context')
 
@@ -477,5 +471,458 @@ send的返回值结构如下：
 
 path来自配置 `PATH` ，theme来自 `THEME` ，output_path 来自 `OUTPUT_PATH` 。
 
+总结：作为源码解读的第一遍过程，配置都认为是默认配置，然后不会讨论用户自定义插件问题，如此则会实例化下面这几个Generator：
+
+- ArticlesGenerator
+- PagesGenerator
+- StaticGenerator
+
 #### generate_context
+在pelican的基本使用学习中我们大概了解到Generator的 `generate_context` 方法是用来收集文章的各个元数据信息从而方便后面输出文章用的。下面具体就各个Generator来讨论下代码细节。
+
+##### ArticlesGenerator
+ArticlesGenerator的`generate_context` 方法首先是获取要处理的文章：
+
+```
+for f in self.get_files(
+                self.settings['ARTICLE_PATHS'],
+                exclude=self.settings['ARTICLE_EXCLUDES']):
+```
+
+在获取要处理的文章列表逻辑里面， 配置 `ARTICLE_EXCLUDES` 和 `IGNORE_FILES` 都会起作用并排除掉，然后只会处理前面提到 `readers.extension` 确定的能够处理的文件后缀名的文件。
+
+默认配置 `ARTICLE_PATHS` 的值为 `['']` ，也就是为空，从而根据：
+```
+root = os.path.join(self.path, path) if path else self.path
+```
+确定root为 `self.path` 也就是配置 `PATH` 。
+
+剩下来的核心逻辑和前面提到的autoreload监控文件变化里面的 `folder_watcher` 用到的都是一样的，就是利用 `os.walk` 递归遍历文件夹。
+
+默认的 `ARTICLE_PATHS` 和默认的 `PATH` 最后确定的路径是 `os.curdir` 这很不好，目前个人的配置是设置 `PATH = 'content'` 勉强可以，现在看来还有优化空间，一些图片和静态文件都刷进去了，虽然根据后缀名最后都会过滤掉，但这里再加上配置 
+
+```
+ARTICLE_PATHS = ['articles']
+```
+会更好一些。
+
+注意看到代码这里 `os.path.join(self.path, path)` ，所以你在定义你想要的文章所在地的时候，就需要在content也就是PATH下面，然后只需要写上目标文件夹名字即可。
+
+在进入各个文件处理区块之后，首先是：
+```
+article = self.get_cached_data(f, None)
+```
+这里pelican自己的处理加速缓存逻辑，如果没有处理缓存则会返回False，如果有则会返回缓存数据，然后后面就不用再计算一边了，直接利用缓存数据即可，这里假定没有缓存数据。
+
+下面代码是没有缓存的时候pelican要做的事情，看到最后一行 `self.cache_data(f,article)` 就是将处理数据存入缓存，所以可以认为这一区块就是pelican在处理文章时候的核心工作了。
+```python
+                try:
+                    article = self.readers.read_file(
+                        base_path=self.path, path=f, content_class=Article,
+                        context=self.context,
+                        preread_signal=signals.article_generator_preread,
+                        preread_sender=self,
+                        context_signal=signals.article_generator_context,
+                        context_sender=self)
+                except Exception as e:
+                    logger.error(
+                        'Could not process %s\n%s', f, e,
+                        exc_info=self.settings.get('DEBUG', False))
+                    self._add_failed_source_path(f)
+                    continue
+
+                if not article.is_valid():
+                    self._add_failed_source_path(f)
+                    continue
+
+                self.cache_data(f, article)
+```
+其就是调用Readers类的实例的read_file方法，继续到read_file那边，有：
+
+```python
+        if preread_signal:
+            preread_signal.send(preread_sender)
+```
+
+```
+article_generator_preread = signal('article_generator_preread')
+```
+这样 `article_generator_preread` 信号就发送出去了，附带的参数是本ArticlesGenerator实例。其标记了ArticlesGenerator将要处理一篇文章的context。
+
+```python
+        if not fmt:
+            _, ext = os.path.splitext(os.path.basename(path))
+            fmt = ext[1:]
+
+        if fmt not in self.readers:
+            raise TypeError(
+                'Pelican does not know how to parse %s', path)
+
+        # ......
+
+        reader = self.readers[fmt]
+
+        metadata = _filter_discardable_metadata(default_metadata(
+            settings=self.settings, process=reader.process_metadata))
+        metadata.update(path_metadata(
+            full_path=path, source_path=source_path,
+            settings=self.settings))
+        metadata.update(_filter_discardable_metadata(parse_path_metadata(
+            source_path=source_path, settings=self.settings,
+            process=reader.process_metadata)))
+        reader_name = reader.__class__.__name__
+        metadata['reader'] = reader_name.replace('Reader', '').lower()
+
+        content, reader_metadata = self.get_cached_data(path, (None, None))
+        if content is None:
+            content, reader_metadata = reader.read(path)
+            reader_metadata = _filter_discardable_metadata(reader_metadata)
+            self.cache_data(path, (content, reader_metadata))
+        metadata.update(reader_metadata)
+```
+
+接下来是根据扩展名找到对应的Reader实例【Readers类初始化的时候已经将各个Reader实例化并对应上各个扩展名了】。
+
+接下来这一句：
+
+```
+        metadata = _filter_discardable_metadata(default_metadata(
+            settings=self.settings, process=reader.process_metadata))
+```
+重点不是 `_filter_discardable_metadata` 而是 `default_metadata` , `_filter_discardable_metadata` 只是过滤掉为 `_DISCARD` 值的字典项，只是细枝末节了。
+
+```python
+def default_metadata(settings=None, process=None):
+    metadata = {}
+    if settings:
+        for name, value in dict(settings.get('DEFAULT_METADATA', {})).items():
+            if process:
+                value = process(name, value)
+            metadata[name] = value
+        if 'DEFAULT_CATEGORY' in settings:
+            value = settings['DEFAULT_CATEGORY']
+            if process:
+                value = process('category', value)
+            metadata['category'] = value
+        if settings.get('DEFAULT_DATE', None) and \
+           settings['DEFAULT_DATE'] != 'fs':
+            if isinstance(settings['DEFAULT_DATE'], str):
+                metadata['date'] = get_date(settings['DEFAULT_DATE'])
+            else:
+                metadata['date'] = datetime.datetime(*settings['DEFAULT_DATE'])
+    return metadata
+```
+上面的process函数是`reader.process_metadata` ，`RstReader` ，`MarkdownReader` ，`HTMLReader` 都没有定义这个方法，也是继承自他们的父类也就是 `BaseReader` , 该方法如下：
+
+```python
+
+    def process_metadata(self, name, value):
+        if name in METADATA_PROCESSORS:
+            return METADATA_PROCESSORS[name](value, self.settings)
+        return value
+```
+
+假设你要编写一个插件，重新写一个Reader，然后要对metadata做某些额外的动作的话，可以通过定义这个 `process_metadata` 方法来，其第一个参数是对应的metadata的key，第二个参数是该key的默认值。
+
+```python
+METADATA_PROCESSORS = {
+    'tags': lambda x, y: ([
+        Tag(tag, y)
+        for tag in ensure_metadata_list(x)
+    ] or _DISCARD),
+    'date': lambda x, y: get_date(x.replace('_', ' ')),
+    'modified': lambda x, y: get_date(x),
+    'status': lambda x, y: x.strip() or _DISCARD,
+    'category': lambda x, y: _process_if_nonempty(Category, x, y),
+    'author': lambda x, y: _process_if_nonempty(Author, x, y),
+    'authors': lambda x, y: ([
+        Author(author, y)
+        for author in ensure_metadata_list(x)
+    ] or _DISCARD),
+    'slug': lambda x, y: x.strip() or _DISCARD,
+}
+```
+
+这个process_metadata更像是一个后处理函数，后面再合适的时机再引入相关的讨论。
+
+继续前面的，假设你的配置通过 `DEFAULT_METADATA` 定义了一些metadata，则你的所有文章都是可以看到这些metadata的，不过你在配置里面定义的metadata还可能会经过 `process_metadata` 的后处理。现在假设你定义了：
+
+```python
+DEFAULT_METADATA = {'author':' abc '}
+```
+
+```python
+def _process_if_nonempty(processor, name, settings):
+    """Removes extra whitespace from name and applies a metadata processor.
+    If name is empty or all whitespace, returns _DISCARD instead.
+    """
+    name = name.strip()
+    return processor(name, settings) if name else _DISCARD
+```
+最后返回的是：`Author('abc', settings)` 。 
+
+再比如 `authors` 的 `ensure_metadata_list` ：
+```python
+def ensure_metadata_list(text):
+    if isinstance(text, str):
+        if ';' in text:
+            text = text.split(';')
+        else:
+            text = text.split(',')
+
+    return list(OrderedDict.fromkeys(
+        [v for v in (w.strip() for w in text) if v]
+    ))
+```
+其认为 `;` 或者 `,` 为作者们的分隔符，这些都是小细节上的处理，完全可以根据实际情况的不同来定制你自己的metadata处理方法，具体再编写上 `Author`, `Category` , `Tag` 是要写成特殊类的，其他的都是字符串。
+
+配置的 `DEFAULT_CATEGORY` 也要这么process一下就是这个Category类的支持。`DEFAULT_DATE` 就是字符串即可。 
+
+```
+metadata.update(path_metadata(
+            full_path=path, source_path=source_path,
+            settings=self.settings))
+```
+
+其中有对配置 `EXTRA_PATH_METADATA` 的支持，我不是很关心，然后看到上面关于 `DEFAULT_DATE` 还有一点没写完的逻辑：
+
+```python
+        if settings.get('DEFAULT_DATE', None) == 'fs':
+            metadata['date'] = datetime.datetime.fromtimestamp(
+                os.stat(full_path).st_mtime)
+            metadata['modified'] = metadata['date']
+```
+
+为什么这些metadata在配置里面要以DEFAULT的字段开头，后面会讲到，这还没有实际刷文章内部定义的metadata，后面代码会显示，凡是文章内部用户自己定义的metadata都具有第一优先级，也就是字典里面的同key值覆盖动作。
+
+接下来是下面这句，具体就是根据文件的文件名来获得一些metadata信息。比如配置 `USE_FOLDER_AS_CATEGORY` 就是根据文章所在的文件夹来获得 Category metadata。其他的读者感兴趣有需要的可以参看代码，这里笔者就不做过多讨论了。
+```python
+        metadata.update(_filter_discardable_metadata(parse_path_metadata(
+            source_path=source_path, settings=self.settings,
+            process=reader.process_metadata)))
+
+def parse_path_metadata(source_path, settings=None, process=None):
+    r"""Extract a metadata dictionary from a file's path
+
+    >>> import pprint
+    >>> settings = {
+    ...     'FILENAME_METADATA': r'(?P<slug>[^.]*).*',
+    ...     'PATH_METADATA':
+    ...         r'(?P<category>[^/]*)/(?P<date>\d{4}-\d{2}-\d{2})/.*',
+    ...     }
+    >>> reader = BaseReader(settings=settings)
+    >>> metadata = parse_path_metadata(
+    ...     source_path='my-cat/2013-01-01/my-slug.html',
+    ...     settings=settings,
+    ...     process=reader.process_metadata)
+    >>> pprint.pprint(metadata)  # doctest: +ELLIPSIS
+    {'category': <pelican.urlwrappers.Category object at ...>,
+     'date': datetime.datetime(2013, 1, 1, 0, 0),
+     'slug': 'my-slug'}
+    """
+    metadata = {}
+    dirname, basename = os.path.split(source_path)
+    base, ext = os.path.splitext(basename)
+    subdir = os.path.basename(dirname)
+    if settings:
+        checks = []
+        for key, data in [('FILENAME_METADATA', base),
+                          ('PATH_METADATA', source_path)]:
+            checks.append((settings.get(key, None), data))
+        if settings.get('USE_FOLDER_AS_CATEGORY', None):
+            checks.append(('(?P<category>.*)', subdir))
+        for regexp, data in checks:
+            if regexp and data:
+                match = re.match(regexp, data)
+                if match:
+                    # .items() for py3k compat.
+                    for k, v in match.groupdict().items():
+                        k = k.lower()  # metadata must be lowercase
+                        if v is not None and k not in metadata:
+                            if process:
+                                v = process(k, v)
+                            metadata[k] = v
+    return metadata
+
+```
+
+再看到下面这段：
+```python
+        content, reader_metadata = self.get_cached_data(path, (None, None))
+        if content is None:
+            content, reader_metadata = reader.read(path)
+            reader_metadata = _filter_discardable_metadata(reader_metadata)
+            self.cache_data(path, (content, reader_metadata))
+        metadata.update(reader_metadata)
+```
+
+除开缓存代码，这里面的核心逻辑就是：
+```
+content, reader_metadata = reader.read(path)
+```
+
+这也是官方文档在如何自定义Reader里面的讨论，那就是必须定义一个 `read` 方法，这个read方法返回content，这个content就是文章要输出的核心内容content，然后就是你想要输出的metadata。正如前面讨论的，凡是在文章中读取到的metadata都会覆写可能从其他途径获得的metadata，如下是字典的update覆写逻辑：
+```
+metadata.update(reader_metadata)
+```
+
+再处理完毕之后将会发送信号：
+```
+article_generator_context = signal('article_generator_context')
+```
+
+最后read_file返回：
+
+```
+        return content_class(content=content, metadata=metadata,
+                             settings=self.settings, source_path=path,
+                             context=context)
+```
+
+具体到ArticlesGenerator这里就是：
+```
+Article(content=content, metadata=metadata,settings=self.settings, source_path=path,context=context)
+```
+这个Article类pelican内部处理逻辑的支持，比如下面这句：
+
+```
+                if not article.is_valid():
+                    self._add_failed_source_path(f)
+                    continue
+
+                if article.status == "published":
+                    all_articles.append(article)
+                elif article.status == "draft":
+                    all_drafts.append(article)
+                elif article.status == "hidden":
+                    hidden_articles.append(article)
+```
+这个 `is_valid` 和 `status` 属性都是Article继承自的Content类提供的。
+
+从配置，从文件名，从文件内容中获取metadata还只是第一步，第二个就是根据收集到的Article信息汇总，pelican需要进行一番内处理，从来方便后面的各个输出工作。
+
+```python
+        def _process(arts):
+            origs, translations = process_translations(
+                arts, translation_id=self.settings['ARTICLE_TRANSLATION_ID'])
+            origs = order_content(origs, self.settings['ARTICLE_ORDER_BY'])
+            return origs, translations
+
+        self.articles, self.translations = _process(all_articles)
+        self.hidden_articles, self.hidden_translations = _process(hidden_articles)
+        self.drafts, self.drafts_translations = _process(all_drafts)
+```
+
+根据Article的status收集到的文章已经分为三类了：`all_articles` , `all_drafts`, `hidden_articles` 。上面的`_process` 进一步对翻译语种不同进行划分。这里的细节略过讨论了。
+
+翻译问题本文忽略讨论，现在收集到三个重要的列表量： `self.articles` , `self.hidden_articles` , `self.drafts` 。
+
+处理完之后发送信号：
+```
+article_generator_pretaxonomy = signal('article_generator_pretaxonomy')
+```
+
+```python
+        for article in self.articles:
+            # only main articles are listed in categories and tags
+            # not translations or hidden articles
+            self.categories[article.category].append(article)
+            if hasattr(article, 'tags'):
+                for tag in article.tags:
+                    self.tags[tag].append(article)
+            for author in getattr(article, 'authors', []):
+                self.authors[author].append(article)
+```
+
+这是按category，tag和author来收集文章，这三个变量都是 `defaultdict(list)` 结构。
+
+```python
+        self.dates = list(self.articles)
+        self.dates.sort(key=attrgetter('date'),
+                        reverse=self.context['NEWEST_FIRST_ARCHIVES'])
+
+```
+这里将所有文章按日期排序然后汇集成 `self.dates` 变量。根据配置 `NEWEST_FIRST_ARCHIVES = True` 来。
+
+```python
+        self.categories = list(self.categories.items())
+        self.categories.sort(
+            reverse=self.settings['REVERSE_CATEGORY_ORDER'])
+```
+上面的 `self.categories` 列表化之后排序，根据配置 `REVERSE_CATEGORY_ORDER = False` 来。
+
+```python
+        self.authors = list(self.authors.items())
+        self.authors.sort()
+```
+`self.authors` 排序。
+
+最后还有一点context更新和缓存处理，这里就略过讨论了。
+
+最后发送信号：
+```
+article_generator_finalized = signal('article_generator_finalized')
+```
+
+
+
+#### refresh_metadata_intersite_links
+这个是站内链接的支持，等下再讨论。
+
+
+#### generate_output
+
+##### ArticlesGenerator
+ArticlesGenerator的generate_output做的工作，一是执行 `generate_feeds` 方法，一是执行 `generate_pages` 方法，然后发送信号：
+
+
+```
+    def generate_output(self, writer):
+        self.generate_feeds(writer)
+        self.generate_pages(writer)
+        signals.article_writer_finalized.send(self, writer=writer)
+```
+```
+article_writer_finalized = signal('article_writer_finalized')
+```
+
+`generate_feeds`
+
+
+`generate_pages`
+
+```python
+    def generate_pages(self, writer):
+        """Generate the pages on the disk"""
+        write = partial(writer.write_file,
+                        relative_urls=self.settings['RELATIVE_URLS'])
+
+        # to minimize the number of relative path stuff modification
+        # in writer, articles pass first
+        self.generate_articles(write)
+        self.generate_period_archives(write)
+        self.generate_direct_templates(write)
+
+        # and subfolders after that
+        self.generate_tags(write)
+        self.generate_categories(write)
+        self.generate_authors(write)
+        self.generate_drafts(write)
+```
+
+这里就是不同的文章输出任务，首先重点看下 `generate_articles` 。
+
+```python
+    def generate_articles(self, write):
+        """Generate the articles."""
+        for article in chain(
+            self.translations, self.articles,
+            self.hidden_translations, self.hidden_articles
+        ):
+            signals.article_generator_write_article.send(self, content=article)
+            write(article.save_as, self.get_template(article.template),
+                  self.context, article=article, category=article.category,
+                  override_output=hasattr(article, 'override_save_as'),
+                  url=article.url, blog=True)
+```
 

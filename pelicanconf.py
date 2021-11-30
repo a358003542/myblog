@@ -20,6 +20,7 @@ SITENAME = "万泽的博客"
 SITEURL = ''
 
 PATH = 'content'
+ARTICLE_PATHS = ['articles']
 ARTICLE_EXCLUDES= []
 
 TIMEZONE = 'Asia/Shanghai'
