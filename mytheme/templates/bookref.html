@@ -64,10 +64,18 @@
 
                 {% if article.bookbaidupandownloadurl %}
                 <div class="row">
-                    <a class="btn btn-primary" target="_blank"href="{{article.bookbaidupandownloadurl}}"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                    <a class="btn btn-primary" target="_blank" href="{{article.bookbaidupandownloadurl}}"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                         百度盘下载
                     </a>
                     提取码是：{{ article.bookbaidupandownloadcode }}
+                </div>
+                {% endif %}
+
+                {% if article.onedrivedownloadurl %}
+                <div class="row">
+                    <a class="btn btn-primary" target="_blank" href="{{article.onedrivedownloadurl}}"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                        onedrive下载
+                    </a>
                 </div>
                 {% endif %}
 

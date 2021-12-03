@@ -1,6 +1,6 @@
 Slug: html5-tutorial
 Date: 20191018
-Summary: 本文讨论了最基础的HTML知识，可作为学习html5的第一篇学习文章。
+Summary: 本文讨论了最基础的HTML知识，可作为学习Web开发的第一篇学习文章。
 
 
 [TOC]
