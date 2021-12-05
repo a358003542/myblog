@@ -13,6 +13,11 @@ BookBaidupanDownloadCode: l75b
 
 本书pdf是文字识别版，影印质量**很好**。
 
+相关书籍：
+
+- [Nuclear Magnetic Resonance Applications to Organic Chemistry]({filename}./Nuclear Magnetic Resonance Applications to Organic Chemistry - John D. Roberts.md)
+- [Introduction to the Analysis of Spin-Spin Splitting ilear Magnetic Resonance Spectra]({filename}./Introduction to the Analysis of Spin-Spin Splitting ilear Magnetic Resonance Spectra, An - John D. Roberts.md)
+
 ### Introduction. The Nuclear Resonance Phenomenon
 
 1.1  Introduction

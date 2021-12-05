@@ -17,8 +17,11 @@ BookBaidupanDownloadCode: nbcy
 - [Chemistry 10e]({filename}./Chemistry 10e - Raymond Chang.md)
 - [Chemistry 12e]({filename}./Chemistry 12e - Raymond Chang & Kenneth A. Goldsby.md)
 - [Chemistry 13e]({filename}./Chemistry 13e - Raymond Chang & Jason Overby.md)
+- [University Chemistry]({filename}./University Chemistry - Brian B. Laird & Raymond Chang.md)
 
-该书的不同版本10e，12e，13e目录内容完全一致，应该书籍内容也差不多。
+Chemistry的不同版本10e，12e，13e目录内容完全一致，应该书籍内容也差不多。
+
+University Chemistry该书Raymond Chang是作为副作者，也在这里列出来了。
 
 ### Introduction
 
