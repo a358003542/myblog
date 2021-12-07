@@ -1,53 +1,18 @@
-## inline css
+Slug: css-tutorial
+Date: 20191018
 
-最基本的css属性可以通过inline css模式直接在html标签中通过 **style** 属性来加上。具体如下所示：
+[TOC]
 
-### font-size
 
-字体大小
+## 两种css设置方式
+### 最直接的inline css
+css属性可以通过inline css模式直接在html标签中通过 **style** 属性来加上。
 
 ```html
 <p style="font-size:12pt">paragraph</p>
 ```
 
-### color
-
-字体颜色， 这是css支持的 [color关键词清单](http://www.w3.org/TR/css3-color/#svg-color) 。
-
-```html
-<h2 style="color:green">paragraph</h2>
-```
-
-### font-family
-
-字族， 这是css一般支持的 [字族信息](http://www.w3.org/TR/CSS21/fonts.html#generic-font-families) 。
-
-```html
-<ol>
-    <li style="font-family:Arial">Arial</li>
-</ol>
-```
-
-一般有文字的标签都可以用上面的三个属性来控制其内文字的大小，颜色和字族。虽然现在都推荐用css来控制，但思路顺序应该是优先inline css，太过普遍多次出现的情况下才考虑单独css控制。
-
-### background-color
-
-背景颜色。如果读者熟悉LaTeX排版系统的，那么我们都清楚LaTeX排版很核心的一个概念就是盒子。在html这里，我们似乎也可以把一个个标签看作一个个排版用的盒子。然后这里的background-color就是控制这一个盒子的背景颜色。
-
-```html
-<body style="background-color:yellow">
-</body>
-```
-
-### text-align
-
-文字在标签盒子里的对齐方式。可选参数有: left, right, center。
-
-```html
-<h3 style="text-align:center">居中对齐的标题</h3>
-```
-
-## 外部css
+### 引入外部css文件
 有一种说法，是将放在html `<head>` 标签里面的css和具体外部的css文件引用区分开来，在我看来区别不大吧。然后网络上还有一种说法认为html `<head>` 标签里面应该多用id的css定义，而外部css文件应该只用class定义好做到普适性，在我看来也有点削足适履了。
 
 在具体使用的时候一个总的原则是一般推荐使用class，只有觉得某些元素需要个别处理的时候才用id属性控制。
@@ -73,163 +38,19 @@
 ```
 
 
-
-## 设置背景图片
-```
-background-image:url("https://theurl/tothe/image.jpg");
-```
-### 设置背景图片位置
-
-设置背景图片位置，可能的值有top，center，right，left，top，bottom等，如下所示:
-```
-top left
-top center
-top right
-center left
-center center
-center right
-bottom left
-bottom center
-bottom right
-```
-如果只给出一个值，则第二个值是默认值center。
-```
-background-position: center center;
-```
-### 设置背景图片是否重复
-
-默认是repeat，如下设置为 `no-repeat` ，则背景图片不会重复以铺满整个背景了。
-
-    background-repeat: no-repeat;
-
-### 设置背景图片不随页面滚动
-
-    background-attachment:fixed;
-
-### 设置背景图片尺寸
-
-如下设置为 `cover` ，则背景图片会拉伸到足够大，以覆盖整个区域，图片某些部位可能不会显示在背景中。
-
-    background-size: cover;
-
-如果设置为 `contain` ，则背景图片会拉伸至最大长度或最大宽度不超过背景为止。
-
-此外还可以如下指定宽高比，下面是宽100px，高150px: 
-
-    background-size:100px 150px;
-
-## 设置背景颜色
-
-这里是html各个标签盒子的背景颜色，而color设置的是里面字体的颜色。
-
-    background-color:red;
-
-## 控制文本大小写
-
-如下所示，依次为: 大写，首字母大写，小写。
-```
-h1 {text-transform:uppercase}
-h2 {text-transform:capitalize}
-p {text-transform:lowercase}
-```
-
-## 边框画一个圆
-
-这样边框就成为一个圆了。
-```
-<div style="border:1pt solid blue;border-radius:50%;width:100px;height:100px;margin:auto;"></div>
-```
-
-<div style="border:1pt solid blue;border-radius:50%;width:100px;height:100px;margin:auto;"></div>
-## z-index属性
-
-css中某个标签盒子设置z-index属性，将影响这些标签盒子的堆叠顺序。比如说如下将header标签的 `z-index` 属性设置为1，而其他的都不设置，则保证header网页头部分总是第一个先堆放。:
-```
-header{
-z-index:1;
-}
-```
-
-
-
-## 响应式布局
-
-提示：现在推荐使用bootstrap来进行响应式设计，下面的内容有助于我们来理解bootstrap内部是如何实现响应式布局的。
-
-请读者先阅读 [这篇文章](http://www.ruanyifeng.com/blog/2012/05/responsive_web_design.html) 。这篇刚开始 Ethan Marccote 给出的那个例子有个非常重要的信息，那就是设备的像素分级:
-
-- 大于1300像素
-- 600到1300像素
-- 400到600像素
-- 小于400像素
-
-这个像素分级可以为后面我们要根据不同的设备进行css进行设置提供了参考。
-
-然后一般网页都要加上这一行:
-
-```
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-```
-
-意思是网页默认宽度为设备宽度，原始缩放比为1。
-
-然后就是各个元素宽度最好不要有 `width: xxx px` 这样写死了的css设置，而是 `%` 或者 `auto` 。字体的大小也都推荐使用 `em` 这样的相对大小。
-
-h1 默认大小是 1.5em 。
-```
-h1 {
-  font-size: 1.5em;
-}
-```
-small 默认是 0.875em 。
-```
-small {
-  font-size: 0.875em;
-}
-```
-流动式布局，各个区块的位置都是浮动的，有些情况下会需要使用 `position: absolute` ，这会带来很多麻烦，尽量少用。
-
-根据屏幕响应式多个css配置适应: 【因为css有很多通用配置是多设备皆适用的，下面这些根据屏幕响应的css应该放在css文件的最后面。】
-
-参看 [这篇文章](http://learn.shayhowe.com/advanced-html-css/responsive-web-design/) ，其提到了现在流行的 mobile-first 设计思路，也就是有限照顾手机小屏幕设备的设计流程。先写好通用css配置，然后css文件最后面如下设置这些屏幕响应css设置。从最小的屏幕照顾起:
-
-```css
-@media screen and (min-width: 400px) {}
-@media screen and (min-width:600px){}
-@media screen and (min-width:1000px){}
-@media screen and (min-width:1400px){}
-```
-
-这里 min-width 是指设备宽度至少要大于那个值，此外还有 max-width 是指设置宽度要小于那个值。上面的例子，假设设备750px，那么第一个第二个配置都满足，但因为css覆盖配置，后面如果你定制了那么将生效后面的，这就是先调手机端的mobile-first思路。
-
-图片的自适应，如下设置最大宽度。
-
-```
-img { max-width: 100%;}
-```
-
-
-## no-js class
-```
-<html class="no-js" lang="zh">
-```
-他们说这个class可以用来设置某些情况下javascript被禁用之后的css。
-
-## 基本写法
-
+## css基本写法
 前面谈到的inline css因为肯定是作用于本标签，所以写法就简化了，style引入之后后面加入一些属性即可。然后前面谈到的外部css，其写法都是如下所示:
 
 ```css
 p{
-text-indent:2em;/*段落缩进*/
-line-height:180%;/*行间距*/
+text-indent:2em; /*段落缩进*/
+line-height:180%; /*行间距*/
 }
 ```
 
-第一个元素我们可以简单称之为css选择器，在网络抓取中也有类似的概念。然后花括号里面就是类似 inline css 一样的格式了，用分号隔开，换行不换行都是无所谓的，具体为了美观一般都一个属性占一行吧。
+第一个元素我们可以简单称之为css选择器，在网络抓取中也有类似的概念。然后花括号里面就是类似inline css 一样的格式了，用分号隔开，换行不换行都是无所谓的，具体为了美观一般都一个属性占一行吧。
 
 ## css选择器
-
 这里以html5为例，html5内置的标签都是可以直接引用的，比如body，article，video，table，figure等等。如果你在css中引用section，那么意思就是整个文档的section标签那些元素被选中了。
 
 我们知道html5中可以通过 **class** 属性来将某个元素归于某一类，现在假设有:
@@ -247,7 +68,6 @@ line-height:180%;/*行间距*/
 其完整形式为 `*.hightlight` ，也就是所有class属性为hightlight的元素都将被选中。
 
 然后id属性可用来定义某个标签的唯一id，一般就用 `#idname` 选中那个标签即可。
-
 
 
 ### 子选择器
@@ -313,7 +133,7 @@ color: red;
 
 内联样式 > 嵌入样式 > 外部样式
 
-## !important 用法
+### !important 用法
 
 css设置有时不可避免会发生样式重叠覆盖，当然一般是尽可能统一css设置，但有时嫌麻烦懒得弄了，你可以用 `!important` 来手工提高某个css设置的优先级(参考了 [这个网页](http://www.cnblogs.com/qieqing/articles/1224085.html) 。)。如下所示：
 
@@ -330,12 +150,11 @@ padding: 5px;
 上面严格控制表格各项都居中对齐。
 
 ## css的长度单位
-
-css有很多长度单位，这些单位如果你熟悉 \(\LaTeX\) 的话你就会对这些单位很眼熟。其中绝对长度单位有：1in = 2.54cm = 25.4mm = 72pt = 6pc ，这些并不推荐使用。[这篇网页](http://www.w3.org/Style/Examples/007/units.en.html) 推荐多使用 `px` ， `em` 和 `%` 这样的长度单位。其中"px"和"%"是css特有的，其会根据显示屏而变动，然后1em我们知道就是当前字体M的宽度（TeX里面的情况）。其中px值得引起我们的注意，其会根据显示设备而有很好的调整，更多信息请参看上面提到的那个参考网页。
+css有很多长度单位，这些单位如果你熟悉 $\LaTeX$ 的话你就会对这些单位很眼熟。其中绝对长度单位有：1in = 2.54cm = 25.4mm = 72pt = 6pc ，这些并不推荐使用。[这篇网页](http://www.w3.org/Style/Examples/007/units.en.html) 推荐多使用 `px` ， `em` 和 `%` 这样的长度单位。其中`px`和`%`是css特有的，其会根据显示屏而变动，然后1em我们知道就是当前字体M的宽度（TeX里面的情况）。其中px值得引起我们的注意，其会根据显示设备而有很好的调整，更多信息请参看上面提到的那个参考网页。
 
 ## css的盒子模型
 
-html的显示布局和 \(TeX\) 的显示布局一样也是采用的浮动盒子模型，从上到下，从左到右，一个个盒子排下来，只是 \(TeX\) 更复杂，还有一个分页算法。简言之就是每一个标签元素都是一个盒子(我还不太确定一个个字是不是一个盒子，在 \(TeX\) 里面一个个字都是一个盒子。) 。
+html的显示布局和 $\TeX$ 的显示布局一样也是采用的浮动盒子模型，从上到下，从左到右，一个个盒子排下来，只是 $\TeX$ 更复杂，还有一个分页算法。简言之就是每一个标签元素都是一个盒子(我还不太确定一个个字是不是一个盒子，在 $\TeX$ 里面一个个字都是一个盒子。) 。
 
 下面这个图片来自 [这个网页](http://www.hicksdesign.co.uk/boxmodel/) 。
 
@@ -379,6 +198,180 @@ border: 1px solid #4682b4
 }
 ```
 border-style情况比较多，常见的有 **solid** 实线 **dashed** 虚线 **double** 双线 **dotted** 点线等，更多请参看 [这个网页](http://www.w3school.com.cn/cssref/pr_border-style.asp) 。
+
+## 字体配置
+### font-size
+
+字体大小
+
+```html
+<p style="font-size:12pt">paragraph</p>
+```
+
+### color
+
+字体颜色， 这是css支持的 [color关键词清单](http://www.w3.org/TR/css3-color/#svg-color) 。
+
+```html
+<h2 style="color:green">paragraph</h2>
+```
+
+### font-family
+
+字族， 这是css一般支持的 [字族信息](http://www.w3.org/TR/CSS21/fonts.html#generic-font-families) 。
+
+```html
+<ol>
+    <li style="font-family:Arial">Arial</li>
+</ol>
+```
+
+一般有文字的标签都可以用上面的三个属性来控制其内文字的大小，颜色和字族。虽然现在都推荐用css来控制，但思路顺序应该是优先inline css，太过普遍多次出现的情况下才考虑单独css控制。
+
+## 布局盒子的背景颜色
+如果读者熟悉LaTeX排版系统的，那么我们都清楚LaTeX排版很核心的一个概念就是盒子。在html这里，我们也可以把一个个标签看作一个个排版用的盒子。然后这里的background-color就是控制这一个盒子的背景颜色。
+
+```html
+<body style="background-color:yellow">
+</body>
+```
+
+## 文字对齐方式
+文字在标签盒子里的对齐方式。可选参数有: left, right, center。
+
+```html
+<h3 style="text-align:center">居中对齐的标题</h3>
+```
+
+## 设置背景图片
+```
+background-image:url("https://theurl/tothe/image.jpg");
+```
+
+### 设置背景图片位置
+
+设置背景图片位置，可能的值有top，center，right，left，top，bottom等，如下所示:
+```
+top left
+top center
+top right
+center left
+center center
+center right
+bottom left
+bottom center
+bottom right
+```
+如果只给出一个值，则第二个值是默认值center。
+```
+background-position: center center;
+```
+### 设置背景图片是否重复
+
+默认是repeat，如下设置为 `no-repeat` ，则背景图片不会重复以铺满整个背景了。
+
+    background-repeat: no-repeat;
+
+### 设置背景图片不随页面滚动
+
+    background-attachment:fixed;
+
+### 设置背景图片尺寸
+
+如下设置为 `cover` ，则背景图片会拉伸到足够大，以覆盖整个区域，图片某些部位可能不会显示在背景中。
+
+    background-size: cover;
+
+如果设置为 `contain` ，则背景图片会拉伸至最大长度或最大宽度不超过背景为止。
+
+此外还可以如下指定宽高比，下面是宽100px，高150px: 
+
+    background-size:100px 150px;
+
+
+## 控制文本大小写
+
+如下所示，依次为: 大写，首字母大写，小写。
+```
+h1 {text-transform:uppercase}
+h2 {text-transform:capitalize}
+p {text-transform:lowercase}
+```
+
+## 边框画一个圆
+
+这样边框就成为一个圆了。
+```
+<div style="border:1pt solid blue;border-radius:50%;width:100px;height:100px;margin:auto;"></div>
+```
+
+<div style="border:1pt solid blue;border-radius:50%;width:100px;height:100px;margin:auto;"></div>
+## z-index属性
+
+css中某个标签盒子设置z-index属性，将影响这些标签盒子的堆叠顺序。比如说如下将header标签的 `z-index` 属性设置为1，而其他的都不设置，则保证header网页头部分总是第一个先堆放。:
+```
+header{
+z-index:1;
+}
+```
+
+
+## 响应式布局
+提示：现在推荐使用bootstrap来进行响应式设计，下面的内容有助于我们来理解bootstrap内部是如何实现响应式布局的。
+
+请读者先阅读 [这篇文章](http://www.ruanyifeng.com/blog/2012/05/responsive_web_design.html) 。这篇刚开始 Ethan Marccote 给出的那个例子有个非常重要的信息，那就是设备的像素分级:
+
+- 大于1300像素
+- 600到1300像素
+- 400到600像素
+- 小于400像素
+
+这个像素分级可以为后面我们要根据不同的设备进行css进行设置提供了参考。
+
+然后一般网页都要加上这一行:
+
+```
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+```
+
+意思是网页默认宽度为设备宽度，原始缩放比为1。
+
+然后就是各个元素宽度最好不要有 `width: xxx px` 这样写死了的css设置，而是 `%` 或者 `auto` 。字体的大小也都推荐使用 `em` 这样的相对大小。
+
+h1 默认大小是 1.5em 。
+```
+h1 {
+  font-size: 1.5em;
+}
+```
+small 默认是 0.875em 。
+```
+small {
+  font-size: 0.875em;
+}
+```
+流动式布局，各个区块的位置都是浮动的，有些情况下会需要使用 `position: absolute` ，这会带来很多麻烦，尽量少用。
+
+根据屏幕响应式多个css配置适应: 【因为css有很多通用配置是多设备皆适用的，下面这些根据屏幕响应的css应该放在css文件的最后面。】
+
+参看 [这篇文章](http://learn.shayhowe.com/advanced-html-css/responsive-web-design/) ，其提到了现在流行的 mobile-first 设计思路，也就是有限照顾手机小屏幕设备的设计流程。先写好通用css配置，然后css文件最后面如下设置这些屏幕响应css设置。从最小的屏幕照顾起:
+
+```css
+@media screen and (min-width: 400px) {}
+@media screen and (min-width:600px){}
+@media screen and (min-width:1000px){}
+@media screen and (min-width:1400px){}
+```
+
+这里 min-width 是指设备宽度至少要大于那个值，此外还有 max-width 是指设置宽度要小于那个值。上面的例子，假设设备750px，那么第一个第二个配置都满足，但因为css覆盖配置，后面如果你定制了那么将生效后面的，这就是先调手机端的mobile-first思路。
+
+图片的自适应，如下设置最大宽度。
+
+```
+img { max-width: 100%;}
+```
+
+
 
 ## css布局
 

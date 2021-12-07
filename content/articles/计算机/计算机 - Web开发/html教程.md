@@ -114,7 +114,7 @@ html5新加入了很多关于文档结构的标签，这些标签并没有任何
 
 -   **ul:** 不编号列表，也叫无序列表（Unordered list）。里面的item用 **li** 标签封装。
 -   **ol:** 编号列表，也叫有序列表（Ordered list）。里面的item用 **li** 标签封装。
--   **h1,h2,h3 ...** 标题标签，数字表示各个标题的层级。
+-   **h1,h2,h3 ...** 标题标签，数字表示各个标题的层级。【这里强调一下，标题标签的含义是文档的结构，而不是文字的表现形式，不要因为h3之类的能让文字显得很大就用它，这是极不规范的。】
 -   **p:** 段落标签。
 -   **b:** 文字加粗
 -   **i:** 文字斜体
@@ -221,8 +221,7 @@ div标签更确切的表达是块状区块，可以看作其display属性是 `bl
 
 
 ## 表单
-
-之前并没有对html中的表单各个情况进行说明，这里详细说明之。这里所谓的表单是指 `form` 标签加上其内包含的 `input` 等元素。这些input元素构成了我们熟知的文本输入框，下拉列表，单选框，复选框等等。
+这里所谓的表单是指 `form` 标签加上其内包含的 `input` 等元素。这些input元素构成了我们熟知的文本输入框，下拉列表，单选框，复选框等等。
 
 ```
 <form>
@@ -246,7 +245,7 @@ div标签更确切的表达是块状区块，可以看作其display属性是 `bl
 </form>
 ```
 
-然后input的 `name` 属性很重要，其值具体对应该文本输入的值的变量名（比如python的wsgi机制就将其刷成 `form.yourname` 这样的引用）。
+然后input的 `name` 属性很重要，其值具体对应该文本输入的值的变量名（比如python就将其刷成 `form.yourname` 这样的引用）。
 
 <form>
 <label>name:</label>
@@ -398,10 +397,7 @@ html有好几种方法创建一个按钮，w3school不推荐button标签，而�
 
 
 
-
-
-
-### html5代码规范
+### html代码规范
 
 本文参考了 [这篇文章](http://codeguide.bootcss.com) 和 [这篇文章](http://alloyteam.github.io/CodeGuide/)  。
 
@@ -412,7 +408,7 @@ html有好几种方法创建一个按钮，w3school不推荐button标签，而�
 #### 总的原则
 
 1.  无论团队人数多少，代码应该看起来就好像一个人写的。——这个原则为大家所公认。
-2.  文件名推荐是小写字母加下划线。（小写字母加连字符也是可以的，但是绝对不推荐带上空格）
+2.  文件名推荐是小写字母加中划线或者下划线。【空格是绝对不推荐的，MDN的[这篇文章](https://developer.mozilla.org/zh-CN/docs/Learn/Getting_started_with_the_web/Dealing_with_files) 推荐用中划线不太推荐下划线，给出的理由是兼顾谷歌搜索引擎分词，这个理由并不是放诸四海皆准而且也很牵强。文件名里面带空格不推荐是因为不管是浏览器还是操作系统还是各个编程语言等等容易出问题的地方太多了，实在不推荐。】
 
 
 
@@ -421,10 +417,10 @@ html有好几种方法创建一个按钮，w3school不推荐button标签，而�
 1.  缩进，这个一个好的编辑器会提供这个自动缩进功能的。
 2.  属性名全部小写，用 `-` 隔开。
 3.  属性的定义用 **双引号** 包围起来。
-4.  `<hr>` `<img src=...>` 这样的不用后面加个 `/` 号了。
+4.  `<hr>` `<img src=...>` 这样的不用后面加个 `/` 了【有的地方加了也不算什么大问题，不推荐加是因为加了也没必要。】。
 5.  关闭标签不要省略 `<li>...</li>`  这是没有疑问的。
 6.  开头格式都是： `<!DOCTYPE html>` 
-7.  语言指定遵循规范 ，`<html lang="zh-cn">` 
+7.  语言指定遵循规范 ，`<html lang="zh">` 【语言代码推荐参看 [这个网页](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry)。】
 8.  字符编码推荐指定utf8，`<meta charset="utf-8">` 
 9.  IE兼容模式，推荐加上这样一行：
 
@@ -435,30 +431,31 @@ html有好几种方法创建一个按钮，w3school不推荐button标签，而�
 10.  引用css和javascript，如下所示（不要再像以前加上一些杂七杂八的东西，尽可能保持代码简洁。）：
 
 ```html
-<!-- External CSS -->
-<link rel="stylesheet" href="code_guide.css">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="code_guide.css">
 
-<!-- In-document CSS -->
-<style>
-...
-</style>
+    <!-- In-document CSS -->
+    <style>
+    ...
+    </style>
 
-<!-- External JS -->
-<script src="code_guide.js"></script>
+    <!-- External JS -->
+    <script src="code_guide.js"></script>
 
-<!-- In-document JS -->
-<script>
-...
-</script>
+    <!-- In-document JS -->
+    <script>
+    ...
+    </script>
 ```
 
 11.  属性的顺序：
-    1)  class
-    2)  id name
-    3)  data-*
-    4)  src for type href value
-    5)  title alt 
-    6)  role aria-*
+    1.  class
+    2.  id name
+    3.  data-*
+    4.  src for type href value
+    5.  title alt 
+    6.  role aria-*
+    
 
 12.  布尔属性，html规范原文就是：
 
@@ -477,14 +474,8 @@ html有好几种方法创建一个按钮，w3school不推荐button标签，而�
 </select>
 ```
 
-13. 代码简洁简洁，尽可能减少标签数量。这是没有疑问的。
+13. 代码简洁简洁，尽可能减少标签数量。
 
-
-
-
-#### css
-
-css代码规范有兴趣的请参看前面提到过的参考文章，这个我不太感兴趣，老实说css本来就可读性偏低吧，当然了基本的代码规范可以做一下。
 
 
 
@@ -497,6 +488,3 @@ css代码规范有兴趣的请参看前面提到过的参考文章，这个我�
 
 
 
-<link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-
-<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>

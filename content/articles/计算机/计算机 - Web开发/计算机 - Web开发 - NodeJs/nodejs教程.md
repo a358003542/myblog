@@ -1,22 +1,25 @@
-Slug: node-learning-notes
+Slug: nodejs-tutorial
 Date: 20201121
 Tags: javascript, node, npm, yarn
 
 [TOC]
 
-## 何为node
+## 何为nodejs
 
-我们知道javascript作为前端的脚本语言是浏览器负责翻译执行的，也就是说javascript的运行是依赖于浏览器的。而node是一个javascript运行时，意思是你的javascript脚本可以类似于在浏览器上在node上运行。事实上node就实现组件结构来说也类似于chrome浏览器，一样是基于chrome的V8 javascript引擎，只是移除了一些和网页显示相关的webkit引擎之类的。
+我们知道javascript作为前端的脚本语言是浏览器负责翻译执行的，也就是说javascript的运行是依赖于浏览器的。而nodejs是一个javascript运行时，意思是你的javascript脚本可以类似于在浏览器上在nodejs上运行。事实上nodejs就实现组件结构来说也类似于chrome浏览器，一样是基于chrome的V8 javascript引擎，只是移除了一些和网页显示相关的webkit引擎之类的。
 
-官网为node的定义如下：
+官网为nodejs的定义如下：
 
 > 一个搭建在Chrome JavaScript运行时上的平台，用于构建高速、可伸缩的网络程序。Node.js采用的事件驱动、非阻塞I/O模型，使它既轻量又高效，并成为构建运行在分布式设备上的数据密集型实时程序的完美选择。
 
-V8引擎性能很高，javascript会被直接编译成本地机器码。所以node使用javascript也很高效。因为V8引擎原来处理网页上的javascript脚本就实现上必须是事件驱动，非阻塞IO的，于是到了node服务器这边也是事件驱动的，非阻塞IO编程的。
+V8引擎性能很高，javascript会被直接编译成本地机器码。所以nodejs使用javascript也很高效。因为V8引擎原来处理网页上的javascript脚本就实现上必须是事件驱动，非阻塞IO的，于是到了nodejs服务器这边也是事件驱动的，非阻塞IO编程的。
 
-## node和npm
+## 安装nodejs
+请到[这个网站](https://nodejs.dev/download/) 下载nodejs。
 
-正如前面所说，node是一个平台，然后node人们也常称作node.js，因为node在作这个平台的时候内置了很多官方的js模块。比如说我们随便从网上找了一个最简单的nodejs入门样例web server程序：
+## nodejs和npm
+
+正如前面所说，nodejs是一个平台，因为nodejs在作这个平台的时候内置了很多官方的js模块。比如说我们随便从网上找了一个最简单的nodejs入门样例web server程序：
 
 ```js
 var http = require('http');
@@ -30,9 +33,9 @@ http.createServer(function (request, response) {
 console.log('Server running at http://127.0.0.1:8888/');
 ```
 
-其最开始的语句 `require('http')` 就是在引入node.js的官方内置js模块http。
+其最开始的语句 `require('http')` 就是在引入nodejs的官方内置js模块http。
 
-既然有了官方模块那当然就有第三方模块和模块管理工具了。一般安装好node之后除了node命令之外还有npm命令，最新的node现在还提供npx命令。
+既然有了官方模块那当然就有第三方模块和模块管理工具了。一般安装好nodejs之后除了node命令之外还有npm命令，最新的nodejs现在还提供npx命令。
 
 首先说一下npx命令有什么用，在本地安装一个npm包之后，该包提供了一个命令，如果你希望调用这个命令，以前的做法则可能需要修改 `package.json` 的 scripts 字段：
 
@@ -102,9 +105,12 @@ yarn在windows下也提供了安装包，去 [官网](https://classic.yarnpkg.co
 
 假设你自定义了npm start这个命令，那么通过 yarn start也是一样可以调用的。
 
-## 模块简介
+## 模块
+前面谈了一些关于模块的东西，本小节将进一步介绍nodejs的模块。说简单一点所谓的nodejs的模块就是一个js文件，只是这个js文件还需要额外写一些代码好让里面的变量export出来，这样才能被其他js文件使用。
 
-前面谈了一些关于模块的东西，本小节将进一步介绍node的模块。
+读者请先跟着进行下面的实践，编写一个最简单的nodejs模块。
+
+### 一个最简单的nodejs模块
 
 首先我们新建一个文件夹mymodule，然后里面新建一个 `index.js` 文件。在`index.js` 文件里面定义一个简单的函数：
 
@@ -128,11 +134,40 @@ var mymodule = require('./mymodule')
 console.log(mymodule.add2(1,2))
 ```
 
-### 补充说明
+然后运行：
+```
+node test_mymodule.js
+```
+如果一起正常，那么读者将会看到输出了数字3，恭喜，一个简单的nodejs模块就编写完成了。
 
-前面简单的模块创建例子中默认的  `index.js` 入口你可以通过新建 `package.json` 文件然后通过设置 `main` 字段属性来指定其他入口js文件。
 
-如果你的模块很大型了，那么可能 `exports.` 这种写法不太合适了，你可以通过设置 `module.exports` 为其他对象来改进之。
+一般模块是默认  `index.js` 为模块的入口，你可以在mymodule文件夹下面新建 `package.json` 文件，这一般正式的模块都会定义这个文件的，然后通过设置 `main` 字段来指定目标入口js文件。【读者可以试着将index.js改为main.js然后试下，然后再按照上面的表述编写一个package.json文件来试下。】
+
+还有一种写法：
+```js
+module.exports.add2 = add2
+```
+这两个写法区别不是太大，参看官方文档：
+>exports shortcut
+>
+>Added in: v0.1.16
+>
+>The exports variable is available within a module's file-level scope, and is assigned the value of `module.exports` before the module is evaluated.
+
+>It allows a shortcut, so that `module.exports.f = ... `can be written more succinctly as `exports.f = ....` However, be aware that like any variable, if a new value is assigned to exports, it is no longer bound to module.exports:
+
+>module.exports.hello = true; // Exported from require of module
+>
+>exports = { hello: false };  // Not exported, only available in the module
+
+简单来说就是如果你总是规范自己采用 `exports.what=what` 这样的语法，那么exports只是`module.exports`的语法糖罢了，不过一定要注意你不能写作 `exports=what`，这样exports这个变量就被污染了。但是你仍然可以写 `module.exports = add2` 这种形式，这样调用语句要改为：
+```
+var mymodule = require('./mymodule')
+
+console.log(mymodule(1,2))
+```
+我不太喜欢这种风格，因为require之后从程序员的习惯来说更期待的是引入进来一个某种模块对象的东西，我更喜欢最开始的那种语法，通过exports将模块里面的目标变量作为属性绑定到某种模块对象里面。
+
 
 
 ### 发行你自己的npm包

@@ -1,8 +1,9 @@
-## bootstrap
+Slug: bootstrap-tutorial
+Date: 20191018
 
-本文点到为止讲解一下，读者简单了解即可，具体还是要自己练手来学习。
+[TOC]
 
-## 安装
+## 安装bootstrap
 
 本文是如下加载的：
 ```
@@ -205,3 +206,4 @@ bootstrap用默认的button来制作标签，如果你需要点击动作的还�
 <a href="https://www.bing.com" target="_blank" role="button" class="btn btn-success btn-large">Click here!</a>
 ```
 <a href="https://www.bing.com" target="_blank" role="button" class="btn btn-success btn-large">Click here!</a>
+
