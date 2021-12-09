@@ -32,11 +32,19 @@ DEFAULT_LANG = 'zh_cn'
 DEFAULT_DATE_FORMAT = '%Y年 %b %-d日'
 
 #  disable feed generation
+FEED_ATOM = None
+FEED_RSS = None
 FEED_ALL_ATOM = None
+FEED_ALL_RSS = None
 CATEGORY_FEED_ATOM = None
+CATEGORY_FEED_RSS = None
 TRANSLATION_FEED_ATOM = None
+TRANSLATION_FEED_RSS = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
+TAG_FEED_ATOM = None
+TAG_FEED_RSS = None
+
 
 # 不要自动删除的文件
 OUTPUT_RETENTION = [".git"]
@@ -62,14 +70,18 @@ ARTICLE_URL = 'articles/{slug}.html'  # articles 里面的内容
 ARTICLE_SAVE_AS = ARTICLE_URL
 PAGE_URL = '{slug}.html'  # pages 文件夹里面的内容
 PAGE_SAVE_AS = PAGE_URL
-CATEGORY_URL = 'categorys/{slug}/index.html'
-CATEGORY_SAVE_AS = CATEGORY_URL
-TAG_URL = 'tags/{slug}.html'
-TAG_SAVE_AS = TAG_URL
+
 
 # disable author page
 AUTHOR_URL = 'author/{slug}.html'
 AUTHOR_SAVE_AS = ''
+# disable category page
+CATEGORY_URL = 'categorys/{slug}/index.html'
+CATEGORY_SAVE_AS = ''
+# disable tag page
+TAG_URL = 'tags/{slug}.html'
+TAG_SAVE_AS = ''
+
 # disable parse html
 # READERS = {'html': None}
 
@@ -100,16 +112,17 @@ TEMPLATE_PAGES = {'404.html': '404.html'}
 
 ######################################################
 
+DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
 
 ################################### plugin #################
 PLUGIN_PATHS = ['myplugins']
 
 PLUGINS = ['pelican_javascript', 'extract_toc',
-           'tipue_search', 'render_math', 'sitemap', 'pandoc_html']
+           'tipue_search', 'render_math', 'sitemap', 'pandoc_html',
+           'bookref']
 
 MATH_JAX = {'tex_extensions': ['mhchem.js']}
 
-DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
 
 SITEMAP = {
     'format': 'xml',
@@ -127,3 +140,5 @@ SITEMAP = {
 }
 
 ##################################################################
+BOOKREFAUTHOR_SAVE_AS = 'bookref_author/{slug}.html'
+BOOKREFAUTHOR_URL = 'bookref_author/{slug}.html'

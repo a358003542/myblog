@@ -24,7 +24,10 @@
             <div class="col-md-6">
 
                 <div class="row">
-                    作者：<i>{{ article.bookauthor}}</i>
+                    作者：
+                    {% for author in article.bookref_authors %}
+                    <a href="{{ SITEURL }}/{{author.url}}">{{ author.name}}</a>  
+                    {% endfor %}
                 </div>
 
                 {% if article.category|trim|count > 0 %}

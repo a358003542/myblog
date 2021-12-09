@@ -17,100 +17,9 @@ V8引擎性能很高，javascript会被直接编译成本地机器码。所以no
 ## 安装nodejs
 请到[这个网站](https://nodejs.dev/download/) 下载nodejs。
 
-## nodejs和npm
-
-正如前面所说，nodejs是一个平台，因为nodejs在作这个平台的时候内置了很多官方的js模块。比如说我们随便从网上找了一个最简单的nodejs入门样例web server程序：
-
-```js
-var http = require('http');
-
-http.createServer(function (request, response) {
-	response.writeHead(200, {'Content-Type': 'text/plain'});
-	response.end('Hello World\n');
-    
-}).listen(8888);
-
-console.log('Server running at http://127.0.0.1:8888/');
-```
-
-其最开始的语句 `require('http')` 就是在引入nodejs的官方内置js模块http。
-
-既然有了官方模块那当然就有第三方模块和模块管理工具了。一般安装好nodejs之后除了node命令之外还有npm命令，最新的nodejs现在还提供npx命令。
-
-首先说一下npx命令有什么用，在本地安装一个npm包之后，该包提供了一个命令，如果你希望调用这个命令，以前的做法则可能需要修改 `package.json` 的 scripts 字段：
-
-```
-  "scripts": {
-    "start": "electron .",
-   }
-```
-
-然后你通过 `npm start` 来达到效果。现在你可以如下直接调用 `electron` 命令了。
-
-```
-npx electron .
-```
-
-然后我们继续往下说，上面提到的 `package.json` 是npm用于包管理的很重要的一个配置信息文件。你可以手工创建一个，或者通过 `npm init` 命令来生成一个。
-
-在你想要新建的模块的根目录下运行 `npm init` ，程序会交互问一些问题，然后创建 `package.json` 文件。
-
-### 配置npm国内源
-
-免得后面有些包下载动作太慢了，这里就先讲了。
-
-```
-npm config set registry https://registry.npm.taobao.org
-```
-
-这个配置对后面提到的yarn也是一样有效的。
-
-### npm的基本使用
-
-- npm install  module_name  安装某个模块
-- npm uninstall module_name 移除某个模块
-- npm list  列出已经安装的模块
-- npm update module_name 更新某个模块
-
-你可以通过 `-g` 选项来说本次操作是针对全局的npm库，但除非有必要，现在是不推荐这样做了。 
-
-npm install 命令还可以使用 `i` 或者 `add` 这两个别名，此外install提供一些安装选项：
-
-- 默认是 `--save-prod` 或者 `-P` ，常规依赖包信息会放在 `dependencies` 字段下。一般和项目直接相关的包放在这里。
-- `--save-dev` 或者 `-D` ，开发包信息会放在 `devDependencies` 。和开发调试封装打包等相关的包信息推荐放在这里，比如electron官方会提示我应该放在 **devDependencies** 那里。
-- `--save-optional` 或者 `-O` ，可选的包信息：`optionalDependencies` 。
-
-包信息后面的版本有一些特殊符号，其含义是：
-
-- 符号 `^` 表示之后的版本都可以
-- 符号 `~` 表示是允许小版本内的升级
 
 
-
-
-
-## yarn
-
-很多人都推荐使用yarn而不是npm，yarn一方面是基于npm包的，然后和npm比较起来有很多优点，比如并发的网络请求，对依赖版本的处理优化等。
-
-yarn在windows下也提供了安装包，去 [官网](https://classic.yarnpkg.com/zh-Hans/docs/install) 上下载即可。
-
-### yarn的基本使用
-
-- `yarn init` 对应于 `npm init` ，适用于初始化一个新项目的，如果你的项目已经有`package.json` 这个文件了，那么你应该使用 `yarn install` 。
-- `yarn add` 对应于 `npm install` ，yarn add 不加上选项将安装到dependencies哪里， 然后 `--dev` 对应npm的 `--save-dev`  ，`--optional` 对应npm的 `--save-optional` 。此外yarn还多了一个 `--peer` 选项，其控制的字段是 `peerDependencies` ，这是一种特殊的依赖，叫做同伴依赖，在发布包的时候需要。
-- `yarn upgrade` 升级包
-- `yarn remove` 移除包
-- `yarn install` 安装项目所有依赖
-
-假设你自定义了npm start这个命令，那么通过 yarn start也是一样可以调用的。
-
-## 模块
-前面谈了一些关于模块的东西，本小节将进一步介绍nodejs的模块。说简单一点所谓的nodejs的模块就是一个js文件，只是这个js文件还需要额外写一些代码好让里面的变量export出来，这样才能被其他js文件使用。
-
-读者请先跟着进行下面的实践，编写一个最简单的nodejs模块。
-
-### 一个最简单的nodejs模块
+## 一个最简单的nodejs模块
 
 首先我们新建一个文件夹mymodule，然后里面新建一个 `index.js` 文件。在`index.js` 文件里面定义一个简单的函数：
 
@@ -169,6 +78,122 @@ console.log(mymodule(1,2))
 我不太喜欢这种风格，因为require之后从程序员的习惯来说更期待的是引入进来一个某种模块对象的东西，我更喜欢最开始的那种语法，通过exports将模块里面的目标变量作为属性绑定到某种模块对象里面。
 
 
+## nodejs和npm
+
+正如前面所说，nodejs是一个平台，因为nodejs在作这个平台的时候内置了很多官方的js模块。比如说我们随便从网上找了一个最简单的nodejs入门样例web server程序：
+
+```js
+var http = require('http');
+
+http.createServer(function (request, response) {
+	response.writeHead(200, {'Content-Type': 'text/plain'});
+	response.end('Hello World\n');
+    
+}).listen(8888);
+
+console.log('Server running at http://127.0.0.1:8888/');
+```
+
+其最开始的语句 `require('http')` 就是在引入nodejs的官方内置js模块http。
+
+既然有了官方模块那当然就有第三方模块和模块管理工具了。一般安装好nodejs之后除了node命令之外还有npm命令，最新的nodejs现在还提供npx命令。
+
+首先说一下npx命令有什么用，在本地安装一个npm包之后，该包提供了一个命令，如果你希望调用这个命令，以前的做法则可能需要修改 `package.json` 的 scripts 字段：
+
+```
+  "scripts": {
+    "start": "electron .",
+   }
+```
+
+然后你通过 `npm start` 来达到效果。现在你可以如下直接调用 `electron` 命令了。
+
+```
+npx electron .
+```
+
+然后我们继续往下说，上面提到的 `package.json` 是npm用于包管理的很重要的一个配置信息文件。你可以手工创建一个，或者通过 `npm init` 命令来生成一个。
+
+在你想要新建的模块的根目录下运行 `npm init` ，程序会交互问一些问题，然后创建 `package.json` 文件。
+
+
+### npm的基本使用
+
+- npm install  module_name  安装某个模块 【如果不写上模块名则会自动根据当前的package.json文件来进行安装动作】
+- npm uninstall module_name 移除某个模块 
+- npm list  列出已经安装的模块
+- npm update module_name 更新某个模块 【如果不写上模块名则会自动根据当前的package.json文件来进行模块升级动作】
+
+你可以通过 `-g` 选项来指明本次操作是针对全局的npm库，但除非有必要，现在是不推荐这样做了。 
+
+`npm install` 还有一些额外的安装选项：
+
+- **默认**是 `--save-prod` 或者 `-P` ，常规依赖包信息会放在 `dependencies` 字段下。一般和项目直接相关的包放在这里。【因为是默认值所以一般很少会打出这个 `--save-prod` ，在npm version5之前需要额外加个 `--save`大概也是类似的功能。】
+
+- `--save-dev` 或者 `-D` ，开发包信息会放在 `devDependencies` 。和开发调试封装打包等相关的包信息推荐放在这里，比如electron官方会提示我应该放在 **devDependencies** 那里。
+
+- `--save-optional` 或者 `-O` ，可选的包信息：`optionalDependencies` 。
+
+- `--no-save` 含义很明显，就是不写入包依赖信息了。
+
+包信息后面的版本有一些特殊符号，其含义是：
+
+- 符号 `^` 表示之后的版本都可以
+- 符号 `~` 表示是允许小版本内的升级
+
+更多关于npm版本号细节请参看官方文档的 [这里](https://nodejs.dev/learn/semantic-versioning-using-npm) 。
+
+### npm run
+前面提到过 `npm start` 启动某个命令，其只是 `npm run start` 的别名。你定义的 `scripts` 字段里面的命令行列表都可以通过 `npm run what` 来调用：
+```
+{
+  "scripts":{
+    "what": "command line"
+  }
+}
+```
+### npx
+前面提到了一点npx命令，如果只是自己编写的模块命令，似乎意义不大，通过npm run一样可以做到，而npx的用处就是对于第三方模块提供的what命令也是可以 `npx what` 这样调用的，一般模块都是安装在本地的，第三方的模块可执行命令在 `node_modules/.bin` 文件夹下，这在操作系统来说那些命令是不能直接在终端调用的，而如果输入 `./node_modules/.bin/what` 这又麻烦了，npx命令的好处就是在这种情况下简单输入 `npx what` 即可。
+
+### package.json文件详解
+- name 本模块名字
+- version 版本号
+- description 简短描述
+- main 模块入口
+- private 设置为true将禁止本模块上传到npm公共库里面去
+- scripts 一系列的命令行入口定义
+- dependencies 包依赖
+- devDependencies 开发包依赖
+- homepage 模块主页
+- license 版权协议
+- keywords 描述关键字
+- author 作者信息 
+```
+{
+  "author": {
+    "name": "Joe",
+    "email": "joe@whatever.com",
+    "url": "https://whatever.com"
+  }
+}
+```
+- repository 模块仓库
+```
+"repository": {
+  "type": "git",
+  "url": "https://github.com/whatever/testing.git"
+}
+```
+- engine nodejs等版本依赖
+```
+"engines": {
+  "node": ">= 6.0.0",
+  "npm": ">= 3.0.0",
+  "yarn": "^0.13.0"
+}
+
+```
+
 
 ### 发行你自己的npm包
 
@@ -190,12 +215,40 @@ npm login
 npm publish
 ```
 
-默认发送公开的模块，npm付费用户可以发布私有模块： `"private": false`。
+默认发送公开的模块，npm付费用户可以发布私有模块。
 
 
 
 
-## 参考资料
+## 附录
+
+### 配置npm国内源
+
+免得后面有些包下载动作太慢了，这里就先讲了。
+
+```
+npm config set registry https://registry.npm.taobao.org
+```
+
+这个配置对后面提到的yarn也是一样有效的。
+
+## yarn
+
+很多人都推荐使用yarn而不是npm，yarn一方面是基于npm包的，然后和npm比较起来有很多优点，比如并发的网络请求，对依赖版本的处理优化等。
+
+yarn在windows下也提供了安装包，去 [官网](https://classic.yarnpkg.com/zh-Hans/docs/install) 上下载即可。
+
+### yarn的基本使用
+
+- `yarn init` 对应于 `npm init` ，适用于初始化一个新项目的，如果你的项目已经有`package.json` 这个文件了，那么你应该使用 `yarn install` 。
+- `yarn add` 对应于 `npm install` ，yarn add 不加上选项将安装到dependencies哪里， 然后 `--dev` 对应npm的 `--save-dev`  ，`--optional` 对应npm的 `--save-optional` 。此外yarn还多了一个 `--peer` 选项，其控制的字段是 `peerDependencies` ，这是一种特殊的依赖，叫做同伴依赖，在发布包的时候需要。
+- `yarn upgrade` 升级包
+- `yarn remove` 移除包
+- `yarn install` 安装项目所有依赖
+
+假设你自定义了npm start这个命令，那么通过 yarn start也是一样可以调用的。
+
+### 参考资料
 
 其他官方文档就不赘述了。
 

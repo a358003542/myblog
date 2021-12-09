@@ -260,8 +260,6 @@ Readers类 `__init__` 构造方法主要工作执行完毕之后会发送这个�
 ```
 all_generators_finalized = signal('all_generators_finalized')
 
-article_generator_write_article = signal('article_generator_write_article')
-
 page_generator_finalized = signal('page_generator_finalized')
 page_generator_write_page = signal('page_generator_write_page')
 page_writer_finalized = signal('page_writer_finalized')
@@ -279,7 +277,6 @@ static_generator_context = signal('static_generator_context')
 content_object_init = signal('content_object_init')
 
 # Writers signals
-content_written = signal('content_written')
 feed_generated = signal('feed_generated')
 feed_written = signal('feed_written')
 ```
@@ -477,10 +474,8 @@ path来自配置 `PATH` ，theme来自 `THEME` ，output_path 来自 `OUTPUT_PAT
 - PagesGenerator
 - StaticGenerator
 
-#### generate_context
-在pelican的基本使用学习中我们大概了解到Generator的 `generate_context` 方法是用来收集文章的各个元数据信息从而方便后面输出文章用的。下面具体就各个Generator来讨论下代码细节。
 
-##### ArticlesGenerator
+### ArticlesGenerator
 ArticlesGenerator的`generate_context` 方法首先是获取要处理的文章：
 
 ```
@@ -865,14 +860,46 @@ article_generator_finalized = signal('article_generator_finalized')
 ```
 
 
-
-#### refresh_metadata_intersite_links
-这个是站内链接的支持，等下再讨论。
-
-
 #### generate_output
+在 `generate_output` 之前有代码：
+```
+writer = self._get_writer()
+```
+这个writer将作为参数传递给 `generate_output` 方法，其有内容：
 
-##### ArticlesGenerator
+```
+    def _get_writer(self):
+        writers = [w for _, w in signals.get_writer.send(self) if isinstance(w, type)]
+        num_writers = len(writers)
+
+        if num_writers == 0:
+            return Writer(self.output_path, settings=self.settings)
+
+        if num_writers > 1:
+            logger.warning("%s writers found, using only first one", num_writers)
+
+        writer = writers[0]
+
+        logger.debug("Found writer: %s (%s)", writer.__name__, writer.__module__)
+        return writer(self.output_path, settings=self.settings)
+
+```
+
+这一行就是对接插件Plugin的 `get_writer` 接口的：
+```
+ writers = [w for _, w in signals.get_writer.send(self) if isinstance(w, type)]
+```
+上面写成列表是因为blinker的信号返回机制，但实际起作用的只是插件的第一个。现在假设没有插件对接信号 `get_writer` ，则返回的是pelican默认的Writer，即：
+```
+Writer(self.output_path, settings=self.settings)
+```
+如果有多个，返回的则只是第一个。
+
+然后这里我们看到，如果用户要自定义 `get_writer` 的插件的话，其构造函数至少要接受一个默认参数 `self.output_path` ，然后还要接受一个可选参数 `settings=` 。本文只讨论默认配置，所以后面就假设返回的是默认的Writer类了。
+
+这个 `self.output_path` 来自配置的 `OUTPUT_PATH` ，默认是 `output` 文件夹。
+
+
 ArticlesGenerator的generate_output做的工作，一是执行 `generate_feeds` 方法，一是执行 `generate_pages` 方法，然后发送信号：
 
 
@@ -882,14 +909,28 @@ ArticlesGenerator的generate_output做的工作，一是执行 `generate_feeds` 
         self.generate_pages(writer)
         signals.article_writer_finalized.send(self, writer=writer)
 ```
+
 ```
 article_writer_finalized = signal('article_writer_finalized')
 ```
 
-`generate_feeds`
+#### `generate_feeds`
+首先来看 `generate_feeds` 方法，如果配置有 `FEED_ATOM` ，则执行writer的 `write_feed` 方法。如果有 `FEED_RSS` ，则执行writer的 `write_feed` 方法，其中额外有参数 `feed_type='rss'` 。后面类似的还有：
 
+- FEED_ALL_ATOM 
+- FEED_ALL_RSS
+- CATEGORY_FEED_ATOM
+- CATEGORY_FEED_RSS
+- AUTHOR_FEED_ATOM
+- AUTHOR_FEED_RSS
+- TAG_FEED_ATOM
+- TAG_FEED_RSS
+- TRANSLATION_FEED_ATOM
+- TRANSLATION_FEED_RSS
 
-`generate_pages`
+这些feed文件因为我都不太需要，所以之前就按照官方文档的说法将这些配置设置为 `None` 了，所以这一块的讨论我就略过了，读者如果有需要了解的，请阅读 Writer类的 `write_feed` 方法。
+
+#### `generate_pages`
 
 ```python
     def generate_pages(self, writer):
@@ -909,10 +950,15 @@ article_writer_finalized = signal('article_writer_finalized')
         self.generate_authors(write)
         self.generate_drafts(write)
 ```
+其中这一行：
+```
+        write = partial(writer.write_file,
+                        relative_urls=self.settings['RELATIVE_URLS'])
+```
+只是需要将额外的参数 `relative_urls` 传递过去，大概查了一下代码，writer的`write_file` 之前的relative_urls都设置为了配置的 `RELATIVE_URLS` ，所以这个应该是后面为了新增配置 `RELATIVE_URLS` 而引入的临时代码，由于 `RELATIVE_URLS` 默认为False，这里就认为和原 `write_file` 方法是一样的了。
 
-这里就是不同的文章输出任务，首先重点看下 `generate_articles` 。
-
-```python
+现在看到 `generate_articles` 方法：
+```
     def generate_articles(self, write):
         """Generate the articles."""
         for article in chain(
@@ -925,4 +971,69 @@ article_writer_finalized = signal('article_writer_finalized')
                   override_output=hasattr(article, 'override_save_as'),
                   url=article.url, blog=True)
 ```
+
+在每篇文章输出之前都会发送信号：
+```
+article_generator_write_article = signal('article_generator_write_article')
+```
+
+然后就是执行 `write_file` 方法来输出文件，Writer类的write_file方法算是有点大的一个函数了，下面慢慢讲：
+
+```
+    def write_file(self, name, template, context, relative_urls=False,
+                   paginated=None, template_name=None, override_output=False,
+                   url=None, **kwargs):
+```
+
+这里的一些参数解释很多都在Article类和Content类之下，这块代码不便粘贴出来，下面就用人类的语言简要说明一下。
+
+- save_as 首先从文章metadata读取到的SAVE_AS会存储为 `override_save_as` ，然后如果有的话，则会优先作为save_as字段。如果没有的话则会试着根据配置的 `ARTICLE_SAVE_AS` 的来配置，这里可配置参数有：原文章中读取的metadata，path，slug，lang，date，author，category。 
+
+- template 首先说 `article.template` ，如果文章metadata定义了`TEMPLATE`。【这里额外提一句，pelican里面自定义的metadata都是小写，然后MarkdownReader读取到的metadata都会先经过lower处理，但HTMLReader并没有这样处理，不管怎么说pelican里面的metadata都应该视作小写。】则取该值，否则取默认值 `article` 。至于那个 `get_template` 方法只是额外的封装，保证目标template文件一定存在。这个判断就是用Jinja2去试着加载， `self.env.get_template(name + ext)` ，这样返回的就是Jinja2那边的Template对象了。
+
+- article.url 和 `SAVE_AS` 大概类似的逻辑，文章有则取文章中读取到的元数据，否则按照 `ARTICLE_URL` 来生成。
+
+- article.category 这里是直接从传递过来的metadata中读取的，因为之前已经有category的metadata修正处理逻辑了。
+
+好吧，我之前说错了，这个 `write_file` 方法挺简单的，只是额外加了一个paginated分页逻辑，这里没有分页逻辑的话，则直接执行 `_write_file` 函数。这里有一些细节上的context处理，暂时略过讨论，于是核心逻辑就剩下：
+
+```
+output = template.render(localcontext)
+```
+然后是一些文件名和文件夹的处理，然后就是写出文件：
+```
+            with self._open_w(path, 'utf-8', override=override) as f:
+                f.write(output)
+```
+然后发送信号：
+```
+content_written = signal('content_written')
+```
+
+因为localcontext是直接影响Jinja2的模板渲染的，所以关于localcontext的生成再详细谈谈。首先是最开始的context，只是从配置文件那边继承过来，然后新增了几个运行时的参数，但是也不太在意，这里又加入了一些参数，实在繁琐，后面有需要再详细讨论吧。目前就记住这个
+```
+localcontext = settings + 一些运行时额外的参数 + kwargs【write_file额外接受的参数，比如blog=True，这就将作为一个额外的参数传递进去。】 
+```
+然后就是 `localsiteurl`  有一些额外的处理，这里就略过了。
+
+下一个过程是 `generate_period_archives` 。先试着加载 `period_archives` 或者 `archives` 模板。这个周期archive输出如果你的配置里面没有配置 `YEAR_ARCHIVE_SAVE_AS` 或者 `MONTH_ARCHIVE_SAVE_AS` 或者 `DAY_ARCHIVE_SAVE_AS` 则将跳过。
+
+- `generate_direct_templates` 是根据配置 `DIRECT_TEMPLATES` 来进行输出。
+
+- generate_tags 根据tag模板来进行输出
+- generate_categories 根据category模板来进行输出
+- generate_authors 根据author模板来进行输出
+
+- generate_drafts 输出draft标记的文章
+
+如果你不想输出这些网页，则配置 `AUTHOR_SAVE_AS = ''` ，类似的有：`CATEGORY_SAVE_AS = ''` 和 `TAG_SAVE_AS = ''` 。
+
+要这些功能正常显示，还需要正确配置模板 authors和 categorys 和 tags，这些应该是走的 `generate_direct_templates` 来生成的。
+
+
+### PagesGenerator
+在了解了ArticlesGenerator的工作原理之后，PagesGenerator在实践中可以看作某个简化版本的ArticlesGenerator，在很多地方代码会写的很简单，因为在articles那边很多需要考虑的问题都没有了。
+
+### StaticGenerator
+对于静态文件来说 `generate_output` 方法需要重写，直接利用文件操作复制过去即可。
 
