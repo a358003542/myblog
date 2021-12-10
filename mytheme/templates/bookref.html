@@ -26,7 +26,7 @@
                 <div class="row">
                     作者：
                     {% for author in article.bookref_authors %}
-                    <a href="{{ SITEURL }}/{{author.url}}">{{ author.name}}</a>  
+                    <a href="{{ SITEURL }}/{{author.url}}">{{ author.name}}</a> {{ " & " if not loop.last else "" }} 
                     {% endfor %}
                 </div>
 

@@ -17,10 +17,9 @@ BookBaidupanDownloadCode: 8h1v
 - [Chemistry A Molecular Approach 5e]({filename}./Chemistry A Molecular Approach 5e - Nivaldo J. Tro.md)
 - [Principles of Chemistry A Molecular Approach 3e]({filename}./Principles of Chemistry A Molecular Approach 3e - Nivaldo J. Tro.md)
 - [Chemistry_ Structure and Properties 2e]({filename}./Chemistry_ Structure and Properties 2e - Nivaldo J. Tro.md)
+- [Introductory Chemistry Essentials 5e]({filename}./Introductory Chemistry Essentials 5e - Nivaldo J. Tro & Ho Yu Au-Yeung.md)
 
 
-
-这四本书籍是相同的作者相同的出版社，并且从目录来看内容应该也是大同小异的，读者可择一而阅读之。
 
 
 
