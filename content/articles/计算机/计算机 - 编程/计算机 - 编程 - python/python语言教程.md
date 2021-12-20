@@ -1653,6 +1653,47 @@ open函数的处理模式如下：
 
 
 
+### 文件操作推荐方式
+除了read直接读取整个文件之外，还有readlines将文件读取为一个列表。不过更推荐的采用如下形式：
+
+```
+f = open('removeduplicate.py')
+
+for line in f:
+    print(line,end='')
+```
+
+这种写法更python风格，代码运行也更高效。读取的line的结果等于readlines里面的一行，换行符 `\n` 附在最后，除了最后一行。
+
+上面的代码的一个小细节就是 `end=''` ，意思是取消`\n`，因为原来的行里面已经有`\n`了。
+
+然后代码稍作修改就可以在每一行之前加上`>>>`这个符号了。
+
+```
+f = open('removeduplicate.py')
+
+for line in f:
+    print('>>>',line,end='')
+```
+
+什么？这个输出只是在终端，没有到某个文件里面去，行，加上file参数。然后代码变成如下：
+
+```
+import sys
+
+f = open('removeduplicate.py')
+pyout=open(sys.argv[1] ,"w")
+
+for line in f:
+    print('>>>',line,end='',file=pyout)
+
+pyout.close()
+f.close()
+```
+
+在上面描述的基础上，可以在新输出行之上再加入一些额外的操作来实现更多样的文件操作工具。
+
+
 ## 函数
 
 函数也是一个对象，叫函数对象。函数名和变量名一样都是引用，函数名后面带个括号才真正实际执行。比如下面不带括号就只是返回了对这个函数对象的引用地址。
