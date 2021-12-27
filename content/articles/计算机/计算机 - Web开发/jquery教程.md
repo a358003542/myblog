@@ -15,8 +15,6 @@ $(selector).action()
 
  `$(selector)` 返回的是找到的对象的数组，而进行某个action的时候是对所有找到的对象都进行如此动作。
 
-
-
 ### 文档初始化之后执行的动作
 
 ```js
@@ -30,8 +28,6 @@ $(document).ready(function(){
 ```
 $(function(){});
 ```
-
-
 
 ### 选择元素
 
@@ -53,7 +49,7 @@ $('#fn\\:1')
 $('.footnote-ref').each(function(){
 
     // $(this)
-    
+
 }
 ```
 
@@ -144,16 +140,12 @@ div.removeClass('highlight'); // 删除highlight这个class
 
     $('div').css('background-color', '#ffd351');
 
-
-
 ### 获取表单value值或修改
 
 ```
 $('input').val()  # 获取值
 $('input').val('new value') # 修改值
 ```
-
-
 
 ### 让按钮变为不可选
 
@@ -163,34 +155,28 @@ prop方法设置或返回被选元素的属性。
 $("button").prop('disabled', true)
 ```
 
-
-
 ### 事件绑定动作
 
 ```
 $(selector).click(function)
 ```
 
-
-
 #### 鼠标事件
 
--   **click:** 鼠标单击时触发；
--   **dblclick:** 鼠标双击时触发；
--   **mouseenter:** 鼠标进入时触发；
--   **mouseleave:** 鼠标移出时触发；
--   **mousemove:** 鼠标在DOM内部移动时触发 （接受e ，e.pageX是鼠标x值，e.pageY是鼠标Y值）
--   **hover:** 鼠标进入和退出时触发两个函数，相当于mouseenter加上mouseleave。
+- **click:** 鼠标单击时触发；
+- **dblclick:** 鼠标双击时触发；
+- **mouseenter:** 鼠标进入时触发；
+- **mouseleave:** 鼠标移出时触发；
+- **mousemove:** 鼠标在DOM内部移动时触发 （接受e ，e.pageX是鼠标x值，e.pageY是鼠标Y值）
+- **hover:** 鼠标进入和退出时触发两个函数，相当于mouseenter加上mouseleave。
 
 #### 键盘事件
 
 键盘事件仅作用在当前焦点的DOM上，通常是 `<input>` 和 `<textarea>` 。
 
--   **keydown:** 键盘按下时触发；
--   **keyup:** 键盘松开时触发；
--   **keypress:** 按一次键后触发。
-
-
+- **keydown:** 键盘按下时触发；
+- **keyup:** 键盘松开时触发；
+- **keypress:** 按一次键后触发。
 
 #### 取消某个事件绑定
 
@@ -232,7 +218,6 @@ $(document).ready(function(){
 
 <div class="slidepanel" style="background-color:#efefef; padding:5px">滑动面板</div>
 <div id="panel-one" style="border:solid 1px #efefef; padding:5px">just jquery it.</div>
-
 ```
 
 <div class="slidepanel" style="background-color:#efefef; padding:5px">滑动面板</div>
@@ -245,9 +230,6 @@ $(document).ready(function(){
 });
 </script>
 
-
-
-
 ## ajax
 
 jquery是基于 `XMLHttpRequest` 的，不得不承认jquery的ajax这块写得实在是太好了。
@@ -256,10 +238,11 @@ jquery是基于 `XMLHttpRequest` 的，不得不承认jquery的ajax这块写得�
 
 ```js
 $("button").click(function(){
-		$.get("/try/ajax/demo_test.php",function(data,status){
-			alert("数据: " + data + "\n状态: " + status);
-		});
+        $.get("/try/ajax/demo_test.php",function(data,status){
+            alert("数据: " + data + "\n状态: " + status);
+        });
 ```
+
 回调函数接受两个参数，传回来的data和状态码。其等价于：
 
 ```js
@@ -293,6 +276,7 @@ $.ajax({
 ```js
 jQuery.post(url,data,success(data, textStatus, jqXHR),dataType)
 ```
+
 等价于：
 
 ```js
@@ -316,8 +300,6 @@ header('Access-Control-Allow-Origin:*');//允许跨域请求的域名，允许�
 header('Access-Control-Allow-Methods:POST,GET');
 ```
 
-
-
 ## 其他
 
 ### 先网络加载jquery或者本地加载
@@ -328,5 +310,4 @@ header('Access-Control-Allow-Methods:POST,GET');
 <script src="https://code.jquery.com/jquery-{{JQUERY_VERSION}}.min.js"></script>
 
 <script>window.jQuery || document.write('<script src="js/vendor/jquery-{{JQUERY_VERSION}}.min.js"><\/script>')</script>
-
 ```

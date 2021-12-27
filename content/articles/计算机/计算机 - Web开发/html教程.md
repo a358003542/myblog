@@ -479,12 +479,5 @@ html有好几种方法创建一个按钮，w3school不推荐button标签，而�
 
 
 
-## 参考资料
-
-1. Javascript权威指南 David Flanagan著.
-2. [mozilla docs](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)
-3. [现代javascript教程](https://zh.javascript.info/)
-4. [you donot need jquery](https://github.com/nefe/You-Dont-Need-jQuery/blob/master/README.zh-CN.md)
-
 
 
