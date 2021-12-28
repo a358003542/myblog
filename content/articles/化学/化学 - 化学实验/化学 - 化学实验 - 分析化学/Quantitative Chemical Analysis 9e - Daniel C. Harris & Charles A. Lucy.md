@@ -1,7 +1,7 @@
 Template: bookref
-BookName: Quantitative Chemical Analysis Ninth Edition
+BookName: Quantitative Chemical Analysis 9e
 BookAuthor: Daniel C. Harris & Charles A. Lucy
-BookPublisher: W.H. Freeman & Company
+BookPublisher: W. H. Freeman & Company
 BookLanguage: 英语
 BookCover: /images/Covers/Quantitative Chemical Analysis Ninth Edition - Daniel C. Harris & Charles A. Lucy.jpg
 BookBaidupanDownloadUrl: https://pan.baidu.com/s/1i-j1-ma2EQ7OeYgcCH9oVw 

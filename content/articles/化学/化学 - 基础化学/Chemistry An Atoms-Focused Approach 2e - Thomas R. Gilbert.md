@@ -11,6 +11,11 @@ BookBaidupanDownloadCode: 5wa1
 
 本书pdf是 **文字版**，**彩图版** ，书签良好。
 
+相关书籍：
+
+- [Chemistry An Atoms-Focused Approach 2e]({filename}./Chemistry An Atoms-Focused Approach 2e - Thomas R. Gilbert.md)
+- [Chemistry The Science in Context 5e]({filename}./Chemistry The Science in Context 5e - Thomas R. Gilbert.md)
+
 ### Matter and Energy: An Atomic Perspective 
 ### Atoms, Ions, and Molecules: The Building Blocks of Matter 
 ### Atomic Structure: Explaining the Properties of Elements 

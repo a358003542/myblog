@@ -11,6 +11,11 @@ BookBaidupanDownloadCode: 2gsx
 
 本书pdf是 **文字版**，**彩图版** ，书签良好。
 
+相关书籍：
+
+- [Chemistry: An Introduction to General, Organic, and Biological Chemistry 13e]({filename}./Chemistry An Introduction to General, Organic, and Biological Chemistry 13e - Karen Timberlake.md)
+- [General, Organic and Biological Chemistry: Structures of Life]({filename}./General, Organic and Biological Chemistry Structures of Life - Karen Timberlake.md)
+
 ### Chemistry in Our Lives 
 
 ### Chemistry and Measurements 

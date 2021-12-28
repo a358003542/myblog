@@ -14,7 +14,7 @@ BookBaidupanDownloadCode: j4pv
 
 相关书籍：
 
-- [Chemistry: The Molecular Nature of Matter and Change: With Advanced Topics 8e]({filename}./Chemistry_ The Molecular Nature of Matter and Change_ Topics 8e - Martin S. Silberberg & Patricia G. Amateis.md)
+- [Chemistry: The Molecular Nature of Matter and Change: With Advanced Topics 8e]({filename}./Chemistry The Molecular Nature of Matter and Change With Advanced Topics 8e - Martin S. Silberberg.md)
 - [Principles of General Chemistry 3e]({filename}./Principles of General Chemistry 3e - Martin S. Silberberg.md)
 
 这两本书目录页基本上是一致的。
