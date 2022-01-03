@@ -1,5 +1,4 @@
 Slug: python-advanced
-Category: python_language
 Tags: python,
 Date: 20191018
 Modified: 20211119

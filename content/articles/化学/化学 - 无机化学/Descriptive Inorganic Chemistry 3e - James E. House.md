@@ -1,7 +1,7 @@
 Template: bookref
 BookName: Descriptive Inorganic Chemistry 3e
 BookAuthor: James E. House & Kathleen A. House
-BookPublisher: Elsevier Inc.
+BookPublisher: Elsevier
 BookLanguage: 英语
 BookCover: /images/Covers/Descriptive Inorganic Chemistry 3e - James E. House.jpg
 BookBaidupanDownloadUrl: https://pan.baidu.com/s/1OTZKQczYFmUPbdCYHAs3bw 

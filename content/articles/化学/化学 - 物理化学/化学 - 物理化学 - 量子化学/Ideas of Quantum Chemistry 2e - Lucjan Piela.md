@@ -1,7 +1,7 @@
 Template: bookref
 BookName: Ideas of Quantum Chemistry 2e
 BookAuthor: Lucjan Piela
-BookPublisher: Elsevier Inc.
+BookPublisher: Elsevier
 BookLanguage: 英语
 BookCover: /images/Covers/Ideas of Quantum Chemistry 2e - Lucjan Piela.jpg
 BookBaidupanDownloadUrl: https://pan.baidu.com/s/1SeFYGzyhaiH0onr9dAHBzQ 
