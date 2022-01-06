@@ -11,6 +11,11 @@ BookBaidupanDownloadCode: asmw
 
 本书pdf是 **文字版** ，**彩图版** ，书签良好。
 
+相关书籍：
+
+- [Inorganic Chemistry]({filename}./Inorganic Chemistry - James E. House.md)
+- [Descriptive Inorganic Chemistry 3e]({filename}./Descriptive Inorganic Chemistry 3e - James E. House.md)
+
 ### Where It All Comes From
 
 ### Atomic Structure and Properties

@@ -1,21 +1,22 @@
 Template: bookref
-BookName: Inorganic Chemistry 6e
-BookAuthor: Duward Shriver & Mark Weller & Tina Overton
+BookName: Shriver & Atkins' Inorganic Chemistry 5e
+BookAuthor: Peter Atkins & Tina Overton & Jonathan Rourke
 BookPublisher: W. H. Freeman & Company
 BookLanguage: 英语
-BookCover: /images/Covers/Inorganic Chemistry 6e - Duward Shriver.jpg
-BookBaidupanDownloadUrl: https://pan.baidu.com/s/1E62U1rqaWjiRjL1yj_eApw 
-BookBaidupanDownloadCode: rr6s
+BookCover: /images/Covers/Shriver & Atkins' Inorganic Chemistry 5e - Peter Atkins.jpg
+BookBaidupanDirectDownloadUrl: https://pan.baidu.com/s/1vrPIkprwS2GgAldqiA0w9w?pwd=opb6 
+
 
 [TOC]
 
-本书pdf是 **文字版** ，**彩图版** ，书签良好。
+本书pdf是 **文字版**，**彩图版**，书签良好。
 
 相关书籍：
 
 - [Shriver & Atkins' Inorganic Chemistry 5e]({filename}./Shriver & Atkins' Inorganic Chemistry 5e - Peter Atkins.md)
 - [Inorganic Chemistry 6e]({filename}./Inorganic Chemistry 6e - Duward Shriver.md)
 - [Inorganic Chemistry 7e]({filename}./Inorganic Chemistry 7e - Mark Weller.md)
+
 
 ### Atomic structure 
 ### Molecular structure and bonding 
@@ -40,9 +41,9 @@ BookBaidupanDownloadCode: rr6s
 ### d-Metal complexes: electronic structure and properties 
 ### Coordination chemistry: reactions of complexes 
 ### d-Metal organometallic chemistry 
-### The f-block elements
+### The f-block metals
 
-### Materials chemistry and nanomaterials 
+### Solid-state and materials chemistry 
+### Nanomaterials, nanoscience, and nanotechnology 
 ### Catalysis 
-### Biological inorganic chemistry 
-### Inorganic chemistry in medicine
+### Biological inorganic chemistry

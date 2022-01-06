@@ -14,7 +14,7 @@ If you are a english reader, I recommend [this article](https://www.websiteplane
 
 ```html
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="zh">
     <head>
     <meta charset="utf-8">
     <title>your awesome title</title>
@@ -47,7 +47,7 @@ If you are a english reader, I recommend [this article](https://www.websiteplane
 
 ```html
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="zh">
     <head>
     <meta charset="utf-8">
     <title>basic html</title>

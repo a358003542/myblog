@@ -56,11 +56,14 @@ class Tipue_Search_JSON_Generator(object):
         # remove pre code
         for s in soup_text.find_all('pre'):
             s.extract()
-
+        
         page_text = soup_text.get_text(' ', strip=True).replace('“', '"'). \
             replace('”', '"').replace('’', "'").replace('¶', ' ').replace('^', '&#94;')
 
         page_text = ' '.join(page_text.split())
+
+        # limit length to 1000
+        page_text = page_text[:1000]
 
         page_category = page.category.name if getattr(page, 'category', 'None') != 'None' else ''
 
