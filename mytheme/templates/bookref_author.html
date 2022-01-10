@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<article>
+<article class="container">
     <div class="row">
-        <header class="page-header col-md-10 col-md-offset-2">
+        <header class="col page-header">
             <h1>{{ bookref_author }}</h1>
         </header>
     </div>
 
 
-    <div class="col-md-10 col-md-offset-2 article-content">
+    <div class="article-content">
+        <div class="row row-cols-3">
 
         {% for article_row in articles| batch(3, '&nbsp;') %}
-        <div class="row">
             {% for article in article_row %}
             {% if article.url %}
-            <div class="col-sm-6 col-md-4">
+            <div class="col">
                 <div class="thumbnail">
                     <a href="{{ SITEURL }}/{{ article.url }}">
                         <img class="img-responsive" src="{{article.bookcover }}" alt="{{article.bookname}}">

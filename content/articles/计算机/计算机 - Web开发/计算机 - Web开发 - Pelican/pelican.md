@@ -296,7 +296,7 @@ PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search',
 
 项目的 [github地址在这里](https://github.com/mortada/pelican_javascript) 。
 
-js和css也是静态资源，但和上面的处理有有所不同，前面也提及了html源文件如果在head部分有css引用语句，都是会丢失的。你需要如下加上这样的meta标签语句：
+js和css也是静态资源，但和上面的处理又有所不同，前面也提及了html源文件如果在head部分有css引用语句，都是会丢失的。你需要如下加上这样的meta标签语句：
 
 ```html
 <meta name="javascripts" content="周易之摇卦.js" />

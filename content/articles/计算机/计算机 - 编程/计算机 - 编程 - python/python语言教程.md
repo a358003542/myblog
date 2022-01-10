@@ -2611,6 +2611,145 @@ pass命令就是什么都不做。pass命令即可用于循环语句也可用于
 pass命令什么都不做似乎没有什么意义，不过作为一个空占位符还是很有用的。比如你编写一个大型的GUI程序，信号－槽机制都构思好了，只是对应的函数暂时还没写好，这个时候你可以将对应的函数，只是空的函数名加上pass语句写上，这样整个程序就可以继续边编写边调试了。
 
 
+## 补充
+
+### assert语句
+
+assert语句简单的理解就是 `assert True` ，正常刷过去，而 `assert False` 将抛出`AssertionError` 。
+
+assert语句实际上是非常重要的一个语句，程序员在编码的时候需要形成一种防御型编码风格，注意这不是所谓的编码规范，而是重要性更高一等级的编码风格，是一种思维方式。
+
+那么什么是防御型编码风格，简言之就是你在编码的时候，你对于你即将面对的各个数据类型的预期。比如说 `is_even` 函数是一个判断输入的整数是否是偶数的函数，那么你预期输入的数值就是一个整数，这个时候你就可以加上`assert  isinstance(x, int)` ，来防御输入的x参数类型。那么假如程序运行过程中抛出了这个地方的assert异常，这个函数实际上在说，不是我的问题，是你给我的参数出问题了，是调用我的那个方法出了问题。
+
+防御型编码风格就是一种去耦合思维，它和你编写各个函数的去耦合思维是一致的，所以不要把防御型编码风格当成某种规范，当作某种额外的约束工作，它就是和你正在编写各种函数时候的思维方式是一致的。如果你去观察那些没有防御型编码风格的初学者，你会发现他们的函数分离工作做得很不好，经常看到大段的代码，各个参数全局变量局部变量都乱七八糟的，整个代码文件混乱不堪。而他们还会嬉笑道，不就是防御型编码吗，我知道，我学过。
+
+assert语句和相关条件判断等抛异常语句片段都属于防御型编码风格，那么什么时候用assert语句，什么时候抛出异常呢。实际上assert语句也是在抛异常，但assert语句和抛异常语句有一个很大的不同：**那就是assert语句可以通过设置python编译器来全局跳过，这个需要注意下。所以对于那些必须要做的校验，是应该使用异常语句的。** 所以一般来说项目早期的话可以写上很多assert语句，但后面时间充裕了很多assert语句是要替换为抛异常语句的。
+
+
+
+
+
+### locals和globals
+
+python的 `locals()` 返回本函数内的局部变量字典值，而 `globals()` 则返回本模块文件的全局变量。 `locals` 是只读的，而 `globals()` 不是，我们可以利用`globals()` 对脚本文件玩出一些新花样。
+
+### and or not的运算优先级
+
+一般是推荐用括号清晰表达，然后not我们知道优先级是最高的。我们再看下面这个例子:
+
+```
+>>> True or True and False
+True
+```
+
+这个例子很好地说明了and和or的优先级顺序，具体就是 and的优先级比or的要高 。
+
+### all和any关键词
+
+这是python语言里面的关键词函数，源码很简单，下面列出来，看一下就清楚了:
+
+```
+def all(iterable):
+    for element in iterable:
+        if not element:
+            return False
+    return True
+
+def any(iterable):
+    for element in iterable:
+        if element:
+            return True
+    return False
+```
+
+
+如果用语言表述的话是:
+
+- all，都是True，则返回True，否则返回False
+- any，只要有一个True则返回True，否则返回False。
+
+
+
+
+
+### 三元运算符
+
+也就是类似这样的结构:
+
+```
+loop = loop if loop is not None else get_event_loop()
+```
+
+通常我们在处理函数的入口参数实现默认值的情况的时候会用到，比如上面一般函数参数那里写着 `loop=None` ，用上面这种一行形式更简洁一些。而我们不直接在函数定义的那里采用默认值可能有两种情况，一是该默认值并不方便作为默认值，而最好默认为None；还有一种情况是默认值是需要通过某个函数等运算得到的。
+
+### 属性管理的函数
+
+hasattr，setattr，getattr，delattr，这些函数都属于关于python中各个对象的属性管理函数，其都是内置函数。
+
+其中hasattr(object, name)检测某个对象有没有某个属性。其实际调用的还是getattr方法，然后稍作封装。
+
+setattr(object, name, value)用于设置某个对象的某个属性为某个值，`setattr(x,a,3)` 对应 `x.a = 3` 这样的语法。
+
+getattr(object, name[, default])用于取某个对象的某个属性的值，对应 `object.name` 这样的语法。
+
+delattr(object,name)用于删除某个对象的某个属性，对应 `del object.name` 这样的语法。
+
+
+
+
+### `__name__` 和 `__file__`
+
+这里所谓脚本被引入是指用import或者from语句被另外一个脚本引入进去，而这里所谓的脚本被执行是指直接如 `python test.py` 这样的形式执行该py脚本。
+
+这两种形式很有一些区别，下面慢慢谈论:
+
+
+- `__name__` 的区别。这个大家应该很熟悉了。如果脚本是被引入的，`__name__` 的值是该引入的脚本文件名，比如引入的是 `test.py` ，那么该脚本被引入，对于这个test.py文件来说，其内的 `__name__` 的值就是 `test` ，也就是 **模块名**  ；而如果是作为脚本被执行，则该 `__name__` 是 `__main__` 。
+- `__file__` 的区别。如果脚本是被执行的，假设该脚本文件是 `hello.py` ，那么在这个被执行脚本中， `__file__` 的值是 `hello.py` ，也就是 **文件名** 。如果是被引用的，那么对于那个被引入的脚本来说， `__file__` 的值是该被引入脚本相对系统来说的 **完整文件名** ，比如是 `/home/wanze/桌面/hello.py` 。
+
+
+### format函数
+
+format函数或者说字符串的format方法，一般的使用还是很简单的，但是有的时候有些特殊的高级需求，下面渐渐收集之。
+
+更多关于python中format函数使用的信息请参考 [pyformat.info](https://pyformat.info/) 。
+
+#### 等宽数字
+
+```
+ {:0>2d} 
+```
+
+目标数字宽度为两位，左边填充0 ， `>` 表示左边填充， `0>` 表示左边填充0，此外还有 `>` 表示右边填充。
+
+#### 花括号的问题
+
+花括号因为是特殊字符，要显示花括号，需要如下输入两次：
+
+```
+>>> print(f'{{----}}')
+{----}
+```
+
+
+
+### f-string
+
+python3.6加入进来的特性。基本情况如下：
+
+python新的format字符串
+
+```
+f"hello. {name}"
+```
+
+等价于
+
+```
+"hello. {name}".format(name=name)
+```
+
+一个变量还好，多个变量的时候这种f-string的写法的好处就很明显了，当时环境下你前面已经定义好的变量名是可以直接使用的，我只能用一句话来形容，太好用了，用上了你就会停不下来。
 
 
 ## 附录
@@ -2653,73 +2792,6 @@ windows下如果是powershell：
 powershell可能会提示无执行权限错误，则你需要给当前用户以执行权限。请参看提示信息中的 [那个网页](https://docs.microsoft.com/zh-cn/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.2)。
 
 
-
-### 其他小技巧
-
-#### 获取本模块对象
-
-如下所示，可以获取本模块内的变量。
-
-```python
-import sys
-current_module = sys.modules[__name__]
-
-old_module_dict = copy(current_module.__dict__)
-
-
-# for k, v in old_module_dict.items():
-#     if k == 'case_base':
-#         pass
-#     elif k.startswith('case_'):
-#         if issubclass(v, case_base):
-#             URL_CASES.append(v)
-```
-
-#### 根据字符串获取模块对象
-
-```
-import importlib
-importlib.import_module('what.what')
-```
-
-
-
-#### 检查某个变量是不是模块对象
-
-参考了 [这个网页](https://stackoverflow.com/questions/865503/how-to-isinstancex-module)
-
-```python
->>> import os, types
->>> isinstance(os, types.ModuleType)
-True
-```
-
-
-
-
-#### 获取一个月最后的一天
-
-首先要说的是利用python的datetime和timedelta对于 `days` 的加减操作是能够很好地支持跨月问题的:
-
-```
-    >>> from datetime import datetime
-    >>> d = datetime.now()
-    >>> d
-    datetime.datetime(2016, 5, 29, 8, 50, 20, 337204)
-    >>> from datetime import timedelta
-    >>> d - timedelta(days = 29)
-    datetime.datetime(2016, 4, 30, 8, 50, 20, 337204)
-    >>> d - timedelta(days = 28)
-    datetime.datetime(2016, 5, 1, 8, 50, 20, 337204)
-```
-
-
-但是有的时候你就是需要直接获知某个月份的最后一天是30还是31等等，然后利用replace来获得一个月的最后一天。这个时候你需要利用 calendar 的 `monthrange` 函数。参考了 [这个网页](http://stackoverflow.com/questions/42950/get-last-day-of-the-month-in-python) 。
-
-```
-    >>> d.replace(year = 2016,month=4,day = monthrange(2016,4)[-1])
-    datetime.datetime(2016, 4, 30, 8, 50, 20, 337204)
-```
 
 
 
@@ -2797,6 +2869,73 @@ it = (len(x) for x in open('/tmp/myfile.txt'))
 <li>命名空间是个拍案叫绝的想法 — 放手多多用起来吧！</li>
 </ol>
 
+
+### 其他小技巧
+
+#### 获取本模块对象
+
+如下所示，可以获取本模块内的变量。
+
+```python
+import sys
+current_module = sys.modules[__name__]
+
+old_module_dict = copy(current_module.__dict__)
+
+
+# for k, v in old_module_dict.items():
+#     if k == 'case_base':
+#         pass
+#     elif k.startswith('case_'):
+#         if issubclass(v, case_base):
+#             URL_CASES.append(v)
+```
+
+#### 根据字符串获取模块对象
+
+```
+import importlib
+importlib.import_module('what.what')
+```
+
+
+
+#### 检查某个变量是不是模块对象
+
+参考了 [这个网页](https://stackoverflow.com/questions/865503/how-to-isinstancex-module)
+
+```python
+>>> import os, types
+>>> isinstance(os, types.ModuleType)
+True
+```
+
+
+
+
+#### 获取一个月最后的一天
+
+首先要说的是利用python的datetime和timedelta对于 `days` 的加减操作是能够很好地支持跨月问题的:
+
+```
+    >>> from datetime import datetime
+    >>> d = datetime.now()
+    >>> d
+    datetime.datetime(2016, 5, 29, 8, 50, 20, 337204)
+    >>> from datetime import timedelta
+    >>> d - timedelta(days = 29)
+    datetime.datetime(2016, 4, 30, 8, 50, 20, 337204)
+    >>> d - timedelta(days = 28)
+    datetime.datetime(2016, 5, 1, 8, 50, 20, 337204)
+```
+
+
+但是有的时候你就是需要直接获知某个月份的最后一天是30还是31等等，然后利用replace来获得一个月的最后一天。这个时候你需要利用 calendar 的 `monthrange` 函数。参考了 [这个网页](http://stackoverflow.com/questions/42950/get-last-day-of-the-month-in-python) 。
+
+```
+    >>> d.replace(year = 2016,month=4,day = monthrange(2016,4)[-1])
+    datetime.datetime(2016, 4, 30, 8, 50, 20, 337204)
+```
 
 
 ### 参考资料

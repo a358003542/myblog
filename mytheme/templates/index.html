@@ -1,132 +1,132 @@
 {% extends 'base.html' %}
 
-
-{% block meta_tags_in_head %}
-{{ super() }}
-{% endblock meta_tags_in_head %}
-
-
 {% block content %}
-<style>
-    .jumbotron {
-        background-color: tomato;
-        color: wheat;
-    }
 
-    dd {
-        padding-top: 0.5em;
-    }
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="jumbotron">
+                <h1>感谢上天</h1>
+            </div>
+        </div>
+    </div>
 
-    dt {
-        padding-top: 0.5em;
-    }
-</style>
 
-<div class="jumbotron">
-    <h1>感谢上天</h1>
+
+    <div class="row">
+        <div class="col">
+            <div class="page-header">
+                <h2>推荐</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <dl class="">
+                <dt>周易初讲</dt>
+                <dd>我编写的周易入门初讲一书。多方资料核对，真正从周易原文出发，感谢上天，天人感应，写作而成的这本周易入门书籍：
+                    <a href="{{ SITE_URL }} /articles/zhou-yi-chu-jiang.html">在线阅读</a>
+                </dd>
+
+                <dt>周易摇卦小程序</dt>
+                <dd>一个在线进行周易摇卦的小工具：<a href="{{ SITE_URL }} /articles/zhou-yi-yao-gua.html">点击使用</a>
+                    <a href="https://1drv.ms/u/s!AuCYFvwp2KHMgpQk6qBazehlSG5i-w?e=4FjlAh">桌面端程序</a>
+                    <a href="https://github.com/a358003542/yaogua2">Github项目</a>
+                </dd>
+
+                <dt>xelatex指南</dt>
+                <dd>我试图收集整理各方面来的xelatex相关的信息，包括自己的实践经验总结，作为后学者的指南手册：
+                    <a href="https://github.com/a358003542/xelatex-guide-book">Github项目</a>
+                    <a
+                        href="https://github.com/a358003542/xelatex-guide-book/releases/download/4.1/xelatex.pdf">下载pdf</a>
+                    <a
+                        href="https://github.com/a358003542/xelatex-guide-book/releases/download/4.1/xelatex.epub">下载epub</a>
+                </dd>
+
+                <dt>Latex Math Helper</dt>
+                <dd>用户在进行Latex数学公式输入时的助手应用程序。用户看见各个数学符号图片点击即输入该符号对应的Latex命令，并提供了一些弹窗来
+                    帮助用户回想起各个Latex数学命令。<a href="#">施工中... 了解更多...</a>
+                </dd>
+
+                <dt>Hello Chemistry</dt>
+                <dd>用户可以从这个应用中绘制化学物质或者输入化学物质的IUPAC正式名字或者各个俗称或者SMILE式或者分子式等，并进行搜索，
+                    从而得到该化学物质的各个常见的物理或化学属性的值。本应用主要定位是普通化学的内容，也就是针对的是最常见的那些化学
+                    物质。后续还将围绕着普通化学里面的计算推出更多的计算功能。<a href="#">施工中... 了解更多...</a>
+                </dd>
+
+                <dt>Laboratory Keeper</dt>
+                <dd>新建一个材料分类项目，输入材料A，制作配方a1，含量2；a2含量3，制造温度300度，得到材料A属性拉伸强度4。如此相同的材料
+                    在Laboratory Keeper下统一输入管理。当数据积累到一定的量之后，通过模式匹配，相似度排序，想要制作一个新的材料，将你
+                    想要的目标材料属性输入进去，然后选择系统推荐，则系统会自动推荐制作该材料的配方和其他参数。<a href="#">施工中... 了解更多...</a>
+                </dd>
+
+            </dl>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <div class="page-header">
+                <h2>其他</h2>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <dl class="dl-horizontal">
+
+                <dt>timer应用程序</dt>
+                <dd>计时和倒计时桌面端程序:
+                    <a href="https://1drv.ms/u/s!AuCYFvwp2KHMgo16dPul4tZzEe79hw?e=gQNwYv">桌面端程序</a>
+                    <a href="https://github.com/a358003542/timer">Github项目</a>
+                </dd>
+
+
+                <dt>人生的智慧</dt>
+                <dd>我整理和点评的叔本华的人生的智慧一书：
+                    <a href="{{ SITE_URL }} /articles/ren-sheng-de-zhi-hui.html">在线阅读</a>
+                    <a href="https://github.com/a358003542/renshengdezhihui">Github项目</a>
+                    <a
+                        href="https://github.com/a358003542/renshengdezhihui/releases/download/0.1.0/default.pdf">下载pdf</a>
+                    <a
+                        href="https://github.com/a358003542/renshengdezhihui/releases/download/0.1.0/default.epub">下载epub</a>
+                </dd>
+
+                <dt>Unix编程艺术</dt>
+                <dd>我精校排版的Unix编程艺术一书：
+                    <a href="https://github.com/a358003542/unixbianchengyishu">Github项目</a>
+                    <a href="https://github.com/a358003542/unixbianchengyishu/releases/download/0.1/main.pdf">下载pdf</a>
+                    <a
+                        href="https://github.com/a358003542/unixbianchengyishu/releases/download/0.1/main.epub">下载epub</a>
+                </dd>
+
+                <dt>少年维特的烦恼</dt>
+                <dd>我精校排版的歌德的少年维特的烦恼一书：
+                    <a href="{{ SITE_URL }} /articles/shao-nian-wei-te-de-fan-nao.html">在线阅读</a>
+                    <a href="https://github.com/a358003542/shaonianweitedefannao">Github项目</a>
+                    <a
+                        href="https://github.com/a358003542/shaonianweitedefannao/releases/download/0.1/main.pdf">下载pdf</a>
+                    <a
+                        href="https://github.com/a358003542/shaonianweitedefannao/releases/download/0.1/main.epub">下载epub</a>
+                </dd>
+
+
+                <dt>唐诗三百首</dt>
+                <dd>我排版整理的唐诗三百首一书：
+                    <a href="{{ SITE_URL }} /articles/tang-shi-san-bai-shou.html">在线阅读</a>
+                    <a href="https://github.com/a358003542/tangshisanbaishou">Github项目</a>
+                    <a href="https://github.com/a358003542/tangshisanbaishou/releases/download/0.1/main.pdf">下载pdf</a>
+                    <a href="https://github.com/a358003542/tangshisanbaishou/releases/download/0.1/main.epub">下载epub</a>
+                </dd>
+
+            </dl>
+        </div>
+    </div>
 </div>
-
-<div>
-    <div class="page-header">
-        <h2>推荐</h2>
-    </div>
-
-    <div>
-        <dl class="dl-horizontal">
-            <dt>周易初讲</dt>
-            <dd>我编写的周易入门初讲一书。多方资料核对，真正从周易原文出发，感谢上天，天人感应，写作而成的这本周易入门书籍：
-                <a href="{{ SITE_URL }} /articles/zhou-yi-chu-jiang.html">在线阅读</a>
-            </dd>
-
-            <dt>周易摇卦小程序</dt>
-            <dd>一个在线进行周易摇卦的小工具：<a href="{{ SITE_URL }} /articles/zhou-yi-yao-gua.html">点击使用</a>
-            <a href="https://1drv.ms/u/s!AuCYFvwp2KHMgpQk6qBazehlSG5i-w?e=4FjlAh" >桌面端程序</a> 
-            <a href="https://github.com/a358003542/yaogua2">Github项目</a>
-            </dd>
-
-            <dt>xelatex指南</dt>
-            <dd>我试图收集整理各方面来的xelatex相关的信息，包括自己的实践经验总结，作为后学者的指南手册：
-                <a href="https://github.com/a358003542/xelatex-guide-book">Github项目</a>
-                <a href="https://github.com/a358003542/xelatex-guide-book/releases/download/4.1/xelatex.pdf">下载pdf</a>
-                <a href="https://github.com/a358003542/xelatex-guide-book/releases/download/4.1/xelatex.epub">下载epub</a>
-            </dd>
-
-            <dt>Latex Math Helper</dt>
-            <dd>用户在进行Latex数学公式输入时的助手应用程序。用户看见各个数学符号图片点击即输入该符号对应的Latex命令，并提供了一些弹窗来
-                帮助用户回想起各个Latex数学命令。<a href="#">施工中...   了解更多...</a>
-            </dd>
-    
-            <dt>Hello Chemistry</dt>
-            <dd>用户可以从这个应用中绘制化学物质或者输入化学物质的IUPAC正式名字或者各个俗称或者SMILE式或者分子式等，并进行搜索，
-                从而得到该化学物质的各个常见的物理或化学属性的值。本应用主要定位是普通化学的内容，也就是针对的是最常见的那些化学
-                物质。后续还将围绕着普通化学里面的计算推出更多的计算功能。<a href="#">施工中... 了解更多...</a>
-            </dd>
-    
-            <dt>Laboratory Keeper</dt>
-            <dd>新建一个材料分类项目，输入材料A，制作配方a1，含量2；a2含量3，制造温度300度，得到材料A属性拉伸强度4。如此相同的材料
-                在Laboratory Keeper下统一输入管理。当数据积累到一定的量之后，通过模式匹配，相似度排序，想要制作一个新的材料，将你
-                想要的目标材料属性输入进去，然后选择系统推荐，则系统会自动推荐制作该材料的配方和其他参数。<a href="#">施工中... 了解更多...</a>
-            </dd>
-
-        </dl>
-    </div>
-</div>
-
-
-<div>
-    <div class="page-header">
-        <h2>其他</h2>
-    </div>
-
-    <div>
-        <dl class="dl-horizontal">
-
-            <dt>timer应用程序</dt>
-            <dd>计时和倒计时桌面端程序:
-                <a href="https://1drv.ms/u/s!AuCYFvwp2KHMgo16dPul4tZzEe79hw?e=gQNwYv" >桌面端程序</a> 
-                <a href="https://github.com/a358003542/timer">Github项目</a>
-            </dd>
-
-
-            <dt>人生的智慧</dt>
-            <dd>我整理和点评的叔本华的人生的智慧一书：
-                <a href="{{ SITE_URL }} /articles/ren-sheng-de-zhi-hui.html">在线阅读</a>
-                <a href="https://github.com/a358003542/renshengdezhihui">Github项目</a>
-                <a href="https://github.com/a358003542/renshengdezhihui/releases/download/0.1.0/default.pdf">下载pdf</a>
-                <a href="https://github.com/a358003542/renshengdezhihui/releases/download/0.1.0/default.epub">下载epub</a>
-            </dd>
-
-            <dt>Unix编程艺术</dt>
-            <dd>我精校排版的Unix编程艺术一书：
-                <a href="https://github.com/a358003542/unixbianchengyishu">Github项目</a>
-                <a href="https://github.com/a358003542/unixbianchengyishu/releases/download/0.1/main.pdf">下载pdf</a>
-                <a href="https://github.com/a358003542/unixbianchengyishu/releases/download/0.1/main.epub">下载epub</a>
-            </dd>
-
-            <dt>少年维特的烦恼</dt>
-            <dd>我精校排版的歌德的少年维特的烦恼一书：
-                <a href="{{ SITE_URL }} /articles/shao-nian-wei-te-de-fan-nao.html">在线阅读</a>
-                <a href="https://github.com/a358003542/shaonianweitedefannao">Github项目</a>
-                <a href="https://github.com/a358003542/shaonianweitedefannao/releases/download/0.1/main.pdf">下载pdf</a>
-                <a href="https://github.com/a358003542/shaonianweitedefannao/releases/download/0.1/main.epub">下载epub</a>
-            </dd>
-
-
-            <dt>唐诗三百首</dt>
-            <dd>我排版整理的唐诗三百首一书：
-                <a href="{{ SITE_URL }} /articles/tang-shi-san-bai-shou.html">在线阅读</a>
-                <a href="https://github.com/a358003542/tangshisanbaishou">Github项目</a>
-                <a href="https://github.com/a358003542/tangshisanbaishou/releases/download/0.1/main.pdf">下载pdf</a>
-                <a href="https://github.com/a358003542/tangshisanbaishou/releases/download/0.1/main.epub">下载epub</a>
-            </dd>
-
-        </dl>
-    </div>
-</div>
-
 
 {% endblock content %}
 
-{% block script %}
-{{ super() }}
-{% endblock script %}
+{% block gotop %}
+{% endblock gotop %}

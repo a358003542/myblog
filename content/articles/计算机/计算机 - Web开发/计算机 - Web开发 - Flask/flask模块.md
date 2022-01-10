@@ -693,32 +693,6 @@ def dropdb():
         assert not database_exists(engine.url)
 ```
 
-### flask-moment
-
-Moment JS 送入UTC时间会自动转换成为本地时间，服务器那边的时间戳最好是记录UTC时间。用户则应该看到本地时间。
-
-```jinja2
-{% block scripts %}
-    {{ super() }}
-    {{ moment.include_moment() }}
-    {{ moment.lang("zh-cn") }}
-{% endblock %}
-```
-
-
-
-在模板上使用：
-
-```jinja2
-    <p>当前时间是： {{ moment(current_time).format('LLLL') }}.</p>
-    <p>{{ moment(current_time).fromNow(refresh=True) }}刷新过.</p>
-```
-
-具体格式请参看 [MomentJs 官网](http://momentjs.cn/) 。
-
-
-
-
 
 ### flask-wtf
 

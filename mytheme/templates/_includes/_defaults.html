@@ -1,22 +1,7 @@
-
-{# License of your site that appears in the footer of every page #}
-{% if not SITE_LICENSE %}
-{% set SITE_LICENSE = '' %}
-{% else %}
-{% set SITE_LICENSE = SITE_LICENSE %}
-{% endif %}
-
 {# Description of your site. It is used in meta tags so it will appear in
 search results and social media #}
 {% if not SITE_DESCRIPTION %}
 {% set SITE_DESCRIPTION = '' %}
 {% else %}
 {% set SITE_DESCRIPTION = SITE_DESCRIPTION %}
-{% endif %}
-
-{# It is displayed along with the SITENAME in the footer of every page #}
-{% if not SITESUBTITLE %}
-{% set SITESUBTITLE = '' %}
-{% else %}
-{% set SITESUBTITLE = SITESUBTITLE %}
 {% endif %}

@@ -14,67 +14,54 @@
 
 
 {% block content %}
-<div class="row">
-    <header class="page-header col-md-10 col-md-offset-2">
-    <h1><a href="{{ SITEURL }}/categories.html">所有分类</a></h1>
-    </header>
-</div>
+<div class="container">
 
 
-<div class="row">
-    <div class="col-md-8 col-md-offset-2">
-        <div class="accordion" id="accordion2" >
-            {% for category, articles in categories %}
-            {% if category != "archived" %}
-            <div class="panel panel-default" >
-                <div class="panel-heading" >
-                    <a role="button" class="accordion-toggle list-of-categories" data-toggle="collapse" data-parent="#accordion2" href="#{{ category.slug }}-ref">
 
-                        {% set num = articles|count %}
-                        {{ category }}<span>{{ num }}</span>
-                    </a>
-                </div>
-                <div id="{{ category.slug }}-ref" class="panel-collapse collapse">
-                    <div class="panel-body">
-                        <ul class="list-articles-category">
-                            {% for article in articles %} 
-                            <li><time pubdate="pubdate" datetime="{{ article.date.isoformat() }}">{{ article.locale_date }}</time><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }} {%if article.subtitle %} <small> {{ article.subtitle }} </small> {% endif %} </a></li>
-                            {% endfor %}
-                        </ul>
+    <div class="row">
+        <header class="page-header col-md-10 col-md-offset-2">
+            <h1><a href="{{ SITEURL }}/categories.html">所有分类</a></h1>
+        </header>
+    </div>
+
+
+    <div class="row">
+        <div class="col">
+            <div class="accordion" id="accordionExample">
+                {% for category, articles in categories %}
+                {% if category != "archived" %}
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="{{ category.slug }}-ref">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#{{ category.slug }}" aria-expanded="true" aria-controls="{{ category.slug }}">
+                            {% set num = articles|count %}
+                            {{ category }}<span class="ms-2 badge bg-info">{{ num }}</span>
+                        </button>
+                    </h2>
+
+                    <div id="{{ category.slug }}" class="accordion-collapse collapse" aria-labelledby="{{ category.slug }}-ref"
+                        data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <ul class="list-articles-category">
+                                {% for article in articles %}
+                                <li><time pubdate="pubdate" datetime="{{ article.date.isoformat() }}">{{
+                                        article.locale_date }}</time><a href="{{ SITEURL }}/{{ article.url }}">{{
+                                        article.title }} {%if article.subtitle %} <small> {{ article.subtitle }}
+                                        </small> {% endif %} </a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
+
+                {% endif %}
+                {% endfor %}
             </div>
-
-            <!--click panel heading can collapse too..-->
-
-            <script>
-                document.getElementById("{{ category.slug }}-ref").previousElementSibling.addEventListener('click', function () {
-                    $("#{{ category.slug }}-ref").collapse('toggle');
-
-                });
-
-            </script>
-
-            {% endif %}
-            {% endfor %}
         </div>
     </div>
 </div>
 {% endblock content %}
-{% block script %}
-{{ super() }}
-<script  language="javascript" type="text/javascript">
-    function uncollapse() {
-            $(window.location.hash).collapse({
-                toggle: true
-            })
-    }
-</script>
 
-<script type="text/javascript" language="JavaScript">
-    uncollapse(); 
-</script>
-
-
-
-{% endblock script %}
+{% block gotop %}
+{% endblock gotop %}

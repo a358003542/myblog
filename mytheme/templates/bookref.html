@@ -5,25 +5,25 @@
 {% endblock title %}
 
 {% block content %}
-<article>
+<article class="container">
 
     <div class="row">
-        <header class="page-header col-md-10 col-md-offset-2">
+        <header class="page-header">
             <h1><a href="{{ SITEURL }}/{{ article.url }}"> {{ article.bookname }} </a></h1>
         </header>
     </div>
 
-    <div class="row">
-        <div class="col-md-10 col-md-offset-2 article-content">
+    <div class="article-content">
 
-            <div class="col-md-6">
+        <div class="row">
+            <div class="col">
                 <img class="img-responsive" src="{{article.bookcover }}" alt="book cover">
             </div>
 
 
-            <div class="col-md-6">
+            <div class="col">
 
-                <div class="row">
+                <div class="">
                     作者：
                     {% for author in article.bookref_authors %}
                     <a href="{{ SITEURL }}/{{author.url}}">{{ author.name}}</a> {{ " & " if not loop.last else "" }}
@@ -31,7 +31,7 @@
                 </div>
 
                 {% if article.category|trim|count > 0 %}
-                <div class="row">
+                <div class="">
                     分类：<a class="category-link" href="{{ SITEURL }}/categories.html#{{ category.slug }}-ref">{{
                         article.category
                         }}</a>
@@ -39,7 +39,7 @@
                 {% endif %}
 
                 {% if article.tags and article.tags[0]|trim|count > 0 %}
-                <div class="row">
+                <div class="">
                     标签：
                     <ul class="list-of-tags tags-in-article">
                         {% for tag in article.tags|sort %}
@@ -54,19 +54,19 @@
 
 
                 {% if article.bookpublisher %}
-                <div class="row">
+                <div class="">
                     出版商：{{ article.bookpublisher}}
                 </div>
                 {% endif %}
 
                 {% if article.booklanguage %}
-                <div class="row">
+                <div class="">
                     语言：{{ article.booklanguage}}
                 </div>
                 {% endif %}
 
                 {% if article.bookbaidupandownloadurl %}
-                <div class="row">
+                <div class="">
                     <a class="btn btn-primary" target="_blank" href="{{article.bookbaidupandownloadurl}}"><span
                             class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                         百度盘下载
@@ -76,7 +76,7 @@
                 {% endif %}
 
                 {% if article.bookbaidupandirectdownloadurl %}
-                <div class="row">
+                <div class="">
                     <a class="btn btn-primary" target="_blank" href="{{article.bookbaidupandirectdownloadurl}}"><span
                             class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                         百度盘直接下载
@@ -85,7 +85,7 @@
                 {% endif %}
 
                 {% if article.onedrivedownloadurl %}
-                <div class="row">
+                <div class="">
                     <a class="btn btn-primary" target="_blank" href="{{article.onedrivedownloadurl}}"><span
                             class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                         onedrive下载
@@ -94,8 +94,9 @@
                 {% endif %}
 
             </div>
-
-            <div class="col-md-12">
+        </div>
+        <div class="row">
+            <div class="col">
 
                 {% if article.toc %}
                 <h2>书籍目录<h2></h2>
@@ -106,9 +107,7 @@
                     {{ article.content }}
 
             </div>
-
         </div>
-
     </div>
 </article>
 {% endblock content %}

@@ -1,30 +1,32 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="zh">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {% if SITEURL %}
-    <meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625"/>
+    <meta name="msvalidate.01" content="55CB117A61A6F8286173763FB18D9625" />
     <meta name="google-site-verification" content="r5HyVvY-ZSgf7ctpcpK1aWIaEfKJ0dvAE3E9kW3vXgI" />
-    <script data-ad-client="ca-pub-5644206261254049" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script data-ad-client="ca-pub-5644206261254049" async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     {% endif %}
-    
+
     {% if article and article.author %}
-        <meta name="author" content="{{ article.author }}"/>
-        <meta name="copyright" content="{{ article.author }}"/>
+    <meta name="author" content="{{ article.author }}" />
+    <meta name="copyright" content="{{ article.author }}" />
     {% elif page and page.author %}
-        <meta name="author" content="{{ page.author }}"/>
-        <meta name="copyright" content="{{ page.author }}"/>
+    <meta name="author" content="{{ page.author }}" />
+    <meta name="copyright" content="{{ page.author }}" />
     {% else %}
-        <meta name="author" content="{{ AUTHOR }}"/>
-        <meta name="copyright" content="{{ AUTHOR }}"/>
+    <meta name="author" content="{{ AUTHOR }}" />
+    <meta name="copyright" content="{{ AUTHOR }}" />
     {% endif %}
 
     {% from '_includes/_defaults.html' import SITE_DESCRIPTION with context %}
     {% if SITE_DESCRIPTION %}
-        <meta name="description"
-              content="{% block head_description %}{{ SITE_DESCRIPTION|e }}{%- endblock head_description %}"/>
+    <meta name="description"
+        content="{% block head_description %}{{ SITE_DESCRIPTION|e }}{%- endblock head_description %}" />
     {% endif %}
 
     {% block meta_tags_in_head %}
@@ -33,123 +35,128 @@
     <title>{% block title %}{{ SITENAME|striptags|e }}{% endblock title %}</title>
 
     {% block head_links %}
-        <link href="{{ SITEURL }}/theme/css/font-awesome.css" rel="stylesheet"
-              media="screen">
-        <link href="{{ SITEURL }}/theme/css/bootstrap.min.css" rel="stylesheet"
-              media="screen">
+    <link href="{{ SITEURL }}/theme/dist/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{{ SITEURL }}/theme/dist/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
-        <link rel="stylesheet" type="text/css"
-                  href="{{ SITEURL }}/theme/css/pygments.css" media="screen">
-        <link rel="stylesheet" type="text/css"
-                  href="{{ SITEURL }}/theme/css/elegant.css" media="screen">
-        <link rel="stylesheet" type="text/css"
-                  href="{{ SITEURL }}/theme/css/base.css" media="screen">
+    <link rel="stylesheet" href="{{ SITEURL }}/theme/css/pygments.css">
+    <link rel="stylesheet" href="{{ SITEURL }}/theme/css/elegant.css">
+    <link rel="stylesheet" href="{{ SITEURL }}/theme/css/base.css">
 
     {% endblock head_links %}
 
 
     {# pelican_javascript #}
     {% if article %}
-        {% if article.stylesheets %}
-            {% for stylesheet in article.stylesheets %}
-                {{ stylesheet }}
-            {% endfor %}
-        {% endif %}
+    {% if article.stylesheets %}
+    {% for stylesheet in article.stylesheets %}
+    {{ stylesheet }}
+    {% endfor %}
+    {% endif %}
     {% endif %}
 
 </head>
+
 <body>
 
-<nav class="navbar">
-    <div class="navbar navbar-default" role="navigation">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed"
-                    data-toggle="collapse" data-target=".navbar-collapse"
-                    aria-expanded="false">
-                <span class="sr-only">Navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light rounded">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ SITEURL }}/"><span class=site-name>网站首页</span></a>
+
+            <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
             </button>
 
-            <a class="navbar-brand" href="{{ SITEURL }}/"><span
-                    class=site-name>网站首页</span></a>
-        </div>
+
+            <div class="navbar-collapse collapse justify-content-md-end" id="navbarContent">
+                <form action="{{ SITEURL }}/search.html" onsubmit="return validateForm(this.elements['q'].value);"
+                    class="d-flex me-auto">
+
+                    <input type="search" name="q" id="tipue_search_input" class="form-control me-2"
+                        placeholder="Search..." style="width:430px;" aria-label="Search">
+
+                    <button class="btn btn-outline-primary" type="submit">搜索</button>
+                </form>
 
 
-        <div class="navbar-collapse collapse">
-            <form action="{{ SITEURL }}/search.html"
-                  onsubmit="return validateForm(this.elements['q'].value);"
-                  class="navbar-form navbar-left">
-                <div class="form-group">
-                    <input type="text" name="q" id="tipue_search_input"
-                           class="form-control" placeholder="Search..."
-                           style="width:430px;">
-                </div>
-                <button class="btn btn-default" type="submit">搜索</button>
-            </form>
+                <ul class="navbar-nav mb-lg-0">
 
+                    <li class="nav-item ">
+                        <a class="nav-link {% if page_name=='archives' %} active {% endif %}"
+                            href="/archives.html">所有博文</a>
+                    </li>
 
-            <ul class="nav navbar-nav nav-pills navbar-right">
+                    <li class="nav-item ">
+                        <a class="nav-link {% if page_name=='categories' %} active {% endif %}"
+                            href="/categories.html">博文分类</a>
+                    </li>
+                    {# <li {% if page_name=='tags' %} class="active" {% endif %}><a href="/tags.html">文章标签</a></li>
+                    #}
 
-                <li {% if page_name == 'archives' %} class="active"{% endif %}>
-                    <a  href="/archives.html">所有博文</a></li>
-                    
-                <li {% if page_name == 'categories' %} class="active"{% endif %}><a href="/categories.html">博文分类</a></li>
-               {#  <li {% if page_name == 'tags' %} class="active"{% endif %}><a href="/tags.html">文章标签</a></li> #}
-                
-
-                {% if DISPLAY_PAGES_ON_MENU %}
+                    {% if DISPLAY_PAGES_ON_MENU %}
                     {% for p in pages | sort(attribute='slug', reverse = True) %}
-                        <li {% if p== page %} class="active" {% endif %}>
-                            <a href="{{ SITEURL }}/{{ p.url }}">{{ p.title }}</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link  {% if p==page %} active {% endif %}" href="{{ SITEURL }}/{{ p.url }}">{{
+                            p.title }}</a>
+                    </li>
                     {% endfor %}
-                {% endif %}
-            </ul>
+                    {% endif %}
+                </ul>
 
 
+            </div>
         </div>
-    </div>
-</nav>
+        </div>
+    </nav>
 
 
-<div class="container-fluid">
-    <div class="col-md-1 col-md-1-left"></div>
-    <div class="col-md-10">
+    <div class="container-fluid mt-3">
+
         {% block content %}
         {% endblock content %}
+
     </div>
-    <div class="col-md-1"></div>
 
-</div>
-
-
-<div id="push"></div>
-<button id="gotop" type="button" class="btn btn-default">
-    <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
-</button>
-
-{% include '_includes/footer.html' %}
+    {% block gotop %}
+    <div>
+        <button id="gotop" type="button" class="btn btn-default">
+            <span class="" aria-hidden="true">↑</span>
+        </button>
+    </div>
+    {% endblock gotop %}
 
 
-{% block script %}
-    <script src="{{ SITEURL }}/theme/js/jquery.min.js"></script>
-    <script src="{{ SITEURL }}/theme/js/bootstrap.min.js"></script>
+    <footer>
+        <div id="footer">
+            <ul class="footer-content">
+                <li class="elegant-power">Powered by <a href="http://getpelican.com/"
+                        title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant"
+                        title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com"
+                        title="Talha Mansoor Home Page">Talha Mansoor</a> and updated by <a
+                        href="https://github.com/a358003542" title="Wanze Home Page">Wanze.</a></li>
+            </ul>
+        </div>
+    </footer>
 
-    <script src="{{ SITEURL }}/theme/js/moment.min.js"></script>
+
+    {% block script %}
+    <script src="{{ SITEURL }}/theme/dist/lodash/js/lodash.min.js"></script>
+    <script src="{{ SITEURL }}/theme/dist/jquery/js/jquery.min.js"></script>
+    <script src="{{ SITEURL }}/theme/dist/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <script src="{{ SITEURL }}/theme/js/base.js"></script>
-{% endblock script %}
+    {% endblock script %}
 
-{# pelican_javascript #}
-{% if article %}
+    {# pelican_javascript #}
+    {% if article %}
     {% if article.javascripts %}
-        {% for javascript in article.javascripts %}
-            {{ javascript }}
-        {% endfor %}
+    {% for javascript in article.javascripts %}
+    {{ javascript }}
+    {% endfor %}
     {% endif %}
-{% endif %}
+    {% endif %}
 
 </body>
+
 </html>

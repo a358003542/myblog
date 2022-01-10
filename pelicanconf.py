@@ -142,3 +142,20 @@ SITEMAP = {
 ##################################################################
 BOOKREFAUTHOR_SAVE_AS = 'bookref_author/{slug}.html'
 BOOKREFAUTHOR_URL = 'bookref_author/{slug}.html'
+
+def archives_dates_to_json(dates):
+    result = []
+    for article in dates:
+        item = {
+            "url": article.url,
+            "title": article.title,
+            "subtitle": article.subtitle if hasattr(article, "subtitle")  else "" ,
+            "datetime": article.date.isoformat(),
+            "locale_date": article.locale_date,
+        }
+        result.append(item)
+    return result
+
+JINJA_FILTERS = {
+    "archives_dates_to_json": archives_dates_to_json
+}
