@@ -19,32 +19,29 @@
 
 {% block content %}
 <article>
-<div class="row">
-    <header class="page-header col-md-10 col-md-offset-2">
-    <h1><a href="{{ SITEURL }}/{{ page.url }}"> {{ page.title }} {%if page.subtitle %} <small> {{ page.subtitle }} </small> {% endif %} </a></h1>
-    </header>
-</div>
-
-<div class="row">
-    {% if page.toc %}
-    <div class="col-md-2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        {{ page.toc }}
-        </nav>
+    <div class="row">
+        <header class="page-header col-md-10 col-md-offset-2">
+            <h1><a href="{{ SITEURL }}/{{ page.url }}"> {{ page.title }} {%if page.subtitle %} <small> {{ page.subtitle
+                        }} </small> {% endif %} </a></h1>
+        </header>
     </div>
-    <div class="col-md-8 article-content">
-        {% else %}
-        <div class="col-md-8 col-md-offset-2 article-content">
-            {% endif %}
 
-            {{ page.content }}
-
+    <div class="row">
+        {% if page.toc %}
+        <div class="col-md-2 table-of-content">
+            <nav>
+                <h4>Contents</h4>
+                {{ page.toc }}
+            </nav>
         </div>
-    </div>
-    </article>
-    {% endblock content %}
+        <div class="col-md-8 article-content">
+            {% else %}
+            <div class="col-md-8 col-md-offset-2 article-content">
+                {% endif %}
 
-    {% block script %}
-    {{ super() }}
-    {% endblock script %}
+                {{ page.content }}
+
+            </div>
+        </div>
+</article>
+{% endblock content %}

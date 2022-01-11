@@ -23,7 +23,6 @@
     <meta name="copyright" content="{{ AUTHOR }}" />
     {% endif %}
 
-    {% from '_includes/_defaults.html' import SITE_DESCRIPTION with context %}
     {% if SITE_DESCRIPTION %}
     <meta name="description"
         content="{% block head_description %}{{ SITE_DESCRIPTION|e }}{%- endblock head_description %}" />
@@ -45,15 +44,6 @@
     {% endblock head_links %}
 
 
-    {# pelican_javascript #}
-    {% if article %}
-    {% if article.stylesheets %}
-    {% for stylesheet in article.stylesheets %}
-    {{ stylesheet }}
-    {% endfor %}
-    {% endif %}
-    {% endif %}
-
 </head>
 
 <body>
@@ -69,14 +59,14 @@
             </button>
 
 
-            <div class="navbar-collapse collapse justify-content-md-end" id="navbarContent">
+            <div class="navbar-collapse collapse" id="navbarContent">
                 <form action="{{ SITEURL }}/search.html" onsubmit="return validateForm(this.elements['q'].value);"
                     class="d-flex me-auto">
 
                     <input type="search" name="q" id="tipue_search_input" class="form-control me-2"
-                        placeholder="Search..." style="width:430px;" aria-label="Search">
+                        placeholder="Search..." aria-label="Search">
 
-                    <button class="btn btn-outline-primary" type="submit">搜索</button>
+                    <button class="btn btn-outline-primary text-nowrap" type="submit">搜索</button>
                 </form>
 
 
@@ -118,15 +108,6 @@
 
     </div>
 
-    {% block gotop %}
-    <div>
-        <button id="gotop" type="button" class="btn btn-default">
-            <span class="" aria-hidden="true">↑</span>
-        </button>
-    </div>
-    {% endblock gotop %}
-
-
     <footer>
         <div id="footer">
             <ul class="footer-content">
@@ -148,14 +129,6 @@
     <script src="{{ SITEURL }}/theme/js/base.js"></script>
     {% endblock script %}
 
-    {# pelican_javascript #}
-    {% if article %}
-    {% if article.javascripts %}
-    {% for javascript in article.javascripts %}
-    {{ javascript }}
-    {% endfor %}
-    {% endif %}
-    {% endif %}
 
 </body>
 

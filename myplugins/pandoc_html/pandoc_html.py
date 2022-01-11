@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 pandoc_html
-========================
-
-A Pelican plugin to extract table of contents (ToC) from `article.content` and
-place it in its own `article.toc` variable for use in templates.
 """
 
 from os import path

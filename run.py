@@ -46,7 +46,7 @@ def devserve():
     """
     click.echo("start devbuild your pelican project...")
     
-    copy_mathjax(OUTPUTDIR)
+    # copy_mathjax(OUTPUTDIR)
     
     def devbuild():
         cmd = "pelican -r {INPUTDIR} -o {OUTPUTDIR} -s {CONFFILE}".format(
@@ -90,7 +90,7 @@ def build():
     build your pelican project
     """
     click.echo("start build your pelican project...")
-    copy_mathjax(PUBLISHDIR)
+    # copy_mathjax(PUBLISHDIR)
     
     cmd = "pelican {INPUTDIR} -o {PUBLISHDIR} -s {PUBLISHCONF}".format(
         INPUTDIR=INPUTDIR,

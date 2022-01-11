@@ -21,7 +21,7 @@ SITEURL = ''
 
 PATH = 'content'
 ARTICLE_PATHS = ['articles']
-ARTICLE_EXCLUDES= []
+ARTICLE_EXCLUDES = []
 
 TIMEZONE = 'Asia/Shanghai'
 
@@ -59,7 +59,9 @@ LINKS = (('MyGitHub', 'http://www.github.com/a358003542'),
 # static path copy it to the destination
 STATIC_PATHS = ['images',
                 'data',
-                'extra']
+                'extra',
+                'html_pages',
+                ]
 
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'},
@@ -83,21 +85,25 @@ TAG_URL = 'tags/{slug}.html'
 TAG_SAVE_AS = ''
 
 # disable parse html
-# READERS = {'html': None}
+READERS = {'html': None}
 
 
 ######################### MARKDOWN CONFIG #################
 MARKDOWN = {
+    'extensions': [
+        'codehilite',
+        'toc',
+        'fenced_code',
+        'extra',
+        'meta',
+        'footnotes',
+        'md4mathjax'
+    ],
     'extension_configs': {
-        'markdown.extensions.codehilite': {'css_class': 'highlight',
-                                           'guess_lang': False},
-        'markdown.extensions.toc': {},
-        'markdown.extensions.fenced_code': {},
-        'markdown.extensions.extra': {},
-        'markdown.extensions.meta': {},
-        'markdown.extensions.footnotes': {}
+        'codehilite': {'css_class': 'highlight',
+                       'guess_lang': False},
     },
-    'output_format': 'html5',
+    'output_format': 'html',
 }
 #############################################################
 
@@ -108,7 +114,10 @@ THEME = 'mytheme'
 
 SITE_DESCRIPTION = '欢迎来到本网站，希望本网站的文章能够对您有所帮助。'
 
-TEMPLATE_PAGES = {'404.html': '404.html'}
+TEMPLATE_PAGES = {
+    '404.html': '404.html',
+    'template_pages/zhou-yi-yao-gua.html' : 'html_pages/zhou-yi-yao-gua.html'
+    }
 
 ######################################################
 
@@ -117,11 +126,7 @@ DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
 ################################### plugin #################
 PLUGIN_PATHS = ['myplugins']
 
-PLUGINS = ['pelican_javascript', 'extract_toc',
-           'tipue_search', 'render_math', 'sitemap', 'pandoc_html',
-           'bookref']
-
-MATH_JAX = {'tex_extensions': ['mhchem.js']}
+PLUGINS = ['extract_toc', 'tipue_search', 'sitemap', 'pandoc_html', 'bookref']
 
 
 SITEMAP = {
@@ -143,18 +148,20 @@ SITEMAP = {
 BOOKREFAUTHOR_SAVE_AS = 'bookref_author/{slug}.html'
 BOOKREFAUTHOR_URL = 'bookref_author/{slug}.html'
 
+
 def archives_dates_to_json(dates):
     result = []
     for article in dates:
         item = {
             "url": article.url,
             "title": article.title,
-            "subtitle": article.subtitle if hasattr(article, "subtitle")  else "" ,
+            "subtitle": article.subtitle if hasattr(article, "subtitle") else "",
             "datetime": article.date.isoformat(),
             "locale_date": article.locale_date,
         }
         result.append(item)
     return result
+
 
 JINJA_FILTERS = {
     "archives_dates_to_json": archives_dates_to_json

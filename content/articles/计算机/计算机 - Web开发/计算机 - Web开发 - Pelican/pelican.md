@@ -288,25 +288,7 @@ theme内部static文件夹下的内容会copy到output文件夹下，比如 `sta
 
 ```text
 PLUGIN_PATHS = ['myplugins']
-PLUGINS = ['pelican_javascript', 'extract_toc', 'pelican_ipynb', 'tipue_search',
-           'render_math']
-```
-
-### pelican_javascript plugin
-
-项目的 [github地址在这里](https://github.com/mortada/pelican_javascript) 。
-
-js和css也是静态资源，但和上面的处理又有所不同，前面也提及了html源文件如果在head部分有css引用语句，都是会丢失的。你需要如下加上这样的meta标签语句：
-
-```html
-<meta name="javascripts" content="周易之摇卦.js" />
-```
-
-然后你还需要安装pelican-plugins里面的 `pelican_javascript` 如下所示：
-
-```
-PLUGIN_PATHS = ['pelican-plugins']
-PLUGINS = ['pelican_javascript', 'tipue_search', 'extract_toc']
+PLUGINS = [ 'extract_toc', 'tipue_search', 'render_math']
 ```
 
 

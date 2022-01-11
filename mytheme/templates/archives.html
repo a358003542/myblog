@@ -66,7 +66,7 @@
 <script>
     let articles = {{ dates | archives_dates_to_json }}
     {% if SITEURL %}
-    let siteUrl = {{ SITEURL }}
+    let siteUrl = "{{ SITEURL }}"
     {% else %}
     let siteUrl = ""
     {% endif %}
@@ -75,5 +75,3 @@
 <script src="{{ SITEURL }}/theme/js/archives.js"></script>
 {% endblock script %}
 
-{% block gotop %}
-{% endblock gotop %}
