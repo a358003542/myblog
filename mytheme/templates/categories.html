@@ -8,6 +8,10 @@
 {{ SITENAME|striptags|e }} 这里根据本网站文章的基本分类信息来展示各个访问，方便访问者快速查阅定位文章。
 {% endblock head_description %}
 
+{% block head_links %}
+{{super()}}
+<link href="{{ SITEURL }}/theme/css/categories.css" rel="stylesheet">
+{% endblock head_links %}
 
 
 {% block content %}

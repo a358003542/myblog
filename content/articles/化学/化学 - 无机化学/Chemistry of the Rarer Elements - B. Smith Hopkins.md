@@ -1,7 +1,7 @@
 Template: bookref
 BookName: Chemistry of the Rarer Elements
 BookAuthor: B. Smith Hopkins
-BookPublisher: D.C. Heath & Co.
+BookPublisher: D. C. Heath & Co.
 BookLanguage: 英语
 BookCover: /images/Covers/Chemistry of the Rarer Elements - B. Smith Hopkins.jpg
 BookBaidupanDirectDownloadUrl: https://pan.baidu.com/s/1DyPjLM0pidPU9OoVMW2AvQ?pwd=7kb3 

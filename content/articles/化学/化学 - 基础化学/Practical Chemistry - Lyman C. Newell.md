@@ -1,7 +1,7 @@
 Template: bookref
 BookName: Practical Chemistry
 BookAuthor: Lyman C. Newell
-BookPublisher: D.C. Heath & Co.
+BookPublisher: D. C. Heath & Co.
 BookLanguage: 英语
 BookCover: /images/Covers/Practical Chemistry - Lyman C. Newell.jpg
 BookBaidupanDownloadUrl: https://pan.baidu.com/s/1qqhS3Gc4Thp66zFZf933lQ 
