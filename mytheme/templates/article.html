@@ -1,15 +1,19 @@
 {% extends 'base.html' %}
 
 {% block title %}
-{{ article.title|striptags|e }} {%if article.subtitle %} - {{ article.subtitle|striptags|e }} {% endif %} · {{ super()
-}}
+<title>{{ article.title|striptags|e }} {%if article.subtitle %} - {{ article.subtitle|striptags|e }} {% endif %} -
+    {{ SITENAME|striptags|e }}</title>
 {% endblock title %}
 
 {% block head_description %}
 {%- if article.summary %}{{ article.summary|striptags|e |truncate(150, True) }}{% endif %}
 {%- endblock head_description %}
 
-
+{% block head_links %}
+{{super()}}
+<link rel="stylesheet" href="{{ SITEURL }}/theme/css/pygments.css">
+<link rel="stylesheet" href="{{ SITEURL }}/theme/css/article.css">
+{% endblock head_links %}
 
 {% block meta_tags_in_head %}
 {{ super() }}
@@ -86,7 +90,11 @@
 
 </div>
 
-
-
-
 {% endblock content %}
+
+{% block script %}
+{{super()}}
+<script src="{{ SITEURL }}/theme/dist/jquery/js/jquery.min.js"></script>
+
+<script src="{{ SITEURL }}/theme/js/article.js"></script>
+{% endblock script %}

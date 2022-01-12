@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-{{ article.bookname|striptags|e }} - {{ article.bookauthor | striptags | e}} · {{ super() }}
+<title>{{ article.bookname|striptags|e }} - {{ article.bookauthor | striptags | e}} -  {{ SITENAME|striptags|e }}</title>
 {% endblock title %}
 
 {% block content %}

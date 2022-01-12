@@ -31,101 +31,109 @@
     {% block meta_tags_in_head %}
     {% endblock meta_tags_in_head %}
 
-    <title>{% block title %}{{ SITENAME|striptags|e }}{% endblock title %}</title>
+    {% block title %}
+    <title>{{ SITENAME|striptags|e }}</title>
+    {% endblock title %}
 
     {% block head_links %}
-    <link href="{{ SITEURL }}/theme/dist/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="{{ SITEURL }}/theme/dist/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ SITEURL }}/theme/dist/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ SITEURL }}/theme/css/pygments.css">
-    <link rel="stylesheet" href="{{ SITEURL }}/theme/css/elegant.css">
-    <link rel="stylesheet" href="{{ SITEURL }}/theme/css/base.css">
-
+    <link href="{{ SITEURL }}/theme/css/base.css" rel="stylesheet">
     {% endblock head_links %}
-
-
 </head>
 
 <body>
+    <div class="flex-wrapper">
+        {% block navbar %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ SITEURL }}/">网站首页</a>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light rounded">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ SITEURL }}/"><span class=site-name>网站首页</span></a>
-
-            <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse"
-                data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-
-            <div class="navbar-collapse collapse" id="navbarContent">
-                <form action="{{ SITEURL }}/search.html" onsubmit="return validateForm(this.elements['q'].value);"
-                    class="d-flex me-auto">
-
-                    <input type="search" name="q" id="tipue_search_input" class="form-control me-2"
-                        placeholder="Search..." aria-label="Search">
-
-                    <button class="btn btn-outline-primary text-nowrap" type="submit">搜索</button>
-                </form>
+                <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
 
-                <ul class="navbar-nav mb-lg-0">
+                <div class="navbar-collapse collapse" id="navbarContent">
+                    <form action="{{ SITEURL }}/search.html" onsubmit="return validateForm(this.elements['q'].value);"
+                        class="d-flex me-auto">
 
-                    <li class="nav-item ">
-                        <a class="nav-link {% if page_name=='archives' %} active {% endif %}"
-                            href="/archives.html">所有博文</a>
-                    </li>
+                        <input type="search" name="q" id="tipue_search_input" class="form-control me-2"
+                            placeholder="Search..." aria-label="Search">
 
-                    <li class="nav-item ">
-                        <a class="nav-link {% if page_name=='categories' %} active {% endif %}"
-                            href="/categories.html">博文分类</a>
-                    </li>
-                    {# <li {% if page_name=='tags' %} class="active" {% endif %}><a href="/tags.html">文章标签</a></li>
+                        <button class="btn btn-outline-primary text-nowrap" type="submit">搜索</button>
+                    </form>
+
+
+                    <ul class="navbar-nav mb-lg-0">
+
+                        <li class="nav-item ">
+                            <a class="nav-link {% if page_name=='archives' %} active {% endif %}"
+                                href="/archives.html">所有博文</a>
+                        </li>
+
+                        <li class="nav-item ">
+                            <a class="nav-link {% if page_name=='categories' %} active {% endif %}"
+                                href="/categories.html">博文分类</a>
+                        </li>
+                        {# <li {% if page_name=='tags' %} class="active" {% endif %}><a href="/tags.html">文章标签</a></li>
                     #}
 
-                    {% if DISPLAY_PAGES_ON_MENU %}
-                    {% for p in pages | sort(attribute='slug', reverse = True) %}
-                    <li class="nav-item">
-                        <a class="nav-link  {% if p==page %} active {% endif %}" href="{{ SITEURL }}/{{ p.url }}">{{
+                        {% if DISPLAY_PAGES_ON_MENU %}
+                        {% for p in pages | sort(attribute='slug', reverse = True) %}
+                        <li class="nav-item">
+                            <a class="nav-link  {% if p==page %} active {% endif %}" href="{{ SITEURL }}/{{ p.url }}">{{
                             p.title }}</a>
-                    </li>
-                    {% endfor %}
-                    {% endif %}
-                </ul>
+                        </li>
+                        {% endfor %}
+                        {% endif %}
+                    </ul>
 
 
+                </div>
             </div>
-        </div>
-        </div>
-    </nav>
+        </nav>
 
-
-    <div class="container-fluid mt-3">
+        {% endblock %}
 
         {% block content %}
         {% endblock content %}
 
-    </div>
-
-    <footer>
-        <div id="footer">
-            <ul class="footer-content">
-                <li class="elegant-power">Powered by <a href="http://getpelican.com/"
-                        title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant"
-                        title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com"
-                        title="Talha Mansoor Home Page">Talha Mansoor</a> and updated by <a
-                        href="https://github.com/a358003542" title="Wanze Home Page">Wanze.</a></li>
+        {% block footer %}
+        <footer class="footer">
+            <ul class="nav justify-content-center">
+                <li class="nav-item">
+                    <span class="nav-link text-muted px-2">Created by Wanze & Companion with</span></li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted px-2" href="https://python.org/">Python</a></li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted px-2" href="http://getpelican.com/">Pelican</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted px-2" href="https://github.com/Python-Markdown/markdown">Markdown</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted px-2" href="http://oncrashreboot.com/pelican-elegant">Elegant</a></li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted px-2" href="https://www.javascript.com/">Javascript</a></li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted px-2" href="https://www.npmjs.com/">Npm</a></li>
+                <li class="nav-item">
+                    <a class="nav-link text-muted px-2" href="https://www.mathjax.org/">Mathjax</a>
+                </li>
+                <li class="nav-item">
+                    <span class="nav-link text-muted px-2">etc...</span></li>
             </ul>
-        </div>
-    </footer>
-
+        </footer>
+        {% endblock %}
+    </div>
 
     {% block script %}
     <script src="{{ SITEURL }}/theme/dist/lodash/js/lodash.min.js"></script>
-    <script src="{{ SITEURL }}/theme/dist/jquery/js/jquery.min.js"></script>
     <script src="{{ SITEURL }}/theme/dist/bootstrap/js/bootstrap.bundle.min.js"></script>
-
     <script src="{{ SITEURL }}/theme/js/base.js"></script>
     {% endblock script %}
 

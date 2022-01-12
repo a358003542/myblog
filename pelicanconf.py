@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
 
+import os
 import sys
+from my_python_module.pathlib import gen_allfile
 
 # set the author metadata
 AUTHOR = 'wanze'
@@ -114,14 +116,22 @@ THEME = 'mytheme'
 
 SITE_DESCRIPTION = '欢迎来到本网站，希望本网站的文章能够对您有所帮助。'
 
-TEMPLATE_PAGES = {
-    '404.html': '404.html',
-    'template_pages/zhou-yi-yao-gua.html' : 'html_pages/zhou-yi-yao-gua.html'
-    }
 
-######################################################
 
-DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags', 'search']
+########################## template ############################
+# need articles or dates or page_name jinja2 env variables
+DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags']
+
+# auto add template pages
+# not include the articles and dates jinja2 env variables
+template_file_startpath = 'content/template_pages'
+TEMPLATE_PAGES = {}
+for template_src in gen_allfile(startpath=template_file_startpath, filetype="html$"):
+    template_dest = template_src
+    template_src = os.path.join('template_pages', template_src)
+    TEMPLATE_PAGES[template_src] = template_dest
+
+
 
 ################################### plugin #################
 PLUGIN_PATHS = ['myplugins']

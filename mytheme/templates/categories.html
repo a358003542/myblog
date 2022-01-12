@@ -1,32 +1,27 @@
 {% extends 'base.html' %}
 
 {% block title %}
-所有分类 {{ super() }}
+<title>分类页面 -  {{ SITENAME|striptags|e }}</title>
 {% endblock title %}
 
 {% block head_description %}
 {{ SITENAME|striptags|e }} 这里根据本网站文章的基本分类信息来展示各个访问，方便访问者快速查阅定位文章。
 {% endblock head_description %}
 
-{% block meta_tags_in_head %}
-{{ super() }}
-{% endblock meta_tags_in_head %}
 
 
 {% block content %}
-<div class="container">
-
-
+<div class="container mt-3">
 
     <div class="row">
-        <header class="page-header col-md-10 col-md-offset-2">
+        <header class="page-header col-md-10 col-sm-12">
             <h1><a href="{{ SITEURL }}/categories.html">所有分类</a></h1>
         </header>
     </div>
 
 
     <div class="row">
-        <div class="col">
+        <div class="col-md-10 col-sm-12">
             <div class="accordion" id="accordionExample">
                 {% for category, articles in categories %}
                 {% if category != "archived" %}

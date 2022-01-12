@@ -6,10 +6,9 @@
     "name": "wanze",
     "email": "a358003542@outlook.com"
   },
-  "devDependencies": {
-  },
   "dependencies": {
     "bootstrap": "^5.1.3",
+    "bootstrap-icons": "^1.7.2",
     "lodash": "^4.17.21",
     "mathjax-full": "^3.2.0"
   }
