@@ -1169,6 +1169,123 @@ undefined
 ## Reg对象
 
 ## DOM操作
+所谓DOM操作就是用Javascript来操作修改页面内容，这基本上是client端javascript的主要工作内容。
+
+如果熟悉python的beautifulsoup或者lxml之类的分析网页的模块，那么对Javascript的这些DOM操作概念都不会太陌生。我这里就不做太多抽象的术语上的讨论了，下面的讨论会更加注重实践方面的东西。
+
+### document
+document就是html文档的主对象，document.body就是对应着body这个标签对象。这里所说的标签对象在javascript的DOM这边对应的是Element类。在Javascript的实现中Element类并不是最底层的类，Element类继承自Node类。一般在html文档这边我们能看到的标签都是Element类，实际上通过Element类和它提供的便捷方法一般就能够完成DOM的大部分操作任务。
+
+比如下面这个例子：
+
+```javascript
+let e = document.createElement('li')
+let t = document.createTextNode('this is text.')
+e.append(t)
+```
+
+读者可以试一下，从这些方法的名字可以直接看出来，第一行就是创建了一个Element对象，具体就是创建了一个li标签。第二行是创建了一个文本节点。第三行是在Element最后一个子节点之后插入一个Node对象或DOMString对象【这就是MDN文档的原话】。最终结果就是：
+
+```
+'<li>this is text.</li>'
+```
+
+但具体获得上面这个字符串要使用 `e.outerHTML` 。
+
+这个例子只是演示目的，实际操作只需要：
+
+```
+e.textContent = 'new text'
+```
+根本不需要了解文本节点这个概念，当然Element类的 `textContent` 这个属性调用的底层实现肯定是基于文本节点来的。再比如属性有一个属性节点的概念，同样类似上面文本节点的讨论，一般通过Element类及其提供的方法就能完成DOM的绝大部分操作，如果有代码出现了文本节点或者属性节点等概念，但是代码的具体工作通过Element类的某个方法就能够完成，那么我们应该说这个代码是有问题的，是故意写的晦涩难懂。
+
+
+#### 查找目标标签
+如果目标标签有id那么自然就直接根据id来。 
+
+```
+let e = document.getElementById('test')
+```
+返回的是找到的目标标签或者说Element对象。不用带 `#` 符号。
+
+现在已经不推荐使用getElementsByTagName之类的方法了，querySelector和querySelectorAll已经足够强大和好用，不需要那些杂七杂八的方法了。
+
+querySelectorAll和querySelector的区别是其返回的是所有匹配的结果而不是第一个匹配项，所以返回的是一个类似Array的对象。虽然不是数组但一般方法操作length，for语句之类的都有。
+
+querySelector的语法使用如果熟悉css那种匹配规则的话那么立马就可以写出对应标签的匹配语句了：
+```
+let e = document.querySelector('.class')
+```
+
+具体MDN的官方文档直接说明了其是一个 **CSS选择器字符串** ，所有有匹配问题实在不清楚的查阅css选择器书写规则即可。
+
+匹配到的Element对象如果还想继续查找的话可以继续调用该Element对象的 `querySelector` 和 `querySelectorAll` 方法。注意上面的表述里面 **没有 `getElementById` ** 。
+
+因为querySelector和querySelectorAll最常用，现代Javascript教程里有一段指出，querySelector和querySelectorAll其返回的是 **静态的集合**。也就是这两个方法是立即调用立即查找，结果封存不变，这个了解一下。
+
+
+#### 标签之间的关系
+document不是Element对象，`document.documentElement` 才是Element对象，其对应的是html这个标签。
+
+再实践中推荐采用下面的属性来实现纯元素导航。
+
+- children 返回本标签下面的子标签 【没有并不是返回的null，用childElementCount来判断。】
+- parentElement  返回本标签上面的父标签 【没有则返回null】
+- firstElementChild 本标签下面的第一个子标签 【没有则返回null】
+- lastElementChild  本标签下面的最后一个子标签 【没有则返回null】
+- previousElementSibling 本标签上面的兄弟标签 【没有则返回null】
+- nextElementSibling 本标签下面的兄弟标签 【没有则返回null】
+
+
+
+
+#### matches
+```
+Element.matches(css)
+```
+返回布尔值，该标签是否匹配给定的css选择器。
+
+
+
+
+
+#### setAttribute
+
+`Element` 对象可以调用这个 `setAttribute` 方法来设置标签内的属性值。
+
+```
+element.setAttribute(name, value);
+```
+
+#### dataset
+
+查询到的元素如果div则是更具体的HTMLdivElement等等，其继承自HTMLElement，HTMLElement有一些专门的方法。比如这个dataset，其是可以只读属性，对应html中的`data-*` 这样的属性值，比如说 `data-name` 将变成dataset的`{'name': 'what'}` 。
+
+#### classList
+
+类似上面的讨论也是HTMLElement的一个属性，表示class属性数组。
+
+
+#### textContent
+
+之前提到querySelector查到某个Element之后想要取出其文本内容可以调用 `textContent` 属性，document和Element都能这样做只是因为它们继承自Node对象，具体textContent这个属性的定义是在Node对象这里。
+
+#### parentElement
+
+返回本节点的父节点
+
+```
+parentElement = node.parentElement
+```
+
+#### removeChild
+
+移除本节点的某个子节点
+
+```
+node.removeChild(child);
+```
+
 
 ### setInterval
 
@@ -1190,81 +1307,6 @@ setInterval(func, 1000)
 
 该窗口的History对象
 
-### document
-
-#### getElementById
-
-#### createElement
-
-```
-var e = document.createElement(name);
-```
-
-创建一个标签，返回的是一个 `Element` 对象。
-
-#### createTextNode
-
-```
-child = document.createTextNode(child);
-```
-
-创建一个文本节点。
-
-```javascript
-var e = document.createElement('li');
-var t = document.createTextNode('this is text.')
-e.appendChild(t);
-```
-
-上面的例子创建了一个li标签，然后创建了一个文本节点，然后将这个文本节点附加到该li标签上，最后该li标签内容如下：
-
-```
-<li>this is text.</li>
-```
-
-### Element对象
-
-#### querySelector
-
-之前接触到的`document.querySelector` 是因为Document对象继承自Element对象，该方法实际来自Element对象。具体就是在本Element下继续进行搜索动作。
-
-#### setAttribute
-
-`Element` 对象可以调用这个 `setAttribute` 方法来设置标签内的属性值。
-
-```
-element.setAttribute(name, value);
-```
-
-#### dataset
-
-查询到的元素如果div则是更具体的HTMLdivElement等等，其继承自HTMLElement，HTMLElement有一些专门的方法。比如这个dataset，其是可以只读属性，对应html中的`data-*` 这样的属性值，比如说 `data-name` 将变成dataset的`{'name': 'what'}` 。
-
-#### classList
-
-类似上面的讨论也是HTMLElement的一个属性，表示class属性数组。
-
-### Node对象
-
-#### textContent
-
-之前提到querySelector查到某个Element之后想要取出其文本内容可以调用 `textContent` 属性，document和Element都能这样做只是因为它们继承自Node对象，具体textContent这个属性的定义是在Node对象这里。
-
-#### parentElement
-
-返回本节点的父节点
-
-```
-parentElement = node.parentElement
-```
-
-#### removeChild
-
-移除本节点的某个子节点
-
-```
-node.removeChild(child);
-```
 
 ### 事件
 

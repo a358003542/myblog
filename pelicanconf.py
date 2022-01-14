@@ -86,8 +86,6 @@ CATEGORY_SAVE_AS = ''
 TAG_URL = 'tags/{slug}.html'
 TAG_SAVE_AS = ''
 
-# disable parse html
-READERS = {'html': None}
 
 
 ######################### MARKDOWN CONFIG #################
@@ -121,6 +119,9 @@ SITE_DESCRIPTION = '欢迎来到本网站，希望本网站的文章能够对您
 ########################## template ############################
 # need articles or dates or page_name jinja2 env variables
 DIRECT_TEMPLATES = ['index', 'categories', 'archives', 'tags']
+
+# disable parse html
+READERS = {'html': None}
 
 # auto add template pages
 # not include the articles and dates jinja2 env variables
