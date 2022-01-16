@@ -89,6 +89,7 @@ TAG_SAVE_AS = ''
 
 
 ######################### MARKDOWN CONFIG #################
+from markdown.extensions.toc import slugify_unicode
 MARKDOWN = {
     'extensions': [
         'codehilite',
@@ -102,6 +103,10 @@ MARKDOWN = {
     'extension_configs': {
         'codehilite': {'css_class': 'highlight',
                        'guess_lang': False},
+        'toc':{
+            'toc_depth': '2-3',
+            'slugify': slugify_unicode
+        }
     },
     'output_format': 'html',
 }
@@ -175,5 +180,5 @@ def archives_dates_to_json(dates):
 
 
 JINJA_FILTERS = {
-    "archives_dates_to_json": archives_dates_to_json
+    "archives_dates_to_json": archives_dates_to_json,
 }
