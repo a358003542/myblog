@@ -266,7 +266,7 @@ electron-builder的官方文档对于初次接触这块的来说我估计会非�
 
 一般配置信息在官方文档的 [这里](https://www.electron.build/configuration/configuration) ，win这个字段下面的配置信息在官方文档的 [这里](https://www.electron.build/configuration/win) ，nsis这个字段下面的配置信息在官方文档的 [这里](https://www.electron.build/configuration/nsis) 。
 
-首先说明一下上面配置的win字段是可以省略的，这里写出来是为了清晰地表明electron-builder在windows平台下默认输出目标nsis，然后对应的下面的nsis的一些配置我们可以具体定制安装包的一些行为，关于nsis这个软件读者可以参看我写的 [这篇文章]({filename}./用nsis制作安装程序.md)。 
+首先说明一下上面配置的win字段是可以省略的，这里写出来是为了清晰地表明electron-builder在windows平台下默认输出目标nsis，然后对应的下面的nsis的一些配置我们可以具体定制安装包的一些行为。 
 
 比如win下面有个字段 `icon` ，其默认值是 `build/icon.ico` ，所以我们把icon.ico这个图标文件放入resources文件夹下即可。
 
