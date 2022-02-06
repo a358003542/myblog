@@ -1,3 +1,6 @@
+Slug: python-pypi
+Date: 20191018
+
 [TOC]
 ### 前言
 
