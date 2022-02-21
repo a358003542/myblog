@@ -5,32 +5,32 @@ Date: 20190405
 [TOC]
 
 
+
+
 ## Beginning
-
-一开始先介绍下Djanog项目的基本文件夹结构，还有一些基本的命令操作和一些基本的常识性东西。
-
-首先是新建一个项目：
+### 安装django
+django是一个python模块，所以首先请确认自己配置好了python环境，最好是python虚拟环境，这一块我就不赘述了。
 
 ### 新建项目
+通过以下命令新建一个django项目
+
 ```
 django-admin startproject project-name
 ```
+不过一般这个时候我们已经把项目文件夹和python环境配置好了，所以这个时候用如下命令就在当前文件夹创建个人认为会更好一些：
 
-这个命令将创建一个文件夹，文件夹的名字就是这里设置的project-name，然后文件夹里面有一个manage.py文件，这个文件的主要作用就是挂载django的配置（一般是settings.py这个文件，当然你也可以修改为其他比如dev_settings.py文件）。
+```
+django-admin startproject project-name .
+```
 
-然后还有一个文件夹，里面有settings.py 、 urls.py 和 wsgi.py 文件。
+你会看到在当前文件夹下面多了一个 `manage.py` 文件。然后多了一个你项目名字的文件夹，里面有：
 
-settings.py 控制django的全部配置管理；
+- settings.py 这是配置文件
+- urls.py 这是URL声明
+- wsgi.py 这是WSGI入口
+- asgi.py 这个以前没有，我简单了解了一下，是从django3开始加入进来了，提供了ASGI入口。如果读者熟悉python的asyncio模块的话，那么这里简单说明一下就是django从version3开始支持异步了读者大概就明白了，更多细节后面再讨论。
 
-urls.py 控制django的路径分发主入口，这个在配置中可以修改的。
-
-wsgi.py 是你用apache或者uwsgi挂载的时候的控制入口。
-
-
-这样最简单的初始项目就是可以运行的了：
-
-
-### 开启服务器
+### 运行项目
 
 ```
 python manage.py runserver localhost:8080
@@ -38,9 +38,9 @@ python manage.py runserver localhost:8080
 
 后面控制服务器监听的localhost或者外网0.0.0.0，然后就是端口号。
 
+默认项目采用的是sqlite数据库，暂时先这么用着。
 
-
-### 新建一个app
+### 新建一个应用
 
 ```
 python manage.py startapp app_name
@@ -48,127 +48,92 @@ python manage.py startapp app_name
 
 这里顺便说一下，有一些项目你可能找不到 manager.py 这个文件了，其实这个文件就是一个便捷入口罢了，所有的命令一样都可以通过 django-admin 命令来运行的。
 
+新建的应用里面有：
 
+- migrations 和数据库迁移相关
+- admin.py admin页面相关
+- apps.py 应用的配置
+- models.py MVC框架模式的模型层代码
+- tests.py 测试代码
+- views.py MVC框架模式的视图层代码
 
-### 数据库操作
+上面的MVC框架模式指的是MVC应用程序会分成三个组件：模型、视图和控制器。这种设计理念最早是源于桌面应用程序，而后为各个Web应用程序所继承。
 
-定义模型之后，你需要运行:
+### 总览
+如果读者熟悉flask框架或者其他Web应用框架，那么对django具体做了一些什么事情是不会感到陌生的，而这里继续往下面讨论的话，对python的Web应用框架该做一些什么事情进行一些总览的讨论是很有裨益的。
 
-```
-python manage.py makemigrations app_name
-```
+HTTP请求包到了你的服务器，一般会有一个nginx或者apache的Web服务器，其会分析你的HTTP请求包里面的URL，具体到Web服务器这边了主要是分析URL里面的path参数，然后根据path参数来决定不同的行为。比如说很多静态图片HTTP请求一边是不会到django那边去的，这些静态内容的URL请求会直接由nginx或者apache来返回HTTP响应包。
 
-这个过程就是创建每个app下的migrations文件夹下面的一些迁移python脚本文件，有的时候某些情况你可能需要手工修改这些迁移文件。
+还有一部分URL里面的path在Web服务器那边是定义为由某个WSGI服务接管的，对于这些URL的HTTP请求，Web服务器只是起到代理性质，将该请求传递给WSGI服务即可，这里所说的WSGI服务就是django提供的。这部分URL又会分成很多不同的类型，在代码上的表现就是通过编写urls.py这个文件来实现URL的进一步分发，分发过来的HTTP请求包会继续往下面传递，这里HTTP请求包当然早就不是原生的文本格式了，而是方便程序员开发应用程序进行了很多友好的封装。分发过去的HTTP请求包会继续分发到视图层也就是views.py这个文件里面的某个视图函数上，具体HTTP响应包的内容就是由这个视图函数决定。
 
-```
-python manage.py migrate
-```
-这个命令就是实际执行那些迁移python脚本。
-
-
-
-
-### 交互式环境
-
-进入python交互环境，这个和纯python交互环境的区别就是里面可以直接使用django里面的一些东西了，比如你定义的模型对象就可以直接使用了。这个对你开发进行测试工作非常有用！
-
-```
-python manage.py shell
-```
-
-
-或者进入sql实现的交互环境:
-
-```
-python manage.py dbshell
-```
-
-
-
-### 创建超级用户
-最开始创建的项目就把admin url挂上去了，你可以去 \verb+/admin+ 这个url下看一下，但要登录除了做一下上面的数据库表格创建工作外，还需要创建一个超级用户用于登录。
-
-```
-python manage.py createsuperuser
-```
-
-
-
-
-## apps.py
-
-通过快捷命令创建的app模块是没有这个文件的，但是我看到某些例子里面其有这个文件，后来了解到这个文件是有特殊含义的：这是django项目用来存放app 一些相关配置信息的地方。
-
-一个基本的例子如下：
-
-```python
-from django.apps import AppConfig
-
-class RockNRollConfig(AppConfig):
-    name = 'rock_n_roll'
-    verbose_name = "Rock ’n’ roll"
-```
-
-
-
-其中name定义了本app的名字和完整名字，然后你需要在本app的 `__init__.py` 文件下加入：
-
-```
-default_app_config = 'rock_n_roll.apps.RockNRollConfig'
-```
-
-来引入这个配置文件。
-
-有什么用？well，最简单的用处就是本app实际在 `INSTALLED_APPS ` 哪里不是默认的文件夹名字了，而是你这里定义的名字。
-
-另外一个高级用法就是定制 `ready` 方法，来初始化本app的一些信号设置。	
+基本上这就是最简单的WSGI应用的工作流程了，至于网页内容的模板引擎生成，后台数据处理上的ORM模型设计等那就是后续扩展内容了。所以下面先着重讨论url分发和视图层这两块内容，然后就其他扩展内容进行讨论。
 
 
 
 ## url分发
+django的项目模板生成功能已经创建了一个 `urls.py` 文件，django是希望程序员们将django项目的所有应用的url分发工作都几种放在这里管理，那我们就顺势而为吧。
 
-web框架的一个核心功能就是完成url分发工作，我们先来看下django的这块内容。
-
-基本过程是在你的 project 的 `urls.py` 那里定义好整个项目的url分发规则。默认的内容如下:
+其默认的内容如下:
 
 ```python
-from django.urls import path
 from django.contrib import admin
+from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 ```
 
-读者有兴趣可以先看下那个admin页，在 `/admin` 那边。请确认已经执行前面的数据库操作 `makemigrations` 和 `migrate` 了，然后已经创建超级用户了 `createsuperuser` 。这样你就可以看到django默认自动创建的admin支持页面了。
+【读者如果暂时还不想折腾数据库那块内容那么可以先跳过本小段 。】读者有兴趣可以先看下那个admin页，在 `/admin` 那边。请确认已经执行前面的数据库操作 `makemigrations` 和 `migrate` 了，然后已经创建超级用户了 `createsuperuser` 。这样你就可以看到django默认自动创建的admin支持页面了。
 
-然后接下来就是类似这样的在这里插入你自己的 app的 各个 urls定义。一般如下简单写上即可:
+下面我们要实现Web应用程序的HelloWorld，也就是根URL在网页上显示文本内容HelloWorld。
 
-```python
-from django.urls import include, path
-    ....
-    path('app_name/', include('app_name.urls')),
-    ....
+读者请看下面代码：
+
+```
+from urllib.parse import urlsplit
+url = 'https://docs.djangoproject.com/zh-hans/4.0/ref/urls/#django.urls.path'
+urlsplit(url)
+SplitResult(scheme='https', netloc='docs.djangoproject.com', path='/zh-hans/4.0/ref/urls/', query='', fragment='django.urls.path')
 ```
 
-在确定没有特殊url分发需求的情况下，都推荐如上使用django官方教程推荐的这种url分发写法。
+一般我们说URL里面的path就是指的那部分，所以根URL的path为空字符串。
 
-在某个app下的 `urls.py` 将进一步定义url分发规则:
+
+```python
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('app_test.urls')),
+]
+```
+然后在 app_test 应用下新增 `urls.py` 文件，内容如下：
 
 ```python
 from django.urls import path
-
-from . import views
+from .views import index
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', index, name='index'),
 ]
 ```
 
+视图函数index内容如下：
+
+```
+from django.http import HttpResponse
 
 
-上面的讨论是根据django的官方教程来的，应该是推荐的写法风格。
+def index(request):
+    return HttpResponse('HelloWorld')
+```
 
+解释：
+- path的用法是 `path(route, view, kwargs=None, name=None)` 意思是那个path分发给那个视图函数，这个path分发的名字叫什么。
+- include 总django项目的`urls.py` 是不方便引入各个视图函数的，通过include可以将各个子应用的url分发模式给引入进来。django引入include的意思是path分发之后截断，然后剩余的path字符串再分发给子应用的urls.py的url分发机制。
+- 视图函数不是这里的讨论重点，简单了解下即可，我们知道HTTP响应也是有规定格式的，django提供了便捷的 `HttpResponse` 类来封装出HTTP响应信息。更多信息请参见下一章关于视图层的讨论。
 
 
 ### url上带参数
@@ -232,7 +197,10 @@ reverse('add',args=(1,2))
 
 
 
-## 请求和响应
+
+
+## 视图层
+视图层的代码是放在views.py这个文件里面的。
 
 ### request
 
@@ -299,6 +267,36 @@ url(r'^snippets/(?P<pk>[0-9]+)/$', views.SnippetDetail.as_view()),
 ```
 
 这里正则表达式 `(?P<pk>[0-9]+)` 的意思是收集某一串数字，这一串数字被命名为 `pk` 。
+
+
+
+
+## apps.py
+这是django项目用来存放app 一些相关配置信息的地方。
+
+一个基本的例子如下：
+
+```python
+from django.apps import AppConfig
+
+class RockNRollConfig(AppConfig):
+    name = 'rock_n_roll'
+    verbose_name = "Rock ’n’ roll"
+```
+
+
+
+其中name定义了本app的名字和完整名字，然后你需要在本app的 `__init__.py` 文件下加入：
+
+```
+default_app_config = 'rock_n_roll.apps.RockNRollConfig'
+```
+
+来引入这个配置文件。
+
+有什么用？well，最简单的用处就是本app实际在 `INSTALLED_APPS ` 哪里不是默认的文件夹名字了，而是你这里定义的名字。
+
+另外一个高级用法就是定制 `ready` 方法，来初始化本app的一些信号设置。	
 
 
 
@@ -993,13 +991,11 @@ GenericAPIView 继承自 django restframework 的 APIView 类，其提供的一�
 
 
 
-## 日志管理
+## 日志
 
 django使用python的logging模块来作为的自己的日志系统，所以django项目日志管理的深入学习离不开对于logging模块的深入学习。
 
-## logging模块中级教程
-
-logging模块的中级使用需要了解如下几个词汇：loggers, handlers, filters, and formatters。
+首先需要了解如下几个词汇：loggers, handlers, filters, and formatters。
 
 ### loggers 
 
@@ -1656,6 +1652,49 @@ url的第一个字段我喜欢使用django的app的名字，然后接下来的�
 
 
 ## 其他技巧
+
+### 数据库操作
+
+定义模型之后，你需要运行:
+
+```
+python manage.py makemigrations app_name
+```
+
+这个过程就是创建每个app下的migrations文件夹下面的一些迁移python脚本文件，有的时候某些情况你可能需要手工修改这些迁移文件。
+
+```
+python manage.py migrate
+```
+这个命令就是实际执行那些迁移python脚本。
+
+
+
+
+### 交互式环境
+
+进入python交互环境，这个和纯python交互环境的区别就是里面可以直接使用django里面的一些东西了，比如你定义的模型对象就可以直接使用了。这个对你开发进行测试工作非常有用！
+
+```
+python manage.py shell
+```
+
+
+或者进入sql实现的交互环境:
+
+```
+python manage.py dbshell
+```
+
+
+
+### 创建超级用户
+最开始创建的项目就把admin url挂上去了，你可以去 \verb+/admin+ 这个url下看一下，但要登录除了做一下上面的数据库表格创建工作外，还需要创建一个超级用户用于登录。
+
+```
+python manage.py createsuperuser
+```
+
 
 ### 模型python2兼容性
 
