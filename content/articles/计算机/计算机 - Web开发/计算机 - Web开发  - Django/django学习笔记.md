@@ -84,8 +84,6 @@ urlpatterns = [
 ]
 ```
 
-【读者如果暂时还不想折腾数据库那块内容那么可以先跳过本小段 。】读者有兴趣可以先看下那个admin页，在 `/admin` 那边。请确认已经执行前面的数据库操作 `makemigrations` 和 `migrate` 了，然后已经创建超级用户了 `createsuperuser` 。这样你就可以看到django默认自动创建的admin支持页面了。
-
 下面我们要实现Web应用程序的HelloWorld，也就是根URL在网页上显示文本内容HelloWorld。
 
 读者请看下面代码：
@@ -132,283 +130,89 @@ def index(request):
 
 解释：
 - path的用法是 `path(route, view, kwargs=None, name=None)` 意思是那个path分发给那个视图函数，这个path分发的名字叫什么。
-- include 总django项目的`urls.py` 是不方便引入各个视图函数的，通过include可以将各个子应用的url分发模式给引入进来。django引入include的意思是path分发之后截断，然后剩余的path字符串再分发给子应用的urls.py的url分发机制。
+- include 总django项目的`urls.py` 是不方便引入各个视图函数的，通过include可以将各个子应用的url分发模式给引入进来。django引入include的意思是path分发之后截断，然后剩余的path字符串再分发给子应用的urls.py里面定义的url分发机制。
 - 视图函数不是这里的讨论重点，简单了解下即可，我们知道HTTP响应也是有规定格式的，django提供了便捷的 `HttpResponse` 类来封装出HTTP响应信息。更多信息请参见下一章关于视图层的讨论。
 
 
-### url上带参数
-
-```python
-from django.urls import re_path
-
-from . import views
-
-urlpatterns = [
-    re_path(r'^add/([\d]+)/([\d]+)$', views.add, name='add'),
-]
-```
-
-这里参数将逐个传递个视图函数，唯一值得一提的是django的视图函数默认第一个函数是传递进去的 `request` 参量。在 `views.py` 里面的内容如下:
-
-```python
-from django.http import HttpResponse
-
-def add(request, a, b):
-    res = int(a) + int(b)
-    return HttpResponse(str(res))
-```
-
-上面这种正则表达式的写法是老式的django的url写法，一般没有特别的需求的话，应该按照django官方教程，采用下面的推荐写法：
-
-```python
-from django.urls import path
-
-from . import views
-
-urlpatterns = [
-    path('add/<int:a>/<int:b>', views.add, name='add'),
-]
-```
-
-
-
-
-
-### url定义name
-
-`name` 这个参量大体类似于flask的 `endpoint` 的概念，然后django还有的 `reverse` 函数，其大体类似于flask的 `url_for` 的概念。
-
-比如上面视图函数的 add 对应的url我们可以如下获得:
-
-```
-from django.core.urlresolvers import reverse
-reverse('add',args=(1,2))
-```
-
-然后在模板中有:
-
-```
-<a href="{% url 'add' 1 2 %}">link</a>
-```
-
-### 获取full-url
-
-上面提到的reverse函数返回的url字符串还不是完整的url，而只是相对url。如果我们要获取全站的完整url则可以使用 `request.build_absolute_uri(location)` ，如果不指定location则默认是当前的url。
-
-
-
-
-
-## 视图层
-视图层的代码是放在views.py这个文件里面的。
-
-### request
-
-是的，我们的APIView的一些特殊含义的方法，都会接收一个 request对象，这个对象有：
-
-- query_params 获得GET传过来的参数
-- data 获得POST PUT PATCH 传过来的参数，这还没完，传过来的文件，表单都支持。
-- user 如果请求经过认证了会返回相应的用户记录，你编写auth类的时候会知道的，如果没有认证，那么返回 `AnonymousUser`
-
-
-
-### Response
-
-也就是一些特殊含义的方法的返回对象，其第一个参数是data，字典值，会自动封装成为json友好的格式。实际上我们经常看到的就是这个套路：
-
-```
-return Response(serializer.data)
-```
-
-然后 serializer 有个 `is_valid` 方法，用来序列化类输出前的预热。这两点在后面序列化的讨论中会涉及。其他一些我们看一下吧：
-
-```
-Response(data, status=None, template_name=None, headers=None, content_type=None)
-```
-
-headers http协议响应头，status http状态码等等。
-
-整个过程套路，很多高级视图的套路都类似于下面这个例子，多看几遍吧。
-
-```python
-class SnippetDetail(APIView):
-    """
-    Retrieve, update or delete a snippet instance.
-    """
-    def get_object(self, pk):
-        try:
-            return Snippet.objects.get(pk=pk)
-        except Snippet.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        snippet.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-```
-
-urls.py那边加上的是:
-
-```
-url(r'^snippets/(?P<pk>[0-9]+)/$', views.SnippetDetail.as_view()),
-```
-
-这里正则表达式 `(?P<pk>[0-9]+)` 的意思是收集某一串数字，这一串数字被命名为 `pk` 。
-
-
-
-
-## apps.py
-这是django项目用来存放app 一些相关配置信息的地方。
-
-一个基本的例子如下：
-
-```python
-from django.apps import AppConfig
-
-class RockNRollConfig(AppConfig):
-    name = 'rock_n_roll'
-    verbose_name = "Rock ’n’ roll"
-```
-
-
-
-其中name定义了本app的名字和完整名字，然后你需要在本app的 `__init__.py` 文件下加入：
-
-```
-default_app_config = 'rock_n_roll.apps.RockNRollConfig'
-```
-
-来引入这个配置文件。
-
-有什么用？well，最简单的用处就是本app实际在 `INSTALLED_APPS ` 哪里不是默认的文件夹名字了，而是你这里定义的名字。
+## 应用配置
+原则上django的应用和项目是可以分离的，安装是非常灵活的。 `INSTALLED_APPS` 的目的是查找目标应用的 `apps.py` 里面的 `AppConfig` 子类，然后根据这个对象来获得目标应用的一些配置信息。比如 `name` 就是具体该应用的指向地。
 
 另外一个高级用法就是定制 `ready` 方法，来初始化本app的一些信号设置。	
 
 
 
 
+## 模型层
+模型层的代码是放在models.py这个文件里面的，模型层本章内容会特别的多，初学者不可能一下就掌握的，慢慢摸索和学习。
 
-## 模型的定义和使用
-
-django的模板和sqlalchemy还是有很多地方类似的。
-
-### settings那边的配置
-
-- **INSTALLED\_APPS:** 你需要加上你新加入的 app 的名字，不加的话是不能通过 `makemigrations` 来管理数据库的。
-- **DATABASES:** 默认会创建一个sqlite3数据库，也能满足基本的需求了，如果你想要使用mysql等数据库，则参考样例修改这里的配置。比如连接mysql的样例是:
+### 数据库的配置
+数据库的配置主要是settings.py的 **DATABASES** 哪里。默认配置是：
 
 ```
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': "database_name",
-            'USER': "root",
-            'PASSWORD': "",
-            'HOST': "localhost", 
-            'PORT': "3306",
-            'OPTIONS': {
-                'charset': 'utf8'
-            }
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
 ```
 
-一般会加上 charset 是 utf8这个选项，当然mysql那边你也需要设置好字符编码。有的时候如下设置init_command 来设置字符编码可以让你获得更好的字符编码兼容性。
+前面随便用下sqlite问题不大，但既然到这里开始认真讨论模型层和数据库相关了，那么推荐使用更正式的postgresql或者mysql会更合适些。
 
+下载binaries版postgresql，然后运行：
 ```
-    'OPTIONS': {
-        'init_command': 'SET character_set_database=utf8 ,\
-        character_set_server=utf8,\
-        character_set_connection=utf8,\
-        collation_connection=utf8_unicode_ci',
-        'charset': 'utf8'}
+source/pgsql/bin/initdb -D ./pgdata -U postgres -W -E UTF8 -A scram-sha-256
 ```
 
-### 使用多个数据库
-
-有的时候你需要使用多个数据库，最常见的情况是某个单独的app使用另外一个数据库。
-
-首先你需要再加上另外一个数据库的定义：
-
+然后运行：
 ```
-    DATABASES = {
-        'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': "database_name",
-        'USER': "root",
-        'PASSWORD': "",
-        'HOST': "localhost",
-        'PORT': "3306",
-        'OPTIONS': {
-            'charset': 'utf8'
-            }
-        },
-        'youapp': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'youapp',
-            'USER': 'root',
-            'PASSWORD': '',
-            'HOST': '',
-            'PORT': '',
-            'OPTIONS': {'charset': 'utf8'}
-        },
+source/pgsql/bin/pg_ctl -D ./pgdata -l logfile start
+```
+
+启动postgresql server服务。然后双击pgadmin4.exe程序。
+
+利用pgadmin4新建一个用户 `django_test` ，添加密码，增加Can Login 和 Create database权限。
+
+然后利用pgadmin4新建一个 `django_test` 数据库，更改用户所有者为 `django_test` 。
+
+
+
+然后配置更改如下：
+```
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django_test',
+        'USER': 'django_test',
+        'PASSWORD': 'django_test',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
+}
 ```
 
-然后在你的app那边新建一个dbrouter文件，里面定义一个YourRouter类。
+**然后注意正确设置好配置的 TIME_ZONE ** 。
+
+然后注意设置好 **INSTALLED_APPS** ，里面有你所有的app的名字，没有加进去的应用是没有进入django的数据库迁移管理的。
+
+### 数据库迁移
+刚开始模型定义没有发生变动，则运行：
 
 ```
-DATABASE_ROUTERS = ['youapp.dbrouter.YourRouter']
+python manage.py migrate
 ```
-
-在这个类里面如下定义一些数据库选择行为：
-
-**NOTICE: 在这个app中定义的模型记得都要加上app_label这个meta属性。**
+应用数据库迁移操作即可。如果后面有应用模型定义发生了变动，则需要执行：
 
 ```
-class YourRouter(object):
-    def db_for_read(self, model, **hints):
-        if model._meta.app_label == 'youapp':
-            return 'youapp'
-        return None
+python manage.py makemigrations
 
-    def db_for_write(self, model, **hints):
-        if model._meta.app_label == 'youapp':
-            return 'youapp'
-        return None
-
-    def allow_relation(self, obj1, obj2, **hints):
-        if obj1._meta.app_label == 'youapp' or \
-            obj2._meta.app_label == 'youapp':
-            return True
-        return None
-
-    def allow_migrate(self, db, app_label, model_name=None, **hints):
-        if app_label == 'youapp':
-            return db == 'youapp'
-        return None
+python manage.py migrate
 ```
 
+### 定义模型
+本小节只是讨论django的ORM模型的定义语法细节，对SQL数据库相关知识不作讨论。
 
-
-## 定义模型
-
-好了，开始实际定义自己的模型了。首先基本语法如下:
-
+我们看到下面这个例子：
 ```python
 from django.db import models
 
@@ -417,9 +221,11 @@ class Question(models.Model):
     pub_date = models.DateTimeField('date published')
 ```
 
-这个熟悉sqlalchemy的对这段代码不会很陌生，下面进一步了解一些细节吧。
+现在请读者将这个模型添加到你的应用的models.py文件里面，然后将目标应用添加到 `INSTALLED_APPS` 里面。然后执行数据库迁移操作。然后请读者打开pgadmin然后继续下面的讨论。
 
-### 字段类型
+django所有的ORM模型都要继承自 `Model` 类，再看到Question这个类，我们可以看到新建了一个表格 `app_test_question` ，这个表格的名字后半部分就是根据这个类的名字来的。再继续看表格里面的信息。有主键id，有question_test字段，其实变长字符串类型，最大长度200。然后后面还有一个字段pub_date，其是timestamp字段，在postgresql那边，其会接受python的datetime对象，会进行一些额外的数据处理再填入SQL字段。
+
+#### 字段类型
 
 - **IntegerField:** 整型
 - **BigIntegerField:** 大整数
@@ -430,27 +236,7 @@ class Question(models.Model):
 - **DateField:** 对应python中的 `datetime.date` 对象。
 - **DateTimeField:** 对应python中的 `datetime.datetime` 对象。
 
-一个有用的基类:
-
-```python
-class BaseModel(models.Model):
-    class Meta:
-        abstract = True
-
-    updated_at= models.DateTimeField(auto_now=True)
-    created_at= models.DateTimeField(auto_now_add=True)
-```
-
-后面的模型都可以继承自该基类，基类是不会创建表格的，因为其Meta设置了 `abstract=True` 。DateTimeField加上 `auto_now=True` ，那么该模型每次 `save` 操作都会自动更新最新日期。 然后 `auto_now_add=True` 即该记录第一次创建时设置最新的日期。然后如果DateTimeField使用了 auto_now 或者 auto_now_add 这两个选项了就不要使用default选项了，还有就是自动插入的默认的时间是由 `django.utils.timezone.now()` 获得的。
-
-比如后面你想获得六个小时之前的所有记录那么可以如下查询：
-
-```
-    checktime = timezone.now() - timedelta(hours=6)
-    result = result.exclude(created_at__gt= checktime)
-```
-
-### 通用选项
+#### 字段可选参数
 
 字段声明控制中有一些通用可选项:
 
@@ -470,7 +256,39 @@ class BaseModel(models.Model):
 
 则 title字段和 pub\_date 字段都不能相同。也就是在某个日期内某个title只能有唯一值。可以看作一种 `unique_together` 的应用。
 
-### 数据库中的关系
+#### 元类数据
+
+```
+    ...
+    class Meta:
+        db_table = 'table_name'
+
+```
+
+- db_table 具体指定实际创建的table表格的名字。
+- abstract 将不会创建表格，该模型为抽象模型。
+
+#### 模型基类
+```python
+class BaseModel(models.Model):
+    class Meta:
+        abstract = True
+
+    updated_at= models.DateTimeField(auto_now=True)
+    created_at= models.DateTimeField(auto_now_add=True)
+```
+
+后面的模型都可以继承自该基类，基类是不会创建表格的，因为其Meta设置了 `abstract=True` 。DateTimeField加上 `auto_now=True` ，那么该模型每次 `save` 操作都会自动更新最新日期。 然后 `auto_now_add=True` 即该记录第一次创建时设置最新的日期。然后如果DateTimeField使用了 auto_now 或者 auto_now_add 这两个选项了就不要使用default选项了，还有就是自动插入的默认的时间是由 `django.utils.timezone.now()` 获得的。
+
+比如后面你想获得六个小时之前的所有记录那么可以如下查询：
+
+```
+    checktime = timezone.now() - timedelta(hours=6)
+    result = result.exclude(created_at__gt= checktime)
+```
+
+
+#### ORM关系
 
 **ForeignKey:** 外键引用，如果该字段的名字是user，那么实际存储在表格中的名字是user\_id，你可以通过 `db_column` 来实际控制该表格的名字。- 
 
@@ -496,7 +314,7 @@ OneToOneField 比较简单，就是一个记录只有一个对应的属性，通
 
 **ManyToManyField**
 
-ManyToManyField 读者请参阅我写的 [sqlalchemy模块](http://www.cdwanze.work/articles/python/sqlalchemy-module.html#orm_2) 一文， 那里写得比较详细。
+ManyToManyField 读者请参阅我写的 [sqlalchemy模块](https://a358003542.github.io/articles/sqlalchemy-module.html) 一文， 那里写得比较详细。
 
 
 
@@ -504,7 +322,7 @@ ManyToManyField 读者请参阅我写的 [sqlalchemy模块](http://www.cdwanze.w
 
 
 
-### 多字段组合唯一
+#### 多字段组合唯一
 
 参考了 [这个网页](https://stackoverflow.com/questions/28712848/composite-primary-key-in-django) ，具体就是在 `Meta`  那里定义 `unique_together` 属性。
 
@@ -521,24 +339,13 @@ ManyToManyField 读者请参阅我写的 [sqlalchemy模块](http://www.cdwanze.w
 
 
 
-## 定义模型中的元类数据
 
-```
-    ...
-    class Meta:
-        db_table = 'table_name'
 
-```
-
-- db_table 具体指定实际创建的table表格的名字。
-- abstract 将不会创建表格，该模型为抽象模型。
-- 
-
-## 模型的使用
+### 模型的使用
 
 模型的使用最核心的部分就是查询操作，至于修改记录，则具体查询获得目标记录了，修改属性然后save即可。
 
-### 新建记录
+#### 新建记录
 
 ```
 from people.models import Person
@@ -571,7 +378,7 @@ except Person.DoesNotExist:
 
 然后是如何理解 defaults 这样选项，defaults里面定义的属性不会参与get查询过程，其参与的是在没有找到记录的情况下，设置某些值。
 
-### 查询记录
+#### 查询记录
 
 首先说一下获取所有的记录：
 
@@ -596,7 +403,7 @@ result = Person.objects.filter(name="abc")
 
 
 
-### 排序
+#### 排序
 
 QuerySet对象可以进一步排序：
 
@@ -605,14 +412,14 @@ result = result.order_by('what')
 
 ```
 
-### reverse
+#### reverse
 
 ```
 result = result.reverse()
 
 ```
 
-### exclude
+#### exclude
 
 排除某些记录，下面是排除created_at这个字段值大于某个时间的值：
 
@@ -621,7 +428,7 @@ result = result.exclude(created_at__gt= checktime)
 
 ```
 
-### offset and limit
+#### offset and limit
 
 ```
 result = result[offset: offset+limit]
@@ -630,11 +437,11 @@ result = result[offset: offset+limit]
 
 
 
-### 删除某个记录
+#### 删除某个记录
 
 找到目标记录的instance，然后调用 `delete` 方法即可。
 
-### 确定某记录是否存在
+#### 确定某记录是否存在
 
 前面已经谈到了一些查询操作，而如果读者只是单纯的想确定某记录是否存在，那么使用 `exists` 方法是最快和最简便的。参考了 [这个网页](https://stackoverflow.com/questions/2690521/django-check-for-any-exists-for-a-query) 。
 
@@ -646,19 +453,115 @@ if Article.objects.filter(unique_id= unique_id).exists():
 
 ```
 
-### 关系的使用
-
-OnetoOne关系的使用非常简单， `a.b` 或者 `b.a` 都是可以的。
+#### 关系的使用
+manytoone关系请参看官方文档的 [这里](https://docs.djangoproject.com/zh-hans/4.0/topics/db/examples/many_to_one/)。
 
 ManytoOne关系也就是由 ForeignKey 定义的关系，如果是引用外键的那个对象，那么直接 `a.b` 即可，如果是反向onetomany那种，则最好你在定义的时候就定义好 `related_name` ，（参考了 [这个问题](https://stackoverflow.com/questions/19799955/django-get-the-set-of-objects-from-many-to-one-relationship) ）那么引用如下：
 
 ```
 b.related_name
-
 ```
 
-具体使用细节还是请查看文档的 [这里](https://docs.djangoproject.com/zh-hans/2.0/topics/db/examples/many_to_one/) 。
+OnetoOne关系的使用非常简单， `a.b` 或者 `b.a` 都是可以的。
 
+
+
+## 视图层
+视图层的代码是放在views.py这个文件里面的。因为本文会更加关注于Restful风格的后台API的编写，所以对于django视图层这块的讨论基本上略过了。
+
+
+## API设计
+本章节讨论的内容主要是基于HTTP协议的Restful API风格的编写原则。
+
+### URL
+目前url域名都推荐使用 api.what.com 这样的风格，然后关于API的版本，在URL上加上版本号，并不是一个很好的主意。在当前前后端分离的大背景下，这给前端和后端的代码都带来了一些额外的复杂度。
+
+版本号按照 [阮一峰的这篇文章](http://www.ruanyifeng.com/blog/2011/09/restful.html) ，推荐使用 Accept 字段：
+
+```
+Accept: vnd.example-com.foo+json; version=2.0
+```
+
+推荐的URL风格如下：
+
+```
+api.what.com/resource_name
+api.what.com/resource_name/<id>
+api.what.com/resource_name/<id>/resource_name2
+api.what.com/resource_name/<id>/resource_name2/<id>
+```
+上面的resource_name2的意思是SQL关系数据库中的关系，某个resource_name会关联多个resource_name2。
+
+### HTTP方法
+按照Restful 风格推荐就采用四种方法：GET, POST, PUT, DELETE。还有一个PATCH方法不太推荐使用。具体这四种方法的分工就是增删改查对应POST，DELETE，PUT，GET。
+
+
+### 返回内容
+payload都推荐采用json的单字典格式形式。
+
+我喜欢使用这种风格：
+
+1. 成功则直接返回各个结果：
+
+```
+{
+    'a':1
+}
+```
+
+有些人会说成功之后也应该加上code:200的代码，可是这是完全没有必要的，如果你需要获取数据，那么拿就是了，如果你怕数据不存在，那么加个针对目标数据的判断即可。加个code:200，但是目标数据字段还是不存在，程序不一样也会报错？
+
+2. 失败则必须带上code错误码和msg错误信息
+
+```
+{
+    'code': 10001,
+    'msg': 'your error msg'
+}
+```
+
+错误码软件系统内部应该有一个统一的规范，常见的错误类型有：
+
+- 资源没有找到
+- 找到多个资源
+- 未知错误
+- 输入缺少参数
+
+
+### 参数设计
+查询操作如果针对的是目标资源集合，有以下参数是推荐加上的：
+
+- limit 返回个数
+- offset 偏移值，可以通过它来实现分页效果
+- sort 或者sortby等，总之一个排序的参数
+- reverse 排序是否反转的参数
+
+### 选择合适的状态码响应
+状态码不建议弄得太复杂，必要的异常错误信息都推荐在payload的msg字段里面列出。下面列出几个必要的：
+
+- 200 正确执行 
+
+- 400 BAD REQUEST 请求参数有误
+- 401 未认证 用户未登陆未被识别
+- 403 被禁止的 用户无权限
+- 404 请求的URL不存在 
+- 405 请求的方法不被允许
+
+- 500 服务器内部错误 某些情况下需要这个状态码
+
+上面这些状态码是HTTP请求包都还没有进入到django视图函数的具体执行过程就应该返回，如果程序逻辑进入了视图函数并且已经封装好了json payload，哪怕这个json里面封装的是这样的错误信息：
+
+```
+{
+    'code': 10001,
+    'msg': 'your error msg'
+}
+```
+推荐状态码也应该是200。
+
+我对是否使用201 CREATED状态码是持保留意见的。
+
+## django rest framework
 
 
 
@@ -769,188 +672,9 @@ user =  self.context['request'].user
 
 
 
-## 模板基本概念
 
-模板基本的样子如下，下面有模板继承，block ，循环，过滤，之类的。熟悉jinja2模板的同学稍微看下大致是个什么意思就已经清楚了。
 
-```django
-{% extends "base_generic.html" %}
-{% block title %}{{ section.title }}{% endblock %}
-{% block content %}
-<h1>{{ section.title }}</h1>
-{% for story in story_list %}
-<h2>
-  <a href="{{ story.get_absolute_url }}">
-    {{ story.headline|upper }}
-  </a>
-</h2>
-<p>{{ story.tease|truncatewords:"100" }}</p>
-{% endfor %}
-{% endblock %}
 
-```
-
-### django如何查找模板的
-
-在django的settings.py哪里有：
-
-```
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-TEMPLATES=[
-{
-'BACKEND':'django.template.backends.django.DjangoTemplates',
-'DIRS':[
-os.path.join(PROJECT_DIR,'templates'),
-],
-```
-
-默认是在每个app下的templates文件里都会递归遍历查找的，这里DIRS加上了另外一个文件夹，也就是现在settings.py所在的那个文件夹下如果有templates文件夹也会去遍历的。
-
-
-
-模板文件最后都会合并的，所以就存在模板的覆盖机制了，为了避免无谓的覆盖，一般模板原则上推荐的结构是在templates下面，不管是那个app下面，都再新建一个目标app的名字，再新建模板文件。当然对于稍小的项目直接扔在templates下面问题不大。
-
-
-
-比如你想覆盖django自带的admin界面，就要在templates下面新建一个admin文件夹，具体什么模板文件，你要研究下django的源码了。
-
-
-
-
-
-
-
-### django的变量怎么传给javascript
-
-**NOTICE: 现在不推荐这种写法了，推荐走ajax通道传数据。**
-
-
-
-django的视图函数在render的时候通过context字典值，里面的各个字段的值将传给django的模板里的变量，这个我们是知道的了，那么django的变量怎么进而传递给javascript呢。本小节参考了 [这个网页](https://stackoverflow.com/questions/7165656/passing-objects-from-django-to-javascript-dom) 。
-
-首先要传递的字段建议如下json封装下：
-
-```
-from django.core.serializers.json import DjangoJSONEncoder
-{
-	what : json.dumps(data['content_images'], cls=DjangoJSONEncoder)
-}
-```
-
-然后在javascript那边：
-
-```
-var what = JSON.parse("{{ what | safe | escapejs }}")
-```
-
-注意 `safe` 和 `escapejs` 过滤器。
-
-
-
-## 扩展用户模型
-
-本小节主要参考了这篇 [不错的文章](https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html) 。一般扩展django自带的用户模型，最常见的就下面两种情况，实际上这两种情况你可能都会使用到。第一种是 User 模型 和 Profile 模型的分开，然后User用来存放登录相关信息，而Profile用来存放更多的用户资料信息，一般User 和 Profile 是 onetoone 关系，这个时候我们会考虑建立一个signals文件来保证没创建一个User就会跟着创建一个Profile：
-
-```python
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-from profiles.models import Profile
-
-from .models import User
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
-```
-
-然后你可能对django默认的auth机制，比如session cookies等不太满意，那么推荐你直接建立自己的 User 模型， 继承自 AbstractBaseUser ，我大概看了一下 AbstractBaseUser 的源码，其做的工作都是围绕着 password这个字段来的，而且只要你在settings里面定义好了:
-
-```
-AUTH_USER_MODEL = ...
-```
-
-就都是可以正常工作的。继承之后定义自己的字段这是不多用多说的，然后推荐进一步继承 `PermissionsMixin` 这个类。
-
-```
-class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_('email address'), unique=True)
-```
-
-`PermissionsMixin` 这个类定义了一些群组信息还有什么的。
-
-然后这三个字段属性有特殊含义，都是可以自己设置的：
-
-```
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
-```
-
-然后你需要写好 objects 这个 UserManager ，其继承自 `BaseUserManager` ，你可以做其他一些定制，这个是个什么东西？这个就是之前我们看到的 `Model.objects.what` 之类的这种用法。在这里你需要根据自己的情况定义好： 
-
-- create_user
-- create_superuser
-
-这两个方法即可。就用这两个方法来控制用户的创建行为。其中 `create_superuser` 主要负责把 
-
-- is_superuser
-- is_staff 
-
-设为True。
-
-
-
-## 基于类的视图
-
-首先我们从django哪里初步了解了下基于类的视图的概念，就是如下代码：
-
-```python
-from django.http import HttpResponse
-
-def my_view(request):
-    if request.method == 'GET':
-        # <view logic>
-        return HttpResponse('result')
-```
-
-变为更简洁的：
-
-```python
-from django.http import HttpResponse
-from django.views import View
-
-class MyView(View):
-    def get(self, request):
-        # <view logic>
-        return HttpResponse('result')
-```
-
-然后依赖类的继承，引入Minxin类，可以让我们在http的很多restful风格请求上，总是一次又一次出现的那些套路，实现代码复用。其基本知识就是python的类的继承，我们可以直接从django restframework 这个模块直接用手来见识这种DRY理念的实现。
-
-### APIView
-
-django restframework的 APIView 继承自 django 的 View，然后针对restful api 进行了很多优化，在某些情况下可能你编写的视图，就继承自APIView就是合适的，后面介绍的通用视图和其他高级视图等等，都是在某些情况下特别合适和让你少写代码，好用就用，仅此而已。如果不合适，那么自己定义 get post put 等等方法也是很方便的。
-
-
-
-### 视图再升级
-
-在某些情况下使用 APIView 类和 Mixin 可能是最合适不过的，下面谈谈django restframework 提供的高级通用视图类。这些类都是继承自 `GenericAPIView` ，他们都有一个特点，那就是有点类似于 Serializer -> ModelSerializer 的升级过程，如果你的视图类方法主要操作对象是基于数据库Model的各个操作，那么推荐视图类继承自 `GenericAPIView` 。
-
-### GenericAPIView
-
-GenericAPIView 继承自 django restframework 的 APIView 类，其提供的一个很重要的特性是 `queryset` ，你设定 queryset属性或者实现 `get_queryset` 方法，该视图类的很多方法都是围绕着`queryset` 来展开的。
-
-具体 CRUD 数据操作有对应的 Minxin类，然后和GenericAPIView 组合出了很多高级的视图类。
-
-一个好的建议对于这块，看源码，源码都很简单的，看懂了，发现符合自己的需要那就使用它，让自己少写点代码。如果有额外的定制需求，那就重写对应的某个方法就是了。
 
 
 
@@ -1082,317 +806,7 @@ LOGGING = {
 
 
 
-## 自定义命令
 
-在目标app下面新建一个 `management` 文件夹，然后新建一个 `commands`  文件夹，注意这两个文件夹都要带上 `__init__.py` 文件。
-
-然后commands文件夹里面就可以定义一些python脚本了，这些脚本成为命令可以直接如下调用：
-
-```
-python manage.py command_name
-```
-
-你可以通过：
-
-```
-python manage.py help
-```
-
-来查看目前已经有的命令列表。
-
-一个基本的命令模块如下所示：
-
-```python
-from django.core.management.base import BaseCommand, CommandError
-from polls.models import Question as Poll
-
-class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
-
-    def add_arguments(self, parser):
-        parser.add_argument('poll_id', nargs='+', type=int)
-
-    def handle(self, *args, **options):
-        for poll_id in options['poll_id']:
-            try:
-                poll = Poll.objects.get(pk=poll_id)
-            except Poll.DoesNotExist:
-                raise CommandError('Poll "%s" does not exist' % poll_id)
-
-            poll.opened = False
-            poll.save()
-
-            self.stdout.write(self.style.SUCCESS('Successfully closed poll "%s"' % poll_id))
-```
-
-
-
-## django和celery
-
-django-crontab这个模块我试过的，还是很便捷的，不过其还是基于系统的crontab，而如果我们将django和celery组合起来，celery灵活的消息分发机制，无疑将给未来开发带来更多的可能性。celery的官方文档在 [这里](http://docs.celeryproject.org/en/latest/index.html) ，本文主要讲一下celery的基本概念和django的集成问题，更多celery的知识请参阅官方文档。
-
-
-
-### celery的核心概念
-
-- broker  任务队列服务提供者，celery推荐使用redis或者rabbitmq作为broker。
-- task 具体执行的任务，其实就是定义的一些函数。
-- backend 用来存储任务之后的输出结果
-- worker celery的启动就是开启一个worker。
-
-
-
-### django内文件安排
-
-本小节参考了 [这篇文章](https://medium.com/@yehandjoe/celery-4-periodic-task-in-django-9f6b5a8c21c7) 和 [这篇文章](http://geek.csdn.net/news/detail/128791) 。需要提醒读者的是，django和celery集成现在并不需要额外安装什么插件了，而且下面讲的配置实际上就是一个单独的celery app大部分都是类似的，只是多了一些细节上的处理和优化。
-
-#### celeryconfig.py 
-
-首先推荐在你的django app `settings.py` 旁新建个 `celeryconfig.py` 文件，有的教程让设置这个配置文件名字为 `celery.py` ，这样很不好，文件名和某个模块名字重复有时会出问题的。里面的内容如下：
-
-```python
-import os
-from celery import Celery
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_name.settings')
-
-app = Celery('project_name')
-app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
-
-
-@app.task(bind=True)
-def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
-```
-
-这个下面新建的任务不过是方便测试罢了，然后上面几行配置基本上死的。最值得讲的就是这两行：
-
-```
-app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
-```
-
-第一行是从django的配置对象中读取配置，特别注意的就是那个 `namespace='CELERY'` ，这样只有 `CELERY_` 开头的配置才会读取，而且对应原celery配置的关系是：
-
-```
-CELERY_BROKER_URL  -> BROKER_URL
-```
-
-我那次就是 `CELERY_BEAT_SCHEDULE` 写成了 `CELERYBEAT_SCHEDULE` 然后老实发现周期性程序启动不起来。
-
-第二行也是一个优化细节，从函数名字也可以看到，就是自动发现任务。在你的django的其他app里面新建一个 `tasks.py` ，celery会自动发现你定义的任务。
-
-
-
-#### `__init__.py` 
-
-还是你的django项目的project `settings.py` 那个文件夹里面，`__init__.py` 推荐写上这几行内容：
-
-```
-from .celeryconfig import app as celery_app
-
-__all__ = ('celery_app',)
-```
-
-#### settings.py
-
-具体celery的一些配置就统一写在 `settings.py` 文件里面，上面也提到了，都要 `CELERY_` 开头，大体如下所示：
-
-```
-CELERY_BROKER_URL = 'redis://localhost:6379'
-#CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-#CELERY_ACCEPT_CONTENT = ['application/json']
-#CELERY_RESULT_SERIALIZER = 'json'
-#CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Shanghai'
-# schedules
-from celery.schedules import crontab
-CELERY_BEAT_SCHEDULE = {
-    'crawl_juhe_every_one_hour': {
-         'task': 'wxarticles.tasks.crawl_juhe',
-         'schedule': crontab(minute=0, hour='*/3'),
-    },
-    'every_miniute_for_test': {
-        'task': 'wxarticles.tasks.test_celery',
-        'schedule': crontab(),
-    },
-}
-
-
-```
-
-#### 定义任务
-
-好了，定义任务，实际上就是定义一个函数，比如下面这个简单的打印函数来确认celery周期程序是工作着的：
-
-```
-from celery import shared_task
-
-@shared_task()
-def test_celery():
-    print('celery is working.')
-```
-
-celery的crontab功能很强大，比如上面的 `crontab()` 就是每分钟执行一次。具体请参看 [官方文档](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html) 之。
-
-#### 启动任务
-
-和celery其他操作都是一样的，就是启动worker：
-
-```
-celery -A project_name worker -l info
-```
-
-`-A` 选项跟着 celery app的名字，在这里也就是django项目的名字。 `-l` 选项设置日志打印级别。
-
-你还可以加上 `-B` 来同时启动周期性任务。
-
-或者另外开个命令：
-
-```
-celery -A project_name beat -l info
-```
-
-
-
-
-
-------
-
-其他制作脚本啊，制作后台程序，制作服务啊，使用supervisor啊，实际上和celery关系已经不大了，可以不在这里说了。
-
-
-
-#### 手工启动一次任务
-
-参考了 [这个网页](https://stackoverflow.com/questions/12900023/how-can-i-run-a-celery-periodic-task-from-the-shell-manually) 。
-
-```
-$ python manage.py shell
->>> from myapp.tasks import my_task
->>> eager_result = my_task.apply()
-
-```
-
-
-
-## 翻译
-
-django的翻译其实已经很便捷了，因为我关注于后台api的编写，所以实际上很多教程说的：
-
-```
-TEMPLATES = [
-    {
-        ...
-        'OPTIONS': {
-            'context_processors': [
-                ...
-                'django.template.context_processors.i18n',
-            ],
-        },
-    },
-]
-```
-
-这个配置只和模板输出的翻译有关，有需要再加上。
-
-然后MIDDLESWARES 哪里要加上：
-
-```
-    'django.middleware.locale.LocaleMiddleware',
-```
-
-然后就是这些配置：
-
-```
-LANGUAGE_CODE = 'zh-Hans'
-
-USE_I18N = True
-```
-
-设置好你的语言代码，这是没有问题的。
-
-我看了一下 django restframework 的翻译管理相关，发现大体这样配置就可以了，很多教程说的设置 `LOCALE_PATHS` 变量觉得没必要，默认的每个app下面的locale文件夹够用了。
-
-然后就是目标py文件下的 字符串 如下装饰之：
-
-```
-from django.utils.translation import ugettext_lazy as _
-...
-
-        if username is None:
-            raise TypeError(_('Users must have a username.'))
-```
-
-Model字段定义的名字可以加上，verbose_name 可以加上，然后异常信息可以加上等等。
-
-加完了之后运行：
-
-```
-django-admin makemessages -l zh_Hans 
-```
-
-app下面没有locale文件夹的创建个就是了，某些文件你不想管，比如 manage.py ，那么加上 `--ignore` 选项即可。
-
-windows下不是很方便，推荐在linux服务器下创建了目标 django.po 文件，然后再修改文件即可。其中po文件的头部有些东西，估计：
-
-```
-"Language: zh-Hans\n"
-```
-
-已经是必填的，其他有时间也填上吧。
-
-然后运行:
-
-```
-django-admin compilemessages 
-```
-
-如果不出意外的，翻译就已经生效了。
-
-
-
-
-
-## 创建可复用的app
-
-创建可复用的app会极大的降低你的目标django项目的复杂度，如果可能，将你的app打造成可复用的风格总是首选。
-
-### 制作django-what的pypi包
-
-有关pypi包的制作就不赘述了，下面主要在官方文档 [这里](https://docs.djangoproject.com/en/1.11/intro/reusable-apps/) 的基础上讨论一些问题。
-
-### 测试问题
-
-我试着如下安装测试过程：
-
-```
-python setup.py sdist
-pip install dist/what.tar.gz
-```
-
-然后安装官方文档，在INSTALL_APPS那里设置好。app是可以正常使用的。但在安装测试过程中，这实在有点繁琐了。推荐还是将整个app文件夹复制到你的测试webapp那边去，然后一边修改一边看。测试好了再把内容同步到pypi安装包那边去。
-
-### migrations问题
-
-官方文档之所以选择制作sdist和用pip install tar包这种风格是有原因的，经测试egg包在访问上很成问题，只有用pip安装这种方法，在site-packages那边你安装才是文件夹风格而不是那种egg文件。这样你等下执行：
-
-```
-python manage.py makemigrations app_name
-```
-
-才会成功。
-
-而且实际生成的迁移文件就放在site-packages那里的目标文件夹下的。所以你制作pypi包的时候不要把migrations文件夹里面的其他迁移文件包含进去了，要包含就包含 `__init__.py` 文件即可。
-
-当然就算你不是制作django的目标pypi包，其他django项目在 `.gitignore` 文件上加上这一行总是不错的：
-
-```
-*/migrations/*
-```
-
-PS: 我知道stackoverflow那边都认为应该加上，还有人专门写了长篇大论认为应该加上。我确定的只有一点：早期测试开发过程，所有的migrations文件夹里面都只有 `__init__.py` 这个空白文件，保持代码整洁，在测试开发阶段不花精力在这上面，这是没有争议的。
 
 
 
@@ -1576,109 +990,20 @@ server {
 }
 ```
 
-
-
-## API设计
-
-首先讲一下这里讨论的API设计和网络上流行的Restful风格的API设计都只是一般性原则，并不是强制性的要求。然后API还分为内部使用和对外的API，如果对外的API那么接口最好遵循无惊讶原则，遵循大家都通用的一些写法风格，但如果是内部使用的API，那么很多情况下，还要考虑自己内部使用的便捷性要求。
-
-### url设计
-
-目前url域名都推荐使用 api.what.com 这样的风格，然后关于API的版本，在URL上加上版本号，并不是一个很好的主意。在当前前后端分离的大背景下，这给前端和后端的代码都带来了一些额外的复杂度。
-
-版本号按照 [阮一峰的这篇文章](http://www.ruanyifeng.com/blog/2011/09/restful.html) ，推荐使用 Accept 字段：
+## 备用
+### 创建超级用户
+最开始创建的项目就把admin url挂上去了，你可以去 `/admin` 这个url下看一下，要想登录的需要如下创建一个超级用户：
 
 ```
-Accept: vnd.example-com.foo+json; version=2.0
+python manage.py createsuperuser
 ```
-
-url的第一个字段我喜欢使用django的app的名字，然后接下来的第二个字段推荐按照 Restful 风格写上目标资源的名字，并不一定要强制写上名词的复数形式，不过如果有两个url，一个是操纵目标资源集，一个是定向操纵某个目标资源，那么尾缀写上s区分是推荐的风格。
-
-然后针对某个资源或者目标资源集的一些额外的动作，这里所谓的额外的动作是指除了常规的Restful风格的那些增删查改动作之外的额外的动作需求，在上面讨论的Restful风格url基础上加上第三个字段，第三个字段是额外动作的名字是个不错的风格。
-
-### 方法设计
-
-方法通用的 GET POST ，GET用于查询获取资源信息，POST用于创建或修改信息这是没有疑问的。
-
-虽然Restful风格还推荐的DELETE，PATCH等方法，但似乎大家实际编写都只是使用GET和POST方法。
-
-### 参数设计
-
-查询操作如果针对的是目标资源集合，有以下参数是推荐加上的：
-
-- limit 返回个数
-- offset 偏移值，可以通过它来实现分页效果
-- sort 或者sortby等，总之一个排序的参数
-- reverse 排序是否反转的参数
-
-### 状态码设计
-
-具体请参看HTTP的各个状态码。
-
-### 返回内容结构设计
-
-我喜欢使用这种风格：
-
-1. 成功则直接返回各个结果：
-
-```
-{
-    'a':1
-}
-```
-
-有些人会说成功之后也应该加上code:200的代码，可是这是完全没有必要的，如果你需要获取数据，那么拿就是了，如果你怕数据不存在，那么加个针对目标数据的判断即可。加个code:200，但是目标数据字段还是不存在，程序不一样也会报错？
-
-2. 失败则必须带上code错误码和msg错误信息
-
-```
-{
-    'code': 10001,
-    'msg': 'your error msg'
-}
-```
-
-错误码软件系统内部应该有一个统一的规范，常见的错误类型有：
-
-- 资源没有找到
-- 找到多个资源
-- 未知错误
-- 输入缺少参数
-
-### 编写良好的文档
-
-这是当然。
-
-
-
-## 其他技巧
-
-### 数据库操作
-
-定义模型之后，你需要运行:
-
-```
-python manage.py makemigrations app_name
-```
-
-这个过程就是创建每个app下的migrations文件夹下面的一些迁移python脚本文件，有的时候某些情况你可能需要手工修改这些迁移文件。
-
-```
-python manage.py migrate
-```
-这个命令就是实际执行那些迁移python脚本。
-
-
-
 
 ### 交互式环境
-
 进入python交互环境，这个和纯python交互环境的区别就是里面可以直接使用django里面的一些东西了，比如你定义的模型对象就可以直接使用了。这个对你开发进行测试工作非常有用！
 
 ```
 python manage.py shell
 ```
-
 
 或者进入sql实现的交互环境:
 
@@ -1686,14 +1011,462 @@ python manage.py shell
 python manage.py dbshell
 ```
 
+## 附录
 
 
-### 创建超级用户
-最开始创建的项目就把admin url挂上去了，你可以去 \verb+/admin+ 这个url下看一下，但要登录除了做一下上面的数据库表格创建工作外，还需要创建一个超级用户用于登录。
+### 扩展用户模型
+
+本小节主要参考了这篇 [不错的文章](https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html) 。一般扩展django自带的用户模型，最常见的就下面两种情况，实际上这两种情况你可能都会使用到。第一种是 User 模型 和 Profile 模型的分开，然后User用来存放登录相关信息，而Profile用来存放更多的用户资料信息，一般User 和 Profile 是 onetoone 关系，这个时候我们会考虑建立一个signals文件来保证没创建一个User就会跟着创建一个Profile：
+
+```python
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from profiles.models import Profile
+
+from .models import User
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
+```
+
+然后你可能对django默认的auth机制，比如session cookies等不太满意，那么推荐你直接建立自己的 User 模型， 继承自 AbstractBaseUser ，我大概看了一下 AbstractBaseUser 的源码，其做的工作都是围绕着 password这个字段来的，而且只要你在settings里面定义好了:
 
 ```
-python manage.py createsuperuser
+AUTH_USER_MODEL = ...
 ```
+
+就都是可以正常工作的。继承之后定义自己的字段这是不多用多说的，然后推荐进一步继承 `PermissionsMixin` 这个类。
+
+```
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(_('email address'), unique=True)
+```
+
+`PermissionsMixin` 这个类定义了一些群组信息还有什么的。
+
+然后这三个字段属性有特殊含义，都是可以自己设置的：
+
+```
+    USERNAME_FIELD = 'username'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['email']
+```
+
+然后你需要写好 objects 这个 UserManager ，其继承自 `BaseUserManager` ，你可以做其他一些定制，这个是个什么东西？这个就是之前我们看到的 `Model.objects.what` 之类的这种用法。在这里你需要根据自己的情况定义好： 
+
+- create_user
+- create_superuser
+
+这两个方法即可。就用这两个方法来控制用户的创建行为。其中 `create_superuser` 主要负责把 
+
+- is_superuser
+- is_staff 
+
+设为True。
+
+### 基于类的视图
+
+首先我们从django哪里初步了解了下基于类的视图的概念，就是如下代码：
+
+```python
+from django.http import HttpResponse
+
+def my_view(request):
+    if request.method == 'GET':
+        # <view logic>
+        return HttpResponse('result')
+```
+
+变为更简洁的：
+
+```python
+from django.http import HttpResponse
+from django.views import View
+
+class MyView(View):
+    def get(self, request):
+        # <view logic>
+        return HttpResponse('result')
+```
+
+然后依赖类的继承，引入Minxin类，可以让我们在http的很多restful风格请求上，总是一次又一次出现的那些套路，实现代码复用。其基本知识就是python的类的继承，我们可以直接从django restframework 这个模块直接用手来见识这种DRY理念的实现。
+
+#### APIView
+
+django restframework的 APIView 继承自 django 的 View，然后针对restful api 进行了很多优化，在某些情况下可能你编写的视图，就继承自APIView就是合适的，后面介绍的通用视图和其他高级视图等等，都是在某些情况下特别合适和让你少写代码，好用就用，仅此而已。如果不合适，那么自己定义 get post put 等等方法也是很方便的。
+
+
+
+#### 视图再升级
+
+在某些情况下使用 APIView 类和 Mixin 可能是最合适不过的，下面谈谈django restframework 提供的高级通用视图类。这些类都是继承自 `GenericAPIView` ，他们都有一个特点，那就是有点类似于 Serializer -> ModelSerializer 的升级过程，如果你的视图类方法主要操作对象是基于数据库Model的各个操作，那么推荐视图类继承自 `GenericAPIView` 。
+
+#### GenericAPIView
+
+GenericAPIView 继承自 django restframework 的 APIView 类，其提供的一个很重要的特性是 `queryset` ，你设定 queryset属性或者实现 `get_queryset` 方法，该视图类的很多方法都是围绕着`queryset` 来展开的。
+
+具体 CRUD 数据操作有对应的 Minxin类，然后和GenericAPIView 组合出了很多高级的视图类。
+
+一个好的建议对于这块，看源码，源码都很简单的，看懂了，发现符合自己的需要那就使用它，让自己少写点代码。如果有额外的定制需求，那就重写对应的某个方法就是了。
+### 自定义命令
+
+在目标app下面新建一个 `management` 文件夹，然后新建一个 `commands`  文件夹，注意这两个文件夹都要带上 `__init__.py` 文件。
+
+然后commands文件夹里面就可以定义一些python脚本了，这些脚本成为命令可以直接如下调用：
+
+```
+python manage.py command_name
+```
+
+你可以通过：
+
+```
+python manage.py help
+```
+
+来查看目前已经有的命令列表。
+
+一个基本的命令模块如下所示：
+
+```python
+from django.core.management.base import BaseCommand, CommandError
+from polls.models import Question as Poll
+
+class Command(BaseCommand):
+    help = 'Closes the specified poll for voting'
+
+    def add_arguments(self, parser):
+        parser.add_argument('poll_id', nargs='+', type=int)
+
+    def handle(self, *args, **options):
+        for poll_id in options['poll_id']:
+            try:
+                poll = Poll.objects.get(pk=poll_id)
+            except Poll.DoesNotExist:
+                raise CommandError('Poll "%s" does not exist' % poll_id)
+
+            poll.opened = False
+            poll.save()
+
+            self.stdout.write(self.style.SUCCESS('Successfully closed poll "%s"' % poll_id))
+```
+
+
+
+### django和celery
+
+django-crontab这个模块我试过的，还是很便捷的，不过其还是基于系统的crontab，而如果我们将django和celery组合起来，celery灵活的消息分发机制，无疑将给未来开发带来更多的可能性。celery的官方文档在 [这里](http://docs.celeryproject.org/en/latest/index.html) ，本文主要讲一下celery的基本概念和django的集成问题，更多celery的知识请参阅官方文档。
+
+
+
+#### celery的核心概念
+
+- broker  任务队列服务提供者，celery推荐使用redis或者rabbitmq作为broker。
+- task 具体执行的任务，其实就是定义的一些函数。
+- backend 用来存储任务之后的输出结果
+- worker celery的启动就是开启一个worker。
+
+
+
+#### django内文件安排
+
+本小节参考了 [这篇文章](https://medium.com/@yehandjoe/celery-4-periodic-task-in-django-9f6b5a8c21c7) 和 [这篇文章](http://geek.csdn.net/news/detail/128791) 。需要提醒读者的是，django和celery集成现在并不需要额外安装什么插件了，而且下面讲的配置实际上就是一个单独的celery app大部分都是类似的，只是多了一些细节上的处理和优化。
+
+##### celeryconfig.py 
+
+首先推荐在你的django app `settings.py` 旁新建个 `celeryconfig.py` 文件，有的教程让设置这个配置文件名字为 `celery.py` ，这样很不好，文件名和某个模块名字重复有时会出问题的。里面的内容如下：
+
+```python
+import os
+from celery import Celery
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_name.settings')
+
+app = Celery('project_name')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+
+
+@app.task(bind=True)
+def debug_task(self):
+    print('Request: {0!r}'.format(self.request))
+```
+
+这个下面新建的任务不过是方便测试罢了，然后上面几行配置基本上死的。最值得讲的就是这两行：
+
+```
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+```
+
+第一行是从django的配置对象中读取配置，特别注意的就是那个 `namespace='CELERY'` ，这样只有 `CELERY_` 开头的配置才会读取，而且对应原celery配置的关系是：
+
+```
+CELERY_BROKER_URL  -> BROKER_URL
+```
+
+我那次就是 `CELERY_BEAT_SCHEDULE` 写成了 `CELERYBEAT_SCHEDULE` 然后老实发现周期性程序启动不起来。
+
+第二行也是一个优化细节，从函数名字也可以看到，就是自动发现任务。在你的django的其他app里面新建一个 `tasks.py` ，celery会自动发现你定义的任务。
+
+
+
+##### `__init__.py` 
+
+还是你的django项目的project `settings.py` 那个文件夹里面，`__init__.py` 推荐写上这几行内容：
+
+```
+from .celeryconfig import app as celery_app
+
+__all__ = ('celery_app',)
+```
+
+##### settings.py
+
+具体celery的一些配置就统一写在 `settings.py` 文件里面，上面也提到了，都要 `CELERY_` 开头，大体如下所示：
+
+```
+CELERY_BROKER_URL = 'redis://localhost:6379'
+#CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+#CELERY_ACCEPT_CONTENT = ['application/json']
+#CELERY_RESULT_SERIALIZER = 'json'
+#CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Shanghai'
+# schedules
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    'crawl_juhe_every_one_hour': {
+         'task': 'wxarticles.tasks.crawl_juhe',
+         'schedule': crontab(minute=0, hour='*/3'),
+    },
+    'every_miniute_for_test': {
+        'task': 'wxarticles.tasks.test_celery',
+        'schedule': crontab(),
+    },
+}
+
+
+```
+
+##### 定义任务
+
+好了，定义任务，实际上就是定义一个函数，比如下面这个简单的打印函数来确认celery周期程序是工作着的：
+
+```
+from celery import shared_task
+
+@shared_task()
+def test_celery():
+    print('celery is working.')
+```
+
+celery的crontab功能很强大，比如上面的 `crontab()` 就是每分钟执行一次。具体请参看 [官方文档](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html) 之。
+
+##### 启动任务
+
+和celery其他操作都是一样的，就是启动worker：
+
+```
+celery -A project_name worker -l info
+```
+
+`-A` 选项跟着 celery app的名字，在这里也就是django项目的名字。 `-l` 选项设置日志打印级别。
+
+你还可以加上 `-B` 来同时启动周期性任务。
+
+或者另外开个命令：
+
+```
+celery -A project_name beat -l info
+```
+
+
+
+
+
+------
+
+其他制作脚本啊，制作后台程序，制作服务啊，使用supervisor啊，实际上和celery关系已经不大了，可以不在这里说了。
+
+
+
+##### 手工启动一次任务
+
+参考了 [这个网页](https://stackoverflow.com/questions/12900023/how-can-i-run-a-celery-periodic-task-from-the-shell-manually) 。
+
+```
+$ python manage.py shell
+>>> from myapp.tasks import my_task
+>>> eager_result = my_task.apply()
+
+```
+
+
+
+
+### 翻译
+
+django的翻译其实已经很便捷了，因为我关注于后台api的编写，所以实际上很多教程说的：
+
+```
+TEMPLATES = [
+    {
+        ...
+        'OPTIONS': {
+            'context_processors': [
+                ...
+                'django.template.context_processors.i18n',
+            ],
+        },
+    },
+]
+```
+
+这个配置只和模板输出的翻译有关，有需要再加上。
+
+然后MIDDLESWARES 哪里要加上：
+
+```
+    'django.middleware.locale.LocaleMiddleware',
+```
+
+然后就是这些配置：
+
+```
+LANGUAGE_CODE = 'zh-Hans'
+
+USE_I18N = True
+```
+
+设置好你的语言代码，这是没有问题的。
+
+我看了一下 django restframework 的翻译管理相关，发现大体这样配置就可以了，很多教程说的设置 `LOCALE_PATHS` 变量觉得没必要，默认的每个app下面的locale文件夹够用了。
+
+然后就是目标py文件下的 字符串 如下装饰之：
+
+```
+from django.utils.translation import ugettext_lazy as _
+...
+
+        if username is None:
+            raise TypeError(_('Users must have a username.'))
+```
+
+Model字段定义的名字可以加上，verbose_name 可以加上，然后异常信息可以加上等等。
+
+加完了之后运行：
+
+```
+django-admin makemessages -l zh_Hans 
+```
+
+app下面没有locale文件夹的创建个就是了，某些文件你不想管，比如 manage.py ，那么加上 `--ignore` 选项即可。
+
+windows下不是很方便，推荐在linux服务器下创建了目标 django.po 文件，然后再修改文件即可。其中po文件的头部有些东西，估计：
+
+```
+"Language: zh-Hans\n"
+```
+
+已经是必填的，其他有时间也填上吧。
+
+然后运行:
+
+```
+django-admin compilemessages 
+```
+
+如果不出意外的，翻译就已经生效了。
+
+
+### 模板层
+
+模板基本的样子如下，下面有模板继承，block ，循环，过滤，之类的。熟悉jinja2模板的同学稍微看下大致是个什么意思就已经清楚了。
+
+```django
+{% extends "base_generic.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block content %}
+<h1>{{ section.title }}</h1>
+{% for story in story_list %}
+<h2>
+  <a href="{{ story.get_absolute_url }}">
+    {{ story.headline|upper }}
+  </a>
+</h2>
+<p>{{ story.tease|truncatewords:"100" }}</p>
+{% endfor %}
+{% endblock %}
+
+```
+
+#### django如何查找模板的
+
+在django的settings.py哪里有：
+
+```
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+TEMPLATES=[
+{
+'BACKEND':'django.template.backends.django.DjangoTemplates',
+'DIRS':[
+os.path.join(PROJECT_DIR,'templates'),
+],
+```
+
+默认是在每个app下的templates文件里都会递归遍历查找的，这里DIRS加上了另外一个文件夹，也就是现在settings.py所在的那个文件夹下如果有templates文件夹也会去遍历的。
+
+
+
+模板文件最后都会合并的，所以就存在模板的覆盖机制了，为了避免无谓的覆盖，一般模板原则上推荐的结构是在templates下面，不管是那个app下面，都再新建一个目标app的名字，再新建模板文件。当然对于稍小的项目直接扔在templates下面问题不大。
+
+
+
+比如你想覆盖django自带的admin界面，就要在templates下面新建一个admin文件夹，具体什么模板文件，你要研究下django的源码了。
+
+
+
+
+
+
+
+#### django的变量怎么传给javascript
+
+**NOTICE: 现在不推荐这种写法了，推荐走ajax通道传数据。**
+
+
+
+django的视图函数在render的时候通过context字典值，里面的各个字段的值将传给django的模板里的变量，这个我们是知道的了，那么django的变量怎么进而传递给javascript呢。本小节参考了 [这个网页](https://stackoverflow.com/questions/7165656/passing-objects-from-django-to-javascript-dom) 。
+
+首先要传递的字段建议如下json封装下：
+
+```
+from django.core.serializers.json import DjangoJSONEncoder
+{
+	what : json.dumps(data['content_images'], cls=DjangoJSONEncoder)
+}
+```
+
+然后在javascript那边：
+
+```
+var what = JSON.parse("{{ what | safe | escapejs }}")
+```
+
+注意 `safe` 和 `escapejs` 过滤器。
+
+
+
+
+
 
 
 ### 模型python2兼容性
@@ -2018,4 +1791,263 @@ def flash(request, title, text, level='info'):
 ```
 CSRF_TRUSTED_ORIGINS = ['www.cdwanze.work']
 ```
+### 创建可复用的app
 
+创建可复用的app会极大的降低你的目标django项目的复杂度，如果可能，将你的app打造成可复用的风格总是首选。
+
+#### 制作django-what的pypi包
+
+有关pypi包的制作就不赘述了，下面主要在官方文档 [这里](https://docs.djangoproject.com/en/1.11/intro/reusable-apps/) 的基础上讨论一些问题。
+
+#### 测试问题
+
+我试着如下安装测试过程：
+
+```
+python setup.py sdist
+pip install dist/what.tar.gz
+```
+
+然后安装官方文档，在INSTALL_APPS那里设置好。app是可以正常使用的。但在安装测试过程中，这实在有点繁琐了。推荐还是将整个app文件夹复制到你的测试webapp那边去，然后一边修改一边看。测试好了再把内容同步到pypi安装包那边去。
+
+#### migrations问题
+
+官方文档之所以选择制作sdist和用pip install tar包这种风格是有原因的，经测试egg包在访问上很成问题，只有用pip安装这种方法，在site-packages那边你安装才是文件夹风格而不是那种egg文件。这样你等下执行：
+
+```
+python manage.py makemigrations app_name
+```
+
+才会成功。
+
+而且实际生成的迁移文件就放在site-packages那里的目标文件夹下的。所以你制作pypi包的时候不要把migrations文件夹里面的其他迁移文件包含进去了，要包含就包含 `__init__.py` 文件即可。
+
+当然就算你不是制作django的目标pypi包，其他django项目在 `.gitignore` 文件上加上这一行总是不错的：
+
+```
+*/migrations/*
+```
+
+PS: 我知道stackoverflow那边都认为应该加上，还有人专门写了长篇大论认为应该加上。我确定的只有一点：早期测试开发过程，所有的migrations文件夹里面都只有 `__init__.py` 这个空白文件，保持代码整洁，在测试开发阶段不花精力在这上面，这是没有争议的。
+
+### request
+
+是的，我们的APIView的一些特殊含义的方法，都会接收一个 request对象，这个对象有：
+
+- query_params 获得GET传过来的参数
+- data 获得POST PUT PATCH 传过来的参数，这还没完，传过来的文件，表单都支持。
+- user 如果请求经过认证了会返回相应的用户记录，你编写auth类的时候会知道的，如果没有认证，那么返回 `AnonymousUser`
+
+
+
+### Response
+
+也就是一些特殊含义的方法的返回对象，其第一个参数是data，字典值，会自动封装成为json友好的格式。实际上我们经常看到的就是这个套路：
+
+```
+return Response(serializer.data)
+```
+
+然后 serializer 有个 `is_valid` 方法，用来序列化类输出前的预热。这两点在后面序列化的讨论中会涉及。其他一些我们看一下吧：
+
+```
+Response(data, status=None, template_name=None, headers=None, content_type=None)
+```
+
+headers http协议响应头，status http状态码等等。
+
+整个过程套路，很多高级视图的套路都类似于下面这个例子，多看几遍吧。
+
+```python
+class SnippetDetail(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Snippet.objects.get(pk=pk)
+        except Snippet.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(snippet)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(snippet, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+urls.py那边加上的是:
+
+```
+url(r'^snippets/(?P<pk>[0-9]+)/$', views.SnippetDetail.as_view()),
+```
+
+这里正则表达式 `(?P<pk>[0-9]+)` 的意思是收集某一串数字，这一串数字被命名为 `pk` 。
+### mysql数据库配置参考
+如果读者想使用mysql数据库，那么下面的配置可作参考：
+
+```
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': "database_name",
+            'USER': "root",
+            'PASSWORD': "",
+            'HOST': "localhost", 
+            'PORT': "3306",
+            'OPTIONS': {
+                'charset': 'utf8'
+            }
+        }
+    }
+```
+
+一般会加上 charset 是 utf8这个选项，当然mysql那边你也需要设置好字符编码。有的时候如下设置init_command 来设置字符编码可以让你获得更好的字符编码兼容性。
+
+```
+    'OPTIONS': {
+        'init_command': 'SET character_set_database=utf8 ,\
+        character_set_server=utf8,\
+        character_set_connection=utf8,\
+        collation_connection=utf8_unicode_ci',
+        'charset': 'utf8'
+    }
+```
+
+### url上带参数
+
+```python
+from django.urls import re_path
+
+from . import views
+
+urlpatterns = [
+    re_path(r'^add/([\d]+)/([\d]+)$', views.add, name='add'),
+]
+```
+
+这里参数将逐个传递个视图函数，唯一值得一提的是django的视图函数默认第一个函数是传递进去的 `request` 参量。在 `views.py` 里面的内容如下:
+
+```python
+from django.http import HttpResponse
+
+def add(request, a, b):
+    res = int(a) + int(b)
+    return HttpResponse(str(res))
+```
+
+上面这种正则表达式的写法是老式的django的url写法，一般没有特别的需求的话，应该按照django官方教程，采用下面的推荐写法：
+
+```python
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path('add/<int:a>/<int:b>', views.add, name='add'),
+]
+```
+
+
+
+
+
+### url定义name
+
+`name` 这个参量大体类似于flask的 `endpoint` 的概念，然后django还有的 `reverse` 函数，其大体类似于flask的 `url_for` 的概念。
+
+比如上面视图函数的 add 对应的url我们可以如下获得:
+
+```
+from django.core.urlresolvers import reverse
+reverse('add',args=(1,2))
+```
+
+然后在模板中有:
+
+```
+<a href="{% url 'add' 1 2 %}">link</a>
+```
+
+### 获取full-url
+
+上面提到的reverse函数返回的url字符串还不是完整的url，而只是相对url。如果我们要获取全站的完整url则可以使用 `request.build_absolute_uri(location)` ，如果不指定location则默认是当前的url。
+
+
+
+### 使用多个数据库
+
+有的时候你需要使用多个数据库，最常见的情况是某个单独的app使用另外一个数据库。
+
+首先你需要再加上另外一个数据库的定义：
+
+```
+    DATABASES = {
+        'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': "database_name",
+        'USER': "root",
+        'PASSWORD': "",
+        'HOST': "localhost",
+        'PORT': "3306",
+        'OPTIONS': {
+            'charset': 'utf8'
+            }
+        },
+        'youapp': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'youapp',
+            'USER': 'root',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+            'OPTIONS': {'charset': 'utf8'}
+        },
+    }
+```
+
+然后在你的app那边新建一个dbrouter文件，里面定义一个YourRouter类。
+
+```
+DATABASE_ROUTERS = ['youapp.dbrouter.YourRouter']
+```
+
+在这个类里面如下定义一些数据库选择行为：
+
+**NOTICE: 在这个app中定义的模型记得都要加上app_label这个meta属性。**
+
+```
+class YourRouter(object):
+    def db_for_read(self, model, **hints):
+        if model._meta.app_label == 'youapp':
+            return 'youapp'
+        return None
+
+    def db_for_write(self, model, **hints):
+        if model._meta.app_label == 'youapp':
+            return 'youapp'
+        return None
+
+    def allow_relation(self, obj1, obj2, **hints):
+        if obj1._meta.app_label == 'youapp' or \
+            obj2._meta.app_label == 'youapp':
+            return True
+        return None
+
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
+        if app_label == 'youapp':
+            return db == 'youapp'
+        return None
+```
