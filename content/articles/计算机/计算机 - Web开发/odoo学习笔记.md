@@ -167,8 +167,11 @@ odoo不容置疑是一个很优秀的项目，其解决的业务，比如进销�
 - res.users 定义了用户 重要的字段有 name login email phone password groups_id【many2many】
 - res.groups 定义了用户的群组概念 这个群组概念主要是控制权限用的
 - ir.modle 模型清单 name
-- ir.rule name group_id modle_id perm_read perm_write perm_create perm_unlink 【定义一系列的安全规则，比如某个群组对某个模型具有什么权限，上面的模型层面级别的权限定义可以简化，多增加几个权限群组，然后一个用户只能属于一个权限群组应该是够用的。】
-- purchase.order 采购订单 具体业务可能不是采购订单 不过可以参考借鉴
+- ir.rule name group_id modle_id perm_read perm_write perm_create perm_unlink 【定义一系列的安全规则，比如某个群组对某个模型具有什么权限。】
+- purchase.order 采购订单 具体业务可能不是采购订单，我看到里面有state字段，用一些确定的字符串选项来表示该采购订单的状态。
+
+在大概阅读研究上面的代码之后，在权限控制等方面完善一下预期的Web应用似乎会有一点样子了，但似乎还少点什么东西，对了，odoo的workflow引擎。odoo的workflow引擎代码在哪里我一时找不到，不过没有问题，用其他的python实现的workflow引擎代码即可。
+
 
 
 ## 附录

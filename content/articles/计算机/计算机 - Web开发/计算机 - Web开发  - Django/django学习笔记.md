@@ -278,7 +278,9 @@ class BaseModel(models.Model):
     created_at= models.DateTimeField(auto_now_add=True)
 ```
 
-后面的模型都可以继承自该基类，基类是不会创建表格的，因为其Meta设置了 `abstract=True` 。DateTimeField加上 `auto_now=True` ，那么该模型每次 `save` 操作都会自动更新最新日期。 然后 `auto_now_add=True` 即该记录第一次创建时设置最新的日期。然后如果DateTimeField使用了 auto_now 或者 auto_now_add 这两个选项了就不要使用default选项了，还有就是自动插入的默认的时间是由 `django.utils.timezone.now()` 获得的。
+后面的模型都可以继承自该基类，基类是不会创建表格的，因为其Meta设置了 `abstract=True` 。DateTimeField加上 `auto_now=True` ，那么该模型每次 `save` 操作都会自动更新最新日期。 然后 `auto_now_add=True` 即该记录第一次创建时设置最新的日期。
+
+如果DateTimeField使用了 auto_now 或者 auto_now_add 这两个选项了就不要使用default选项了，还有就是自动插入的默认的时间是由 `django.utils.timezone.now()` 获得的。
 
 比如后面你想获得六个小时之前的所有记录那么可以如下查询：
 
@@ -562,9 +564,370 @@ payload都推荐采用json的单字典格式形式。
 我对是否使用201 CREATED状态码是持保留意见的。
 
 ## django rest framework
+### 渲染器
+可以用如下配置rest framework的全局默认渲染器：
+
+```
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ]
+}
+```
+对于继承自 `APIView` 的视图类，可以通过 `renderer_classes` 来设置它的渲染器：
+
+```
+from django.contrib.auth.models import User
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+class UserCountView(APIView):
+    """
+    A view that returns the count of active users in JSON.
+    """
+    renderer_classes = [JSONRenderer]
+
+    def get(self, request, format=None):
+        user_count = User.objects.filter(active=True).count()
+        content = {'user_count': user_count}
+        return Response(content)
+```
+
+或者：
+
+```
+@api_view(['GET'])
+@renderer_classes([JSONRenderer])
+def user_count_view(request, format=None):
+    """
+    A view that returns the count of active users in JSON.
+    """
+    user_count = User.objects.filter(active=True).count()
+    content = {'user_count': user_count}
+    return Response(content)
+```
+
+### 自定义渲染器
+在realworld有这样一个自定义渲染器样例：
+```python
+import json
+
+from rest_framework.renderers import JSONRenderer
+
+
+class ConduitJSONRenderer(JSONRenderer):
+    charset = 'utf-8'
+    object_label = 'object'
+    pagination_object_label = 'objects'
+    pagination_object_count = 'count'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if data.get('results', None) is not None:
+            return json.dumps({
+                self.pagination_object_label: data['results'],
+                self.pagination_count_label: data['count']
+            })
+
+        # If the view throws an error (such as the user can't be authenticated
+        # or something similar), `data` will contain an `errors` key. We want
+        # the default JSONRenderer to handle rendering errors, so we need to
+        # check for this case.
+        elif data.get('errors', None) is not None:
+            return super(ConduitJSONRenderer, self).render(data)
+
+        else:
+            return json.dumps({
+                self.object_label: data
+            })
+
+显然渲染器就是要实现render方法，这里的思路就是假如说是多个结果的情况，那么最好封装成为：
+
+```
+{
+    "results": ...
+    "count": ...
+}
+```
+这样的结构形式，然后后续不同的render可以更改 `pagination_object_label` 这个参数。
+
+假如说是异常错误的情况则推荐采用格式：
+```
+{
+    "errors": ...
+}
+```
+
+加入是单个对象的返回值，视图函数那边直接返回该对象的数据，然后会封装成为：
+
+```
+{
+    "object_label" : data
+}
+```
+
+
+class UserJSONRenderer(ConduitJSONRenderer):
+    charset = 'utf-8'
+    object_label = 'user'
+    pagination_object_label = 'users'
+    pagination_count_label = 'usersCount'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        # If we recieve a `token` key as part of the response, it will by a
+        # byte object. Byte objects don't serializer well, so we need to
+        # decode it before rendering the User object.
+        token = data.get('token', None)
+
+        if token is not None and isinstance(token, bytes):
+            # Also as mentioned above, we will decode `token` if it is of type
+            # bytes.
+            data['token'] = token.decode('utf-8')
+
+        return super(UserJSONRenderer, self).render(data)
+
+```
+
+UserJSONRenderer主要在ConduitJSONRenderer的基础上新增了一个token字段。
+
+
+### 自定义异常处理
+对于API视图函数抛出的异常，可以通过异常处理函数，根据接受到的异常转成Response对象。
+
+这个函数接受两个参数，第一个exc是当前正在处理的异常，第二个参数是一个字典值context，一些额外的环境参数。
+
+异常处理函数要某返回一个Response对象，或者返回None。如果返回的是None，则该异常将会抛给Django，然后Django返回一个标准的500 Server error响应。
+
+下面这个样例异常处理函数，会将所有的响应状态码写入response字典数据里面。
+```python
+from rest_framework.views import exception_handler
+
+def custom_exception_handler(exc, context):
+    # Call REST framework's default exception handler first,
+    # to get the standard error response.
+    response = exception_handler(exc, context)
+
+    # Now add the HTTP status code to the response.
+    if response is not None:
+        response.data['status_code'] = response.status_code
+
+    return response
+```
+
+再比如realworld里面自定义的异常处理函数：
+
+```python
+def core_exception_handler(exc, context):
+    # If an exception is thrown that we don't explicitly handle here, we want
+    # to delegate to the default exception handler offered by DRF. If we do
+    # handle this exception type, we will still want access to the response
+    # generated by DRF, so we get that response up front.
+    response = exception_handler(exc, context)
+    handlers = {
+        'ValidationError': _handle_generic_error
+    }
+    # This is how we identify the type of the current exception. We will use
+    # this in a moment to see whether we should handle this exception or let
+    # Django REST Framework do it's thing.
+    exception_class = exc.__class__.__name__
+
+    if exception_class in handlers:
+        # If this exception is one that we can handle, handle it. Otherwise,
+        # return the response generated earlier by the default exception 
+        # handler.
+        return handlers[exception_class](exc, context, response)
+
+    return response
+```
+也就是根据你定义的异常类型来决定不同的处理策略，比如 `_handle_not_found_error` :
+
+```python
+def _handle_generic_error(exc, context, response):
+    # This is about the most straightforward exception handler we can create.
+    # We take the response generated by DRF and wrap it in the `errors` key.
+    response.data = {
+        'errors': response.data
+    }
+
+    return response
+```
+
+`context['view']` 可以获取目标视图函数。上面就是简单将异常信息封装进errors键里面。
+
+自定义的异常要在 `REST_FRAMEWORK` 上配置后才生效。
+
+```
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'my_project.my_app.utils.custom_exception_handler'
+}
+```
+
+### JWT认证
+jwt认证的基本思路是对于某个api请求，用户输入用户名和密码，正确的话服务器返回jwt的token，然后后面用户要请求其他url则需要在HTTP请求的Header上加上 `Authorization` 这个字段。具体这个字段的值可能会有所差异的，我略微查看了pyjwt `version 2.3.0` 的源码，得到这一行：
+```
+authentication.get_authorization_header(request)
+```
+就会获取 `Authorization` 的值。realworld的样例在处理上会有一个额外的动作：
+
+```python
+import jwt
+
+from django.conf import settings
+
+from rest_framework import authentication, exceptions
+
+from .models import User
+
+
+class JWTAuthentication(authentication.BaseAuthentication):
+    authentication_header_prefix = 'Token'
+
+    def authenticate(self, request):
+        """
+        The `authenticate` method is called on every request, regardless of
+        whether the endpoint requires authentication.
+
+        `authenticate` has two possible return values:
+
+        1) `None` - We return `None` if we do not wish to authenticate. Usually
+        this means we know authentication will fail. An example of
+        this is when the request does not include a token in the
+        headers.
+
+        2) `(user, token)` - We return a user/token combination when
+        authentication was successful.
+
+        If neither of these two cases were met, that means there was an error.
+        In the event of an error, we do not return anything. We simple raise
+        the `AuthenticationFailed` exception and let Django REST Framework
+        handle the rest.
+        """
+        request.user = None
+
+        # `auth_header` should be an array with two elements: 1) the name of
+        # the authentication header (in this case, "Token") and 2) the JWT
+        # that we should authenticate against.
+        auth_header = authentication.get_authorization_header(request).split()
+        auth_header_prefix = self.authentication_header_prefix.lower()
+        if not auth_header:
+            return None
+
+        if len(auth_header) == 1:
+            # Invalid token header. No credentials provided. Do not attempt to
+            # authenticate.
+            return None
+
+        elif len(auth_header) > 2:
+            # Invalid token header. Token string should not contain spaces. Do
+            # not attempt to authenticate.
+            return None
+
+        # The JWT library we're using can't handle the `byte` type, which is
+        # commonly used by standard libraries in Python 3. To get around this,
+        # we simply have to decode `prefix` and `token`. This does not make for
+        # clean code, but it is a good decision because we would get an error
+        # if we didn't decode these values.
+        prefix = auth_header[0].decode('utf-8')
+        token = auth_header[1].decode('utf-8')
+
+        if prefix.lower() != auth_header_prefix:
+            # The auth header prefix is not what we expected. Do not attempt to
+            # authenticate.
+            return None
+        # By now, we are sure there is a *chance* that authentication will
+        # succeed. We delegate the actual credentials authentication to the
+        # method below.
+        return self._authenticate_credentials(request, token)
+
+    def _authenticate_credentials(self, request, token):
+        """
+        Try to authenticate the given credentials. If authentication is
+        successful, return the user and token. If not, throw an error.
+        """
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+        except:
+            msg = 'Invalid authentication. Could not decode token.'
+            raise exceptions.AuthenticationFailed(msg)
+
+        try:
+            user = User.objects.get(pk=payload['id'])
+        except User.DoesNotExist:
+            msg = 'No user matching this token was found.'
+            raise exceptions.AuthenticationFailed(msg)
+
+        if not user.is_active:
+            msg = 'This user has been deactivated.'
+            raise exceptions.AuthenticationFailed(msg)
+
+        return (user, token)
+
+```
+注意看那个split方法和后面的：
+```
+        prefix = auth_header[0].decode('utf-8')
+        token = auth_header[1].decode('utf-8')
+```
+
+也就是 `Authorization` 内的值是：
+```
+Token token....
+```
+
+这样的格式。
+
+注意pyjwt version 2.3.0版本decode是 `algorithms` 参数名，encode是 `algorithm` 参数名，好像最新的才都改为了 `algorithms` 。
+
+默认的rest framework认证配置是：
+```
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
+```
+
+这是一个尝试清单，realworld改为了：
+```
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'apps.app_user.backends.JWTAuthentication',
+    )
+}
+```
+
+认证类认证成功返回 `(user, auth)` 认证成功后到视图函数那边，通过 `request.user` 和 `request.auth` 来获得对应的这两个值。没有认证成功则 `request.user` 是默认值： `django.contrib.auth.models.AnonymousUser` ，可通过 `UNAUTHENTICATED_USER` 另外配置。 `request.auth` 是默认值 `None` ，可通过 `UNAUTHENTICATED_TOKEN` 配置。
+
+```
+from django.contrib.auth import authenticate
+```
+
+这个autheticate函数的功能的实现就是根据你定义的那些认证类来的。
+
+realworld的代码似乎并没有对jwt的时效性进行校对，此外jwt认证还需要加入refresh token过程来完善。
+
+#### refresh token
+一般access_token时效性会设置的较短，大概几分钟的样子。在应用上不可能要求用户时不时得就输入用户名和密码，于是人们参考OAUTH2的认证方式提出了refresh token的概念，在用户首次登陆输入用户名和密码的请求哪里，还会返回一个时效性较长的refresh token，平时用access token去请求和之前的过程一样，区别就是客户端自己把那个refresh token存起来了，当客户端发现access token过期了的时候会像服务器的refresh token api 发送refresh token请求，带上的就是客户端自己保存的refresh token，服务器判断token有效，就会返回新的access token和新的refresh token。
 
 
 
+
+### APIView
+
+django restframework的 APIView 继承自 django 的 View，然后针对restful api 进行了很多优化，在某些情况下可能你编写的视图，就继承自APIView就是合适的，后面介绍的通用视图和其他高级视图等等，都是在某些情况下特别合适和让你少写代码，好用就用，仅此而已。如果不合适，那么自己定义 get post put 等等方法也是很方便的。
+
+
+在某些情况下使用 APIView 类和 Mixin 可能是最合适不过的，下面谈谈django restframework 提供的高级通用视图类。这些类都是继承自 `GenericAPIView` ，他们都有一个特点，那就是有点类似于 Serializer -> ModelSerializer 的升级过程，如果你的视图类方法主要操作对象是基于数据库Model的各个操作，那么推荐视图类继承自 `GenericAPIView` 。
+
+#### GenericAPIView
+
+GenericAPIView 继承自 django restframework 的 APIView 类，其提供的一个很重要的特性是 `queryset` ，你设定 queryset属性或者实现 `get_queryset` 方法，该视图类的很多方法都是围绕着`queryset` 来展开的。
+
+具体 CRUD 数据操作有对应的 Minxin类，然后和GenericAPIView 组合出了很多高级的视图类。
+
+一个好的建议对于这块，看源码，源码都很简单的，看懂了，发现符合自己的需要那就使用它，让自己少写点代码。如果有额外的定制需求，那就重写对应的某个方法就是了。
 
 ## 序列化
 
@@ -669,14 +1032,6 @@ serializer.is_valid(raise_exception=True)
 user =  self.context['request'].user
 
 ```
-
-
-
-
-
-
-
-
 
 ## 权限管理
 
@@ -1098,23 +1453,6 @@ class MyView(View):
 
 然后依赖类的继承，引入Minxin类，可以让我们在http的很多restful风格请求上，总是一次又一次出现的那些套路，实现代码复用。其基本知识就是python的类的继承，我们可以直接从django restframework 这个模块直接用手来见识这种DRY理念的实现。
 
-#### APIView
-
-django restframework的 APIView 继承自 django 的 View，然后针对restful api 进行了很多优化，在某些情况下可能你编写的视图，就继承自APIView就是合适的，后面介绍的通用视图和其他高级视图等等，都是在某些情况下特别合适和让你少写代码，好用就用，仅此而已。如果不合适，那么自己定义 get post put 等等方法也是很方便的。
-
-
-
-#### 视图再升级
-
-在某些情况下使用 APIView 类和 Mixin 可能是最合适不过的，下面谈谈django restframework 提供的高级通用视图类。这些类都是继承自 `GenericAPIView` ，他们都有一个特点，那就是有点类似于 Serializer -> ModelSerializer 的升级过程，如果你的视图类方法主要操作对象是基于数据库Model的各个操作，那么推荐视图类继承自 `GenericAPIView` 。
-
-#### GenericAPIView
-
-GenericAPIView 继承自 django restframework 的 APIView 类，其提供的一个很重要的特性是 `queryset` ，你设定 queryset属性或者实现 `get_queryset` 方法，该视图类的很多方法都是围绕着`queryset` 来展开的。
-
-具体 CRUD 数据操作有对应的 Minxin类，然后和GenericAPIView 组合出了很多高级的视图类。
-
-一个好的建议对于这块，看源码，源码都很简单的，看懂了，发现符合自己的需要那就使用它，让自己少写点代码。如果有额外的定制需求，那就重写对应的某个方法就是了。
 ### 自定义命令
 
 在目标app下面新建一个 `management` 文件夹，然后新建一个 `commands`  文件夹，注意这两个文件夹都要带上 `__init__.py` 文件。
