@@ -134,11 +134,88 @@ def index(request):
 - 视图函数不是这里的讨论重点，简单了解下即可，我们知道HTTP响应也是有规定格式的，django提供了便捷的 `HttpResponse` 类来封装出HTTP响应信息。更多信息请参见下一章关于视图层的讨论。
 
 
+
+### url上带参数
+即使是这种情况也是推荐使用path而不是 `re_path` ，
+
+
+```python
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path('add/<int:a>/<int:b>', views.add, name='add'),
+]
+```
+url上的参数经过处理后将作为可选参数传递给视图函数，即： `add(request, a=1, b=2)` 。
+
+- <username> 默认是字符串
+
+
+
+
+### url定义name
+
+`name` 这个参量大体类似于flask的 `endpoint` 的概念，然后django还有的 `reverse` 函数，其大体类似于flask的 `url_for` 的概念。
+
+比如上面视图函数的 add 对应的url我们可以如下获得:
+
+```
+from django.core.urlresolvers import reverse
+reverse('add',args=(1,2))
+```
+
+然后在模板中有:
+
+```
+<a href="{% url 'add' 1 2 %}">link</a>
+```
+
+上面提到的reverse函数返回的url字符串还不是完整的url，而只是相对url。如果我们要获取全站的完整url则可以使用 `request.build_absolute_uri(location)` ，如果不指定location则默认是当前的url。
+
+
+
 ## 应用配置
 原则上django的应用和项目是可以分离的，安装是非常灵活的。 `INSTALLED_APPS` 的目的是查找目标应用的 `apps.py` 里面的 `AppConfig` 子类，然后根据这个对象来获得目标应用的一些配置信息。比如 `name` 就是具体该应用的指向地。
 
-另外一个高级用法就是定制 `ready` 方法，来初始化本app的一些信号设置。	
+关于上面的讨论如果只是默认的写法可能会不太注意，但如果稍微调整下django项目的文件夹结构，则可能会出问题，所以下面我再详细说明下。
 
+以下面的文件夹结构来举例：
+```
+--apps
+    --app_user
+    --
+
+manage.py    
+```
+
+`INSTALLED_APPS` 要引入应用 app_user 是：
+
+```
+INSTALLED_APPS = [
+    'apps.app_user',
+]
+```
+一般会在app_user里面新建一个 `apps.py` 文件，里面有内容：
+
+```
+from django.apps import AppConfig
+
+
+class AppUserConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'apps.app_user'
+```
+
+**注意：** AppConfig的name属性并不是简单的名字那么简单，其有特殊含义：代表指向该应用的完整python引入路径。也就是你在当前项目根目录下运行： `import apps.app_user` 是可行的。
+
+默认是 `DEFAULT_AUTO_FIELD` 配置的，通过 `default_auto_field` 可以配置本应用的隐式主键类型。
+
+### ready方法
+可以通过重写 `ready` 方法，来初始化本app的一些信号配置。
+
+关于信号这块在信号那一小节集中讨论。
 
 
 
@@ -227,34 +304,91 @@ django所有的ORM模型都要继承自 `Model` 类，再看到Question这个类
 
 #### 字段类型
 
-- **IntegerField:** 整型
-- **BigIntegerField:** 大整数
+##### 数值
+- IntegerField 整型
+- BigIntegerField 大整数
+
+##### 布尔
+BooleanField bool 值
+
+##### 字符
+- CharField 定义字符串类型，需要设置最大长度 `max_length` 这个属性。
+
+- TextField 大段文字用这个。
+
+##### 日期时间
+
+- DateField 对应python中的 `datetime.date` 对象。
+- DateTimeField 对应python中的 `datetime.datetime` 对象。
+
 - **BinaryField:** raw data
-- **BooleanField:** bool 值
-- **CharField:** 定义字符串类型，比如设置最大长度 `max_length` 这个属性。
-- **TextField:** 大段文字用这个。
-- **DateField:** 对应python中的 `datetime.date` 对象。
-- **DateTimeField:** 对应python中的 `datetime.datetime` 对象。
+
+
+
+
 
 #### 字段可选参数
+##### verbose_name
+一般字段的第一个参数人们会写上一个字符串，比如：
 
-字段声明控制中有一些通用可选项:
+```
+username = models.CharField('username', max_length=150)
+```
+这个第一个参数其实是在设置 `verbose_name` 这个参数。这个叫做该字段的备注名，不一定要设置的和字段名一样的，具体该字段在数据库那边对应的名字由 `db_column` 设置，如果没指定，则基于这个字段名自动生成，总之，这个字段备用名和数据库那边的字段具体的名字完全没有关系的。
 
-- **default:** 设置该字段的默认值，注意default还可以接受一个函数对象。
-- **null:** 设置为True，则该自动会自动填充sql中的NULL值，字符串类型字段最好默认空字符。
-- **blank:** 如果设置为True，则空值也是允许的，其和null的区别是null是说数据库那边的，而blank是说显示那边的。
-- **db\_column:** 设置该字段具体在数据库中对应的表格的名字。
-- **db\_index:** 设置为 `True` 则表示该字段开启索引。
-- **primary\_key:** 主键 。
-- **unique:** 唯一
-- **unique\_for\_date:** 比如title字段设置:
+ForeignKey, ManyToManyField 和 OneToOneField 接受的第一个参数必须是对应的模型的类名，如果要设置字段备注名，则后面加上 `verbose_name` 参数进行设置即可。
+
+##### default
+设置该字段的默认值，注意default还可以接受一个函数对象。
+
+##### null
+设置为True，则该自动会自动填充sql中的NULL值。一般字符串类型字段是推荐设置默认为空空字符串，但也只是一个建议。然后如果一个CharField设置了 `unique=True` 和 `black=True` ，则这个时候是一定要设置 `null=True` 的，因为存储多个空白值会违反唯一性约束。
+
+##### blank
+如果设置为True，则该字段是允许为空的，其和null的区别是null是说数据库那边的可以设置为NULL，而blank是说显示的验证环节可以允许为空。
+
+##### db_column
+设置该字段具体在数据库中对应的名字。
+
+##### db_index
+设置为 `True` 则表示该字段开启索引。
+
+##### unique
+字段唯一约束
+
+##### choices 
+choices的变动就会创建一个新的数据库迁移，因此choices应用情景只是某些固定的选项的情况。
+
+```
+YEAR_IN_SCHOOL_CHOICES = [
+    (FRESHMAN, 'Freshman'),
+    (SOPHOMORE, 'Sophomore'),
+    (JUNIOR, 'Junior'),
+    (SENIOR, 'Senior'),
+    (GRADUATE, 'Graduate'),
+]
+year_in_school = models.CharField(
+    max_length=2,
+    choices=YEAR_IN_SCHOOL_CHOICES,
+    default=FRESHMAN,
+)
+```
+
+choices的第一个值是实际存储到数据库里面的值，第二个值是用于表单显示的值。
+
+##### help_text
+关于该字段的额外帮助信息，这个在admin页面是可以看到具体该字段的提示文本的。
+
+
+##### unique_for_date
+比如title字段设置:
 
 ```
     unique_for_date="pub_date"
-
 ```
 
-则 title字段和 pub\_date 字段都不能相同。也就是在某个日期内某个title只能有唯一值。可以看作一种 `unique_together` 的应用。
+则 title字段和 pub_date 字段都不能相同。也就是在某个日期内某个title只能有唯一值。可以看作一种 `unique_together` 的应用。
+
 
 #### 元类数据
 
@@ -291,8 +425,13 @@ class BaseModel(models.Model):
 
 
 #### ORM关系
+一般来说ORM关系有四种，多对一，多对多，一对一，一对多。其中django只需要实现多对一，反向查询就自动实现了一对多关系。
 
-**ForeignKey:** 外键引用，如果该字段的名字是user，那么实际存储在表格中的名字是user\_id，你可以通过 `db_column` 来实际控制该表格的名字。- 
+##### 一对一关系
+用 **OneToOneField** 来实现两个模型之间某两个字段的一对一关系。
+
+##### 多对一关系
+**ForeignKey:** 外键引用，如果该字段的名字是user，那么实际存储在表格中的名字是user_id，你可以通过 `db_column` 来实际控制该表格的名字。- 
 
 我们通常说的onetomany关系就是通过定义ForeignKey来获得的。比如：
 
@@ -311,17 +450,10 @@ class Address(models.Model):
 
 一个city有多个address，但是一个address只能有一个city，也就是一个外键映射到city那边。所以我觉得ForeignKey更确切的表示是manytoone关系，当某个模型有一个外键属性是，也就是可以有多个记录指向同一个它物 [参阅了这篇文章](https://chrisbartos.com/articles/how-to-implement-one-to-many-relationship-in-django/)。
 
-**OneToOneField**
-OneToOneField 比较简单，就是一个记录只有一个对应的属性，通常在用户管理的时候会用到。
+##### 多对多关系
+用 **ManyToManyField** 来实现多对多关系。
 
-**ManyToManyField**
-
-ManyToManyField 读者请参阅我写的 [sqlalchemy模块](https://a358003542.github.io/articles/sqlalchemy-module.html) 一文， 那里写得比较详细。
-
-
-
-关于模型定义的字段，更多的内容请参看官方文档。
-
+读者请参阅我写的 [sqlalchemy模块](https://a358003542.github.io/articles/sqlalchemy-module.html) 一文， 那里写得比较详细。
 
 
 #### 多字段组合唯一
@@ -340,7 +472,18 @@ ManyToManyField 读者请参阅我写的 [sqlalchemy模块](https://a358003542.g
 ```
 
 
+#### 自动设置主键
+如果你定义的模型里面没有字段给定选项 `primary_key=True` ，也就是你的模型里面没有主键字段，则django会自动为你的模型创建一个名叫 `id` 的字段。如果该模型所在的应用里面没有设置 `AppConfig.default_auto_field` ，则id字段的字段类型由 `DEFUALT_AUTO_FIELD` 全局配置指定，默认是：
 
+```
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+```
+
+如果你的应用配置指定了该值，比如：
+```
+    default_auto_field = 'django.db.models.BigAutoField'
+```
+则id字段类型为你指定的值。
 
 
 ### 模型的使用
@@ -404,6 +547,19 @@ result = Person.objects.filter(name="abc")
 ```
 
 
+#### select_related
+```
+queryset = Organization.objects.select_related('user')
+```
+返回一个 QuerySet，它将跟随外键关系，在执行查询时选择额外的相关对象数据。这是一个性能提升器，它导致一个更复杂的单一查询，但意味着以后使用外键关系将不需要数据库查询。
+
+官方文档就是上面这句话，个人不是特别理解。
+
+#### 查询外键关联表格属性
+Entry和Blog是manytoone干系，下面根据外键关联的表格的某个字段属性执行查询[过滤]操作。
+```
+Entry.objects.filter(blog__name='Beatles Blog')
+```
 
 #### 排序
 
@@ -465,6 +621,63 @@ b.related_name
 ```
 
 OnetoOne关系的使用非常简单， `a.b` 或者 `b.a` 都是可以的。
+
+### 模型层实战
+
+#### 扩展用户模型
+本小节主要参考了这篇 [不错的文章](https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html) 。
+
+一般扩展django自带的用户模型，最常见的就下面两种情况【实际上下面讨论的两种情况你可能都会用到】：
+
+##### User和Profile
+你对django原有的用户登录机制，也就是基于session和cookies那一套是满意的，但是觉得django原有的User里面用户的信息太少了不是很满意。那么可以新建一个Profile模型，然后将User和Profile建立onetoone关系。User那边是django原有的登录相关的东西，Profile这边是存放着更多的用户资料信息。一般在代码实践上会采用如下的信号机制：
+
+
+```python
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from apps.profiles.models import Profile
+
+from .models import User
+
+@receiver(post_save, sender=User)
+def create_related_profile(sender, instance, created, *args, **kwargs):
+    # Notice that we're checking for `created` here. We only want to do this
+    # the first time the `User` instance is created. If the save that caused
+    # this signal to be run was an update action, we know the user already
+    # has a profile.
+    if instance and created:
+        instance.profile = Profile.objects.create(user=instance)
+```
+
+从而保证每新建一个User就会新建一个对应的Profile记录。用户删除没必要删除记录，更改 `is_active` 布尔值即可。
+
+##### 自定义User模型
+你可能对django默认的auth机制，也就是基于session cookies的那套认证不太满意，那么你干脆直接建立自己的User模型，一般推荐还是继承自 `AbstractBaseUser` ， `AbstractBaseUser`里面做的很多工作都是和password这个字段相关的，一般来说django实现的这部分密码处理的代码就真的没必要自己去实现了。
+
+然后你需要在settings里面定义好:
+
+```
+AUTH_USER_MODEL = 'app_user.User'
+```
+
+指向你刚自定义的模型类。
+
+继承之后一般还推荐继承 `PermissionsMixin` 这个类。关于这块下面还会简单讨论点，但既然都自定义用户模型了，还是推荐参看django的源码，就是 `django.contrib.auth` 应用。
+
+这三个字段属性有特殊含义，都是可以自己设置的：
+
+```
+    USERNAME_FIELD = 'username'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['email']
+```
+
+然后你需要写好 objects 这个 UserManager ，其继承自 `BaseUserManager` ，你可以做其他一些定制，这个对应的就是之前我们看到的 `Model.objects.what` 之类的这种用法。在这里你需要根据自己的情况定义好： 
+
+- create_user
+- create_superuser
 
 
 
@@ -564,8 +777,190 @@ payload都推荐采用json的单字典格式形式。
 我对是否使用201 CREATED状态码是持保留意见的。
 
 ## django rest framework
+
+### APIView
+对于一般的视图函数根据HTTP请求方法的不同，我们一般会有如下代码：
+
+```python
+from django.http import HttpResponse
+
+def my_view(request):
+    if request.method == 'GET':
+        # <view logic>
+        return HttpResponse('result')
+```
+
+django那边提出View类的概念，只需要具体编写`get`、`post`等方法就实现了对应方法的响应。
+
+
+```python
+from django.http import HttpResponse
+from django.views import View
+
+class MyView(View):
+    def get(self, request):
+        # <view logic>
+        return HttpResponse('result')
+```
+
+django restframework的 APIView 继承自 django 的 View，然后针对restful风格的api提供了很多便捷的功能支持。此外rest framework还提供了 `GenericAPIView` 和 `RetrieveAPIView` 等等其他视图类，还提供了 `ListModelMixin` 等等其他Mixin，一般来说视图类的编写继承自 `APIView` 类即可，其他Mixin和视图类很方便，在应用上可以节省很多代码的编写，读者可以随着对这些视图类和Mixin的熟悉程度而慢慢使用之【对于新手推荐就直接使用APIView类，已经足够的好用了，rest fraemwork提供的其他视图类如果熟悉的话就用，不熟悉就不用，过多的类嵌套层次不一定是一件好事】。
+
+#### Request对象
+APIView视图类下面定义get，post等方法，默认第一个参数是request参数，即Request对象，这个对象有：
+
+- query_params 其对应的是URL参数上解析获得的参数，一般情况是GET方法的URL上的参数，但其他方法也可能会有。
+
+- data 其对应的是HTTP请求体BODY部分的解析内容，对于Restful风格API来说，一种常见的情况就是POST，PUT上传递过来的json字典值。而更厉害的是对于传过来的文件，表单其都有不错的支持。
+
+- user 如果请求经过认证了会返回相应的用户记录，你编写auth类的时候会知道的，如果没有认证，那么返回 `AnonymousUser`
+
+
+
+#### Response对象
+rest framework的Response对象继承自django的SimpleTemplateResponse类，其继承自django的HttpResponse对象，也就是最终返回的仍是django的HttpResponse对象，只是针对Restful风格API作了很多优化，一般来说是推荐使用rest framework提供的Response类。
+
+```
+Response(data, status=None, template_name=None, headers=None, content_type=None)
+```
+headers http协议响应头，status http状态码等等。
+
+下面贴上一个视图类的代码样例，因为rest framework的视图类编写的具体过程很是大同小异，多看几遍就清楚了该做那些事情了。
+
+```python
+class SnippetDetail(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Snippet.objects.get(pk=pk)
+        except Snippet.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(snippet)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(snippet, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+
+
+### 序列化
+rest framework的序列化类提供了沟通django的Model类到JSON数据格式之间的桥梁【说的简单点就是序列化就是数据从模型层流向python代码层的过程。】。
+
+比如下面是模型层到python代码层的过程，序列化之后的 `data` 就是python的字典值了。
+
+```
+serializer = SnippetSerializer(snippet)
+serializer.data
+# {'pk': 2, 'title': u'', 'code': u'print "hello, world"\n', 'linenos': False, 'language': u'python', 'style': u'friendly'}
+```
+
+下面的过程是反序列化过程【数据从python代码层流向模型层的过程】：
+
+```
+serializer = SnippetSerializer(data=data)
+serializer.save()
+```
+
+这个save方法具体行为如果你定义的save方法当然就是直接调用save方法，如果没有则依赖于你定义的 `create` 和 `update` 方法。如下所示：
+
+```
+    def create(self, validated_data):
+        return Comment.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.email = validated_data.get('email', instance.email)
+        instance.content = validated_data.get('content', instance.content)
+        instance.created = validated_data.get('created', instance.created)
+        instance.save()
+        return instance
+```
+
+#### ModelSerializer
+可以利用 `ModelSerializer` 类来更快地创建序列化类，比如上面的SnippetSerializer如果你是继承自Serializer类那么一些字段你是要一个个去定义的，而如果继承自 `ModelSerializer` 类则只需要指定一些模型字段就会自动创建，然后其有一个默认创建的 create和update方法，一般情况下这两个方法对于一般情况就够用了。
+
+
+```python
+from rest_framework import serializers
+
+class SnippetSerializer(serializers.ModelSerializer):
+    title = CharField(allow_blank=True, max_length=100, required=False)
+    
+    class Meta:
+        model = Snippet
+        fields = ('id', 'title', 'code', 'linenos', 'language', 'style')
+```
+**值得一提的是：** 上面这种写法，比如说title字段你也可以明确声明出来，下面fields再列出来也是不冲突的，因为可能有时默认的字段声明你不是很满意。
+
+```
+>>> from snippets.models import Snippet
+>>> snippet = Snippet(code='print "hello, world2"\n')
+>>> from snippets.serializers import SnippetSerializer
+>>> snippet.save()
+>>> serializer = SnippetSerializer(snippet)
+>>> serializer.data
+{'language': 'python', 'linenos': False, 'id': 3, 'title': '', 'code': 'print "hello, world2"\n', 'style': 'friendly'}
+```
+
+#### 查看ModelSerializer默认配置
+python manage.py shell
+
+```
+from myapp.serializers import AccountSerializer
+serializer = AccountSerializer()
+print(repr(serializer))
+```
+
+
+#### partial参数
+默认序列化类需要传入所有required字段数据，否则将抛出验证异常，可以传入 `partial=True` 来允许部分更新。
+
+
+#### is_valid 方法
+当反序列化的时候，一般需要调用 `is_valid` 方法来判断数据是否合适保存到模型层去。
+```
+serializer.is_valid(raise_exception=True)
+```
+
+你可以定义 `validate` 方法来进行目标对象的验证行为，或者定义 `validate_<fieldname>` 来定义字段级别的验证行为。
+
+```python
+    def validate(self, data):
+        """
+        Check that the start is before the stop.
+        """
+        if data['start'] > data['finish']:
+            raise serializers.ValidationError("finish must occur after start")
+        return data
+```
+
+
+
+#### 在序列化类里面引用request.user
+
+参考了 [这个问题](https://stackoverflow.com/questions/30203652/how-to-get-request-user-in-django-rest-framework-serializer) ，在序列化类里面需要通过 `self.context['request']` 来获取 request 对象，进而获取 user对象。
+
+```
+user =  self.context['request'].user
+
+```
+
 ### 渲染器
-可以用如下配置rest framework的全局默认渲染器：
+如下是配置rest framework的全局默认渲染器：
 
 ```
 REST_FRAMEWORK = {
@@ -691,6 +1086,11 @@ class UserJSONRenderer(ConduitJSONRenderer):
 
 UserJSONRenderer主要在ConduitJSONRenderer的基础上新增了一个token字段。
 
+**警告：** 上面的例子只是参考，还是有点问题的，比如media_type和renderer_context参数已经传递丢失了。
+
+renderer_context 里面的参数有：view, request, response, args, kwargs 。这些args和kwargs都是视图函数那边的。
+
+**警告：** 自定义的渲染器的返回值格式变动TestCase那边的测试代码是不知道的，因为那边调用的是response对象，你需要修改 `renderer_context['response']` 。
 
 ### 自定义异常处理
 对于API视图函数抛出的异常，可以通过异常处理函数，根据接受到的异常转成Response对象。
@@ -764,6 +1164,11 @@ REST_FRAMEWORK = {
 ```
 
 ### JWT认证
+首先说一下JWT认证和传统的session的区别在哪里，有很多文章会比较它们的优缺点，比如session需要服务器在数据库里面存储于是这是一笔额外的计算开销，这个是一个点，至于因此带来的服务器分布式的可扩展性问题会麻烦点，但不是没有办法解决。此外有的批评JWT的安全性的观点我认为是有待考量的，有的认为JWT具有实现简单的优势我也不是很认同，我不认为JWT会比session简单，结合对JWT的安全性的批评我们会发现，JWT作为一种新技术要将其用好，比如安全性方面完善好也不简单。所以我发现网上的关于JWT认证和基于session的认证的优缺点对比说的点我觉得都不是很重要，至少我可以确定在小用户量应用场景下这两者是不能说谁优于谁的。
+
+不过这里我提出一个点，这个点就是JWT认证在设计上会更加吻合HTTP的无状态特性，更吻合Restful 风格api的无状态设计理念。正确的设计理念有的时候很重要，人们谈论的很多问题JWT在实践上都可以慢慢完善，唯独这个设计理念如果不对味后面也是完善不了的。所以讨论了这么久无非是这个问题，服务器到底有没有必要存储session信息，看着数据库里面一堆乱码般的django_session数据库，这些无谓的临时冗余信息让我不是很喜欢，所以以下是个人的一家之言：如果你不清楚该用那种认证方式，那么推荐JWT认证。
+
+
 jwt认证的基本思路是对于某个api请求，用户输入用户名和密码，正确的话服务器返回jwt的token，然后后面用户要请求其他url则需要在HTTP请求的Header上加上 `Authorization` 这个字段。具体这个字段的值可能会有所差异的，我略微查看了pyjwt `version 2.3.0` 的源码，得到这一行：
 ```
 authentication.get_authorization_header(request)
@@ -914,126 +1319,9 @@ realworld的代码似乎并没有对jwt的时效性进行校对，此外jwt认�
 
 
 
-### APIView
-
-django restframework的 APIView 继承自 django 的 View，然后针对restful api 进行了很多优化，在某些情况下可能你编写的视图，就继承自APIView就是合适的，后面介绍的通用视图和其他高级视图等等，都是在某些情况下特别合适和让你少写代码，好用就用，仅此而已。如果不合适，那么自己定义 get post put 等等方法也是很方便的。
-
-
-在某些情况下使用 APIView 类和 Mixin 可能是最合适不过的，下面谈谈django restframework 提供的高级通用视图类。这些类都是继承自 `GenericAPIView` ，他们都有一个特点，那就是有点类似于 Serializer -> ModelSerializer 的升级过程，如果你的视图类方法主要操作对象是基于数据库Model的各个操作，那么推荐视图类继承自 `GenericAPIView` 。
-
-#### GenericAPIView
-
-GenericAPIView 继承自 django restframework 的 APIView 类，其提供的一个很重要的特性是 `queryset` ，你设定 queryset属性或者实现 `get_queryset` 方法，该视图类的很多方法都是围绕着`queryset` 来展开的。
-
-具体 CRUD 数据操作有对应的 Minxin类，然后和GenericAPIView 组合出了很多高级的视图类。
-
-一个好的建议对于这块，看源码，源码都很简单的，看懂了，发现符合自己的需要那就使用它，让自己少写点代码。如果有额外的定制需求，那就重写对应的某个方法就是了。
-
-## 序列化
-
-### 理解序列化过程
-
-django restframework的序列化类类似于django的表单类，不同的是django的表单类是用于沟通django的Model和网页form之间的桥梁；而序列化类是用于沟通django的Model类和JSON数据格式之间的桥梁。
-
-```
-注: Model -> Serializer （其data挂载的是python的dict字典值了）
-
-serializer = SnippetSerializer(snippet)
-serializer.data
-# {'pk': 2, 'title': u'', 'code': u'print "hello, world"\n', 'linenos': False, 'language': u'python', 'style': u'friendly'}
-```
-
-上面这个过程通常是在视图类特殊方法下，进行一些数据库操作之后获取数据库的目标Model的记录，然后送入序列化类，然后目标类的 `.data` 属性就是字典值了，送入Response哪里就可以作为HTTP响应的结果值了。
-
-
-
-然后还有下面这种用法，将某个字典data送入序列化类的data属性中，
-
-```
-serializer = SnippetSerializer(data=data)
-```
-
-调用序列化类的save方法来进一步完成相应的数据库操作。
-
-```
-serializer.save()
-```
-
-这个save方法具体行为依赖于你进一步定义序列化类里面的 `create` 和 `update` 方法。如下所示：
-
-```
-    def create(self, validated_data):
-        return Comment.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.email = validated_data.get('email', instance.email)
-        instance.content = validated_data.get('content', instance.content)
-        instance.created = validated_data.get('created', instance.created)
-        instance.save()
-        return instance
-```
-
-某些情况下你可能想直接定义save方法。
-
-
-
-### ModelSerializer
-
-类似于django的表单类，可以利用 `ModelSerializer` 类来更快地创建序列化类。
-
-```python
-from rest_framework import serializers
-
-class SnippetSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Snippet
-        fields = ('id', 'title', 'code', 'linenos', 'language', 'style')
-```
-
-为了证明这种简便写法对于上面的任务（包括create和update方法都会自动实现的）是完全应付得过来的。上面在shell里的代码再撸一遍。
-
-```
->>> from snippets.models import Snippet
->>> snippet = Snippet(code='print "hello, world2"\n')
->>> from snippets.serializers import SnippetSerializer
->>> snippet.save()
->>> serializer = SnippetSerializer(snippet)
->>> serializer.data
-{'language': 'python', 'linenos': False, 'id': 3, 'title': '', 'code': 'print "hello, world2"\n', 'style': 'friendly'}
-```
-
-
-
-### is_valid 方法
-
-```
-serializer.is_valid(raise_exception=True)
-```
-
-你可以定义 `validate` 方法来进行目标对象的验证行为，或者定义 `validate_<fieldname>` 来定义字段级别的验证行为。
-
-```python
-    def validate(self, data):
-        """
-        Check that the start is before the stop.
-        """
-        if data['start'] > data['finish']:
-            raise serializers.ValidationError("finish must occur after start")
-        return data
-```
-
-
-
-### 在序列化类里面引用request.user
-
-参考了 [这个问题](https://stackoverflow.com/questions/30203652/how-to-get-request-user-in-django-rest-framework-serializer) ，在序列化类里面需要通过 `self.context['request']` 来获取 request 对象，进而获取 user对象。
-
-```
-user =  self.context['request'].user
-
-```
 
 ## 权限管理
+权限管理很重要，而且内容很多，在实战中需要细心思考已确定你的应用的权限验证基本流程，并针对具体业务细节的不同要反复思考具体的权限分配问题。
 
 ### 认证
 
@@ -1067,6 +1355,29 @@ user =  self.context['request'].user
 自定义权限管理类还可以加上 `message` 属性，用户权限没通过抛出 `PermissionDenied` 异常的额外显示信息。
 
 
+## 测试
+```
+python manage.py test
+```
+运行应用里面的单元测试代码。一个样例如下：
+
+```
+from django.test import TestCase
+from .models import User
+
+class UserTestCase(TestCase):
+    def setUp(self):
+        User.objects.create_user(username="lion", password="123455", email="abc@django.com")
+
+    def test_animals_can_speak(self):
+        """Animals that can speak are correctly identified"""
+        lion = User.objects.get(username="lion")
+        self.assertEqual(lion.username, 'lion')
+```
+
+测试代码的运行会另外创建一个数据库，测试完之后删除。
+
+## admin站点
 
 
 
@@ -1318,7 +1629,7 @@ server {
 
 
 
-## 对外部署必看
+### 对外部署必看
 
 django项目如果对外部署的话，因为python是一个动态脚本语言，所以会有很多安全性的问题需要检查，否则你的项目对外会很不安全。本文主要参看官方文档的 [这里](https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/) 。
 
@@ -1330,11 +1641,11 @@ django项目如果对外部署的话，因为python是一个动态脚本语言�
 python manage.py check --deploy
 ```
 
-### settings.py 里密钥外置
+#### settings.py 里密钥外置
 
 settings.py 文件里面不要有任何密钥信息，包括 `SECRET_KEY` 你的数据库连接信息或者其他密钥等等，所有这些信息都应该作为环境变量引入或者从某个配置文件中读取出来。
 
-### ALLOWED_HOSTS
+#### ALLOWED_HOSTS
 
 要某是限定好域名，要某是你的nginx服务器那边对入口请求已经做好了限定，凡是不认识的域名HOST请求都抛出444错误：
 
@@ -1346,116 +1657,10 @@ server {
 ```
 
 ## 备用
-### 创建超级用户
-最开始创建的项目就把admin url挂上去了，你可以去 `/admin` 这个url下看一下，要想登录的需要如下创建一个超级用户：
-
-```
-python manage.py createsuperuser
-```
-
-### 交互式环境
-进入python交互环境，这个和纯python交互环境的区别就是里面可以直接使用django里面的一些东西了，比如你定义的模型对象就可以直接使用了。这个对你开发进行测试工作非常有用！
-
-```
-python manage.py shell
-```
-
-或者进入sql实现的交互环境:
-
-```
-python manage.py dbshell
-```
-
-## 附录
-
-
-### 扩展用户模型
-
-本小节主要参考了这篇 [不错的文章](https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html) 。一般扩展django自带的用户模型，最常见的就下面两种情况，实际上这两种情况你可能都会使用到。第一种是 User 模型 和 Profile 模型的分开，然后User用来存放登录相关信息，而Profile用来存放更多的用户资料信息，一般User 和 Profile 是 onetoone 关系，这个时候我们会考虑建立一个signals文件来保证没创建一个User就会跟着创建一个Profile：
-
-```python
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-from profiles.models import Profile
-
-from .models import User
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
-```
-
-然后你可能对django默认的auth机制，比如session cookies等不太满意，那么推荐你直接建立自己的 User 模型， 继承自 AbstractBaseUser ，我大概看了一下 AbstractBaseUser 的源码，其做的工作都是围绕着 password这个字段来的，而且只要你在settings里面定义好了:
-
-```
-AUTH_USER_MODEL = ...
-```
-
-就都是可以正常工作的。继承之后定义自己的字段这是不多用多说的，然后推荐进一步继承 `PermissionsMixin` 这个类。
-
-```
-class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_('email address'), unique=True)
-```
-
-`PermissionsMixin` 这个类定义了一些群组信息还有什么的。
-
-然后这三个字段属性有特殊含义，都是可以自己设置的：
-
-```
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
-```
-
-然后你需要写好 objects 这个 UserManager ，其继承自 `BaseUserManager` ，你可以做其他一些定制，这个是个什么东西？这个就是之前我们看到的 `Model.objects.what` 之类的这种用法。在这里你需要根据自己的情况定义好： 
-
-- create_user
-- create_superuser
-
-这两个方法即可。就用这两个方法来控制用户的创建行为。其中 `create_superuser` 主要负责把 
-
-- is_superuser
-- is_staff 
-
-设为True。
-
-### 基于类的视图
-
-首先我们从django哪里初步了解了下基于类的视图的概念，就是如下代码：
-
-```python
-from django.http import HttpResponse
-
-def my_view(request):
-    if request.method == 'GET':
-        # <view logic>
-        return HttpResponse('result')
-```
-
-变为更简洁的：
-
-```python
-from django.http import HttpResponse
-from django.views import View
-
-class MyView(View):
-    def get(self, request):
-        # <view logic>
-        return HttpResponse('result')
-```
-
-然后依赖类的继承，引入Minxin类，可以让我们在http的很多restful风格请求上，总是一次又一次出现的那些套路，实现代码复用。其基本知识就是python的类的继承，我们可以直接从django restframework 这个模块直接用手来见识这种DRY理念的实现。
-
 ### 自定义命令
+自定义命令的好处就是你写的python脚本可以类似在 `python manage.py shell` 环境内使用，比如一些数据库操作就可以直接写上python的ORM操作代码而不用关心数据库连接的问题。
 
-在目标app下面新建一个 `management` 文件夹，然后新建一个 `commands`  文件夹，注意这两个文件夹都要带上 `__init__.py` 文件。
+首先是在目标app下面新建一个 `management` 文件夹，然后新建一个 `commands`  文件夹，注意这两个文件夹都要带上 `__init__.py` 文件。
 
 然后commands文件夹里面就可以定义一些python脚本了，这些脚本成为命令可以直接如下调用：
 
@@ -1471,7 +1676,7 @@ python manage.py help
 
 来查看目前已经有的命令列表。
 
-一个基本的命令模块如下所示：
+一个基本的命令脚本编写大概如下所示：
 
 ```python
 from django.core.management.base import BaseCommand, CommandError
@@ -1495,6 +1700,37 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS('Successfully closed poll "%s"' % poll_id))
 ```
+
+
+
+### 创建超级用户
+最开始创建的项目就把admin url挂上去了，你可以去 `/admin` 这个url下看一下，要想登录的需要如下创建一个超级用户：
+
+```
+python manage.py createsuperuser
+```
+
+### 交互式环境
+进入python交互环境，这个和纯python交互环境的区别就是里面可以直接使用django里面的一些东西了，比如你定义的模型对象就可以直接使用了。这个对你开发进行测试工作非常有用！
+
+```
+python manage.py shell
+```
+
+或者进入sql实现的交互环境:
+
+```
+python manage.py dbshell
+```
+
+
+### 编码规范
+- 模型字段名应当全部小写，使用下划线代替驼峰命名。
+
+
+## 附录
+
+
 
 
 
@@ -1807,100 +2043,6 @@ var what = JSON.parse("{{ what | safe | escapejs }}")
 
 
 
-### 模型python2兼容性
-
-为了提高模型python2兼容性，推荐模型定义上加个如下装饰器。
-
-```
-from django.utils.encoding import python_2_unicode_compatible
-
-
-@python_2_unicode_compatible 
-class Question(models.Model):
-    # ...
-    def __str__(self):
-        return self.question_text
-```
-
-以前不加这个装饰器，python2之前用的是 `__unicode__` 方法。
-
-### 重置migrations
-
-一般的方法把migrations文件删掉，把表格删掉并不能成功，因为他们忽视了django_migrations这个表格里面的数据（参考了 [这个网页](https://stackoverflow.com/questions/23755523/how-to-reset-migrations-in-django-1-7)）。
-
-如果你把 `django_migrations` 里面的对应app的迁移数据删掉，然后再makemigrations和migrate，那么就更重新开始的一样。
-
-```
-python manage.py makemigrations app_name
-python manage.py migrate app_name
-```
-
-### 处理列表对象
-
-我们需要自定义一个model的新Field对象来解决这个问题，具体就叫做ListField。
-
-```
-def parse_to_python(value):
-    try:
-        value = ast.literal_eval(value)
-        return value
-    except Exception as e:
-        rasie ValidationError
-
-
-class ListField(models.TextField):
-    """
-    存储python列表对象
-    """
-    description = _("Stores a python list")
-
-    def __init__(self, *args, **kwargs):
-        super(ListField, self).__init__(*args, **kwargs)
-
-    def to_python(self, value):
-        if value is None:
-            value = value
-
-        if isinstance(value, list):
-            return value
-
-        return parse_to_python(value)
-
-    def get_prep_value(self, value):
-        if value is None:
-            return value
-
-        value = six.text_type(value)
-        return value
-
-    def value_to_string(self, obj):
-        value = self.value_from_object(obj)
-        return self.get_prep_value(value)
-
-    def from_db_value(self, value, expression, connection, context):
-        if value is None:
-            return value
-
-        return parse_to_python(value)
-
-```
-
-- `from_db_value` 当数据从数据库里面读取出来，总会调用这个方法。包括（including in aggregates and [`values()`](https://docs.djangoproject.com/en/1.11/ref/models/querysets/#django.db.models.query.QuerySet.values) calls。 所以这是最重要最核心的一个定制方法，其含义是很明显的，不用多说了。
-
-  ------
-
-这四个方法大体如下流程：
-
-```
-python  <- to_python  <-   from_db_value<- database
-
-python ->value_to_string -> get_prep_value -> database
-
-```
-
-**NOTICE** 上图主要是方便读者理解，实际上django并不是这样逐个处理的。按照官方文档的说法 `to_python` 和django的反序列（deserialization ）有关，其还必须处理好三种情况：None，目标对象，字符串情况。
-
-`value_to_string` 和序列化有关，和`to_python` 是相对的。`get_prep_value` 和我们在输入get(what='20170809') 执行查询是有关，讲过其转化成为sql实际查询中用到的字符串（比如说datetimefield）就做了一些额外的处理工作。 
 
 
 
@@ -1953,7 +2095,7 @@ class ArticlesRouter(object):
 
 从上面的代码可以看出来，你定义的模型 `Meta` 那里必须定义好 `app_label` 属性。更多信息请参看官方文档的 [这里](https://docs.djangoproject.com/en/1.11/topics/db/multi-db) 。
 
-### 如何根据django的模型对象来获取其对应的表格的名字
+### 获取模型对应的表格的名字
 
 参看 [这个网页](http://stackoverflow.com/questions/233045/how-to-read-the-database-table-name-of-a-model-instance) 。
 
@@ -2168,71 +2310,7 @@ python manage.py makemigrations app_name
 
 PS: 我知道stackoverflow那边都认为应该加上，还有人专门写了长篇大论认为应该加上。我确定的只有一点：早期测试开发过程，所有的migrations文件夹里面都只有 `__init__.py` 这个空白文件，保持代码整洁，在测试开发阶段不花精力在这上面，这是没有争议的。
 
-### request
 
-是的，我们的APIView的一些特殊含义的方法，都会接收一个 request对象，这个对象有：
-
-- query_params 获得GET传过来的参数
-- data 获得POST PUT PATCH 传过来的参数，这还没完，传过来的文件，表单都支持。
-- user 如果请求经过认证了会返回相应的用户记录，你编写auth类的时候会知道的，如果没有认证，那么返回 `AnonymousUser`
-
-
-
-### Response
-
-也就是一些特殊含义的方法的返回对象，其第一个参数是data，字典值，会自动封装成为json友好的格式。实际上我们经常看到的就是这个套路：
-
-```
-return Response(serializer.data)
-```
-
-然后 serializer 有个 `is_valid` 方法，用来序列化类输出前的预热。这两点在后面序列化的讨论中会涉及。其他一些我们看一下吧：
-
-```
-Response(data, status=None, template_name=None, headers=None, content_type=None)
-```
-
-headers http协议响应头，status http状态码等等。
-
-整个过程套路，很多高级视图的套路都类似于下面这个例子，多看几遍吧。
-
-```python
-class SnippetDetail(APIView):
-    """
-    Retrieve, update or delete a snippet instance.
-    """
-    def get_object(self, pk):
-        try:
-            return Snippet.objects.get(pk=pk)
-        except Snippet.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        serializer = SnippetSerializer(snippet, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        snippet = self.get_object(pk)
-        snippet.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-```
-
-urls.py那边加上的是:
-
-```
-url(r'^snippets/(?P<pk>[0-9]+)/$', views.SnippetDetail.as_view()),
-```
-
-这里正则表达式 `(?P<pk>[0-9]+)` 的意思是收集某一串数字，这一串数字被命名为 `pk` 。
 ### mysql数据库配置参考
 如果读者想使用mysql数据库，那么下面的配置可作参考：
 
@@ -2263,65 +2341,6 @@ url(r'^snippets/(?P<pk>[0-9]+)/$', views.SnippetDetail.as_view()),
         'charset': 'utf8'
     }
 ```
-
-### url上带参数
-
-```python
-from django.urls import re_path
-
-from . import views
-
-urlpatterns = [
-    re_path(r'^add/([\d]+)/([\d]+)$', views.add, name='add'),
-]
-```
-
-这里参数将逐个传递个视图函数，唯一值得一提的是django的视图函数默认第一个函数是传递进去的 `request` 参量。在 `views.py` 里面的内容如下:
-
-```python
-from django.http import HttpResponse
-
-def add(request, a, b):
-    res = int(a) + int(b)
-    return HttpResponse(str(res))
-```
-
-上面这种正则表达式的写法是老式的django的url写法，一般没有特别的需求的话，应该按照django官方教程，采用下面的推荐写法：
-
-```python
-from django.urls import path
-
-from . import views
-
-urlpatterns = [
-    path('add/<int:a>/<int:b>', views.add, name='add'),
-]
-```
-
-
-
-
-
-### url定义name
-
-`name` 这个参量大体类似于flask的 `endpoint` 的概念，然后django还有的 `reverse` 函数，其大体类似于flask的 `url_for` 的概念。
-
-比如上面视图函数的 add 对应的url我们可以如下获得:
-
-```
-from django.core.urlresolvers import reverse
-reverse('add',args=(1,2))
-```
-
-然后在模板中有:
-
-```
-<a href="{% url 'add' 1 2 %}">link</a>
-```
-
-### 获取full-url
-
-上面提到的reverse函数返回的url字符串还不是完整的url，而只是相对url。如果我们要获取全站的完整url则可以使用 `request.build_absolute_uri(location)` ，如果不指定location则默认是当前的url。
 
 
 
@@ -2389,3 +2408,105 @@ class YourRouter(object):
             return db == 'youapp'
         return None
 ```
+
+## Deprecate
+
+### 模型python2兼容性
+
+为了提高模型python2兼容性，推荐模型定义上加个如下装饰器。
+
+```
+from django.utils.encoding import python_2_unicode_compatible
+
+
+@python_2_unicode_compatible 
+class Question(models.Model):
+    # ...
+    def __str__(self):
+        return self.question_text
+```
+
+以前不加这个装饰器，python2之前用的是 `__unicode__` 方法。
+
+
+
+### 重置migrations
+本小节讨论价值不大，如果你是想清空本数据库的数据，则flush即可。如果你还不满意，那么直接删除整个数据库即可，没必要专门针对某个表格来较劲。
+
+一般的方法把migrations文件删掉，把表格删掉并不能成功，因为他们忽视了django_migrations这个表格里面的数据（参考了 [这个网页](https://stackoverflow.com/questions/23755523/how-to-reset-migrations-in-django-1-7)）。
+
+如果你把 `django_migrations` 里面的对应app的迁移数据删掉，然后再makemigrations和migrate，那么就更重新开始的一样。
+
+```
+python manage.py makemigrations app_name
+python manage.py migrate app_name
+```
+
+
+### 处理列表对象
+不推荐下面的处理方式了，现在一般数据库都支持JSONField，用JSONField存储列表即可，用下面方式还不一定稳定好用。
+
+我们需要自定义一个model的新Field对象来解决这个问题，具体就叫做ListField。
+
+```
+def parse_to_python(value):
+    try:
+        value = ast.literal_eval(value)
+        return value
+    except Exception as e:
+        rasie ValidationError
+
+
+class ListField(models.TextField):
+    """
+    存储python列表对象
+    """
+    description = _("Stores a python list")
+
+    def __init__(self, *args, **kwargs):
+        super(ListField, self).__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        if value is None:
+            value = value
+
+        if isinstance(value, list):
+            return value
+
+        return parse_to_python(value)
+
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+
+        value = six.text_type(value)
+        return value
+
+    def value_to_string(self, obj):
+        value = self.value_from_object(obj)
+        return self.get_prep_value(value)
+
+    def from_db_value(self, value, expression, connection, context):
+        if value is None:
+            return value
+
+        return parse_to_python(value)
+
+```
+
+- `from_db_value` 当数据从数据库里面读取出来，总会调用这个方法。包括（including in aggregates and [`values()`](https://docs.djangoproject.com/en/1.11/ref/models/querysets/#django.db.models.query.QuerySet.values) calls。 所以这是最重要最核心的一个定制方法，其含义是很明显的，不用多说了。
+
+  ------
+
+这四个方法大体如下流程：
+
+```
+python  <- to_python  <-   from_db_value<- database
+
+python ->value_to_string -> get_prep_value -> database
+
+```
+
+**NOTICE** 上图主要是方便读者理解，实际上django并不是这样逐个处理的。按照官方文档的说法 `to_python` 和django的反序列（deserialization ）有关，其还必须处理好三种情况：None，目标对象，字符串情况。
+
+`value_to_string` 和序列化有关，和`to_python` 是相对的。`get_prep_value` 和我们在输入get(what='20170809') 执行查询是有关，讲过其转化成为sql实际查询中用到的字符串（比如说datetimefield）就做了一些额外的处理工作。 
