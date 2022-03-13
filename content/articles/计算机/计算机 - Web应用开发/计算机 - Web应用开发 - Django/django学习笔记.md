@@ -708,7 +708,9 @@ api.what.com/resource_name/<id>/resource_name2/<id>
 上面的resource_name2的意思是SQL关系数据库中的关系，某个resource_name会关联多个resource_name2。
 
 ### HTTP方法
-按照Restful 风格推荐就采用四种方法：GET, POST, PUT, DELETE。还有一个PATCH方法不太推荐使用。具体这四种方法的分工就是增删改查对应POST，DELETE，PUT，GET。
+按照Restful 风格推荐就采用四种方法：GET, POST, PUT, DELETE。还有一个PATCH方法不太推荐使用。具体这四种方法的分工就是增删改查对应POST，DELETE，PUT，GET，前面这样的简单用数据库增删改查来对应Restful api风格的四种方法大体是正确了，除了一点，那就是PUT也可以用于新增记录。也就是POST一定是只能用于新增记录insert，而PUT是insert or update。
+
+一般来说GET方法权限审核最宽松，POST方法次之，PUT方法和DELETE方法的权限审核最严，有时甚至完全不会将api写出来。
 
 
 ### 返回内容
@@ -889,6 +891,26 @@ serializer.save()
         instance.save()
         return instance
 ```
+#### Serializer类
+Serializer类的初始化方法了解一下：
+```
+    def __init__(self, instance=None, data=empty, **kwargs):
+```
+第一个参数是instance，如果这个设置了，那么后面save的时候会调用update方法，否则调用create方法。
+
+第二个参数data为我们很熟悉了。
+
+kwargs里面还有一个参数值得一提，有的时候序列化类里面某些方法可能需要一些特殊的参数，比如：
+```
+        serializer = self.serializer_class(profile, context={
+            'request': request
+        })
+```
+
+后面序列化类的自定义方面里面可以如下调用这个request对象：
+```
+request = self.context.get('request', None)
+```
 
 #### ModelSerializer
 可以利用 `ModelSerializer` 类来更快地创建序列化类，比如上面的SnippetSerializer如果你是继承自Serializer类那么一些字段你是要一个个去定义的，而如果继承自 `ModelSerializer` 类则只需要指定一些模型字段就会自动创建，然后其有一个默认创建的 create和update方法，一般情况下这两个方法对于一般情况就够用了。
@@ -916,6 +938,22 @@ class SnippetSerializer(serializers.ModelSerializer):
 {'language': 'python', 'linenos': False, 'id': 3, 'title': '', 'code': 'print "hello, world2"\n', 'style': 'friendly'}
 ```
 
+ModelSerializer实现了一个版本的create和update方法，你可能会对默认的版本不太满意，则你可以自己去定义自己的版本。这两个方法具体是在调用 `save` 的时候被调用的，当instance没有传入进序列化对象的时候，其会调用create方法；如果instance对象传入进来了，则调用update方法。
+
+```python
+        validated_data = {**self.validated_data, **kwargs}
+        if self.instance is not None:
+            self.instance = self.update(self.instance, validated_data)
+            assert self.instance is not None, (
+                '`update()` did not return an object instance.'
+            )
+        else:
+            self.instance = self.create(validated_data)
+            assert self.instance is not None, (
+                '`create()` did not return an object instance.'
+            )
+```
+
 #### 查看ModelSerializer默认配置
 python manage.py shell
 
@@ -925,6 +963,17 @@ serializer = AccountSerializer()
 print(repr(serializer))
 ```
 
+#### source参数
+source对于字段的一般含义如下所示：
+```
+    if self.source is None:
+        self.source = field_name
+```
+
+ 默认为None，然后赋值为字段名。扩展的用法如下：
+
+ 1. `URLField(source='get_absolute_url')` 根据序列化类的方法来获得值
+ 2. `EmailField(source='user.email')` 通过关系字段获得扩展属性，注意如果关系字段为NULL则会报错，最好设置下default值。
 
 #### partial参数
 默认序列化类需要传入所有required字段数据，否则将抛出验证异常，可以传入 `partial=True` 来允许部分更新。
@@ -948,7 +997,31 @@ serializer.is_valid(raise_exception=True)
         return data
 ```
 
+#### read_only和write_only
+序列化类的某个字段设置为 `read_only` 则该字段不会进入 read 和 update 方法的 `validated_data` 参数，但可以用于 `.data` 的序列化展示数据。
 
+如果某个字段设置为 `write_only` ，则该字段不会 `.data` 的序列化数据展示，但会进入 read 和 update 方法的 `validated_data` 参数中。
+
+#### SerializerMethodField
+这是一个read_only 字段，可以通过某个方法来给你的 `.data` 序列化输出增加额外的字段信息。
+
+**NOTICE: ** 注意目标方法接受两个参数。
+
+```python
+from django.contrib.auth.models import User
+from django.utils.timezone import now
+from rest_framework import serializers
+
+class UserSerializer(serializers.ModelSerializer):
+    days_since_joined = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    def get_days_since_joined(self, obj):
+        return (now() - obj.date_joined).days
+```
 
 #### 在序列化类里面引用request.user
 
@@ -1378,8 +1451,12 @@ class UserTestCase(TestCase):
 测试代码的运行会另外创建一个数据库，测试完之后删除。
 
 ## admin站点
+简单的admin站点配置就是：
 
-
+```
+admin.site.register(Profile)
+```
+即添加对应的模型类，更复杂的则需要继承自 `forms.ModelForm` ，然后进行一些管理页面上的调配。
 
 ## 日志
 
@@ -1450,20 +1527,16 @@ LOGGING = {
     },
     'handlers': {
         'log_file': {
-            'class': 'sdsom.common.log.DedupeRotatingAndTimedRotatingFileHandler',
-            'filename': config.get('web', 'log_path'),
-            'when': 'midnight',
-            'maxBytes':int(config.get('web','log_max_bytes')),
-            'interval': 1,
-            'backupDay': int(config.get('web', 'log_backup_days')),
-            'dedupetime': int(config.get('web', 'log_dedupe_time')),
-            'formatter': 'simple'
+            'class': 'logging.FileHandler',
+            'filename': 'django.log',
+            'formatter': 'simple',
+            'level': 'DEBUG'
         },
     },
     'loggers': {
-        'django.request': {
+        'django': {
             'handlers': ['log_file'],
-            'level': config.get('web', 'log_level'),
+            'level': 'DEBUG',
             'propagate': True,
         },
     }
@@ -1472,6 +1545,138 @@ LOGGING = {
 
 
 
+## django和celery
+本小节主要讲一下celery的基本概念，还有和django的集成问题，更多celery的知识请参阅官方文档，celery的官方文档在 [这里](http://docs.celeryproject.org/en/latest/index.html) 。
+
+首先说一下为什么要使用celery，首先明确任务这个概念，这里讨论的任务是指你的程序主要运行流程中的一些子任务，你的程序主要工作流程中附加的一些子进程或子线程等。比如说Web server的主任务是对HTTP的API请求进行响应，另外一些附加的子进程和子线程都可以叫做子任务，但这里面有些是不需要或者不适合使用celery的，有的子进程或子线程处理的任务本质上仍然是主工作任务的一部分，有的子任务很简单也没必要上celery，有以下应用场景的则推荐使用celery来对这些子任务进行管理：
+
+- 只有那些有特殊调度需求的子任务
+- 长时间后台运行的子任务
+- 数量很多的子任务
+
+
+### celery的核心概念
+
+- broker  任务队列服务提供者，celery推荐使用redis或者rabbitmq作为broker。
+- task 具体执行的任务，其实就是定义的一些函数。
+- backend 用来存储任务之后的输出结果
+- worker celery的启动就是开启一个worker。
+
+
+### django内文件安排
+本小节参考了 [这篇文章](https://medium.com/@yehandjoe/celery-4-periodic-task-in-django-9f6b5a8c21c7) 和 [这篇文章](http://geek.csdn.net/news/detail/128791) 。
+
+需要提醒读者的是，django和celery集成现在并不需要额外安装什么插件了，经过下面额外的配置之后其他细节问题都可以参看celery文档了。
+
+首先推荐在你的django `settings.py` 旁新建个 `celeryconfig.py` 文件，有的教程让设置这个配置文件名字为 `celery.py` ，这样很不好，文件名和某个模块名字重复有时会出问题的。里面的内容如下：
+
+```python
+import os
+from celery import Celery
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_name.settings')
+
+app = Celery('project_name')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+
+
+@app.task(bind=True)
+def debug_task(self):
+    print('Request: {0!r}'.format(self.request))
+```
+
+这个新建的任务不过是方便测试罢了，然后上面几行配置基本上死的。最值得讲的就是这两行：
+
+```
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+```
+
+第一行是从django的配置对象中读取配置，特别注意的就是那个 `namespace='CELERY'` ，这样只有 `CELERY_` 开头的配置才会读取，而且对应原celery配置的关系是：
+
+```
+CELERY_BROKER_URL  -> BROKER_URL
+```
+
+我那次就是 `CELERY_BEAT_SCHEDULE` 写成了 `CELERYBEAT_SCHEDULE` 然后发现周期性程序总启动不起来。
+
+第二行也是一个优化细节，从函数名字也可以看到，就是自动发现任务。在你的django的其他app里面新建一个 `tasks.py` ，celery会自动发现你定义的任务。
+
+
+还是你的django项目的 `settings.py` 那个文件夹里面，`__init__.py` 推荐写上这几行内容：
+
+```
+from .celeryconfig import app as celery_app
+
+__all__ = ('celery_app',)
+```
+
+### celery配置
+
+具体celery的一些配置就统一写在 `settings.py` 文件里面，上面也提到了，都要 `CELERY_` 开头，大体如下所示：
+
+```
+CELERY_BROKER_URL = 'redis://localhost:6379'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Shanghai'
+# schedules
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'every_miniute_for_test': {
+        'task': 'apps.workflow.tasks.test_celery',
+        'schedule': crontab(),
+    },
+}
+
+```
+
+### 定义任务
+好了，定义任务，实际上就是定义一个函数，比如下面这个简单的打印函数来确认celery周期程序是工作着的：
+
+```
+from celery import shared_task
+
+@shared_task()
+def test_celery():
+    print('celery is working.')
+```
+
+celery的crontab功能很强大，比如上面的 `crontab()` 就是每分钟执行一次。具体请参看 [官方文档](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html) 。
+
+### 启动任务
+
+和celery其他操作都是一样的，就是启动worker：
+
+```
+celery -A project_name worker -l info
+```
+
+`-A` 选项跟着 celery app的名字，在这里也就是django项目的名字。 `-l` 选项设置日志打印级别。
+
+你还可以加上 `-B` 来同时启动周期性任务。
+
+或者另外开个命令：
+
+```
+celery -A project_name beat -l info
+```
+
+
+#### 手工启动一次任务
+
+参考了 [这个网页](https://stackoverflow.com/questions/12900023/how-can-i-run-a-celery-periodic-task-from-the-shell-manually) 。
+
+```
+$ python manage.py shell
+>>> from myapp.tasks import my_task
+>>> eager_result = my_task.apply()
+
+```
 
 
 
@@ -1656,7 +1861,13 @@ server {
 }
 ```
 
+
+
+
 ## 备用
+### 线程池管理后台多个子任务
+
+
 ### 自定义命令
 自定义命令的好处就是你写的python脚本可以类似在 `python manage.py shell` 环境内使用，比如一些数据库操作就可以直接写上python的ORM操作代码而不用关心数据库连接的问题。
 
@@ -1733,154 +1944,6 @@ python manage.py dbshell
 
 
 
-
-### django和celery
-
-django-crontab这个模块我试过的，还是很便捷的，不过其还是基于系统的crontab，而如果我们将django和celery组合起来，celery灵活的消息分发机制，无疑将给未来开发带来更多的可能性。celery的官方文档在 [这里](http://docs.celeryproject.org/en/latest/index.html) ，本文主要讲一下celery的基本概念和django的集成问题，更多celery的知识请参阅官方文档。
-
-
-
-#### celery的核心概念
-
-- broker  任务队列服务提供者，celery推荐使用redis或者rabbitmq作为broker。
-- task 具体执行的任务，其实就是定义的一些函数。
-- backend 用来存储任务之后的输出结果
-- worker celery的启动就是开启一个worker。
-
-
-
-#### django内文件安排
-
-本小节参考了 [这篇文章](https://medium.com/@yehandjoe/celery-4-periodic-task-in-django-9f6b5a8c21c7) 和 [这篇文章](http://geek.csdn.net/news/detail/128791) 。需要提醒读者的是，django和celery集成现在并不需要额外安装什么插件了，而且下面讲的配置实际上就是一个单独的celery app大部分都是类似的，只是多了一些细节上的处理和优化。
-
-##### celeryconfig.py 
-
-首先推荐在你的django app `settings.py` 旁新建个 `celeryconfig.py` 文件，有的教程让设置这个配置文件名字为 `celery.py` ，这样很不好，文件名和某个模块名字重复有时会出问题的。里面的内容如下：
-
-```python
-import os
-from celery import Celery
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_name.settings')
-
-app = Celery('project_name')
-app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
-
-
-@app.task(bind=True)
-def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
-```
-
-这个下面新建的任务不过是方便测试罢了，然后上面几行配置基本上死的。最值得讲的就是这两行：
-
-```
-app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
-```
-
-第一行是从django的配置对象中读取配置，特别注意的就是那个 `namespace='CELERY'` ，这样只有 `CELERY_` 开头的配置才会读取，而且对应原celery配置的关系是：
-
-```
-CELERY_BROKER_URL  -> BROKER_URL
-```
-
-我那次就是 `CELERY_BEAT_SCHEDULE` 写成了 `CELERYBEAT_SCHEDULE` 然后老实发现周期性程序启动不起来。
-
-第二行也是一个优化细节，从函数名字也可以看到，就是自动发现任务。在你的django的其他app里面新建一个 `tasks.py` ，celery会自动发现你定义的任务。
-
-
-
-##### `__init__.py` 
-
-还是你的django项目的project `settings.py` 那个文件夹里面，`__init__.py` 推荐写上这几行内容：
-
-```
-from .celeryconfig import app as celery_app
-
-__all__ = ('celery_app',)
-```
-
-##### settings.py
-
-具体celery的一些配置就统一写在 `settings.py` 文件里面，上面也提到了，都要 `CELERY_` 开头，大体如下所示：
-
-```
-CELERY_BROKER_URL = 'redis://localhost:6379'
-#CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-#CELERY_ACCEPT_CONTENT = ['application/json']
-#CELERY_RESULT_SERIALIZER = 'json'
-#CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Shanghai'
-# schedules
-from celery.schedules import crontab
-CELERY_BEAT_SCHEDULE = {
-    'crawl_juhe_every_one_hour': {
-         'task': 'wxarticles.tasks.crawl_juhe',
-         'schedule': crontab(minute=0, hour='*/3'),
-    },
-    'every_miniute_for_test': {
-        'task': 'wxarticles.tasks.test_celery',
-        'schedule': crontab(),
-    },
-}
-
-
-```
-
-##### 定义任务
-
-好了，定义任务，实际上就是定义一个函数，比如下面这个简单的打印函数来确认celery周期程序是工作着的：
-
-```
-from celery import shared_task
-
-@shared_task()
-def test_celery():
-    print('celery is working.')
-```
-
-celery的crontab功能很强大，比如上面的 `crontab()` 就是每分钟执行一次。具体请参看 [官方文档](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html) 之。
-
-##### 启动任务
-
-和celery其他操作都是一样的，就是启动worker：
-
-```
-celery -A project_name worker -l info
-```
-
-`-A` 选项跟着 celery app的名字，在这里也就是django项目的名字。 `-l` 选项设置日志打印级别。
-
-你还可以加上 `-B` 来同时启动周期性任务。
-
-或者另外开个命令：
-
-```
-celery -A project_name beat -l info
-```
-
-
-
-
-
-------
-
-其他制作脚本啊，制作后台程序，制作服务啊，使用supervisor啊，实际上和celery关系已经不大了，可以不在这里说了。
-
-
-
-##### 手工启动一次任务
-
-参考了 [这个网页](https://stackoverflow.com/questions/12900023/how-can-i-run-a-celery-periodic-task-from-the-shell-manually) 。
-
-```
-$ python manage.py shell
->>> from myapp.tasks import my_task
->>> eager_result = my_task.apply()
-
-```
 
 
 
