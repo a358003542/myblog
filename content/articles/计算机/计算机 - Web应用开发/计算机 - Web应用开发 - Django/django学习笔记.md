@@ -212,11 +212,14 @@ class AppUserConfig(AppConfig):
 
 默认是 `DEFAULT_AUTO_FIELD` 配置的，通过 `default_auto_field` 可以配置本应用的隐式主键类型。
 
+
 ### ready方法
 可以通过重写 `ready` 方法，来初始化本app的一些信号配置。
 
 关于信号这块在信号那一小节集中讨论。
 
+### app_label
+默认是 name的最后一段内容，这个app_label参数还是很重要的，比如引用外键，第一段就是app_label，第二个就是模型的名字。比如 `user.has_perm` 方法接受的参数第一段就是app_label，第二段是权限的code name。
 
 
 ## 模型层
@@ -622,6 +625,84 @@ b.related_name
 
 OnetoOne关系的使用非常简单， `a.b` 或者 `b.a` 都是可以的。
 
+#### 从数据库刷新对象
+可以通过调用模型实例的 `refresh_from_db` 方法来从数据库中更新数据：
+
+```python
+def test_update_result(self):
+    obj = MyModel.objects.create(val=1)
+    MyModel.objects.filter(pk=obj.pk).update(val=F('val') + 1)
+    # At this point obj.val is still 1, but the value in the database
+    # was updated to 2. The object's updated value needs to be reloaded
+    # from the database.
+    obj.refresh_from_db()
+    self.assertEqual(obj.val, 2)
+```
+
+#### queryset的update方法
+queryset的update方法应该是对应SQL语句的UPDATE语句：
+
+如果只是更新一个记录的某个字段并不需要其他操作的模型层代码最好是如下写：
+```
+Entry.objects.filter(id=10).update(comments_on=False)
+```
+而不是这样写：
+```
+e = Entry.objects.get(id=10)
+e.comments_on = False
+e.save()
+```
+
+直接用update方法会更高效一些，但是效率固然是一方面，也要记住你的post_save，pre_save信号是依赖save方法的调用的，如果你的模型有这方面信号依赖，那么要慎重改动。此外还有如果你的程序逻辑对save方法进行了重载并加入了一些额外的逻辑，那么也要慎重改动。
+
+#### 更多的自定义方法
+模型类类似python的其他类一样可以加入更多的自定义方法，这些方法的作用对象是本模型实例。而模型管理类则是不能直接获取到模型实例的，需要查询动作。
+
+#### 原生SQL语句查询
+```
+Manager.raw(raw_query, params=(), translations=None)
+```
+
+#### 模型的继承
+1. 利用抽象基类来实现模型的继承，来避免模型字段的重复输入。抽象基类被继承时其Meta定义的属性也会被合理有选择性地继承。
+
+2. 多表继承
+
+3. 代理模型，不修改数据库字段相关信息，只是在修改python面对模型层数据的行为。
+
+```
+rom django.db import models
+
+class Person(models.Model):
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+
+class MyPerson(Person):
+    class Meta:
+        proxy = True
+
+    def do_something(self):
+        # ...
+        pass
+```
+代理模型和原模型都是在操作同一个数据库表格。可以通过代理模型来定义另外一种排序方法。
+
+
+#### 两个模型实例的==比较
+比较的是pk主键值。
+
+
+
+
+### 跨关系查询
+Entry manytoone blog
+
+可以如下用双下划线来实现跨关系查询，django在幕后自动处理SQL的join关系。
+```
+Entry.objects.filter(blog__name='Beatles Blog')
+```
+
+
 ### 模型层实战
 
 #### 扩展用户模型
@@ -679,6 +760,12 @@ AUTH_USER_MODEL = 'app_user.User'
 - create_user
 - create_superuser
 
+##### 其他内容
+- REQUIRED_FIELDS 对django没有什么影响，唯一的影响就是createsuperuser的时候会弹出该字段的输入提示，一般没有设置 `blank = True` 的字段都可以加到该字段里面。
+
+- EMAIL_FIELD 影响 `get_email_field_name` 方法
+
+- USERNAME_FIELD ModelBackend的authenticate方法默认会先试着用 username+passworld来进行，如果你指定其他字段，则会试着从那个字段+passworld的方式来进行认证。
 
 
 ## 视图层
@@ -708,7 +795,9 @@ api.what.com/resource_name/<id>/resource_name2/<id>
 上面的resource_name2的意思是SQL关系数据库中的关系，某个resource_name会关联多个resource_name2。
 
 ### HTTP方法
-按照Restful 风格推荐就采用四种方法：GET, POST, PUT, DELETE。还有一个PATCH方法不太推荐使用。具体这四种方法的分工就是增删改查对应POST，DELETE，PUT，GET，前面这样的简单用数据库增删改查来对应Restful api风格的四种方法大体是正确了，除了一点，那就是PUT也可以用于新增记录。也就是POST一定是只能用于新增记录insert，而PUT是insert or update。
+按照Restful api风格就推荐使用HTTP的这五种方法：GET, POST, PUT, DELETE和PATCH。
+
+具体在使用上首先简单的理解就是对应数据库的增删改查来对应POST，DELETE，PUT，GET这四种方法。然后在细节上POST只能用户新增记录insert逻辑，PUT则是insert or update逻辑，PATCH只能用户update更新逻辑。
 
 一般来说GET方法权限审核最宽松，POST方法次之，PUT方法和DELETE方法的权限审核最严，有时甚至完全不会将api写出来。
 
@@ -754,9 +843,10 @@ payload都推荐采用json的单字典格式形式。
 - reverse 排序是否反转的参数
 
 ### 选择合适的状态码响应
-状态码不建议弄得太复杂，必要的异常错误信息都推荐在payload的msg字段里面列出。下面列出几个必要的：
+状态码不建议弄得太复杂，下面列出几个必要的：
 
 - 200 正确执行 
+- 201 POST成功新增
 
 - 400 BAD REQUEST 请求参数有误
 - 401 未认证 用户未登陆未被识别
@@ -766,17 +856,9 @@ payload都推荐采用json的单字典格式形式。
 
 - 500 服务器内部错误 某些情况下需要这个状态码
 
-上面这些状态码是HTTP请求包都还没有进入到django视图函数的具体执行过程就应该返回，如果程序逻辑进入了视图函数并且已经封装好了json payload，哪怕这个json里面封装的是这样的错误信息：
 
-```
-{
-    'code': 10001,
-    'msg': 'your error msg'
-}
-```
-推荐状态码也应该是200。
 
-我对是否使用201 CREATED状态码是持保留意见的。
+
 
 ## django rest framework
 
@@ -1390,31 +1472,82 @@ realworld的代码似乎并没有对jwt的时效性进行校对，此外jwt认�
 一般access_token时效性会设置的较短，大概几分钟的样子。在应用上不可能要求用户时不时得就输入用户名和密码，于是人们参考OAUTH2的认证方式提出了refresh token的概念，在用户首次登陆输入用户名和密码的请求哪里，还会返回一个时效性较长的refresh token，平时用access token去请求和之前的过程一样，区别就是客户端自己把那个refresh token存起来了，当客户端发现access token过期了的时候会像服务器的refresh token api 发送refresh token请求，带上的就是客户端自己保存的refresh token，服务器判断token有效，就会返回新的access token和新的refresh token。
 
 
+## 认证和权限
+django rest framework的配置 `DEFAULT_AUTHENTICATION_CLASSES` 默认是：
+
+```
+'DEFAULT_AUTHENTICATION_CLASSES': [
+    'rest_framework.authentication.SessionAuthentication',
+    'rest_framework.authentication.BasicAuthentication'
+],
+```
+其对应的是APIView类下的配置：
+```
+authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
+```
+
+具体到APIView类的每个HTTP请求都会经过一些预处理，这其中就包括调用各个认证类的 authenticate方法。
+
+而django的 `AUTHENTICATION_BACKENDS` 配置默认是：
+```
+AUTHENTICATION_BACKENDS = (
+    # default django authenticate method
+    'django.contrib.auth.backends.ModelBackend',
+)
+```
+
+对应的是 `from django.contrib.auth import authenticate` 这个authenticate这个函数。在实践中这两个功能会分离出来：django提供的authenticate方法和用户的登录行为相关，这个方法只是返回User对象，说的再直白点这个只和login那一个api有关系。对于其他众多的restful 风格的api的请求仍然是需要一个认证过程的，这个认证就是通过rest framework提供的认证类来做的，这些认证类同样也有一个 authentication 方法，其返回的有User对象和token。
+
+django rest framework的 `permission_classes` 来确定目标视图类的权限管理行为，默认是 `AllowAny` 。上面的认证过程做完了就会进入权限管理逻辑，也就是说在权限检查的时候 `request.user`  `request.auth` 已经是可以调用的了。
+
+最简单的权限管理类就是 `IsAuthenticated` ：
+
+```
+class IsAuthenticated(BasePermission):
+    """
+    Allows access only to authenticated users.
+    """
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated)
+```
+
+这个确认 `request.user` 是可用的，也就是是登录用户是可以理解的，这个 `request.user.is_authenticated` 有点看不懂，简单查了一下似乎这个值总是True，是django因为兼容性问题写的代码。
+
+最后就是`AUTHENTICATION_BACKENDS`里面认证权限不分家，django的ModelBackend自带权限校验，这块内容有点多，后面有时间再慢慢讨论。
+
+再来看下面这段代码：
+```
+def get_user(request):
+    if not hasattr(request, '_cached_user'):
+        request._cached_user = auth.get_user(request)
+    return request._cached_user
+
+
+class AuthenticationMiddleware(MiddlewareMixin):
+    def process_request(self, request):
+        if not hasattr(request, 'session'):
+            raise ImproperlyConfigured(
+                "The Django authentication middleware requires session "
+                "middleware to be installed. Edit your MIDDLEWARE setting to "
+                "insert "
+                "'django.contrib.sessions.middleware.SessionMiddleware' before "
+                "'django.contrib.auth.middleware.AuthenticationMiddleware'."
+            )
+        request.user = SimpleLazyObject(lambda: get_user(request))
+```
+
+看的出来 `request.user` 的效果是 `AuthenticationMiddleware` 中间件做到的，然后 `get_user` 会调用各个backend的`get_user` 方法来获得user对象。 
 
 
 
-## 权限管理
-权限管理很重要，而且内容很多，在实战中需要细心思考已确定你的应用的权限验证基本流程，并针对具体业务细节的不同要反复思考具体的权限分配问题。
-
-### 认证
-
-在视图类里定义 `authentication_classes` 来确定目标视图类的认证行为，如果没有则采取默认的认证管理类行为。
 
 ### 自定义身份认证
-
 写自己的身份认证类，继承自 `BaseAuthentication` ，然后重写 `authenticate(self, request)` 方法，认证成功则返回 `(user, auth)` ，否则返回None。request.user 是当前登录的用户实例， request.auth 是当前登录auth的信息。
 
 某些情况下身份认证失败你可能想要抛出 `AuthenticationFailed` 异常。
 
-### 权限
 
-在视图类里定义 `permission_classes` 来确定目标视图类的权限管理行为，如果没有则采用默认的权限管理类行为。
-
-认证完了就会进去权限管理，也就是权限检查的时候 `request.user`  `request.auth` 已经是可以调用的了。
-
-最简单的权限管理类就是 `IsAuthenticated` ，允许通过身份验证的用户访问，拒绝没通过的用户访问。
-
-`IsAuthenticatedOrReadOnly` 类的意思是通过身份认证的用户完全访问，没有通过身份验证的用户只能进行只读访问。
 
 ### 自定义权限管理类
 
@@ -1457,6 +1590,8 @@ class UserTestCase(TestCase):
 admin.site.register(Profile)
 ```
 即添加对应的模型类，更复杂的则需要继承自 `forms.ModelForm` ，然后进行一些管理页面上的调配。
+
+这块不做过多介绍了，有需要的结合文档和源码慢慢研究。
 
 ## 日志
 
@@ -1542,6 +1677,45 @@ LOGGING = {
     }
 }
 ```
+
+
+## django的session
+
+cookie-session之间交互的 `session_key` django对应还有一个字段：
+
+```
+    session_data = models.TextField(_('session data'))
+```
+
+也就是我们在django上接触的session对象就存在这里的。
+
+这个 `session_key` 在django这边如果一开始cookie里面没有则会自动生成。我们知道HTTP协议是无状态的，实际上在引入这样的cookie-session会话机制之后，后续HTTP请求并不能算是无状态的。
+
+一般web服务器的全局变量解决方案也是推荐利用session来完成的，当然本质上仍然是依托数据库来完成的。
+
+cookie-session这一来一回看懂了还不够，关键是还要有这个会话的概念，关键是你的头脑在构想HTTP请求和响应的时候，你要知道这个HTTP请求就好像一个用户自身已经挂载上了用户标识的。
+
+再翻看django源码我们会发现 `AuthenticationMiddleware` 做的一个主要工作就是把 `request.user` 制作好。这个user是调用的auth的backend的认证类的 `get_user(user_id)` 方法来完成的。
+而这个user_id：
+```
+user_id = _get_user_session_key(request)
+
+def _get_user_session_key(request):
+    # This value in the session is always serialized to a string, so we need
+    # to convert it back to Python whenever we access it.
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+```
+这个 `request.session` 实际上就是对应 `session_data` 的字典表达。 这里面还有点细节问题，但这不是重点。
+
+此外还值得一提的是django的session保存策略和删除策略。django的session并没有删除策略，当用户logout之后django会删除对应的session。django的session_data的保存，推荐修改之后调用：
+
+```
+request.session.modified = True
+```
+更多信息参见官方文档。
+
+
+
 
 
 
@@ -1865,6 +2039,43 @@ server {
 
 
 ## 备用
+## 文件上传
+请参看rest framework的 FileUploadParser 。在获取到file_obj之后，如下进行写文件动作：
+
+```
+       outfile = open('test_out.jpg', 'wb+')
+
+        for chunk in file_obj.chunks():
+            outfile.write(chunk)
+```
+
+rest framework最后仍然会使用django提供的upload handler。`FILE_UPLOAD_HANDLERS` 默认是：
+
+```
+["django.core.files.uploadhandler.MemoryFileUploadHandler",
+ "django.core.files.uploadhandler.TemporaryFileUploadHandler"]
+```
+
+小文件会写入内存，大文件会写在临时文件上。
+
+MEDIA_ROOT 是用来控制media在本地的存放路径的。MEDIA_URL是用来控制media在url上的前缀显示的。还需要如下将media文件加入额外的静态文件管理：
+
+```
+STATICFILES_DIRS = [MEDIA_ROOT]
+```
+然后django urls.py哪里：
+
+```
+from django.conf.urls.static import static
+from django.conf import settings
+
+urlpatterns = [
+    ......
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```
+
+要这样设置下media静态文件的服务。这是测试环境，生产环境请把这行去掉用ngnix这样的web server来进行静态文件服务。
+
 ### 线程池管理后台多个子任务
 
 
