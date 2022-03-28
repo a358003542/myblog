@@ -2039,7 +2039,19 @@ server {
 
 
 ## 备用
-## 文件上传
+
+### pycharm的python console配置django环境
+其他独立的python脚本也是类似的配置原理：
+
+1. 配置环境变量： `DJANGO_SETTINGS_MODULE=what.settings`
+2. 加上这样两句：
+
+```
+import django
+django.setup()
+```
+
+### 文件上传
 请参看rest framework的 FileUploadParser 。在获取到file_obj之后，如下进行写文件动作：
 
 ```
@@ -2076,7 +2088,6 @@ urlpatterns = [
 
 要这样设置下media静态文件的服务。这是测试环境，生产环境请把这行去掉用ngnix这样的web server来进行静态文件服务。
 
-### 线程池管理后台多个子任务
 
 
 ### 自定义命令
@@ -2150,12 +2161,8 @@ python manage.py dbshell
 - 模型字段名应当全部小写，使用下划线代替驼峰命名。
 
 
+
 ## 附录
-
-
-
-
-
 
 
 
