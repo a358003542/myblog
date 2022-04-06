@@ -691,8 +691,15 @@ class MyPerson(Person):
 #### 两个模型实例的==比较
 比较的是pk主键值。
 
-
-
+#### create方法
+```python
+def create(self,**kwargs):
+    obj=self.model(**kwargs)
+    self._for_write=True
+    obj.save(force_insert=True,using=self.db)
+    return obj
+```
+django的queryset的create方法最后也会调用实例的save方法。
 
 ### 跨关系查询
 Entry manytoone blog
