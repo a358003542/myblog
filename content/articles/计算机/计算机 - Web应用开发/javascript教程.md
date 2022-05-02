@@ -1350,6 +1350,16 @@ event.target是引用那个最开始触发事件的那个目标元素，而event
 
 在一个目标button里面处理click事件使用event.target或者event.currentTarget是没有区别的。
 
+
+## 模块
+一个模块就是一个js文件。
+
+通过import export来实现模块间对象的互相调用。
+
+TODO
+
+
+
 ## no-jquery
 
 更多相关知识请参阅参考资料四，即 [这个Github项目](https://github.com/nefe/You-Dont-Need-jQuery/blob/master/README.zh-CN.md) 。下面就一些重点知识做出一些整理。

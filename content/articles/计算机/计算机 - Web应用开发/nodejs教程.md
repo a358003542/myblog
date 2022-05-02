@@ -82,6 +82,8 @@ console.log(mymodule(1,2))
 
 我不太喜欢这种风格，因为require之后从程序员的习惯来说更期待的是引入进来一个某种模块对象的东西，我更喜欢最开始的那种语法，通过exports将模块里面的目标变量作为属性绑定到某种模块对象里面。
 
+NOTICE: 注意nodejs的exports是后端那块的东西，而es6的export是前端的东西，别弄混了。
+
 ## nodejs和npm
 
 正如前面所说，nodejs是一个平台，因为nodejs在作这个平台的时候内置了很多官方的js模块。比如说我们随便从网上找了一个最简单的nodejs入门样例web server程序：
