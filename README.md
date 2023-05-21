@@ -1,9 +1,5 @@
 # myblog
-a static blog based on pelican.
+个人博客这个项目停止更新了，后续主要维护 图书精选 这个项目： https://github.com/tushujingxuan/tushujingxuan.github.io
 
-## Category约定
 
-`Name1 - Name2`
-
-也就是以`-` 和左右空格分开。
-
+https://tushujingxuan.github.io/
